@@ -1,0 +1,12 @@
+{
+  "name": "gakumasu-core",
+  "version": "1.0.0",
+  "description": "Core engine of \"学園アイドルマスター\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

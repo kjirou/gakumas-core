@@ -7,7 +7,7 @@
     "build": "tsc --project tsconfig.build.json",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "tsc": "tsc"
   },
   "keywords": [],

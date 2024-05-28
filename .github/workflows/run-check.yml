@@ -1,0 +1,18 @@
+name: run-checks
+on: push
+jobs:
+  run-checks:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+      - run: npm run prettier:check
+      - run: npm run tsc
+      - run: npm run build

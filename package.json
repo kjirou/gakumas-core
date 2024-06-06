@@ -1,5 +1,5 @@
 {
-  "name": "gakumasu-core",
+  "name": "gakumas-core",
   "version": "0.0.0",
   "description": "Core engine of \"学園アイドルマスター\"",
   "main": "index.js",

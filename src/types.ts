@@ -26,15 +26,21 @@ type ProducePlan =
     }
   | {
       /** 「センス」 */
-      kind: "sence";
+      kind: "sense";
       recommendedEffect: "goodCondition" | "focus";
     };
 
 /** カード所持種別、関連する原文は「プラン不一致」 */
 type CardPossessionKind = ProducePlan["kind"] | "free";
 
-/** カード種別、値は原文の「アクティブカード」「メンタルカード」「トラブルカード」に準拠 */
-type CardKind = "active" | "mental" | "trouble";
+/**
+ * カード概要種別
+ *
+ * - 値は原文の「アクティブスキルカード」「メンタルスキルカード」「トラブルカード」に準拠
+ * - 現状は、パラメータ増加が設定されているものがアクティブへ分類されているよう
+ *   - 一部例外があり、スキルカードデータのテストにメモしている
+ */
+type CardSummaryKind = "active" | "mental" | "trouble";
 
 /**
  * 元気更新要求
@@ -117,35 +123,30 @@ type Modifier =
       kind: "doubleLifeConsumption";
       duration: number;
     }
-  | ({
+  | {
       /**
-       * カード使用時に何かを付与
+       * ターン終了時に効果発動
        *
-       * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{modifier|vitaility}」
+       * - 原文の構文は、「以降、ターン終了時、[{effect}]」
+       *   - 「内気系少女」は、「以降、ターン終了時、好印象+1」
+       *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
+       *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
+       */
+      kind: "effectActivationAtEndOfTurn";
+      effect: Effect;
+    }
+  | {
+      /**
+       * カード使用時に効果発動
+       *
+       * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{effect}」
        *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
        *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
        */
-      kind: "everyCardUsage";
-      cardKind?: CardKind;
+      kind: "effectActivationUponCardUsage";
+      cardKind?: CardSummaryKind;
+      effect: Effect;
       times?: number;
-    } & (
-      | {
-          modifier: Modifier;
-        }
-      | {
-          vitaility: VitalityUpdateQuery;
-        }
-    ))
-  | {
-      /**
-       * ターン終了時に状態修正を付与
-       *
-       * - 原文の構文は、「以降、ターン終了時、{modifier}」
-       *   - 「内気系少女」は、「以降、ターン終了時、好印象+1」
-       *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
-       */
-      kind: "everyEndOfTurn";
-      modifier: Modifier;
     }
   | {
       /** 「絶好調{duration}ターン」 */
@@ -153,9 +154,9 @@ type Modifier =
       duration: number;
     }
   | {
-      /** 「集中+{duration}」 */
+      /** 「集中+{amount}」 */
       kind: "focus";
-      duration: number;
+      amount: number;
     }
   | {
       /** 「好調{duration}ターン」 */
@@ -166,6 +167,11 @@ type Modifier =
       /** 「消費体力減少{duration}ターン」、端数は切り上げ */
       kind: "halfLifeConsumption";
       duration: number;
+    }
+  | {
+      /** 「消費体力削減{value}」 */
+      kind: "lifeConsumptionReduction";
+      value: number;
     }
   | {
       /** 「パラメータ上昇量増加50%（{duration}ターン）」、TODO: [仕様確認] 端数処理というか計算式 */
@@ -186,11 +192,6 @@ type Modifier =
       /** 「好印象+{amount}」 */
       kind: "positiveImpression";
       amount: number;
-    }
-  | {
-      /** 「消費体力削減{duration}」 */
-      kind: "vitalityReduction";
-      duration: number;
     };
 
 /**
@@ -291,8 +292,8 @@ type Effect = (
        */
       kind: "drawCards";
       amount: number;
-      /** 0の場合は即座 */
-      delay: number;
+      /** 0の場合は即座、デフォルトは 0 */
+      delay?: number;
     }
   | {
       /**
@@ -304,7 +305,7 @@ type Effect = (
        */
       kind: "enhanceHand";
       /** 0の場合は即座 */
-      delay: number;
+      delay?: number;
     }
   | {
       /**
@@ -388,6 +389,7 @@ type Effect = (
        * - 原文の構文は、「{modifierKind}の{percentage}%分パラメータ上昇」
        *   - 「200%スマイル」は、「好印象の100%分パラメータ上昇」
        *   - 「開花」は、「やる気の200%分パラメータ上昇」
+       * - TODO: そのスキルカード使用時に別効果で含まれる状態修正を含むのか？
        */
       kind: "performLeveragingModifier";
       modifierKind: "motivation" | "positiveImpression";
@@ -419,9 +421,10 @@ type Effect = (
     }
 ) & {
   /**
-   * 発動条件
+   * 効果発動条件
    *
    * - この効果のみの発動条件
+   * - 行動前の状態と条件を比較する。例えば、複数効果があり2つ目に条件が設定されている時、1つ目の効果は条件の判定には反映されない。
    * - 原作の構文は、「{condition}{effect}」
    *   - 「思い出し笑い」は、「好印象が3以上の場合、やる気+2」
    */
@@ -440,11 +443,11 @@ type CardUsageCondition =
       /**
        * ターン数が指定数以降か
        *
-       * - 原文は、「{value}ターン目以降の場合、使用可」
+       * - 原文は、「{min}ターン目以降の場合、使用可」
        *   - 「ストレッチ談義」は、「3ターン目以降の場合、使用可」
        */
       kind: "countTurnNumber";
-      value: number;
+      min: number;
     }
   | {
       /**
@@ -497,10 +500,10 @@ type ActionCost = {
   kind:
     | "focus"
     | "goodCondition"
-    | "goodImpression"
     | "life"
     | "motivation"
-    | "normal";
+    | "normal"
+    | "positiveImpression";
   value: number;
 };
 
@@ -554,15 +557,25 @@ export type CardDefinition = {
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
+  cardSummaryKind: CardSummaryKind;
+  /** キャラクター固有のカードか */
+  characterSpecific?: boolean;
   /** 強化済みカード内容 */
-  enhanced: CardDefinitionContent;
+  enhanced?: CardDefinitionContent;
   id: string;
-  kind: CardKind;
   name: string;
-  /** カード出現に必要なPLv、原文は「解放PLv」 */
-  necessaryProducerLevel: number;
+  /** カード出現に必要なPLv、原文は「解放PLv」、デフォルトは 1 */
+  necessaryProducerLevel?: number;
   /** 2枚以上所持できないか、原文は「重複不可」、デフォルトは false */
-  nonDuplicative: boolean;
+  nonDuplicative?: boolean;
+  /**
+   * レアリティ
+   *
+   * - 本家だと、カードの色のみで表現されていて、「レアリティ」の表記がなさそう？
+   */
+  rarity: "c" | "r" | "sr" | "ssr";
+  /** サポートカード固有のカードか */
+  supportCardSpecific?: boolean;
 };
 
 /**
@@ -606,7 +619,7 @@ export type ProducerItemTrigger = (
        */
       kind: "cardUsage";
       cardDefinitionId?: CardDefinition["id"];
-      cardKind?: CardKind;
+      cardSummaryKind?: CardSummaryKind;
     }
   | {
       /**

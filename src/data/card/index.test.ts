@@ -36,7 +36,7 @@ for (const card of cards) {
         );
       }
     });
-    test("the type of cost for the enhanced card is generally the same as that for the basic card", () => {
+    test("the kind of cost for the enhanced card is generally the same as that for the basic card", () => {
       // kind:"life" の種類がコストが 0 になり、kind:"normal" になることはあるので、それは除外する
       if (
         card.enhanced &&
@@ -46,9 +46,7 @@ for (const card of cards) {
           card.enhanced.cost.value === 0
         )
       ) {
-        expect(card.enhanced.cost.value).toBeLessThanOrEqual(
-          card.base.cost.value,
-        );
+        expect(card.enhanced.cost.kind).toBe(card.base.cost.kind);
       }
     });
     test("the enhanced card should have lower cost than the base card", () => {

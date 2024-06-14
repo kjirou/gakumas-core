@@ -30,8 +30,17 @@ type ProducePlan =
       recommendedEffect: "goodCondition" | "focus";
     };
 
-/** カード所持種別、関連する原文は「プラン不一致」 */
+/** スキルカードの提供元種別、"others" は現状はキャラ固有でもサポカ固有でも無いもの全て */
+type CardProviderKind = "idol" | "others" | "supportCard";
+
+/** Pアイテムの提供元種別、"others" は現状は中間試験後にもらえるもの */
+type ProducerItemProviderKind = "idol" | "others" | "supportCard";
+
+/** スキルカード所持種別、関連する原文は「プラン不一致」 */
 type CardPossessionKind = ProducePlan["kind"] | "free";
+
+/** Pアイテム所持種別 */
+type ProducerItemPossessionKind = ProducePlan["kind"] | "free";
 
 /**
  * カード概要種別
@@ -355,6 +364,18 @@ type Effect = (
     }
   | {
       /**
+       * 状態修正を乗算する
+       *
+       * - 原文の構文は、「{modifierKind}{multiplier}倍」
+       *   - 「夢へのライフログ」は、「好印象1.5倍」
+       * - TODO: [仕様確認] 端数処理
+       */
+      kind: "multiplyModifier";
+      modifierKind: "positiveImpression";
+      multiplier: number;
+    }
+  | {
+      /**
        * スコアまたは元気またはその両方を増加する
        *
        * - 原文の構文は、「[パラメータ+{value}][（集中効果を{focusMultiplier}倍適用）][（{times}回）][元気+{amount}]」
@@ -373,7 +394,10 @@ type Effect = (
         /**
          * 集中適用倍率
          *
-         * - TODO: [仕様確認] 端数処理
+         * - 端数計算は切り上げ、現状は0.5倍単位でしか値が存在しないので四捨五入かもしれない
+         *   - 計算例
+         *     - 「ハイタッチ」（パラメータ+17、集中適用倍率1.5倍）を、集中+11、好調中に使った時に、スコアが51だった
+         *       - `集中11 * 1.5 = 16.5 => 17 ; (パラメータ17 + 集中分17) * 好調1.5 = 51`
          */
         focusMultiplier?: number;
         /** 複数回攻撃 */
@@ -464,6 +488,9 @@ type CardUsageCondition =
        *
        * - 原文は、以下の通り
        *   - 「バズワード」は、「好調状態の場合、使用可」
+       * - 好調付与時は、スコア計算時に、`パラメータ+集中`に対して1.5倍（端数切り上げ）を乗ずる
+       *   - 計算例
+       *     - 「アピールの基本」（パラメータ+9）を、好調中に使うと、`9 * 1.5 = 13.5 => 14` となる
        */
       kind: "hasGoodCondition";
     }
@@ -507,7 +534,7 @@ type ActionCost = {
   value: number;
 };
 
-export type CardDefinitionContent = {
+type CardDefinitionContent = {
   condition?: CardUsageCondition;
   cost: ActionCost;
   effects: Effect[];
@@ -552,15 +579,16 @@ export type CardDefinitionContent = {
  *     重複不可
  */
 export type CardDefinition = {
-  /** 未強化カード内容 */
+  /** 未強化時の内容 */
   base: CardDefinitionContent;
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
   cardSummaryKind: CardSummaryKind;
+  // TODO: Pアイテム側と同じくenumにする
   /** キャラクター固有のカードか */
   characterSpecific?: boolean;
-  /** 強化済みカード内容 */
+  /** 強化済み時の内容 */
   enhanced?: CardDefinitionContent;
   id: string;
   name: string;
@@ -571,7 +599,7 @@ export type CardDefinition = {
   /**
    * レアリティ
    *
-   * - 本家だと、カードの色のみで表現されていて、「レアリティ」の表記がなさそう？
+   * - 本家だと、アイコンの色のみで表現されていて、「レアリティ」の表記がなさそう
    */
   rarity: "c" | "r" | "sr" | "ssr";
   /** サポートカード固有のカードか */
@@ -644,13 +672,18 @@ export type ProducerItemTrigger = (
       /**
        * 状態修正が増加した時
        *
-       * - 原文の構文は、「{modifier}が増加後」
+       * - 原文の構文は、「{modifierKind}が増加後」
        *   - 「緑のお揃いブレス」は、「好印象が増加後、好印象+3」
        *   - 「願いを叶えるお守り」は、「やる気が増加後、やる気+2」
        *   - 「Dearリトルプリンス」は、「好調の効果ターンが増加後、好調3ターン」
        *   - 「放課後のらくがき」は、「集中が増加後体力が50%以上の場合、集中+2」
        */
       kind: "modifierIncrease";
+      modifierKind:
+        | "focus"
+        | "goodCondition"
+        | "motivation"
+        | "positiveImpression";
     }
   | {
       /**
@@ -680,6 +713,35 @@ export type ProducerItemTrigger = (
    *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
    */
   idolParameterKind?: IdolParameterKind;
+};
+
+type ProducerItemDefinitionContent = {
+  /**
+   * 効果発動条件
+   *
+   * - Pアイテム全体の効果発動条件を意味する
+   *   - 原文の効果説明欄の構造上は、複数の効果があるときも、効果1行目に埋め込まれて記載されているよう
+   * - TODO: [仕様確認] 「私の「初」の楽譜」の効果に「体力減少1」があるが、体力が0の時発動するのか
+   * - TODO: [仕様確認] 「超絶あんみんマスク」の効果に「体力消費1」があるが、体力が0の時発動するのか
+   */
+  condition?: EffectCondition;
+  cost?: ActionCost;
+  /**
+   * 効果リスト
+   *
+   * - 現状、各効果それぞれへ条件を設定しているPアイテムはないので、 condition プロパティは設定する必要がない
+   */
+  effects: Effect[];
+  /**
+   * レッスン中に発動する回数
+   *
+   * - 原文の構文は、「（レッスン内{times}回）」
+   * - 少なくとも表記上は、回数指定がないものがある
+   *   - ほとんどの場合は、最終ターンに発動するはずの「超絶あんみんマスク」など
+   *     - TODO: 最終ターンが1でこれを発動して、そのターンにターン追加+1をしたら、再び発動するの？
+   */
+  times?: number;
+  trigger: ProducerItemTrigger;
 };
 
 /**
@@ -712,32 +774,20 @@ export type ProducerItemTrigger = (
  * - TODO: [仕様確認] 右側アイコンに並ぶ順番は取得した順番か？
  */
 export type ProducerItemDefinition = {
+  /** 未強化時の内容 */
+  base: ProducerItemDefinitionContent;
+  /** 強化済み時の内容 */
+  enhanced?: ProducerItemDefinitionContent;
+  id: string;
+  name: string;
+  producerItemPossessionKind: ProducerItemPossessionKind;
+  producerItemProviderKind: ProducerItemProviderKind;
   /**
-   * 効果発動条件
+   * レアリティ
    *
-   * - Pアイテム全体の効果発動条件を意味する
-   *   - 原文の効果説明欄の構造上は、複数の効果があるときも、効果1行目に埋め込まれて記載されているよう
-   * - TODO: [仕様確認] 「私の「初」の楽譜」の効果に「体力減少1」があるが、体力が0の時発動するのか
-   * - TODO: [仕様確認] 「超絶あんみんマスク」の効果に「体力消費1」があるが、体力が0の時発動するのか
+   * - 本家だと、アイコンの色のみで表現されていて、「レアリティ」の表記がなさそう
    */
-  condition?: EffectCondition;
-  cost?: ActionCost;
-  /**
-   * 効果リスト
-   *
-   * - 現状、各効果それぞれへ条件を設定しているPアイテムはないので、 condition プロパティは設定する必要がない
-   */
-  effects: Effect[];
-  /**
-   * レッスン中に発動する回数
-   *
-   * - 原文の構文は、「（レッスン内{times}回）」
-   * - 少なくとも表記上は、回数指定がないものがある
-   *   - ほとんどの場合は、最終ターンに発動するはずの「超絶あんみんマスク」など
-   *     - TODO: 最終ターンが1でこれを発動して、そのターンにターン追加+1をしたら、再び発動するの？
-   */
-  times?: number;
-  trigger: ProducerItemTrigger;
+  rarity: "r" | "sr" | "ssr";
 };
 
 /**

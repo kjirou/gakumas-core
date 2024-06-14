@@ -12,31 +12,31 @@ test("any id is not duplicated", () => {
 // 今後、新しいデータの出現によって、法則が崩れてテストが成立しなくなる可能性はある。
 for (const card of cards) {
   describe(`${card.name}(${card.id})`, () => {
-    test("the character specific card should be non-duplicative and usable once per lesson", () => {
+    test("a character specific card should be non-duplicative and usable once per lesson", () => {
       if (card.characterSpecific) {
         expect(card.nonDuplicative).toBe(true);
         expect(card.base.usableOncePerLesson).toBe(true);
       }
     });
-    test("the support-card specific card should be non-duplicative and usable once per lesson", () => {
+    test("a support-card specific card should be non-duplicative and usable once per lesson", () => {
       if (card.supportCardSpecific) {
         expect(card.nonDuplicative).toBe(true);
         expect(card.base.usableOncePerLesson).toBe(true);
       }
     });
-    test("the `innate` property should not change if the card is enhanced", () => {
+    test("a `innate` property should not change if the card is enhanced", () => {
       if (card.enhanced) {
         expect(card.base.innate).toBe(card.base.innate);
       }
     });
-    test("the `usableOncePerLesson` property should not change if the card is enhanced", () => {
+    test("a `usableOncePerLesson` property should not change if the card is enhanced", () => {
       if (card.enhanced) {
         expect(card.base.usableOncePerLesson).toBe(
           card.base.usableOncePerLesson,
         );
       }
     });
-    test("the kind of cost for the enhanced card is generally the same as that for the basic card", () => {
+    test("a kind of cost for a enhanced card is generally the same as that for the basic card", () => {
       // kind:"life" の種類がコストが 0 になり、kind:"normal" になることはあるので、それは除外する
       if (
         card.enhanced &&
@@ -49,14 +49,14 @@ for (const card of cards) {
         expect(card.enhanced.cost.kind).toBe(card.base.cost.kind);
       }
     });
-    test("the enhanced card should have lower cost than the base card", () => {
+    test("a card has a number of cost that is equal to or greater than its pre-enhanced value", () => {
       if (card.enhanced) {
         expect(card.enhanced.cost.value).toBeLessThanOrEqual(
           card.base.cost.value,
         );
       }
     });
-    test("the active card should have score performance", () => {
+    test("an active card should have score performance", () => {
       // 「なに聴いているの？」は、元気と体力回復だけだがアクティブになっていて、データ設定がおかしそう？
       // 体力回復はアクティブではないのは、「距離感」や「陽だまりの生徒会室」がメンタルであることから。
       if (card.id !== "nanikiteruno") {

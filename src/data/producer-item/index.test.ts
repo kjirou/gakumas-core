@@ -49,7 +49,7 @@ for (const producerItem of producerItems) {
         expect(producerItem.enhanced).toBeUndefined();
       }
     });
-    test("an enhanced producer item has a number of uses that is equal to or greater than its pre-enhanced value", () => {
+    test("an enhanced producer item has a number of times that is equal to or greater than its pre-enhanced value", () => {
       if (
         producerItem.base.times !== undefined &&
         producerItem.enhanced &&

@@ -355,7 +355,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "junbiundo",
+    id: "jumbiundo",
     name: "準備運動",
     cardPossessionKind: "sense",
     cardSummaryKind: "active",
@@ -428,7 +428,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "haitacchi",
+    id: "haitatchi",
     name: "ハイタッチ",
     cardPossessionKind: "sense",
     cardSummaryKind: "active",
@@ -1383,7 +1383,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "syukufuku",
+    id: "shukufuku",
     name: "祝福",
     cardPossessionKind: "sense",
     cardSummaryKind: "active",
@@ -1987,7 +1987,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "hazimarinoaizu",
+    id: "hajimarinoaizu",
     name: "始まりの合図",
     cardPossessionKind: "sense",
     cardSummaryKind: "mental",
@@ -2015,7 +2015,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "izi",
+    id: "iji",
     name: "意地",
     cardPossessionKind: "sense",
     cardSummaryKind: "mental",
@@ -2300,7 +2300,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "honbanzenya",
+    id: "hombanzenya",
     name: "本番前夜",
     cardPossessionKind: "logic",
     cardSummaryKind: "mental",
@@ -2692,7 +2692,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "junpakunoyose",
+    id: "jumpakunoyose",
     name: "純白の妖精",
     cardPossessionKind: "logic",
     characterSpecific: true,
@@ -2731,7 +2731,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "isshokenmei",
+    id: "isshokemmei",
     name: "いっしょけんめい",
     cardPossessionKind: "logic",
     characterSpecific: true,
@@ -2902,7 +2902,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "sutorecchidangi",
+    id: "sutoretchidangi",
     name: "ストレッチ談義",
     cardPossessionKind: "free",
     cardSummaryKind: "active",
@@ -2982,7 +2982,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "kimegaodezidori",
+    id: "kimegaodejidori",
     name: "キメ顔で自撮り",
     cardPossessionKind: "sense",
     cardSummaryKind: "mental",
@@ -3576,7 +3576,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "tenshinranman",
+    id: "tenshinramman",
     name: "天真爛漫",
     cardPossessionKind: "sense",
     cardSummaryKind: "mental",
@@ -3985,7 +3985,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "wanmoasuteppu",
+    id: "wammoasuteppu",
     name: "ワンモアステップ",
     cardPossessionKind: "sense",
     cardSummaryKind: "active",

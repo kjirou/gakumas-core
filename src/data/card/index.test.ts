@@ -11,6 +11,30 @@ test("any id is not duplicated", () => {
 // 存在するデータのパターンから、法則を推測し、それに適合しているかでデータの検証を行う。
 // 今後、新しいデータの出現によって、法則が崩れてテストが成立しなくなる可能性はある。
 for (const card of cards) {
+  test("an id should be written in Hepburn romanization", () => {
+    const nonHepburnWords = [
+      "si",
+      "ti",
+      "tu",
+      /(?<!s)hu/,
+      "zi",
+      "di",
+      "du",
+      "sya",
+      "syu",
+      "syo",
+      "tya",
+      "tyu",
+      "tyo",
+      "nb",
+      "nm",
+      "np",
+      "cch",
+    ];
+    for (const word of nonHepburnWords) {
+      expect(card.id).not.toMatch(word);
+    }
+  });
   describe(`${card.name}(${card.id})`, () => {
     test("a character specific card should be non-duplicative and usable once per lesson", () => {
       if (card.characterSpecific) {

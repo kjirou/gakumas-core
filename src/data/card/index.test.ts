@@ -37,13 +37,13 @@ for (const card of cards) {
   });
   describe(`${card.name}(${card.id})`, () => {
     test("a character specific card should be non-duplicative and usable once per lesson", () => {
-      if (card.characterSpecific) {
+      if (card.cardProviderKind === "idol") {
         expect(card.nonDuplicative).toBe(true);
         expect(card.base.usableOncePerLesson).toBe(true);
       }
     });
     test("a support-card specific card should be non-duplicative and usable once per lesson", () => {
-      if (card.supportCardSpecific) {
+      if (card.cardProviderKind === "supportCard") {
         expect(card.nonDuplicative).toBe(true);
         expect(card.base.usableOncePerLesson).toBe(true);
       }

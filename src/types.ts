@@ -584,10 +584,9 @@ export type CardDefinition = {
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
+  cardProviderKind: CardProviderKind;
   cardSummaryKind: CardSummaryKind;
   // TODO: Pアイテム側と同じくenumにする
-  /** キャラクター固有のカードか */
-  characterSpecific?: boolean;
   /** 強化済み時の内容 */
   enhanced?: CardDefinitionContent;
   id: string;
@@ -602,8 +601,6 @@ export type CardDefinition = {
    * - 本家だと、アイコンの色のみで表現されていて、「レアリティ」の表記がなさそう
    */
   rarity: "c" | "r" | "sr" | "ssr";
-  /** サポートカード固有のカードか */
-  supportCardSpecific?: boolean;
 };
 
 /**

@@ -92,7 +92,8 @@ for (const card of cards) {
             effect.kind === "performLeveragingModifier" ||
             effect.kind === "performLeveragingVitality" ||
             (effect.kind === "getModifier" &&
-              effect.modifier.kind === "delayedPerformance"),
+              effect.modifier.kind === "delayedEffect" &&
+              effect.modifier.effect.kind === "perform"),
         );
         if (card.cardSummaryKind === "active") {
           expect(hasScorePerformance).toBe(true);

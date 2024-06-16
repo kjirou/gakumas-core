@@ -107,14 +107,15 @@ type Modifier =
     }
   | {
       /**
-       * 「次のターン、パラメータ+{value}」
+       * 「(次のターン|{delay}ターン後)、{effect}」
        *
        * - 原文の例
        *   - 「成就」は、「次のターン、パラメータ+32」
-       * - TODO: アイコン表示があるのか、内容はどうなってる？
+       *   - 「心のアルバム」は、「次のターン、スキルカードを引く」「2ターン後、スキルカードを引く」
        */
-      kind: "delayedPerformance";
-      value: number;
+      kind: "delayedEffect";
+      delay: number;
+      effect: Effect;
     }
   | {
       /**

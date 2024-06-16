@@ -3207,7 +3207,11 @@ export const cards: CardDefinition[] = [
         },
         {
           kind: "getModifier",
-          modifier: { kind: "delayedPerformance", value: 32 },
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "perform", score: { value: 32 } },
+          },
         },
       ],
       usableOncePerLesson: true,
@@ -3221,7 +3225,11 @@ export const cards: CardDefinition[] = [
         },
         {
           kind: "getModifier",
-          modifier: { kind: "delayedPerformance", value: 40 },
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "perform", score: { value: 40 } },
+          },
         },
       ],
       usableOncePerLesson: true,
@@ -3246,7 +3254,11 @@ export const cards: CardDefinition[] = [
         },
         {
           kind: "getModifier",
-          modifier: { kind: "delayedPerformance", value: 38 },
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "perform", score: { value: 38 } },
+          },
         },
       ],
       usableOncePerLesson: true,
@@ -3261,7 +3273,11 @@ export const cards: CardDefinition[] = [
         },
         {
           kind: "getModifier",
-          modifier: { kind: "delayedPerformance", value: 47 },
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "perform", score: { value: 47 } },
+          },
         },
       ],
       usableOncePerLesson: true,

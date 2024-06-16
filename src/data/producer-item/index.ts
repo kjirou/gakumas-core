@@ -5,7 +5,7 @@ import { ProducerItemDefinition } from "../../types";
  *
  * - データ定義のルール
  *   - id は、名称を機械的に変換したもの
- *     - 名称が日本語の時は、カード名をヘボン式のローマ字で表記し、記号は除去するかハイフンに置き換えたもの
+ *     - 名称が日本語の時は、Pアイテム名をヘボン式のローマ字で表記し、記号は除去するかハイフンに置き換えたもの
  *       - ヘボン式ローマ字書式参考資料: https://www.ezairyu.mofa.go.jp/passport/hebon.html
  *     - 名称が英語の時は、スペルのまま小文字表記にする
  *   - レコードの定義順は、本家のP図鑑のPアイテムの「通常」表示順へ合わせる。現状は以下の順になってそう、上から優先順位が高い。
@@ -916,7 +916,7 @@ export const producerItems: ProducerItemDefinition[] = [
   },
   {
     id: "himitsutokkunkade",
-    name: "秘密特訓カーデ",
+    name: "ひみつ特訓カーデ",
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "ssr",

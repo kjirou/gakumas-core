@@ -12,12 +12,14 @@ test("any id is not duplicated", () => {
 // 今後、新しいデータの出現によって、法則が崩れてテストが成立しなくなる可能性はある。
 for (const producerItem of producerItems) {
   describe(`${producerItem.name}(${producerItem.id})`, () => {
+    // id値は複数単語を区切りなく連結しているため、特に母音が後の単語の先頭になるときのパターンはリストに加えられない
+    // 例えば、"ou"は、「〜の/う〜」のような単語の場合、"no/u"が連続する
     test("an id should be written in Hepburn romanization", () => {
       const nonHepburnWords = [
         "si",
         "ti",
         "tu",
-        "hu",
+        /(?<!s)hu/,
         "zi",
         "di",
         "du",

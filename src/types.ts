@@ -806,10 +806,32 @@ export type ProducerItem = {
 };
 
 /**
+ * アイドル個性定義
+ */
+export type CharacterDefinition = {
+  firstName: string;
+  id: string;
+  lastName: string;
+  /**
+   * 最大体力
+   *
+   * - True End アチーブメント効果込み
+   * - サポートカードでも変動するので、レッスンシミュレーター上ではあくまで参考値になりそう
+   */
+  maxLife: number;
+};
+
+/**
  * プロデュースアイドル定義
  */
 export type IdolDefinition = {
+  characterId: CharacterDefinition["id"];
   producePlan: ProducePlan;
+  rarity: "r" | "sr" | "ssr";
+  specificCardId: CardDefinition["id"];
+  specificProducerItemId: ProducerItemDefinition["id"];
+  /** プロデュースアイドルのタイトル。例えば、咲季SSRなら"Fighting My Way"。 */
+  title: string;
 };
 
 /**

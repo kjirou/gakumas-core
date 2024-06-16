@@ -4218,7 +4218,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "moukowakunaikara",
+    id: "mokowakunaikara",
     name: "もう怖くないから",
     cardPossessionKind: "logic",
     cardSummaryKind: "mental",

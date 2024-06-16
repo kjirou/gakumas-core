@@ -2880,7 +2880,14 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 3 },
       effects: [
         { kind: "perform", score: { value: 6 }, vitality: { value: 6 } },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -2894,7 +2901,14 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 3 },
       effects: [
         { kind: "perform", score: { value: 10 }, vitality: { value: 9 } },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -2916,7 +2930,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "halfLifeConsumption", duration: 2 },
         },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -2929,7 +2950,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "halfLifeConsumption", duration: 3 },
         },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -2952,7 +2980,14 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 5 },
       effects: [
         { kind: "perform", score: { value: 4 }, vitality: { value: 5 } },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -2966,7 +3001,14 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 2 },
       effects: [
         { kind: "perform", score: { value: 4 }, vitality: { value: 5 } },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -2991,7 +3033,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "halfLifeConsumption", duration: 2 },
         },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -3007,7 +3056,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "halfLifeConsumption", duration: 2 },
         },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -3031,7 +3087,14 @@ export const cards: CardDefinition[] = [
             duration: 1,
           },
         },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -3046,7 +3109,14 @@ export const cards: CardDefinition[] = [
             duration: 1,
           },
         },
-        { kind: "drawCards", amount: 2, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 2 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -3071,10 +3141,13 @@ export const cards: CardDefinition[] = [
           modifier: { kind: "focus", amount: 2 },
         },
         {
-          kind: "drawCards",
+          kind: "getModifier",
           condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          amount: 1,
-          delay: 1,
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
         },
       ],
       usableOncePerLesson: true,
@@ -3091,10 +3164,13 @@ export const cards: CardDefinition[] = [
           modifier: { kind: "focus", amount: 3 },
         },
         {
-          kind: "drawCards",
+          kind: "getModifier",
           condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          amount: 1,
-          delay: 1,
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
         },
       ],
       usableOncePerLesson: true,
@@ -3487,7 +3563,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "debuffProtection", times: 1 },
         },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4383,7 +4466,14 @@ export const cards: CardDefinition[] = [
             duration: 1,
           },
         },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4399,7 +4489,14 @@ export const cards: CardDefinition[] = [
             duration: 1,
           },
         },
-        { kind: "drawCards", amount: 1, delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4455,8 +4552,22 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 0 },
       effects: [
         { kind: "perform", score: { value: 3 }, vitality: { value: 3 } },
-        { kind: "drawCards", amount: 1, delay: 1 },
-        { kind: "drawCards", amount: 1, delay: 2 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 2,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4464,8 +4575,22 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 0 },
       effects: [
         { kind: "perform", score: { value: 6 }, vitality: { value: 5 } },
-        { kind: "drawCards", amount: 1, delay: 1 },
-        { kind: "drawCards", amount: 1, delay: 2 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 2,
+            effect: { kind: "drawCards", amount: 1 },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4612,8 +4737,22 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 5 },
       effects: [
         { kind: "perform", vitality: { value: 3 } },
-        { kind: "enhanceHand", delay: 1 },
-        { kind: "enhanceHand", delay: 2 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 2,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4621,8 +4760,22 @@ export const cards: CardDefinition[] = [
       cost: { kind: "normal", value: 2 },
       effects: [
         { kind: "perform", vitality: { value: 3 } },
-        { kind: "enhanceHand", delay: 1 },
-        { kind: "enhanceHand", delay: 2 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 2,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4682,7 +4835,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "goodCondition", duration: 2 },
         },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4694,7 +4854,14 @@ export const cards: CardDefinition[] = [
           kind: "getModifier",
           modifier: { kind: "goodCondition", duration: 4 },
         },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4715,7 +4882,14 @@ export const cards: CardDefinition[] = [
           modifier: { kind: "positiveImpression", amount: 4 },
         },
         { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },
@@ -4727,7 +4901,14 @@ export const cards: CardDefinition[] = [
           modifier: { kind: "positiveImpression", amount: 5 },
         },
         { kind: "getModifier", modifier: { kind: "motivation", amount: 4 } },
-        { kind: "enhanceHand", delay: 1 },
+        {
+          kind: "getModifier",
+          modifier: {
+            kind: "delayedEffect",
+            delay: 1,
+            effect: { kind: "enhanceHand" },
+          },
+        },
       ],
       usableOncePerLesson: true,
     },

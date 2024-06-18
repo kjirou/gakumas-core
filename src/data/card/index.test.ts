@@ -102,5 +102,17 @@ for (const card of cards) {
         }
       }
     });
+    // TODO: delayedEffect 内の effect を検証できていない
+    test("`perform` effect should have a score or a vitality or both", () => {
+      const performEffects: any[] = [
+        ...card.base.effects.filter((effect) => effect.kind === "perform"),
+        ...(card.enhanced
+          ? card.enhanced.effects.filter((effect) => effect.kind === "perform")
+          : []),
+      ];
+      for (const effect of performEffects) {
+        expect(effect.score || effect.vitality).toBeDefined();
+      }
+    });
   });
 }

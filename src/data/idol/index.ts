@@ -128,7 +128,7 @@ export const idols: IdolDefinition[] = [
     },
     rarity: "r",
     specificCardId: "arubaita",
-    specificProducerItemId: "chibidomotezukuriburesu",
+    specificProducerItemId: "chibidomotezukurimedaru",
     title: "学園生活",
   },
   {

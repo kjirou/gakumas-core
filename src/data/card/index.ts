@@ -1,5 +1,17 @@
 import { CardDefinition } from "../../types";
 
+export const findCardDataById = (
+  id: CardDefinition["id"],
+): CardDefinition | undefined => cards.find((card) => card.id === id);
+
+export const getCardDataById = (id: CardDefinition["id"]): CardDefinition => {
+  const card = findCardDataById(id);
+  if (!card) {
+    throw new Error(`Card not found: ${id}`);
+  }
+  return card;
+};
+
 /**
  * スキルカードデータの定義
  *
@@ -43,7 +55,7 @@ export const cards: CardDefinition[] = [
     },
   },
   {
-    id: "posunokihon",
+    id: "pozunokihon",
     name: "ポーズの基本",
     basic: true,
     cardPossessionKind: "free",
@@ -56,7 +68,7 @@ export const cards: CardDefinition[] = [
         {
           kind: "perform",
           score: { value: 2 },
-          vitality: { value: 3 },
+          vitality: { value: 2 },
         },
       ],
     },
@@ -658,6 +670,7 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     necessaryProducerLevel: 16,
+    nonDuplicative: true,
     rarity: "r",
     base: {
       cost: { kind: "normal", value: 0 },
@@ -3585,7 +3598,7 @@ export const cards: CardDefinition[] = [
     nonDuplicative: true,
     rarity: "ssr",
     base: {
-      cost: { kind: "life", value: 5 },
+      cost: { kind: "normal", value: 5 },
       effects: [
         { kind: "exchangeHand" },
         {
@@ -3604,7 +3617,7 @@ export const cards: CardDefinition[] = [
       usableOncePerLesson: true,
     },
     enhanced: {
-      cost: { kind: "life", value: 2 },
+      cost: { kind: "normal", value: 2 },
       effects: [
         { kind: "exchangeHand" },
         {
@@ -3786,10 +3799,6 @@ export const cards: CardDefinition[] = [
             },
           },
         },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
       ],
       usableOncePerLesson: true,
     },
@@ -3811,10 +3820,6 @@ export const cards: CardDefinition[] = [
               modifier: { kind: "focus", amount: 2 },
             },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
         },
       ],
       usableOncePerLesson: true,

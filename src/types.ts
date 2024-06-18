@@ -1,4 +1,4 @@
-type RangedNumber =
+export type RangedNumber =
   | { min: number }
   | { max: number }
   | { max: number; min: number };
@@ -9,7 +9,7 @@ type IdolParameters = {
   vocal: number;
 };
 
-type IdolParameterKind = keyof IdolParameters;
+export type IdolParameterKind = keyof IdolParameters;
 
 /**
  * プロデュース計画
@@ -61,7 +61,7 @@ type CardSummaryKind = "active" | "mental" | "trouble";
  *   - 「おっきなおにぎり」は、「元気+2（レッスン中に使用したスキルカード1枚ごとに、元気増加量+5）」
  *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
  */
-type VitalityUpdateQuery = {
+export type VitalityUpdateQuery = {
   /** 使用したスキルカード1枚毎の効果量増加 */
   boostPerCardUsed?: number;
   /** 効果に記載した値をそのまま適用するか、原文は「固定元気」 */
@@ -80,10 +80,10 @@ type VitalityUpdateQuery = {
  *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
  * - 種類は名詞句で表現する、原文が名詞だから
  */
-type Modifier =
+export type Modifier =
   | {
       /**
-       * 「スキルカード使用数+{amount}」
+       * 「スキルカード使用数追加+{amount}」
        *
        * - 原文の例
        *   - 「私がスター」は、「スキルカード使用数+1」
@@ -112,6 +112,7 @@ type Modifier =
        * - 原文の例
        *   - 「成就」は、「次のターン、パラメータ+32」
        *   - 「心のアルバム」は、「次のターン、スキルカードを引く」「2ターン後、スキルカードを引く」
+       * - TODO: [仕様確認] 左アイコンタップ時の表示はどうなってる？例えば、「2ターン後」は1ターン後に変わる？
        * - TODO: [仕様確認] レッスン中の履歴での表示はどうなってる？
        */
       kind: "delayedEffect";
@@ -155,9 +156,8 @@ type Modifier =
        *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
        */
       kind: "effectActivationUponCardUsage";
-      cardKind?: CardSummaryKind;
+      cardKind: CardSummaryKind;
       effect: Effect;
-      times?: number;
     }
   | {
       /** 「絶好調{duration}ターン」 */
@@ -211,7 +211,7 @@ type Modifier =
  * - スキルカードの効果に対して設定する場合は、効果それぞれの発動条件を意味する
  * - Pアイテムの効果に対して設定する場合は、Pアイテムの効果全体に対する発動条件を意味する
  */
-type EffectCondition =
+export type EffectCondition =
   | {
       /**
        * 状態変化の数が指定数以上か
@@ -281,7 +281,7 @@ type EffectCondition =
  * - おおよそ、本家の効果説明欄の1行に対応する
  *   - ただし、Pアイテムの1行目は条件も含まれるなど、この限りではない。詳細はそれぞれの型定義を参照。
  */
-type Effect = (
+export type Effect = (
   | {
       /**
        * 体力を減少する
@@ -333,18 +333,11 @@ type Effect = (
     }
   | {
       /**
-       * スキルカード使用数を追加する
-       *
-       * - 原文の構文は、「スキルカード使用数追加+{amount}」
-       */
-      kind: "increaseCardUsageLimit";
-      amount: number;
-    }
-  | {
-      /**
        * レッスン終了までのターン数を追加する
        *
        * - 原文の構文は、「ターン追加+{amount}」
+       * - この効果は、状態修正ではなさそう
+       *   - 左アイコンリストにもそれをタップしたリストにもない
        */
       kind: "increaseTurns";
       amount: number;
@@ -376,7 +369,7 @@ type Effect = (
       /**
        * スコアまたは元気またはその両方を増加する
        *
-       * - 原文の構文は、「[パラメータ+{value}][（集中効果を{focusMultiplier}倍適用）][（{times}回）][元気+{amount}]」
+       * - 原文の構文は、「[パラメータ+{value}][（集中効果を{focusMultiplier}倍適用）][（{times}回）][{vitality}]」
        *   - 「ポーズの基本」は、「パラメータ+2元気+2」
        *   - 「盛装の華形」は、「好調状態の場合、パラメータ+14」
        *   - 「ワンモアステップ」は、「パラメータ+7（2回）」「集中が6以上の場合、パラメータ+7」
@@ -460,7 +453,7 @@ type Effect = (
  *   - コスト表記との前後は不明、現状は同時に記載されているスキルカードは無い
  * - 本条件とコストを満たす状態であるかで、カード使用の可否が決まる
  */
-type CardUsageCondition =
+export type CardUsageCondition =
   | {
       /**
        * ターン数が指定数以降か
@@ -510,13 +503,13 @@ type CardUsageCondition =
 /**
  * レッスン中の各種コスト
  *
- * - スキルカードの使用コスト及び一部のPアイテム効果欄にあるコストを抽象化・構造化したもの
- * - コストに関しては全てがこの構造に収まる。現状の唯一の例外は、Pアイテムの「私の「初」の楽譜」の「体力減少1」という表記、Effect の "drainLife" を参照。
+ * - スキルカードの使用コスト及び一部のPアイテム効果欄にあるコストを構造化したもの
+ * - コストに関してはほぼ全てがこの構造に収まる。現状の唯一の例外は、Pアイテムの「私の「初」の楽譜」の「体力減少1」という表記、Effect の "drainLife" を参照。
  * - 原文の構文は、1)通常コストの場合は表記無し、2)それ以外は、「(体力|{modifier})消費{value}」
  *   - スキルカードの場合は、スキルカード右下のアイコンと、効果欄の1行目に記載される
  *   - Pアイテムで通常コストを消費する場合に表記はどうなるのか？という疑問はあるが、現状そのようなPアイテムはない
  */
-type ActionCost = {
+export type ActionCost = {
   /**
    * コストの種類
    *
@@ -532,7 +525,7 @@ type ActionCost = {
   value: number;
 };
 
-type CardDefinitionContent = {
+export type CardContentDefinition = {
   condition?: CardUsageCondition;
   cost: ActionCost;
   effects: Effect[];
@@ -578,7 +571,7 @@ type CardDefinitionContent = {
  */
 export type CardDefinition = {
   /** 未強化時の内容 */
-  base: CardDefinitionContent;
+  base: CardContentDefinition;
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
@@ -586,7 +579,7 @@ export type CardDefinition = {
   cardSummaryKind: CardSummaryKind;
   // TODO: Pアイテム側と同じくenumにする
   /** 強化済み時の内容 */
-  enhanced?: CardDefinitionContent;
+  enhanced?: CardContentDefinition;
   id: string;
   name: string;
   /** カード出現に必要なPLv、原文は「解放PLv」、デフォルトは 1 */
@@ -634,11 +627,14 @@ export type ProducerItemTrigger = (
       /**
        * スキルカードを使用した時
        *
-       * - 原文の構文は、「(スキルカード使用後|(アクティブ|メンタル)スキルカード使用時)」
-       *   - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
+       * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用(時|後)」
        *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
-       *   - 「転がり続ける元気の源」は、「メンタルスキルカード使用時、やる気が5以上の場合、やる気+3」
+       *   - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
+       *   - 「転がり続ける元気の源」は、「メンタルスキルカード使用後やる気が5以上の場合、やる気+3」
        *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
+       * - 「使用時」と「使用後」の違いがある、現状は後に続く条件で変わっているように見える
+       *   - デフォルトは「使用時」で、状態変化を条件にしている時が「使用後」になってそう
+       * - 現データでは、スキルカード使用に対しては条件が必ず付与されている
        */
       kind: "cardUsage";
       cardDefinitionId?: CardDefinition["id"];
@@ -672,6 +668,10 @@ export type ProducerItemTrigger = (
        *   - 「願いを叶えるお守り」は、「やる気が増加後、やる気+2」
        *   - 「Dearリトルプリンス」は、「好調の効果ターンが増加後、好調3ターン」
        *   - 「放課後のらくがき」は、「集中が増加後体力が50%以上の場合、集中+2」
+       *   - 「ひみつ特訓カーデ」は、「やる気が増加後、やる気+3」
+       * - 状態修正の継続効果による増加は、増加と見做されないよう
+       *   - 例えば、「ひみつ特訓カーデ」は、「厳選初星ブレンド」の効果によるやる気増加では発動しない
+       *   - TODO: Pアイテムによる増加はトリガーになるのか？相互ループの処理が面倒そうだからなさそうな気はする
        */
       kind: "modifierIncrease";
       modifierKind:
@@ -710,7 +710,7 @@ export type ProducerItemTrigger = (
   idolParameterKind?: IdolParameterKind;
 };
 
-type ProducerItemDefinitionContent = {
+export type ProducerItemContentDefinition = {
   /**
    * 効果発動条件
    *
@@ -770,9 +770,9 @@ type ProducerItemDefinitionContent = {
  */
 export type ProducerItemDefinition = {
   /** 未強化時の内容 */
-  base: ProducerItemDefinitionContent;
+  base: ProducerItemContentDefinition;
   /** 強化済み時の内容 */
-  enhanced?: ProducerItemDefinitionContent;
+  enhanced?: ProducerItemContentDefinition;
   id: string;
   name: string;
   producerItemPossessionKind: ProducerItemPossessionKind;

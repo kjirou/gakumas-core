@@ -1,5 +1,20 @@
 import { ProducerItemDefinition } from "../../types";
 
+export const findProducerItemDataById = (
+  id: ProducerItemDefinition["id"],
+): ProducerItemDefinition | undefined =>
+  producerItems.find((producerItem) => producerItem.id === id);
+
+export const getProducerItemDataById = (
+  id: ProducerItemDefinition["id"],
+): ProducerItemDefinition => {
+  const producerItem = findProducerItemDataById(id);
+  if (!producerItem) {
+    throw new Error(`Producer item not found: ${id}`);
+  }
+  return producerItem;
+};
+
 /**
  * Pアイテムデータの定義
  *
@@ -134,8 +149,8 @@ export const producerItems: ProducerItemDefinition[] = [
     },
   },
   {
-    id: "chibidomotezukuriburesu",
-    name: "ちびども手作りブレス",
+    id: "chibidomotezukurimedaru",
+    name: "ちびども手作りメダル",
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "r",
@@ -178,18 +193,14 @@ export const producerItems: ProducerItemDefinition[] = [
     rarity: "r",
     base: {
       condition: { kind: "countReminingTurns", max: 1 },
-      effects: [
-        { kind: "performLeveragingVitality", percentage: 50 },
-        { kind: "drainLife", value: 1 },
-      ],
+      cost: { kind: "life", value: 1 },
+      effects: [{ kind: "performLeveragingVitality", percentage: 50 }],
       trigger: { kind: "turnStart" },
     },
     enhanced: {
       condition: { kind: "countReminingTurns", max: 1 },
-      effects: [
-        { kind: "performLeveragingVitality", percentage: 70 },
-        { kind: "drainLife", value: 1 },
-      ],
+      cost: { kind: "life", value: 1 },
+      effects: [{ kind: "performLeveragingVitality", percentage: 70 }],
       trigger: { kind: "turnStart" },
     },
   },

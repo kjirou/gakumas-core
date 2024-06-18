@@ -1,3 +1,4 @@
+import { findCardDataById } from "../card";
 import { producerItems } from "./index";
 
 test("any id is not duplicated", () => {
@@ -60,6 +61,25 @@ for (const producerItem of producerItems) {
         expect(producerItem.enhanced.times).toBeGreaterThanOrEqual(
           producerItem.base.times,
         );
+      }
+    });
+    test("`trigger`が`cardDefinitionId`設定の`cardUsage`の時、対象のidがスキルカード定義に存在する", () => {
+      if (
+        producerItem.base.trigger.kind === "cardUsage" &&
+        producerItem.base.trigger.cardDefinitionId !== undefined
+      ) {
+        expect(
+          findCardDataById(producerItem.base.trigger.cardDefinitionId),
+        ).not.toBeUndefined();
+      }
+      if (
+        producerItem.enhanced &&
+        producerItem.enhanced.trigger.kind === "cardUsage" &&
+        producerItem.enhanced.trigger.cardDefinitionId !== undefined
+      ) {
+        expect(
+          findCardDataById(producerItem.enhanced.trigger.cardDefinitionId),
+        ).not.toBeUndefined();
       }
     });
   });

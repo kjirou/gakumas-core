@@ -57,7 +57,7 @@ const globalKeywords = {
   generateCard: "生成",
   goodCondition: "好調",
   halfLifeConsumption: "消費体力減少",
-  increaseTurns: "ターン追加",
+  increaseRemainingTurns: "ターン追加",
   lifeConsumptionReduction: "消費体力削減",
   mentalSkillCard: "メンタルスキルカード",
   mightyPerformance: "パラメータ上昇量増加",
@@ -133,7 +133,7 @@ const generateModifierText = (modifier: Modifier): string => {
           : `${modifier.delay}ターン後、`) + generateEffectText(modifier.effect)
       );
     case "doubleEffect":
-      return `次に使用するスキルカードの効果をもう1回発動（${modifier.times}回）`;
+      return `次に使用するスキルカードの効果をもう1回発動（1回）`;
     case "doubleLifeConsumption":
       return `${kwd("doubleLifeConsumption")}${modifier.duration}ターン`;
     case "effectActivationAtEndOfTurn":
@@ -247,8 +247,8 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
       return "手札をすべて入れ替える";
     case "generateCard":
       return `ランダムな強化済みスキルカード（SSR）を、手札に${kwd("generateCard")}`;
-    case "increaseTurns":
-      return `${kwd("increaseTurns")}+${effect.amount}`;
+    case "increaseRemainingTurns":
+      return `${kwd("increaseRemainingTurns")}+${effect.amount}`;
     case "getModifier":
       return generateModifierText(effect.modifier);
     case "multiplyModifier":

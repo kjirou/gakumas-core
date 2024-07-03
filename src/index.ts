@@ -34,7 +34,9 @@ import {
   LessonUpdateQuery,
 } from "./types";
 import {
-  drawCardsOnLessonStart,
+  activateEffectsOnLessonStart,
+  activateEffectsOnTurnStart,
+  drawCardsOnTurnStart,
   previewCardUsage,
   useCard,
 } from "./lesson-mutation";
@@ -91,34 +93,81 @@ import { handSizeOnLessonStart, patchUpdates } from "./models";
 export const startLessonTurn = (
   lessonGamePlay: LessonGamePlay,
 ): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
+  let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: ターン数増加
+  //
+  // レッスン開始時の効果発動
+  //
+  // - ゲーム内の履歴を見ると、1ターン目の前にこれの結果が記載されている
+  //
+  if (lesson.turnNumber === 0) {
+    const activateEffectsOnLessonStartResult = activateEffectsOnLessonStart(
+      lesson,
+      historyResultIndex,
+      {
+        getRandom: lessonGamePlay.getRandom,
+        idGenerator: lessonGamePlay.idGenerator,
+      },
+    );
+    updates = [...updates, ...activateEffectsOnLessonStartResult.updates];
+    historyResultIndex =
+      activateEffectsOnLessonStartResult.nextHistoryResultIndex;
+    lesson = patchUpdates(lesson, activateEffectsOnLessonStartResult.updates);
+  }
 
-  // TODO: 1ターン目なら、レッスン開始時トリガー
-
-  // 手札を山札から引く
-  lesson = patchUpdates(lesson, updatesList[updatesList.length - 1]);
-  updatesList = [
-    ...updatesList,
-    drawCardsOnLessonStart(lesson, {
-      // 一時的なメモ: 次のターンにスキルカードを引く効果は、本家を見ると手札に後で足すアニメーションなので、この後のレッスン開始トリガーで別にやってそう
-      count: handSizeOnLessonStart,
-      historyResultIndex: historyResultIndex,
-      getRandom: lessonGamePlay.getRandom,
-    }),
-  ];
+  //
+  // ターン番号を増やす
+  //
+  const increaseTurnNumberUpdate: LessonUpdateQuery = {
+    kind: "turnNumberIncrease",
+    reason: {
+      kind: "turnStartTrigger",
+      historyTurnNumber: lesson.turnNumber,
+      historyResultIndex,
+    },
+  };
+  updates = [...updates, increaseTurnNumberUpdate];
   historyResultIndex++;
+  lesson = patchUpdates(lesson, [increaseTurnNumberUpdate]);
 
-  // TODO: ターン開始時トリガー
+  //
+  // 手札を山札から引く
+  //
+  const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
+    lesson,
+    historyResultIndex,
+    {
+      getRandom: lessonGamePlay.getRandom,
+    },
+  );
+  updates = [...updates, ...drawCardsOnLessonStartResult.updates];
+  historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+
+  //
+  // ターン開始時の効果発動
+  //
+  const activateEffectsOnTurnStartResult = activateEffectsOnTurnStart(
+    lesson,
+    historyResultIndex,
+    {
+      getRandom: lessonGamePlay.getRandom,
+      idGenerator: lessonGamePlay.idGenerator,
+    },
+  );
+  updates = [...updates, ...activateEffectsOnTurnStartResult.updates];
+  historyResultIndex = activateEffectsOnTurnStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, activateEffectsOnTurnStartResult.updates);
 
   return {
     ...lessonGamePlay,
-    updates: updatesList.flat(),
+    updates,
   };
 };
+
+// const 手札リストを使用可否を含めて取得する
 
 // const previewCardUsage = () => {};
 
@@ -159,6 +208,27 @@ export const playCard = (
 };
 
 /**
+ * ターンをスキップする
+ *
+ * - 本家のボタンについているラベルは「Skip」
+ * - プレビューはない
+ */
+export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
+  let updatesList = [lessonGamePlay.updates];
+  let lesson = lessonGamePlay.initialLesson;
+  let historyResultIndex = 1;
+
+  // TODO: スキルカード使用数1以上必要
+
+  // TODO: 体力回復
+
+  return {
+    ...lessonGamePlay,
+    updates: updatesList.flat(),
+  };
+};
+
+/**
  * レッスンのターンを終了する
  *
  * - レッスン終了時に関わる処理は、現在はなさそう
@@ -175,27 +245,6 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   // TODO: 手札を捨てる
 
   // TODO: ターン数によるゲーム終了判定
-
-  return {
-    ...lessonGamePlay,
-    updates: updatesList.flat(),
-  };
-};
-
-/**
- * ターンをスキップする
- *
- * - 本家のボタンについているラベルは「Skip」
- * - プレビューはない
- */
-export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
-  let historyResultIndex = 1;
-
-  // TODO: スキルカード使用数1以上必要
-
-  // TODO: 体力回復
 
   return {
     ...lessonGamePlay,

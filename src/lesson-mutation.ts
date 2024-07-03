@@ -21,6 +21,11 @@ import {
   calculateActualActionCost,
   calculateActualRemainingTurns,
   calculateClearScoreProgress,
+  handSizeOnLessonStart,
+  isDelayedEffectModifierType,
+  isDrawCardsEffectType,
+  isEnhanceHandEffectType,
+  isPerformEffectType,
   maxHandSize,
   patchUpdates,
   prepareCardsForLesson,
@@ -145,85 +150,6 @@ export const createCardPlacementDiff = (
       JSON.stringify(after.removedCardPile)
       ? { removedCardPile: after.removedCardPile }
       : {}),
-  };
-};
-
-type LessonMutationResult = {
-  nextHistoryResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"];
-  updates: LessonUpdateQuery[];
-};
-
-/**
- * ターン開始時に手札を引く
- *
- * - TODO: レッスン開始時に手札
- */
-export const drawCardsOnLessonStart = (
-  lesson: Lesson,
-  params: {
-    count: number;
-    getRandom: GetRandom;
-    historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"];
-  },
-): LessonUpdateQuery[] => {
-  const { deck, discardPile, drawnCards } = drawCardsFromDeck(
-    lesson.deck,
-    params.count,
-    lesson.discardPile,
-    params.getRandom,
-  );
-  const { hand: hand2, discardPile: discardPile2 } =
-    addCardsToHandOrDiscardPile(drawnCards, lesson.hand, discardPile);
-  return [
-    {
-      ...createCardPlacementDiff(
-        {
-          deck: lesson.deck,
-          discardPile: lesson.discardPile,
-          hand: lesson.hand,
-        },
-        {
-          deck,
-          discardPile: discardPile2,
-          hand: hand2,
-        },
-      ),
-      reason: {
-        kind: "lessonStartTrigger",
-        historyTurnNumber: lesson.turnNumber,
-        historyResultIndex: params.historyResultIndex,
-      },
-    },
-  ];
-};
-
-/**
- * 手札使用のプレビュー表示をするか表示を解除する
- *
- * - コストを満たさない状態でもプレビューはできる
- *   - 足りないコストは、ゼロとして差分表示される
- * - カードを引く効果や「生成」効果など、一部の効果はプレビューできない
- */
-export const previewCardUsage = (
-  lesson: Lesson,
-  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-  params: {
-    selectedCardInHandIndex: number | undefined;
-  },
-): LessonMutationResult => {
-  return {
-    nextHistoryResultIndex: historyResultIndex + 1,
-    updates: [
-      {
-        kind: "selectedCardInHandIndex",
-        index: params.selectedCardInHandIndex,
-        reason: {
-          kind: "cardUsagePreview",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        },
-      },
-    ],
   };
 };
 
@@ -606,7 +532,7 @@ export const calculatePerformingVitalityEffect = (
  * - 本処理内では、レッスンその他の状況は変わらない前提
  *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
  */
-const computeEffects = (
+const activateEffects = (
   lesson: Lesson,
   effects: Effect[],
   getRandom: GetRandom,
@@ -754,9 +680,16 @@ const computeEffects = (
         break;
       }
       case "getModifier": {
+        let modifier: Modifier = effect.modifier;
+        if (isDelayedEffectModifierType(modifier)) {
+          modifier = {
+            ...modifier,
+            id: idGenerator(),
+          };
+        }
         diffs.push({
           kind: "modifier",
-          modifier: effect.modifier,
+          modifier,
         });
         break;
       }
@@ -889,6 +822,297 @@ const computeEffects = (
   return diffs;
 };
 
+const activateDelayedEffectModifier = (
+  lesson: Lesson,
+  modifier: Extract<Modifier, { kind: "delayedEffect" }>,
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+): LessonUpdateQueryDiff[] => {
+  if (modifier.id === undefined) {
+    throw new Error(`modifier.id is undefined: ${modifier}`);
+  }
+  let diffs: LessonUpdateQueryDiff[] = [];
+  if (modifier.delay === 1) {
+    diffs = activateEffects(lesson, [modifier.effect], getRandom, idGenerator);
+  }
+  diffs = [
+    ...diffs,
+    {
+      kind: "modifier",
+      modifier: {
+        ...modifier,
+        delay: -1,
+        id: modifier.id,
+      },
+    },
+  ];
+  return diffs;
+};
+
+type LessonMutationResult = {
+  nextHistoryResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"];
+  updates: LessonUpdateQuery[];
+};
+
+/**
+ * レッスン開始時に効果を発動する
+ */
+export const activateEffectsOnLessonStart = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  //
+  // TODO: Pアイテムによるレッスン開始時の効果発動
+  //
+  // - 「レッスン開始時手札に入る」は、ターン開始時の手札を引く処理に関連するので、ここでは処理しない
+  //
+
+  return {
+    updates: [],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
+ * ターン開始時に手札を引く
+ */
+export const drawCardsOnTurnStart = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  //
+  // 「レッスン開始時手札に入る」のスキルカードを引く
+  //
+  // - TODO: [仕様確認] レッスン開始時手札が6枚あるとき、6枚目以降は山札に残るのか捨札に行くのか？今は捨札へ移動している。
+  //
+  let drawInnateCardsUpdates: LessonUpdateQuery[] = [];
+  let remainingDrawCount = handSizeOnLessonStart;
+  if (newLesson.turnNumber === 1) {
+    let deck: Array<Card["id"]> = [];
+    let innateCardIds: Array<Card["id"]> = [];
+    for (const deckCardId of newLesson.deck) {
+      const card = newLesson.cards.find((card) => card.id === deckCardId);
+      if (!card) {
+        throw new Error(`Card not found in cards: cardId=${deckCardId}`);
+      }
+      if (getCardContentDefinition(card).innate) {
+        innateCardIds = [...innateCardIds, deckCardId];
+      } else {
+        deck = [...deck, deckCardId];
+      }
+    }
+    if (innateCardIds.length > 0) {
+      remainingDrawCount = Math.max(
+        0,
+        remainingDrawCount - innateCardIds.length,
+      );
+      const drawnCards = innateCardIds.slice(0, maxHandSize);
+      const discardPile = [
+        ...newLesson.discardPile,
+        ...innateCardIds.slice(maxHandSize),
+      ];
+      const { hand, discardPile: discardPile2 } = addCardsToHandOrDiscardPile(
+        drawnCards,
+        newLesson.hand,
+        discardPile,
+      );
+      drawInnateCardsUpdates = [
+        {
+          ...createCardPlacementDiff(
+            {
+              deck: newLesson.deck,
+              discardPile: newLesson.discardPile,
+              hand: newLesson.hand,
+            },
+            {
+              deck,
+              discardPile: discardPile2,
+              hand,
+            },
+          ),
+          reason: {
+            kind: "turnStartTrigger",
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex,
+          },
+        },
+      ];
+      newLesson = patchUpdates(newLesson, drawInnateCardsUpdates);
+      nextHistoryResultIndex++;
+    }
+  }
+
+  //
+  // 手札を引く
+  //
+  let drawCardsInHandUpdates: LessonUpdateQuery[] = [];
+  if (remainingDrawCount > 0) {
+    drawCardsInHandUpdates = activateEffects(
+      newLesson,
+      [{ kind: "drawCards", amount: remainingDrawCount }],
+      params.getRandom,
+      () => "",
+    ).map((diff) =>
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "turnStartTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      }),
+    );
+    newLesson = patchUpdates(newLesson, drawCardsInHandUpdates);
+    nextHistoryResultIndex++;
+  }
+
+  return {
+    updates: [...drawInnateCardsUpdates, ...drawCardsInHandUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
+ * ターン開始時の効果を発動する
+ *
+ * - TODO: [仕様確認] 状態修正の「次ターン」or「nターン後」 と Pアイテム による発動があるが、その順序が不明。また、おそらくカード引き→カード強化の順にもなってそうで内容によるのかも。
+ */
+export const activateEffectsOnTurnStart = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  //
+  // TODO: Pアイテムによるターン開始時の効果発動
+  //
+
+  //
+  // 状態修正の「次ターン/nターン後、パラメータ+n」による効果発動
+  //
+  // - TODO: [仕様確認] 他ふたつの手札関連の発動より先だっけ？
+  // - 実装上、元気更新も実行できるが、本家にその効果は存在しない
+  //
+  let performDelayedEffectUpdates: LessonUpdateQuery[] = [];
+  for (const modifier of newLesson.idol.modifiers) {
+    if (
+      isDelayedEffectModifierType(modifier) &&
+      isPerformEffectType(modifier.effect)
+    ) {
+      const innerUpdates = activateDelayedEffectModifier(
+        newLesson,
+        modifier,
+        params.getRandom,
+        params.idGenerator,
+      ).map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        }),
+      );
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      performDelayedEffectUpdates = [
+        ...performDelayedEffectUpdates,
+        ...innerUpdates,
+      ];
+    }
+  }
+  if (performDelayedEffectUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  //
+  // 状態修正の「次ターン/nターン後、スキルカードを引く」による効果発動
+  //
+  // - スキルカードを引く → スキルカードを強化 の順に処理する必要がある
+  //
+  let drawCardDelayedEffectUpdates: LessonUpdateQuery[] = [];
+  for (const modifier of newLesson.idol.modifiers) {
+    if (
+      isDelayedEffectModifierType(modifier) &&
+      isDrawCardsEffectType(modifier.effect)
+    ) {
+      const innerUpdates = activateDelayedEffectModifier(
+        newLesson,
+        modifier,
+        params.getRandom,
+        params.idGenerator,
+      ).map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        }),
+      );
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      drawCardDelayedEffectUpdates = [
+        ...drawCardDelayedEffectUpdates,
+        ...innerUpdates,
+      ];
+    }
+  }
+  if (drawCardDelayedEffectUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  //
+  // 状態修正の「次ターン/nターン後、スキルカードを強化」による効果発動
+  //
+  let enhanceHandDelayedEffectUpdates: LessonUpdateQuery[] = [];
+  for (const modifier of newLesson.idol.modifiers) {
+    if (
+      isDelayedEffectModifierType(modifier) &&
+      isEnhanceHandEffectType(modifier.effect)
+    ) {
+      const innerUpdates = activateDelayedEffectModifier(
+        newLesson,
+        modifier,
+        params.getRandom,
+        params.idGenerator,
+      ).map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        }),
+      );
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      enhanceHandDelayedEffectUpdates = [
+        ...enhanceHandDelayedEffectUpdates,
+        ...innerUpdates,
+      ];
+    }
+  }
+  if (enhanceHandDelayedEffectUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  return {
+    updates: [
+      ...performDelayedEffectUpdates,
+      ...drawCardDelayedEffectUpdates,
+      ...enhanceHandDelayedEffectUpdates,
+    ],
+    nextHistoryResultIndex,
+  };
+};
+
 /**
  * スキルカードを使用する
  */
@@ -981,7 +1205,7 @@ export const useCard = (
     //
     // 主効果発動
     //
-    let effectActivationUpdatesOnce: LessonUpdateQuery[] = computeEffects(
+    let effectActivationUpdatesOnce: LessonUpdateQuery[] = activateEffects(
       newLesson,
       cardContent.effects,
       params.getRandom,
@@ -1031,7 +1255,7 @@ export const useCard = (
     for (const { effect } of effectsUponCardUsage) {
       effectActivationUpdatesOnce = [
         ...effectActivationUpdatesOnce,
-        ...computeEffects(
+        ...activateEffects(
           newLesson,
           [effect],
           params.getRandom,
@@ -1072,6 +1296,36 @@ export const useCard = (
       ...discardOrRemovedCardUpdates,
       ...costConsumptionUpdates,
       ...effectActivationUpdates,
+    ],
+  };
+};
+
+/**
+ * 手札使用のプレビュー表示をするか表示を解除する
+ *
+ * - コストを満たさない状態でもプレビューはできる
+ *   - 足りないコストは、ゼロとして差分表示される
+ * - カードを引く効果や「生成」効果など、一部の効果はプレビューできない
+ */
+export const previewCardUsage = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    selectedCardInHandIndex: number | undefined;
+  },
+): LessonMutationResult => {
+  return {
+    nextHistoryResultIndex: historyResultIndex + 1,
+    updates: [
+      {
+        kind: "selectedCardInHandIndex",
+        index: params.selectedCardInHandIndex,
+        reason: {
+          kind: "cardUsagePreview",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
     ],
   };
 };

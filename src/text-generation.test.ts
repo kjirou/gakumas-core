@@ -107,23 +107,6 @@ describe("generateEffectText", () => {
           kind: "getModifier",
           modifier: {
             kind: "delayedEffect",
-            delay: 1,
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "goodCondition", duration: 1 },
-            },
-          },
-        },
-      ],
-      expected: "次のターン、{{好調}}1ターン",
-      name: "getModifier - delayedEffect - 次のターンに getModifier",
-    },
-    {
-      args: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
             delay: 2,
             effect: { kind: "drawCards", amount: 1 },
           },

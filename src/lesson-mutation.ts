@@ -366,6 +366,7 @@ type CostConsumptionUpdateQueryDiff = Extract<
 const calculateCostConsumption = (
   idol: Idol,
   cost: ActionCost,
+  idGenerator: IdGenerator,
 ): CostConsumptionUpdateQueryDiff[] => {
   switch (cost.kind) {
     case "normal": {
@@ -411,6 +412,7 @@ const calculateCostConsumption = (
           modifier: {
             kind: cost.kind,
             amount: cost.value,
+            id: idGenerator(),
           },
         },
       ];
@@ -422,6 +424,7 @@ const calculateCostConsumption = (
           modifier: {
             kind: cost.kind,
             duration: cost.value,
+            id: idGenerator(),
           },
         },
       ];
@@ -674,16 +677,12 @@ const activateEffects = (
         break;
       }
       case "getModifier": {
-        let modifier: Modifier = effect.modifier;
-        if (isDelayedEffectModifierType(modifier)) {
-          modifier = {
-            ...modifier,
-            id: idGenerator(),
-          };
-        }
         diffs.push({
           kind: "modifier",
-          modifier,
+          modifier: {
+            ...effect.modifier,
+            id: idGenerator(),
+          },
         });
         break;
       }
@@ -707,6 +706,7 @@ const activateEffects = (
               amount:
                 Math.ceil(modifier.amount * effect.multiplier) -
                 modifier.amount,
+              id: idGenerator(),
             },
           });
         }
@@ -1186,6 +1186,7 @@ export const useCard = (
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
     calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
+    params.idGenerator,
   ).map((diff) => ({
     ...diff,
     reason: {
@@ -1247,6 +1248,7 @@ export const useCard = (
             modifier: {
               kind: "doubleEffect",
               times: 1,
+              id: params.idGenerator(),
             },
           },
           {

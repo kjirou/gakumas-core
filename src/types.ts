@@ -75,18 +75,11 @@ export type VitalityUpdateQuery = {
 };
 
 /**
- * 状態修正
+ * 状態修正定義
  *
- * - レッスン中に画面左上に表示されるアイコン群のことを、状態修正(modifier)と呼ぶ
- * - 現在の状況を表現するのに使うのと共に、加算時の更新要求を表現するのにも使う
- *   - 加算の表現は、単に加算するしかできないので、その内無理になるかもしれない。元気は VitalityUpdateQuery が必要になった。
- *   - 減算の表現は含まない、減算は ActionCost 側で表現する
- * - 付与された順番で左側のアイコンとアイコンタップ時の説明リストに表示される
- *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
- * - 種類は名詞句で表現する、原文が名詞だから
- * - TODO: データ定義・インスタンス・インスタンスへの更新クエリの3役割を1つの構造に強引にまとめているので拡張性が危ない、例えば delayedEffect の id や doubleEffect の times などがおかしい
+ * - Modifier をデータ定義で行う時の形式
  */
-export type Modifier =
+export type ModifierDefinition =
   | {
       /**
        * 「スキルカード使用数追加+{amount}」
@@ -135,8 +128,6 @@ export type Modifier =
         Effect,
         { kind: "drawCards" | "enhanceHand" | "perform" }
       >;
-      /** レッスン内のみ存在して変更する値を指定するのに使う、アイドルの状態修正リスト内で一意のID */
-      id?: string;
     }
   | {
       /**
@@ -230,6 +221,22 @@ export type Modifier =
       kind: "positiveImpression";
       amount: number;
     };
+
+/**
+ * 状態修正
+ *
+ * - レッスン中に画面左上に表示されるアイコン群のことを、状態修正(modifier)と呼ぶ
+ * - 現在の状況を表現するのに使うのと共に、加算時の更新要求を表現するのにも使う
+ *   - 加算の表現は、単に加算するしかできないので、その内無理になるかもしれない。元気は VitalityUpdateQuery が必要になった。
+ *   - 減算の表現は含まない、減算は ActionCost 側で表現する
+ * - 付与された順番で左側のアイコンとアイコンタップ時の説明リストに表示される
+ *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
+ * - 種類は名詞句で表現する、原文が名詞だから
+ * - TODO: 状態そのものの表現と更新差分の表現を1つの構造で兼用しているので拡張性が危ない、例えば delayedEffect の id や doubleEffect の times などがおかしい
+ */
+export type Modifier = ModifierDefinition & {
+  id: string;
+};
 
 /**
  * 効果発動条件
@@ -378,7 +385,7 @@ export type Effect = (
        * - 1行の効果説明内で複数の状態変化を付与するスキルカードはなかった
        */
       kind: "getModifier";
-      modifier: Modifier;
+      modifier: ModifierDefinition;
     }
   | {
       /**

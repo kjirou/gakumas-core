@@ -1878,7 +1878,7 @@ describe("useCard, previe:false", () => {
         ],
       });
       lesson.hand = ["a"];
-      lesson.idol.modifiers = [{ kind: "motivation", amount: 3 }];
+      lesson.idol.modifiers = [{ kind: "motivation", amount: 3, id: "x" }];
       const { updates } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
@@ -1890,6 +1890,7 @@ describe("useCard, previe:false", () => {
         modifier: {
           kind: "motivation",
           amount: 3,
+          id: expect.any(String),
         },
         reason: expect.any(Object),
       });
@@ -1906,7 +1907,7 @@ describe("useCard, previe:false", () => {
         ],
       });
       lesson.hand = ["a"];
-      lesson.idol.modifiers = [{ kind: "goodCondition", duration: 2 }];
+      lesson.idol.modifiers = [{ kind: "goodCondition", duration: 2, id: "x" }];
       const { updates } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
@@ -1918,6 +1919,7 @@ describe("useCard, previe:false", () => {
         modifier: {
           kind: "goodCondition",
           duration: 2,
+          id: expect.any(String),
         },
         reason: expect.any(Object),
       });
@@ -1934,7 +1936,9 @@ describe("useCard, previe:false", () => {
         ],
       });
       lesson.hand = ["a"];
-      lesson.idol.modifiers = [{ kind: "lifeConsumptionReduction", value: 1 }];
+      lesson.idol.modifiers = [
+        { kind: "lifeConsumptionReduction", value: 1, id: "x" },
+      ];
       const { updates } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
@@ -1985,7 +1989,7 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1 }];
+        lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1, id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2272,43 +2276,10 @@ describe("useCard, previe:false", () => {
           modifier: {
             kind: "goodCondition",
             duration: 2,
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         });
-      });
-      test("delayedEffectを追加する時、更新内容へidが設定されている", () => {
-        const lesson = createLessonForTest({
-          cards: [
-            {
-              id: "a",
-              definition: getCardDataById("joju"),
-              enabled: true,
-              enhanced: false,
-            },
-          ],
-        });
-        lesson.hand = ["a"];
-        const { updates } = useCard(lesson, 1, {
-          selectedCardInHandIndex: 0,
-          getRandom: () => 0,
-          idGenerator: () => "x",
-          preview: false,
-        });
-        const delayedEffectUpdates = updates.filter(
-          (e) => e.kind === "modifier" && e.modifier.kind === "delayedEffect",
-        ) as any;
-        expect(delayedEffectUpdates).toStrictEqual([
-          {
-            kind: "modifier",
-            modifier: {
-              kind: "delayedEffect",
-              delay: 1,
-              id: "x",
-              effect: expect.any(Object),
-            },
-            reason: expect.any(Object),
-          },
-        ]);
       });
     });
     describe("increaseRemainingTurns", () => {
@@ -2324,7 +2295,9 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "positiveImpression", amount: 2 }];
+        lesson.idol.modifiers = [
+          { kind: "positiveImpression", amount: 2, id: "x" },
+        ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2366,8 +2339,8 @@ describe("useCard, previe:false", () => {
         });
         lesson.hand = ["a"];
         lesson.idol.modifiers = [
-          { kind: "focus", amount: 20 },
-          { kind: "positiveImpression", amount: 10 },
+          { kind: "focus", amount: 20, id: "x" },
+          { kind: "positiveImpression", amount: 10, id: "y" },
         ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
@@ -2381,6 +2354,7 @@ describe("useCard, previe:false", () => {
           modifier: {
             kind: "positiveImpression",
             amount: 5,
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         });
@@ -2536,7 +2510,7 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "motivation", amount: 10 }];
+        lesson.idol.modifiers = [{ kind: "motivation", amount: 10, id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2563,7 +2537,9 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "positiveImpression", amount: 10 }];
+        lesson.idol.modifiers = [
+          { kind: "positiveImpression", amount: 10, id: "x" },
+        ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2594,7 +2570,7 @@ describe("useCard, previe:false", () => {
           clear: 1,
           perfect: 6,
         };
-        lesson.idol.modifiers = [{ kind: "motivation", amount: 5 }];
+        lesson.idol.modifiers = [{ kind: "motivation", amount: 5, id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2789,6 +2765,7 @@ describe("useCard, previe:false", () => {
           modifier: {
             kind: "positiveImpression",
             amount: 3,
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },
@@ -2798,6 +2775,7 @@ describe("useCard, previe:false", () => {
             kind: "effectActivationUponCardUsage",
             cardKind: "mental",
             effect: expect.any(Object),
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },
@@ -2817,6 +2795,7 @@ describe("useCard, previe:false", () => {
           modifier: {
             kind: "positiveImpression",
             amount: 1,
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },
@@ -2868,6 +2847,7 @@ describe("useCard, previe:false", () => {
           modifier: {
             kind: "excellentCondition",
             duration: 3,
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },
@@ -2877,6 +2857,7 @@ describe("useCard, previe:false", () => {
             kind: "effectActivationUponCardUsage",
             cardKind: "active",
             effect: expect.any(Object),
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },

@@ -37,6 +37,7 @@ import {
   LessonUpdateQuery,
   LessonUpdateQueryDiff,
   Modifier,
+  ModifierDefinition,
 } from "./types";
 import { createIdGenerator, shuffleArray } from "./utils";
 
@@ -226,7 +227,7 @@ export const calculateActualRemainingTurns = (lesson: Lesson): number =>
 /** 「消費体力減少」・「消費体力削減」・「消費体力増加」を反映したコストを返す */
 export const calculateActualActionCost = (
   cost: ActionCost,
-  modifiers: Modifier[],
+  modifiers: ModifierDefinition[],
 ): ActionCost => {
   switch (cost.kind) {
     case "focus":

@@ -417,6 +417,7 @@ describe("patchUpdates", () => {
               {
                 kind: "focus",
                 amount: 1,
+                id: "a",
               },
             ],
           },
@@ -427,6 +428,7 @@ describe("patchUpdates", () => {
             modifier: {
               kind: "goodCondition",
               duration: 2,
+              id: "b",
             },
             reason: {
               kind: "lessonStartTrigger",
@@ -439,10 +441,12 @@ describe("patchUpdates", () => {
           {
             kind: "focus",
             amount: 1,
+            id: "a",
           },
           {
             kind: "goodCondition",
             duration: 2,
+            id: "b",
           },
         ]);
       });
@@ -452,6 +456,7 @@ describe("patchUpdates", () => {
             modifiers: [
               {
                 kind: "effectActivationAtEndOfTurn",
+                id: "a",
               },
             ],
           },
@@ -461,6 +466,7 @@ describe("patchUpdates", () => {
             kind: "modifier",
             modifier: {
               kind: "effectActivationAtEndOfTurn",
+              id: "b",
             } as Extract<Modifier, { kind: "effectActivationAtEndOfTurn" }>,
             reason: {
               kind: "lessonStartTrigger",
@@ -472,9 +478,11 @@ describe("patchUpdates", () => {
         expect(lessonMock.idol.modifiers).toStrictEqual([
           {
             kind: "effectActivationAtEndOfTurn",
+            id: "a",
           },
           {
             kind: "effectActivationAtEndOfTurn",
+            id: "b",
           },
         ]);
       });
@@ -494,6 +502,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     amount: 1,
+                    id: "a",
                   },
                 ],
               },
@@ -504,6 +513,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   amount: 2,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -516,6 +526,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 amount: 3,
+                id: "a",
               },
             ]);
           });
@@ -526,6 +537,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     amount: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -536,6 +548,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   amount: -1,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -548,6 +561,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 amount: 4,
+                id: "a",
               },
             ]);
           });
@@ -558,6 +572,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     amount: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -568,6 +583,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   amount: -5,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -592,6 +608,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     duration: 1,
+                    id: "a",
                   },
                 ],
               },
@@ -602,6 +619,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   duration: 2,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -614,6 +632,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 duration: 3,
+                id: "a",
               },
             ]);
           });
@@ -624,6 +643,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     duration: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -634,6 +654,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   duration: -1,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -646,6 +667,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 duration: 4,
+                id: "a",
               },
             ]);
           });
@@ -656,6 +678,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     duration: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -666,6 +689,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   duration: -5,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -690,6 +714,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     times: 1,
+                    id: "a",
                   },
                 ],
               },
@@ -700,6 +725,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   times: 2,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -712,6 +738,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 times: 3,
+                id: "a",
               },
             ]);
           });
@@ -722,6 +749,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     times: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -732,6 +760,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   times: -1,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -744,6 +773,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 times: 4,
+                id: "a",
               },
             ]);
           });
@@ -754,6 +784,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     times: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -764,6 +795,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   times: -5,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -788,6 +820,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     value: 1,
+                    id: "a",
                   },
                 ],
               },
@@ -798,6 +831,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   value: 2,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -810,6 +844,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 value: 3,
+                id: "a",
               },
             ]);
           });
@@ -820,6 +855,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     value: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -830,6 +866,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   value: -1,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -842,6 +879,7 @@ describe("patchUpdates", () => {
               {
                 kind: modifierKind,
                 value: 4,
+                id: "a",
               },
             ]);
           });
@@ -852,6 +890,7 @@ describe("patchUpdates", () => {
                   {
                     kind: modifierKind,
                     value: 5,
+                    id: "a",
                   },
                 ],
               },
@@ -862,6 +901,7 @@ describe("patchUpdates", () => {
                 modifier: {
                   kind: modifierKind,
                   value: -5,
+                  id: "b",
                 },
                 reason: {
                   kind: "lessonStartTrigger",
@@ -883,6 +923,7 @@ describe("patchUpdates", () => {
               {
                 kind: "doubleEffect",
                 times: 1,
+                id: "a",
               },
             ],
           },
@@ -893,6 +934,7 @@ describe("patchUpdates", () => {
             modifier: {
               kind: "doubleEffect",
               times: 1,
+              id: "b",
             },
             reason: {
               kind: "lessonStartTrigger",
@@ -905,10 +947,12 @@ describe("patchUpdates", () => {
           {
             kind: "doubleEffect",
             times: 1,
+            id: "a",
           },
           {
             kind: "doubleEffect",
             times: 1,
+            id: "b",
           },
         ]);
       });
@@ -919,14 +963,17 @@ describe("patchUpdates", () => {
               {
                 kind: "doubleEffect",
                 times: 1,
+                id: "a",
               },
               {
                 kind: "focus",
                 amount: 1,
+                id: "b",
               },
               {
                 kind: "doubleEffect",
                 times: 1,
+                id: "c",
               },
             ],
           },
@@ -937,6 +984,7 @@ describe("patchUpdates", () => {
             modifier: {
               kind: "doubleEffect",
               times: -1,
+              id: "d",
             },
             reason: {
               kind: "lessonStartTrigger",
@@ -949,10 +997,12 @@ describe("patchUpdates", () => {
           {
             kind: "focus",
             amount: 1,
+            id: "b",
           },
           {
             kind: "doubleEffect",
             times: 1,
+            id: "c",
           },
         ]);
       });

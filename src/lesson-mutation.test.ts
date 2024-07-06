@@ -1730,7 +1730,7 @@ describe("activateEffectsOnTurnStart", () => {
     ]);
   });
 });
-describe("useCard", () => {
+describe("useCard, previe:false", () => {
   describe("使用した手札を捨札か除外へ移動", () => {
     test("「レッスン中1回」ではない手札を使った時は、捨札へ移動", () => {
       const lesson = createLessonForTest({
@@ -1748,6 +1748,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       const update = updates.find((e) => e.kind === "cardPlacement") as any;
       expect(update.hand).toStrictEqual([]);
@@ -1771,6 +1772,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       const update = updates.find((e) => e.kind === "cardPlacement") as any;
       expect(update.hand).toStrictEqual([]);
@@ -1797,6 +1799,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates.find((e) => e.kind === "vitality")).toStrictEqual({
         kind: "vitality",
@@ -1823,6 +1826,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates.find((e) => e.kind === "vitality")).toStrictEqual({
         kind: "vitality",
@@ -1853,6 +1857,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates.find((e) => e.kind === "life")).toStrictEqual({
         kind: "life",
@@ -1878,6 +1883,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates.find((e) => e.kind === "modifier")).toStrictEqual({
         kind: "modifier",
@@ -1905,6 +1911,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates.find((e) => e.kind === "modifier")).toStrictEqual({
         kind: "modifier",
@@ -1932,6 +1939,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates.find((e) => e.kind === "life")).toStrictEqual({
         kind: "life",
@@ -1959,6 +1967,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         expect(updates.filter((e) => e.kind === "score")).toHaveLength(1);
       });
@@ -1981,6 +1990,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         expect(updates.filter((e) => e.kind === "life")).toHaveLength(1);
         expect(updates.filter((e) => e.kind === "score")).toHaveLength(2);
@@ -2032,6 +2042,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         // 手札使用時の更新があるため、効果による手札増加は2番目の更新になる
         const update = updates.filter(
@@ -2066,6 +2077,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         // 手札使用時の更新があるため、効果による手札増加は2番目の更新になる
         const update = updates.filter(
@@ -2099,6 +2111,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         // 手札使用時の更新があるため、効果による手札増加は2番目の更新になる
         const update = updates.filter(
@@ -2141,6 +2154,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const enhancedCardIds = (
           updates.find((e) => e.kind === "cardEnhancement") as any
@@ -2177,6 +2191,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         // 手札使用時の更新があるため、効果による手札増加は2番目の更新になる
         const update = updates.filter(
@@ -2210,6 +2225,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const cardsUpdate = updates.find((e) => e.kind === "cards") as any;
         // アイドル固有 + 上記で足している hanamoyukisetsu + 生成したカード
@@ -2248,6 +2264,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "modifier") as any;
         expect(update).toStrictEqual({
@@ -2275,6 +2292,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: () => "x",
+          preview: false,
         });
         const delayedEffectUpdates = updates.filter(
           (e) => e.kind === "modifier" && e.modifier.kind === "delayedEffect",
@@ -2311,6 +2329,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "remainingTurns") as any;
         expect(update).toStrictEqual({
@@ -2354,6 +2373,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "modifier") as any;
         expect(update).toStrictEqual({
@@ -2389,6 +2409,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const filtered = updates.filter((e) => e.kind === "score") as any[];
         expect(filtered).toStrictEqual([
@@ -2419,6 +2440,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const filtered = updates.filter((e) => e.kind === "score") as any[];
         expect(filtered).toStrictEqual([
@@ -2446,6 +2468,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const filtered = updates.filter((e) => e.kind === "score") as any[];
         expect(filtered).toStrictEqual([
@@ -2479,6 +2502,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const filtered = updates.filter(
           (e) => e.kind === "score" || e.kind === "vitality",
@@ -2517,6 +2541,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "score") as any;
         expect(update).toStrictEqual({
@@ -2543,6 +2568,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "score") as any;
         expect(update).toStrictEqual({
@@ -2573,6 +2599,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "score") as any;
         expect(update).toStrictEqual({
@@ -2601,6 +2628,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "score") as any;
         expect(update).toStrictEqual({
@@ -2627,6 +2655,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "vitality") as any;
         expect(update).toStrictEqual({
@@ -2653,6 +2682,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "vitality") as any;
         expect(update).toStrictEqual({
@@ -2681,6 +2711,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "life") as any;
         expect(update).toStrictEqual({
@@ -2707,6 +2738,7 @@ describe("useCard", () => {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          preview: false,
         });
         const update = updates.find((e) => e.kind === "life") as any;
         expect(update).toStrictEqual({
@@ -2747,7 +2779,8 @@ describe("useCard", () => {
       const { updates: updates1 } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
-        idGenerator,
+        idGenerator: createIdGenerator(),
+        preview: false,
       });
       expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
         // 「ファンシーチャーム」には、直接好印象を付与する効果もある
@@ -2776,6 +2809,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator,
+        preview: false,
       });
       expect(updates2a.filter((e) => e.kind === "modifier")).toStrictEqual([
         {
@@ -2792,6 +2826,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 1,
         getRandom: () => 0,
         idGenerator,
+        preview: false,
       });
       expect(updates2b.filter((e) => e.kind === "modifier")).toHaveLength(0);
     });
@@ -2824,6 +2859,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator,
+        preview: false,
       });
       expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
         // 「演出計画」には、直接絶好調を付与する効果もある
@@ -2852,6 +2888,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
         idGenerator,
+        preview: false,
       });
       expect(updates2a.filter((e) => e.kind === "vitality")).toStrictEqual([
         {
@@ -2866,6 +2903,7 @@ describe("useCard", () => {
         selectedCardInHandIndex: 1,
         getRandom: () => 0,
         idGenerator,
+        preview: false,
       });
       expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
     });

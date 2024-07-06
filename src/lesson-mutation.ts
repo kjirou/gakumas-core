@@ -361,7 +361,7 @@ type CostConsumptionUpdateQueryDiff = Extract<
 /**
  * コスト消費を計算する
  *
- * - 消費分のコストは足りる前提で呼び出す
+ * - 消費分のコストが足りない場合は、最大値まで消費する差分を返す
  */
 const calculateCostConsumption = (
   idol: Idol,
@@ -1116,6 +1116,7 @@ export const useCard = (
   params: {
     getRandom: GetRandom;
     idGenerator: IdGenerator;
+    preview: boolean;
     selectedCardInHandIndex: number;
   },
 ): LessonMutationResult => {
@@ -1140,38 +1141,44 @@ export const useCard = (
   //
   // - 本関数は、使用条件を満たさないスキルカードに対しては使えない前提
   //
-  if (!canUseCard(lesson, cardContent.cost, cardContent.condition)) {
+  if (
+    !params.preview &&
+    !canUseCard(lesson, cardContent.cost, cardContent.condition)
+  ) {
     throw new Error(`Can not use the card: ${card.original.definition.name}`);
   }
 
   //
   // 使用した手札を捨札か除外へ移動
   //
-  const discardOrRemovedCardUpdates: LessonUpdateQuery[] = [
-    {
-      ...createCardPlacementDiff(
-        {
-          hand: lesson.hand,
-          discardPile: lesson.discardPile,
-          removedCardPile: lesson.removedCardPile,
+  let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
+  if (!params.preview) {
+    usedCardPlacementUpdates = [
+      {
+        ...createCardPlacementDiff(
+          {
+            hand: lesson.hand,
+            discardPile: lesson.discardPile,
+            removedCardPile: lesson.removedCardPile,
+          },
+          {
+            hand: newLesson.hand.filter((id) => id !== cardId),
+            ...(cardContent.usableOncePerLesson
+              ? { removedCardPile: [...newLesson.removedCardPile, cardId] }
+              : { discardPile: [...newLesson.discardPile, cardId] }),
+          },
+        ),
+        reason: {
+          kind: "cardUsage",
+          cardId,
+          historyTurnNumber: newLesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
         },
-        {
-          hand: newLesson.hand.filter((id) => id !== cardId),
-          ...(cardContent.usableOncePerLesson
-            ? { removedCardPile: [...newLesson.removedCardPile, cardId] }
-            : { discardPile: [...newLesson.discardPile, cardId] }),
-        },
-      ),
-      reason: {
-        kind: "cardUsage",
-        cardId,
-        historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
       },
-    },
-  ];
-  newLesson = patchUpdates(newLesson, discardOrRemovedCardUpdates);
-  nextHistoryResultIndex++;
+    ];
+    newLesson = patchUpdates(newLesson, usedCardPlacementUpdates);
+    nextHistoryResultIndex++;
+  }
 
   //
   // コスト消費
@@ -1197,11 +1204,25 @@ export const useCard = (
   let effectActivationUpdates: LessonUpdateQuery[] = [];
   for (let times = 1; times <= (hasDoubleEffect ? 2 : 1); times++) {
     //
+    // プレビュー時は反映しない効果を除外する
+    //
+    const filteredEffects = cardContent.effects.filter(
+      (effect) =>
+        !params.preview ||
+        !(
+          effect.kind === "drawCards" ||
+          effect.kind === "enhanceHand" ||
+          effect.kind === "exchangeHand" ||
+          effect.kind === "generateCard"
+        ),
+    );
+
+    //
     // 主効果発動
     //
     let effectActivationUpdatesOnce: LessonUpdateQuery[] = activateEffects(
       newLesson,
-      cardContent.effects,
+      filteredEffects,
       params.getRandom,
       params.idGenerator,
     ).map((diff) => ({
@@ -1287,39 +1308,9 @@ export const useCard = (
   return {
     nextHistoryResultIndex,
     updates: [
-      ...discardOrRemovedCardUpdates,
+      ...usedCardPlacementUpdates,
       ...costConsumptionUpdates,
       ...effectActivationUpdates,
-    ],
-  };
-};
-
-/**
- * 手札使用のプレビュー表示をするか表示を解除する
- *
- * - コストを満たさない状態でもプレビューはできる
- *   - 足りないコストは、ゼロとして差分表示される
- * - カードを引く効果や「生成」効果など、一部の効果はプレビューできない
- */
-export const previewCardUsage = (
-  lesson: Lesson,
-  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-  params: {
-    selectedCardInHandIndex: number | undefined;
-  },
-): LessonMutationResult => {
-  return {
-    nextHistoryResultIndex: historyResultIndex + 1,
-    updates: [
-      {
-        kind: "selectedCardInHandIndex",
-        index: params.selectedCardInHandIndex,
-        reason: {
-          kind: "cardUsagePreview",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        },
-      },
     ],
   };
 };

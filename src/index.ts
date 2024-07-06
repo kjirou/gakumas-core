@@ -25,6 +25,7 @@ import { getProducerItemDataById } from "./data/producer-item";
 import {
   Card,
   CardInProduction,
+  CardsInHand,
   GetRandom,
   IdGenerator,
   Idol,
@@ -38,7 +39,6 @@ import {
   activateEffectsOnTurnStart,
   canUseCard,
   drawCardsOnTurnStart,
-  previewCardUsage,
   useCard,
 } from "./lesson-mutation";
 import {
@@ -171,16 +171,17 @@ export const startLessonTurn = (
   };
 };
 
+// export const プレイヤーにスキルカード使用数が残っているか()
+
 /**
- * 手札情報を取得する
+ * 手札をリストで取得する
  */
-export const getCardsInHand = (
-  lessonGamePlay: LessonGamePlay,
-): Array<{ card: Card; playable: boolean }> => {
+export const getCardsInHand = (lessonGamePlay: LessonGamePlay): CardsInHand => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
+  // TODO: 手札一覧で表示されている効果テキストを生成する、またパラメータ増加は状態修正効果込みになっている
   return lesson.hand.map((cardId) => {
     const card = lesson.cards.find((e) => e.id === cardId);
     if (!card) {
@@ -194,12 +195,40 @@ export const getCardsInHand = (
   });
 };
 
-// const previewCardUsage = () => {};
+/**
+ * スキルカードの使用結果をプレビューする
+ *
+ * - TODO: 状態修正リストの差分は、本家だと、削除される状態修正は0表記になって残っていた。なので、これから巡り巡って、ModifierはModifierDefinitionと分離する必要がある。
+ * - プレビュー用の更新を反映した値を返す
+ * - 本家のプレビュー仕様
+ *   - 体力・元気
+ *     - 効果反映後の値に変わり、その近くに差分アイコンが +n/-n で表示される
+ *     - 差分は実際に変化した値を表示する、例えば、結果的に値の変更がない場合は何も表示されない
+ *   - 状態修正差分
+ *     - 新規: スキルカード追加使用など一部のものを除いて、左側の状態修正リストの末尾へ追加
+ *     - 既存: 差分がある状態修正アイコンに差分適用後の値を表示し、その右に差分アイコンを表示する
+ *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
+ *
+ * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
+ */
+const previewCardPlay = (
+  lessonGamePlay: LessonGamePlay,
+  selectedCardInHandIndex: number,
+): LessonGamePlay => {
+  let updates = lessonGamePlay.updates;
+  let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
+
+  return {
+    ...lessonGamePlay,
+    updates,
+  };
+};
 
 /**
  * スキルカードを使用する
  *
- * @param selectedCardInHandIndex 選択した手札のインデックス、使用可能な手札を渡す必要がある
+ * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たす手札のみ選択可能
  */
 export const playCard = (
   lessonGamePlay: LessonGamePlay,
@@ -218,6 +247,7 @@ export const playCard = (
     getRandom: lessonGamePlay.getRandom,
     idGenerator: lessonGamePlay.idGenerator,
     selectedCardInHandIndex,
+    preview: false,
   });
   updatesList = [...updatesList, result.updates];
   historyResultIndex = result.nextHistoryResultIndex;
@@ -267,7 +297,7 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: 応援/トラブルトリガー
 
-  // TODO: 手札を捨てる
+  // TODO: 手札を捨てる、山札が0の状態の捨札は次のシャッフル後の捨札に所属する。例えば、手札3枚、山札0枚、手札1枚使って残り捨札、の捨札はシャッフル後
 
   // TODO: ターン数によるゲーム終了判定
 

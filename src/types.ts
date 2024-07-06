@@ -1204,3 +1204,14 @@ export type LessonGamePlay = {
    */
   updates: LessonUpdateQuery[];
 };
+
+/**
+ * 公開API用の手札情報
+ *
+ * - この配列のインデックスを、手札選択時に渡す
+ */
+export type CardsInHand = Array<{
+  card: Card;
+  /** 使用条件を満たすか */
+  playable: boolean;
+}>;

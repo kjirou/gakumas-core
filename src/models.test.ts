@@ -1,4 +1,11 @@
-import { Card, Idol, IdolInProduction, Lesson, Modifier } from "./types";
+import {
+  Card,
+  Idol,
+  IdolInProduction,
+  Lesson,
+  Modifier,
+  LessonUpdateQuery,
+} from "./types";
 import { getCardDataById } from "./data/card";
 import { getIdolDataById } from "./data/idol";
 import { getProducerItemDataById } from "./data/producer-item";
@@ -410,7 +417,7 @@ describe("patchUpdates", () => {
   });
   describe("modifier", () => {
     describe("新規追加", () => {
-      test("同種の状態修正が存在しない時、末尾へ新規追加する", () => {
+      test("既存の状態修正を指定しない時、末尾へ新規追加する", () => {
         let lessonMock = {
           idol: {
             modifiers: [
@@ -425,7 +432,12 @@ describe("patchUpdates", () => {
         lessonMock = patchUpdates(lessonMock, [
           {
             kind: "modifier",
-            modifier: {
+            actual: {
+              kind: "goodCondition",
+              duration: 2,
+              id: "b",
+            },
+            max: {
               kind: "goodCondition",
               duration: 2,
               id: "b",
@@ -450,473 +462,125 @@ describe("patchUpdates", () => {
           },
         ]);
       });
-      test("一部の状態修正は、同種のものが存在しても新規追加する", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "effectActivationAtEndOfTurn",
-                id: "a",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
-          {
-            kind: "modifier",
-            modifier: {
-              kind: "effectActivationAtEndOfTurn",
-              id: "b",
-            } as Extract<Modifier, { kind: "effectActivationAtEndOfTurn" }>,
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "effectActivationAtEndOfTurn",
-            id: "a",
-          },
-          {
-            kind: "effectActivationAtEndOfTurn",
-            id: "b",
-          },
-        ]);
-      });
     });
-    describe("増減対象のプロパティがamountのものの合算", () => {
-      const modifierKinds = [
-        "focus",
-        "motivation",
-        "positiveImpression",
+    describe("既存の特別な処理がない状態修正を指定した時、増減対象のプロパティ名称別に正しく更新できるか", () => {
+      const modifierPropertyNamesWithKindsList = [
+        [
+          "amount",
+          [
+            "additionalCardUsageCount",
+            "focus",
+            "motivation",
+            "positiveImpression",
+          ],
+        ],
+        ["delay", ["delayedEffect"]],
+        [
+          "duration",
+          [
+            "doubleLifeConsumption",
+            "excellentCondition",
+            "goodCondition",
+            "halfLifeConsumption",
+            "mightyPerformance",
+            "noVitalityIncrease",
+          ],
+        ],
+        ["times", ["debuffProtection"]],
+        ["value", ["lifeConsumptionReduction"]],
       ] as const;
-      for (const modifierKind of modifierKinds) {
-        describe(modifierKind, () => {
-          test("増加する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
+      for (const [
+        propertyName,
+        modifierKinds,
+      ] of modifierPropertyNamesWithKindsList) {
+        describe(propertyName, () => {
+          for (const modifierKind of modifierKinds) {
+            describe(modifierKind, () => {
+              test("合算する", () => {
+                let lessonMock = {
+                  idol: {
+                    modifiers: [
+                      {
+                        kind: modifierKind,
+                        [propertyName]: 1,
+                        id: "a",
+                      },
+                    ],
+                  },
+                } as Lesson;
+                lessonMock = patchUpdates(lessonMock, [
+                  {
+                    kind: "modifier",
+                    actual: {
+                      kind: modifierKind,
+                      [propertyName]: 2,
+                      id: "b",
+                      updateTargetId: "a",
+                    },
+                    max: {
+                      kind: modifierKind,
+                      [propertyName]: 2,
+                      id: "b",
+                      updateTargetId: "a",
+                    },
+                    reason: {
+                      kind: "lessonStartTrigger",
+                      historyTurnNumber: 1,
+                      historyResultIndex: 1,
+                    },
+                  } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
+                ]);
+                expect(lessonMock.idol.modifiers).toStrictEqual([
                   {
                     kind: modifierKind,
-                    amount: 1,
+                    [propertyName]: 3,
                     id: "a",
                   },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  amount: 2,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                amount: 3,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
+                ]);
+              });
+              test("合算した結果0になった時、削除する", () => {
+                let lessonMock = {
+                  idol: {
+                    modifiers: [
+                      {
+                        kind: modifierKind,
+                        [propertyName]: 5,
+                        id: "a",
+                      },
+                    ],
+                  },
+                } as Lesson;
+                lessonMock = patchUpdates(lessonMock, [
                   {
-                    kind: modifierKind,
-                    amount: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  amount: -1,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                amount: 4,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少した結果0になった時、削除する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    amount: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  amount: -5,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([]);
-          });
-        });
-      }
-    });
-    describe("増減対象のプロパティがdurationのものの合算", () => {
-      const modifierKinds = ["excellentCondition", "goodCondition"] as const;
-      for (const modifierKind of modifierKinds) {
-        describe(modifierKind, () => {
-          test("増加する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    duration: 1,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  duration: 2,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                duration: 3,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    duration: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  duration: -1,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                duration: 4,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少した結果0になった時、削除する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    duration: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  duration: -5,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([]);
-          });
-        });
-      }
-    });
-    describe("増減対象のプロパティがtimesのものの合算", () => {
-      const modifierKinds = ["debuffProtection"] as const;
-      for (const modifierKind of modifierKinds) {
-        describe(modifierKind, () => {
-          test("増加する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    times: 1,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  times: 2,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                times: 3,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    times: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  times: -1,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                times: 4,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少した結果0になった時、削除する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    times: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  times: -5,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([]);
-          });
-        });
-      }
-    });
-    describe("増減対象のプロパティがvalueのものの合算", () => {
-      const modifierKinds = ["lifeConsumptionReduction"] as const;
-      for (const modifierKind of modifierKinds) {
-        describe(modifierKind, () => {
-          test("増加する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    value: 1,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  value: 2,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                value: 3,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    value: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  value: -1,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([
-              {
-                kind: modifierKind,
-                value: 4,
-                id: "a",
-              },
-            ]);
-          });
-          test("減少した結果0になった時、削除する", () => {
-            let lessonMock = {
-              idol: {
-                modifiers: [
-                  {
-                    kind: modifierKind,
-                    value: 5,
-                    id: "a",
-                  },
-                ],
-              },
-            } as Lesson;
-            lessonMock = patchUpdates(lessonMock, [
-              {
-                kind: "modifier",
-                modifier: {
-                  kind: modifierKind,
-                  value: -5,
-                  id: "b",
-                },
-                reason: {
-                  kind: "lessonStartTrigger",
-                  historyTurnNumber: 1,
-                  historyResultIndex: 1,
-                },
-              },
-            ]);
-            expect(lessonMock.idol.modifiers).toStrictEqual([]);
-          });
+                    kind: "modifier",
+                    actual: {
+                      kind: modifierKind,
+                      [propertyName]: -5,
+                      id: "b",
+                      updateTargetId: "a",
+                    },
+                    max: {
+                      kind: modifierKind,
+                      [propertyName]: -5,
+                      id: "b",
+                      updateTargetId: "a",
+                    },
+                    reason: {
+                      kind: "lessonStartTrigger",
+                      historyTurnNumber: 1,
+                      historyResultIndex: 1,
+                    },
+                  } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
+                ]);
+                expect(lessonMock.idol.modifiers).toStrictEqual([]);
+              });
+            });
+          }
         });
       }
     });
     describe("doubleEffect", () => {
-      test("既存レコードへ1レコード足したとき、合算されずに2レコードになる", () => {
+      test("既存の状態修正を指定した時、削除できる", () => {
         let lessonMock = {
           idol: {
             modifiers: [
@@ -931,174 +595,18 @@ describe("patchUpdates", () => {
         lessonMock = patchUpdates(lessonMock, [
           {
             kind: "modifier",
-            modifier: {
-              kind: "doubleEffect",
-              times: 1,
-              id: "b",
-            },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "doubleEffect",
-            times: 1,
-            id: "a",
-          },
-          {
-            kind: "doubleEffect",
-            times: 1,
-            id: "b",
-          },
-        ]);
-      });
-      test("削除更新を受け取った時、先頭の1レコードのみが削除される", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "doubleEffect",
-                times: 1,
-                id: "a",
-              },
-              {
-                kind: "focus",
-                amount: 1,
-                id: "b",
-              },
-              {
-                kind: "doubleEffect",
-                times: 1,
-                id: "c",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
-          {
-            kind: "modifier",
-            modifier: {
+            actual: {
               kind: "doubleEffect",
               times: -1,
-              id: "d",
+              id: "b",
+              updateTargetId: "a",
             },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
+            max: {
+              kind: "doubleEffect",
+              times: -1,
+              id: "b",
+              updateTargetId: "a",
             },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "focus",
-            amount: 1,
-            id: "b",
-          },
-          {
-            kind: "doubleEffect",
-            times: 1,
-            id: "c",
-          },
-        ]);
-      });
-    });
-    describe("delayedEffect", () => {
-      test("delayが1の既存レコードへ、delayが正の数の1レコードを追加したとき、合算されずに2レコードになる", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "delayedEffect",
-                delay: 1,
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
-          {
-            kind: "modifier",
-            modifier: {
-              kind: "delayedEffect",
-              delay: 2,
-            } as Modifier,
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "delayedEffect",
-            delay: 1,
-          },
-          {
-            kind: "delayedEffect",
-            delay: 2,
-          },
-        ]);
-      });
-      test("delayが2の既存レコードを指定して、delayが-1の1レコードを追加した時、合算して既存レコードのdelayが1減る", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "delayedEffect",
-                delay: 2,
-                id: "a",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
-          {
-            kind: "modifier",
-            modifier: {
-              kind: "delayedEffect",
-              delay: -1,
-              id: "a",
-            } as Modifier,
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "delayedEffect",
-            delay: 1,
-            id: "a",
-          },
-        ]);
-      });
-      test("delayが1の既存レコードを指定して、delayが-1の1レコードを追加した時、既存レコードが削除される", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "delayedEffect",
-                delay: 1,
-                id: "a",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
-          {
-            kind: "modifier",
-            modifier: {
-              kind: "delayedEffect",
-              delay: -1,
-              id: "a",
-            } as Modifier,
             reason: {
               kind: "lessonStartTrigger",
               historyTurnNumber: 1,
@@ -1107,61 +615,6 @@ describe("patchUpdates", () => {
           },
         ]);
         expect(lessonMock.idol.modifiers).toStrictEqual([]);
-      });
-      test("delayが-1の1レコードをindex付きで追加した時、indexで指定したレコードのみのdelayを減らす", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "delayedEffect",
-                delay: 1,
-                id: "a",
-              },
-              {
-                kind: "delayedEffect",
-                delay: 3,
-                id: "b",
-              },
-              {
-                kind: "delayedEffect",
-                delay: 5,
-                id: "c",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
-          {
-            kind: "modifier",
-            modifier: {
-              kind: "delayedEffect",
-              delay: -1,
-              id: "b",
-            } as Modifier,
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "delayedEffect",
-            delay: 1,
-            id: "a",
-          },
-          {
-            kind: "delayedEffect",
-            delay: 2,
-            id: "b",
-          },
-          {
-            kind: "delayedEffect",
-            delay: 5,
-            id: "c",
-          },
-        ]);
       });
     });
   });

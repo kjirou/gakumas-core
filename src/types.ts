@@ -139,8 +139,8 @@ export type ModifierDefinition =
        * - この状態修正は合算されない、例えば「国民的アイドル」を2回連続で使うと、2つの状態修正として表示される
        */
       kind: "doubleEffect";
-      /** 状態修正更新クエリとして使用する際に、1 なら追加、-1 は削除、の意味 */
-      times: 1 | -1;
+      /** 状態修正更新クエリとして使用する際に、1 なら追加、-1 は削除、の意味。0 は計算中の削除待ち状態であり得る。 */
+      times: 1 | 0 | -1;
     }
   | {
       /** 「消費体力増加{duration}ターン」 */
@@ -226,16 +226,16 @@ export type ModifierDefinition =
  * 状態修正
  *
  * - レッスン中に画面左上に表示されるアイコン群のことを、状態修正(modifier)と呼ぶ
- * - 現在の状況を表現するのに使うのと共に、加算時の更新要求を表現するのにも使う
- *   - 加算の表現は、単に加算するしかできないので、その内無理になるかもしれない。元気は VitalityUpdateQuery が必要になった。
- *   - 減算の表現は含まない、減算は ActionCost 側で表現する
+ * - 現在の状況を表現するのに使うのと共に、更新を表現するのにも使う
  * - 付与された順番で左側のアイコンとアイコンタップ時の説明リストに表示される
  *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
  * - 種類は名詞句で表現する、原文が名詞だから
- * - TODO: 状態そのものの表現と更新差分の表現を1つの構造で兼用しているので拡張性が危ない、例えば delayedEffect の id や doubleEffect の times などがおかしい
  */
 export type Modifier = ModifierDefinition & {
+  /** 全てのインスタンスで一意のID */
   id: string;
+  /** 既存インスタンスの更新時にのみ存在する、対象のID */
+  updateTargetId?: string;
 };
 
 /**
@@ -1148,11 +1148,10 @@ export type LessonUpdateQueryDiff =
   | {
       /**
        * 状態修正の差分
-       *
-       * - life や vitality とは異なり、現状使うとこがなさそうなので max は付与していない
        */
       kind: "modifier";
-      modifier: Modifier;
+      actual: Modifier;
+      max: Modifier;
     }
   | {
       kind: "remainingTurns";

@@ -25,6 +25,7 @@ import { getProducerItemDataById } from "./data/producer-item";
 import {
   ActionCost,
   Card,
+  CardContentDefinition,
   CardInProduction,
   Effect,
   GetRandom,
@@ -63,6 +64,13 @@ export const isEnhanceHandEffectType = (
 export const isPerformEffectType = (
   effect: Effect,
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
+
+export const getCardContentDefinition = (card: Card): CardContentDefinition => {
+  return card.original.definition.enhanced !== undefined &&
+    card.enhancements.length > 0
+    ? card.original.definition.enhanced
+    : card.original.definition.base;
+};
 
 // TODO: 初期カードセットをどこかに定義する
 //       - 集中型: 試行錯誤、アピールの基本x2, ポーズの基本, 表情の基本x2, 表現の基本x2

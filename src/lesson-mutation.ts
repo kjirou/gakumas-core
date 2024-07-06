@@ -21,6 +21,7 @@ import {
   calculateActualActionCost,
   calculateActualRemainingTurns,
   calculateClearScoreProgress,
+  getCardContentDefinition,
   handSizeOnLessonStart,
   isDelayedEffectModifierType,
   isDrawCardsEffectType,
@@ -37,13 +38,6 @@ const createLessonUpdateQueryFromDiff = (
   diff: LessonUpdateQueryDiff,
   reason: LessonUpdateQueryReason,
 ): LessonUpdateQuery => ({ ...diff, reason });
-
-const getCardContentDefinition = (card: Card): CardContentDefinition => {
-  return card.original.definition.enhanced !== undefined &&
-    card.enhancements.length > 0
-    ? card.original.definition.enhanced
-    : card.original.definition.base;
-};
 
 /**
  * 山札から指定数のスキルカードを引く

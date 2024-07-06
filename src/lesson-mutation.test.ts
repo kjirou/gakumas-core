@@ -9,6 +9,7 @@ import {
 } from "./types";
 import { cards, getCardDataById } from "./data/card";
 import {
+  activateEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
@@ -16,7 +17,7 @@ import {
   canUseCard,
   createCardPlacementDiff,
   drawCardsFromDeck,
-  drawCardsOnLessonStart,
+  drawCardsOnTurnStart,
   useCard,
   validateCostComsumution,
 } from "./lesson-mutation";
@@ -27,6 +28,26 @@ import {
   prepareCardsForLesson,
 } from "./models";
 import { createIdGenerator } from "./utils";
+
+const createLessonForTest = (
+  overwrites: Partial<Parameters<typeof createIdolInProduction>[0]> = {},
+): Lesson => {
+  const idolInProduction = createIdolInProduction({
+    // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
+    idolDefinitionId: "shinosawahiro-r-1",
+    cards: [],
+    specificCardEnhanced: false,
+    specificProducerItemEnhanced: false,
+    idGenerator: createIdGenerator(),
+    ...overwrites,
+  });
+  return createLesson({
+    clearScoreThresholds: undefined,
+    getRandom: Math.random,
+    idolInProduction,
+    lastTurnNumber: 6,
+  });
+};
 
 describe("drawCardsFromDeck", () => {
   test("山札がなくならない状態で1枚引いた時、1枚引けて、山札が1枚減る", () => {
@@ -978,59 +999,6 @@ describe("canApplyEffect", () => {
     expect(canApplyEffect(...args)).toBe(expected);
   });
 });
-describe("drawCardsOnLessonStart", () => {
-  test("山札に引く数が残っている時、山札はその分減り、捨札に変化はない", () => {
-    const lessonMock = {
-      hand: [] as Lesson["hand"],
-      deck: ["1", "2", "3"],
-      discardPile: ["4"],
-    } as Lesson;
-    const updates = drawCardsOnLessonStart(lessonMock, {
-      count: 3,
-      historyResultIndex: 1,
-      getRandom: Math.random,
-    });
-    const update = updates.find((e) => e.kind === "cardPlacement") as any;
-    expect(update.hand).toHaveLength(3);
-    expect(update.deck).toHaveLength(0);
-    expect(update.discardPile).toBeUndefined();
-    expect(update.removedCardPile).toBeUndefined();
-  });
-  test("山札に引く数が残っていない時、山札は再構築された上で残りの引く数分減り、捨札は空になる", () => {
-    const lessonMock = {
-      hand: [] as Lesson["hand"],
-      deck: ["1", "2"],
-      discardPile: ["3", "4"],
-    } as Lesson;
-    const updates = drawCardsOnLessonStart(lessonMock, {
-      count: 3,
-      historyResultIndex: 1,
-      getRandom: Math.random,
-    });
-    const update = updates.find((e) => e.kind === "cardPlacement") as any;
-    expect(update.hand).toHaveLength(3);
-    expect(update.deck).toHaveLength(1);
-    expect(update.discardPile).toHaveLength(0);
-    expect(update.removedCardPile).toBeUndefined();
-  });
-  test("手札最大数を超える枚数を引いた時、入らないスキルカードは捨札へ移動する", () => {
-    const lessonMock = {
-      hand: [] as Lesson["hand"],
-      deck: ["1", "2", "3", "4", "5", "6"],
-      discardPile: [] as Lesson["discardPile"],
-    } as Lesson;
-    const updates = drawCardsOnLessonStart(lessonMock, {
-      count: 6,
-      historyResultIndex: 1,
-      getRandom: Math.random,
-    });
-    const update = updates.find((e) => e.kind === "cardPlacement") as any;
-    expect(update.hand).toHaveLength(5);
-    expect(update.deck).toHaveLength(0);
-    expect(update.discardPile).toHaveLength(1);
-    expect(update.removedCardPile).toBeUndefined();
-  });
-});
 describe("calculatePerformingScoreEffect", () => {
   const testCases: {
     args: Parameters<typeof calculatePerformingScoreEffect>;
@@ -1278,26 +1246,491 @@ describe("calculatePerformingVitalityEffect", () => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
   });
 });
-describe("useCard", () => {
-  const createLessonForTest = (
-    overwrites: Partial<Parameters<typeof createIdolInProduction>[0]> = {},
-  ): Lesson => {
-    const idolInProduction = createIdolInProduction({
-      // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
-      idolDefinitionId: "shinosawahiro-r-1",
-      cards: [],
-      specificCardEnhanced: false,
-      specificProducerItemEnhanced: false,
-      idGenerator: createIdGenerator(),
-      ...overwrites,
+describe("drawCardsOnLessonStart", () => {
+  test("山札に引く数が残っている時、山札はその分減り、捨札に変化はない / 1ターン目でレッスン開始時手札がない時、その更新は発行されない", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c", "d"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
     });
-    return createLesson({
-      clearScoreThresholds: undefined,
+    lesson.deck = ["a", "b", "c"];
+    lesson.discardPile = ["d"];
+    lesson.turnNumber = 1;
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
-      idolInProduction,
-      lastTurnNumber: 6,
     });
-  };
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: expect.arrayContaining(["a", "b", "c"]),
+        deck: [],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("山札に引く数が残っていない時、山札は再構築された上で残りの引く数分減り、捨札は空になる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c", "d"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b"];
+    lesson.discardPile = ["c", "d"];
+    lesson.turnNumber = 2;
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    const update = updates.find((e) => e.kind === "cardPlacement") as any;
+    expect(update.hand).toHaveLength(3);
+    expect(update.deck).toHaveLength(1);
+    expect(update.discardPile).toHaveLength(0);
+    expect(update.removedCardPile).toBeUndefined();
+  });
+  test("1ターン目でレッスン開始時手札が1枚ある時、更新は2回発行され、手札は最終的にその札を含む3枚になる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a"].map((id) => ({
+          id,
+          definition: getCardDataById("shizukanaishi"),
+          enabled: true,
+          enhanced: false,
+        })),
+        ...["b", "c", "d"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b", "c", "d"];
+    lesson.turnNumber = 1;
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a"],
+        deck: ["b", "c", "d"],
+        reason: expect.any(Object),
+      },
+      {
+        kind: "cardPlacement",
+        hand: ["a", "b", "c"],
+        deck: ["d"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("1ターン目でレッスン開始時手札が3枚ある時、更新は1回のみ発行され、手札は最終的に開始時手札のみの3枚になる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c"].map((id) => ({
+          id,
+          definition: getCardDataById("shizukanaishi"),
+          enabled: true,
+          enhanced: false,
+        })),
+        ...["d"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b", "c", "d"];
+    lesson.turnNumber = 1;
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a", "b", "c"],
+        deck: ["d"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("1ターン目でレッスン開始時手札が5枚ある時、更新は1回のみ発行され、手札は最終的に開始時手札のみの5枚になる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c", "d", "e"].map((id) => ({
+          id,
+          definition: getCardDataById("shizukanaishi"),
+          enabled: true,
+          enhanced: false,
+        })),
+        ...["f"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b", "c", "d", "e", "f"];
+    lesson.turnNumber = 1;
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a", "b", "c", "d", "e"],
+        deck: ["f"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("1ターン目でレッスン開始時手札が6枚ある時、更新は1回のみ発行され、手札は最終的に開始時手札のみの5枚になり、6枚目の開始時手札は捨札になる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c", "d", "e", "f"].map((id) => ({
+          id,
+          definition: getCardDataById("shizukanaishi"),
+          enabled: true,
+          enhanced: false,
+        })),
+        ...["g"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b", "c", "d", "e", "f", "g"];
+    lesson.turnNumber = 1;
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a", "b", "c", "d", "e"],
+        deck: ["g"],
+        discardPile: ["f"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+});
+describe("activateEffectsOnTurnStart", () => {
+  test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        {
+          id: "a",
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "perform",
+          score: {
+            value: 10,
+          },
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 2,
+        id: "y",
+        effect: {
+          kind: "perform",
+          score: {
+            value: 15,
+          },
+        },
+      },
+    ];
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        actual: 10,
+        max: 10,
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "x",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "y",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターンにスキルカードを1枚引く状態修正がある時、手札が1枚増え、その状態修正を減少する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        {
+          id: "a",
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.deck = ["a"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+    ];
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a"],
+        deck: [],
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "x",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターン・2ターン後・次ターンにスキルカードを1枚引く状態修正がある時、手札1枚増加を2回行い、全ての状態修正を減少する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 2,
+        id: "y",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "z",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+    ];
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a"],
+        deck: ["b"],
+        reason: expect.any(Object),
+      },
+      {
+        kind: "cardPlacement",
+        hand: ["a", "b"],
+        deck: [],
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "x",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "y",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "z",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターンに手札を強化するを状態修正がある時、手札が全て強化され、その状態修正を減少する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.hand = ["a", "b"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "enhanceHand",
+        },
+      },
+    ];
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "cardEnhancement")).toStrictEqual([
+      {
+        kind: "cardEnhancement",
+        cardIds: ["a", "b"],
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      {
+        kind: "modifier",
+        modifier: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: "x",
+          effect: expect.any(Object),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターンにスキルカードを引く状態修正と手札を強化する状態修正がある時、手札が引かれた状態で、手札が全て強化される", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.hand = ["a"];
+    lesson.deck = ["b"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "enhanceHand",
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "y",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+    ];
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "cardEnhancement")).toStrictEqual([
+      {
+        kind: "cardEnhancement",
+        cardIds: ["a", "b"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+});
+describe("useCard", () => {
   describe("使用した手札を捨札か除外へ移動", () => {
     test("「レッスン中1回」ではない手札を使った時は、捨札へ移動", () => {
       const lesson = createLessonForTest({
@@ -1825,6 +2258,39 @@ describe("useCard", () => {
           },
           reason: expect.any(Object),
         });
+      });
+      test("delayedEffectを追加する時、更新内容へidが設定されている", () => {
+        const lesson = createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("joju"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        });
+        lesson.hand = ["a"];
+        const { updates } = useCard(lesson, 1, {
+          selectedCardInHandIndex: 0,
+          getRandom: () => 0,
+          idGenerator: () => "x",
+        });
+        const delayedEffectUpdates = updates.filter(
+          (e) => e.kind === "modifier" && e.modifier.kind === "delayedEffect",
+        ) as any;
+        expect(delayedEffectUpdates).toStrictEqual([
+          {
+            kind: "modifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              id: "x",
+              effect: expect.any(Object),
+            },
+            reason: expect.any(Object),
+          },
+        ]);
       });
     });
     describe("increaseRemainingTurns", () => {

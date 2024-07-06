@@ -26,6 +26,7 @@ import {
   ActionCost,
   Card,
   CardInProduction,
+  Effect,
   GetRandom,
   IdGenerator,
   Idol,
@@ -43,6 +44,25 @@ export const handSizeOnLessonStart = 3;
 
 /** 手札の最大枚数 */
 export const maxHandSize = 5;
+
+export const isDelayedEffectModifierType = (
+  modifier: Modifier,
+): modifier is Extract<Modifier, { kind: "delayedEffect" }> =>
+  modifier.kind === "delayedEffect";
+
+export const isDrawCardsEffectType = (
+  effect: Effect,
+): effect is Extract<Effect, { kind: "drawCards" }> =>
+  effect.kind === "drawCards";
+
+export const isEnhanceHandEffectType = (
+  effect: Effect,
+): effect is Extract<Effect, { kind: "enhanceHand" }> =>
+  effect.kind === "enhanceHand";
+
+export const isPerformEffectType = (
+  effect: Effect,
+): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
 // TODO: 初期カードセットをどこかに定義する
 //       - 集中型: 試行錯誤、アピールの基本x2, ポーズの基本, 表情の基本x2, 表現の基本x2
@@ -301,11 +321,30 @@ export const patchUpdates = (
         // 同種の状態修正がない場合は新規追加、または特殊な状態修正の場合は新規追加
         if (
           sameKindIndex === -1 ||
-          update.modifier.kind === "delayedEffect" ||
           update.modifier.kind === "effectActivationAtEndOfTurn" ||
           update.modifier.kind === "effectActivationUponCardUsage"
         ) {
           newModifiers = [...newModifiers, update.modifier];
+        } else if (update.modifier.kind === "delayedEffect") {
+          if (update.modifier.delay >= 1) {
+            newModifiers = [...newModifiers, update.modifier];
+          } else {
+            newModifiers = newModifiers
+              .map((modifier) =>
+                isDelayedEffectModifierType(modifier) &&
+                isDelayedEffectModifierType(update.modifier) &&
+                update.modifier.id === modifier.id
+                  ? {
+                      ...modifier,
+                      delay: modifier.delay - 1,
+                    }
+                  : modifier,
+              )
+              .filter(
+                (modifier) =>
+                  !isDelayedEffectModifierType(modifier) || modifier.delay >= 1,
+              );
+          }
         } else if (update.modifier.kind === "doubleEffect") {
           if (update.modifier.times === 1) {
             newModifiers = [...newModifiers, update.modifier];

@@ -451,7 +451,7 @@ describe("patchUpdates", () => {
           idol: {
             modifiers: [
               {
-                kind: "delayedEffect",
+                kind: "effectActivationAtEndOfTurn",
               },
             ],
           },
@@ -460,8 +460,8 @@ describe("patchUpdates", () => {
           {
             kind: "modifier",
             modifier: {
-              kind: "delayedEffect",
-            } as Extract<Modifier, { kind: "delayedEffect" }>,
+              kind: "effectActivationAtEndOfTurn",
+            } as Extract<Modifier, { kind: "effectActivationAtEndOfTurn" }>,
             reason: {
               kind: "lessonStartTrigger",
               historyTurnNumber: 1,
@@ -471,10 +471,10 @@ describe("patchUpdates", () => {
         ]);
         expect(lessonMock.idol.modifiers).toStrictEqual([
           {
-            kind: "delayedEffect",
+            kind: "effectActivationAtEndOfTurn",
           },
           {
-            kind: "delayedEffect",
+            kind: "effectActivationAtEndOfTurn",
           },
         ]);
       });
@@ -953,6 +953,163 @@ describe("patchUpdates", () => {
           {
             kind: "doubleEffect",
             times: 1,
+          },
+        ]);
+      });
+    });
+    describe("delayedEffect", () => {
+      test("delayが1の既存レコードへ、delayが正の数の1レコードを追加したとき、合算されずに2レコードになる", () => {
+        let lessonMock = {
+          idol: {
+            modifiers: [
+              {
+                kind: "delayedEffect",
+                delay: 1,
+              },
+            ],
+          },
+        } as Lesson;
+        lessonMock = patchUpdates(lessonMock, [
+          {
+            kind: "modifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 2,
+            } as Modifier,
+            reason: {
+              kind: "lessonStartTrigger",
+              historyTurnNumber: 1,
+              historyResultIndex: 1,
+            },
+          },
+        ]);
+        expect(lessonMock.idol.modifiers).toStrictEqual([
+          {
+            kind: "delayedEffect",
+            delay: 1,
+          },
+          {
+            kind: "delayedEffect",
+            delay: 2,
+          },
+        ]);
+      });
+      test("delayが2の既存レコードを指定して、delayが-1の1レコードを追加した時、合算して既存レコードのdelayが1減る", () => {
+        let lessonMock = {
+          idol: {
+            modifiers: [
+              {
+                kind: "delayedEffect",
+                delay: 2,
+                id: "a",
+              },
+            ],
+          },
+        } as Lesson;
+        lessonMock = patchUpdates(lessonMock, [
+          {
+            kind: "modifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: -1,
+              id: "a",
+            } as Modifier,
+            reason: {
+              kind: "lessonStartTrigger",
+              historyTurnNumber: 1,
+              historyResultIndex: 1,
+            },
+          },
+        ]);
+        expect(lessonMock.idol.modifiers).toStrictEqual([
+          {
+            kind: "delayedEffect",
+            delay: 1,
+            id: "a",
+          },
+        ]);
+      });
+      test("delayが1の既存レコードを指定して、delayが-1の1レコードを追加した時、既存レコードが削除される", () => {
+        let lessonMock = {
+          idol: {
+            modifiers: [
+              {
+                kind: "delayedEffect",
+                delay: 1,
+                id: "a",
+              },
+            ],
+          },
+        } as Lesson;
+        lessonMock = patchUpdates(lessonMock, [
+          {
+            kind: "modifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: -1,
+              id: "a",
+            } as Modifier,
+            reason: {
+              kind: "lessonStartTrigger",
+              historyTurnNumber: 1,
+              historyResultIndex: 1,
+            },
+          },
+        ]);
+        expect(lessonMock.idol.modifiers).toStrictEqual([]);
+      });
+      test("delayが-1の1レコードをindex付きで追加した時、indexで指定したレコードのみのdelayを減らす", () => {
+        let lessonMock = {
+          idol: {
+            modifiers: [
+              {
+                kind: "delayedEffect",
+                delay: 1,
+                id: "a",
+              },
+              {
+                kind: "delayedEffect",
+                delay: 3,
+                id: "b",
+              },
+              {
+                kind: "delayedEffect",
+                delay: 5,
+                id: "c",
+              },
+            ],
+          },
+        } as Lesson;
+        lessonMock = patchUpdates(lessonMock, [
+          {
+            kind: "modifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: -1,
+              id: "b",
+            } as Modifier,
+            reason: {
+              kind: "lessonStartTrigger",
+              historyTurnNumber: 1,
+              historyResultIndex: 1,
+            },
+          },
+        ]);
+        expect(lessonMock.idol.modifiers).toStrictEqual([
+          {
+            kind: "delayedEffect",
+            delay: 1,
+            id: "a",
+          },
+          {
+            kind: "delayedEffect",
+            delay: 2,
+            id: "b",
+          },
+          {
+            kind: "delayedEffect",
+            delay: 5,
+            id: "c",
           },
         ]);
       });

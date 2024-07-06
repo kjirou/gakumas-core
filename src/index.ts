@@ -36,11 +36,16 @@ import {
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnStart,
+  canUseCard,
   drawCardsOnTurnStart,
   previewCardUsage,
   useCard,
 } from "./lesson-mutation";
-import { handSizeOnLessonStart, patchUpdates } from "./models";
+import {
+  getCardContentDefinition,
+  handSizeOnLessonStart,
+  patchUpdates,
+} from "./models";
 
 //
 // UI側での想定の呼び出し方
@@ -70,9 +75,8 @@ import { handSizeOnLessonStart, patchUpdates } from "./models";
 //
 // 手札のスキルカードを表示:
 // ```
-// // スキルカードIDと選択可能かの状態のリスト
-// const 手札リスト = 手札を取得する(lessonGamePlay);
-// const set手札リスト(手札リスト)
+// const cardsInHand = getCardsInHand(lessonGamePlay);
+// set手札リスト(cardsInHand);
 // ```
 //
 // カード選択してスキルカード使用:
@@ -167,7 +171,28 @@ export const startLessonTurn = (
   };
 };
 
-// const 手札リストを使用可否を含めて取得する
+/**
+ * 手札情報を取得する
+ */
+export const getCardsInHand = (
+  lessonGamePlay: LessonGamePlay,
+): Array<{ card: Card; playable: boolean }> => {
+  const lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
+  return lesson.hand.map((cardId) => {
+    const card = lesson.cards.find((e) => e.id === cardId);
+    if (!card) {
+      throw new Error(`Card not found: ${cardId}`);
+    }
+    const cardContent = getCardContentDefinition(card);
+    return {
+      card,
+      playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
+    };
+  });
+};
 
 // const previewCardUsage = () => {};
 

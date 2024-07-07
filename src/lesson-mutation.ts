@@ -882,30 +882,6 @@ const activateEffect = (
   return diffs;
 };
 
-/**
- * 効果リストを計算して更新差分リストを返す
- *
- * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
- * - 本処理内では、レッスンその他の状況は変わらない前提
- *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
- * - TODO: これは1効果だけの計算にして、スキルカード使用・Pアイテム用・Pドリンク用のラッパーにする方が良さそうかも
- */
-const activateEffects = (
-  lesson: Lesson,
-  effects: Effect[],
-  getRandom: GetRandom,
-  idGenerator: IdGenerator,
-): LessonUpdateQueryDiff[] => {
-  let diffs: LessonUpdateQueryDiff[] = [];
-  for (const effect of effects) {
-    const result = activateEffect(lesson, effect, getRandom, idGenerator);
-    if (result) {
-      diffs = [...diffs, ...result];
-    }
-  }
-  return diffs;
-};
-
 const activateDelayedEffectModifier = (
   lesson: Lesson,
   modifier: Extract<Modifier, { kind: "delayedEffect" }>,
@@ -947,6 +923,35 @@ const activateDelayedEffectModifier = (
     },
   ];
   return diffs;
+};
+
+/**
+ * 効果発動結果リスト
+ *
+ * - 配列のインデックスは、実行した効果リストのインデックスに対応する
+ * - undefined は、効果適用条件を満たさなかったもの
+ */
+type EffectActivations = Array<LessonUpdateQueryDiff[] | undefined>;
+
+/**
+ * 効果リストを発動をして、効果発動結果リストを返す
+ *
+ * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
+ * - 本処理内では、レッスンその他の状況は変わらない前提
+ *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
+ */
+const activateEffects = (
+  lesson: Lesson,
+  effects: Effect[],
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+): EffectActivations => {
+  let effectActivations: EffectActivations = [];
+  for (const effect of effects) {
+    const activation = activateEffect(lesson, effect, getRandom, idGenerator);
+    effectActivations = [...effectActivations, activation];
+  }
+  return effectActivations;
 };
 
 type LessonMutationResult = {
@@ -1328,23 +1333,32 @@ export const useCard = (
     //
     // 主効果発動
     //
-    let effectActivationUpdatesOnce: LessonUpdateQuery[] = activateEffects(
+    const effectActivations = activateEffects(
       newLesson,
       filteredEffects,
       params.getRandom,
       params.idGenerator,
-    ).map((diff) => ({
-      ...diff,
-      reason: {
-        kind: "cardUsage",
-        cardId: card.id,
-        historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
-      },
-    }));
+    );
+    let effectActivationUpdatesOnce: LessonUpdateQuery[] = [];
+    for (const [effectIndex, effectActivation] of effectActivations.entries()) {
+      if (effectActivation) {
+        effectActivationUpdatesOnce = [
+          ...effectActivationUpdatesOnce,
+          ...effectActivation.map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "cardUsage.effectActivation",
+              cardId: card.id,
+              effectIndex,
+              historyTurnNumber: newLesson.turnNumber,
+              historyResultIndex: nextHistoryResultIndex,
+            }),
+          ),
+        ];
+      }
+    }
 
     //
-    // 「次に使用するスキルカードの効果をもう1回発動」を消費
+    // 「次に使用するスキルカードの効果をもう1回発動」の状態修正を消費
     //
     if (hasDoubleEffect && times === 1) {
       const id = params.idGenerator();

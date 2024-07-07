@@ -1060,6 +1060,12 @@ export type LessonUpdateQueryReason = (
       cardId: Card["id"];
     }
   | {
+      /** スキルカード使用 > 効果発動 */
+      kind: "cardUsage.effectActivation";
+      cardId: Card["id"];
+      effectIndex: number;
+    }
+  | {
       /** スキルカード使用プレビュー */
       kind: "cardUsagePreview";
     }

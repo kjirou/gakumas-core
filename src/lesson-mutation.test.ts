@@ -6,11 +6,13 @@ import {
   IdolDefinition,
   IdolInProduction,
   Lesson,
+  Modifier,
 } from "./types";
 import { cards, getCardDataById } from "./data/card";
 import {
   activateEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
+  calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
   canApplyEffect,
@@ -19,7 +21,7 @@ import {
   drawCardsFromDeck,
   drawCardsOnTurnStart,
   useCard,
-  validateCostComsumution,
+  validateCostConsumution,
 } from "./lesson-mutation";
 import {
   createIdolInProduction,
@@ -272,10 +274,10 @@ describe("createCardPlacementDiff", () => {
     expect(createCardPlacementDiff(...args)).toStrictEqual(expected);
   });
 });
-describe("validateCostComsumution", () => {
+describe("validateCostConsumution", () => {
   const testCases: Array<{
-    args: Parameters<typeof validateCostComsumution>;
-    expected: ReturnType<typeof validateCostComsumution>;
+    args: Parameters<typeof validateCostConsumution>;
+    expected: ReturnType<typeof validateCostConsumution>;
     name: string;
   }> = [
     {
@@ -456,10 +458,10 @@ describe("validateCostComsumution", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(validateCostComsumution(...args)).toStrictEqual(expected);
+    expect(validateCostConsumution(...args)).toStrictEqual(expected);
   });
 });
-// validateCostComsumution で検証できる内容はそちらで行う
+// validateCostConsumution で検証できる内容はそちらで行う
 describe("canUseCard", () => {
   const testCases: Array<{
     args: Parameters<typeof canUseCard>;
@@ -999,6 +1001,229 @@ describe("canApplyEffect", () => {
     expect(canApplyEffect(...args)).toBe(expected);
   });
 });
+describe("calculateCostConsumption", () => {
+  const testCases: Array<{
+    args: Parameters<typeof calculateCostConsumption>;
+    expected: ReturnType<typeof calculateCostConsumption>;
+    name: string;
+  }> = [
+    {
+      name: "normalコストでvitality以下の値の時、全コストをvitalityで払う",
+      args: [
+        {
+          vitality: 3,
+        } as Idol,
+        { kind: "normal", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [{ kind: "vitality", actual: -3, max: -3 }],
+    },
+    {
+      name: "normalコストでvitalityを超える値の時、一部コストをvitalityで払い、一部をlifeで払う",
+      args: [
+        {
+          life: 1,
+          vitality: 3,
+        } as Idol,
+        { kind: "normal", value: 4 },
+        createIdGenerator(),
+      ],
+      expected: [
+        { kind: "vitality", actual: -3, max: -4 },
+        { kind: "life", actual: -1, max: -1 },
+      ],
+    },
+    {
+      name: "normalコストでvitalityとlifeの合計を超える値の時、一部コストをvitalityとlifeで払う",
+      args: [
+        {
+          life: 1,
+          vitality: 3,
+        } as Idol,
+        { kind: "normal", value: 5 },
+        createIdGenerator(),
+      ],
+      expected: [
+        { kind: "vitality", actual: -3, max: -5 },
+        { kind: "life", actual: -1, max: -2 },
+      ],
+    },
+    {
+      name: "normalコストでvitalityもlifeも0の時、lifeで0コストを払う",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+        } as Idol,
+        { kind: "normal", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [{ kind: "life", actual: 0, max: -3 }],
+    },
+    {
+      name: "lifeコストでlife以下の値の時、全コストをlifeで払う",
+      args: [
+        {
+          life: 3,
+        } as Idol,
+        { kind: "life", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [{ kind: "life", actual: -3, max: -3 }],
+    },
+    {
+      name: "lifeコストでlifeを超える値の時、一部コストをlifeで払う",
+      args: [
+        {
+          life: 2,
+        } as Idol,
+        { kind: "life", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [{ kind: "life", actual: -2, max: -3 }],
+    },
+    {
+      name: "lifeコストでlifeが0の時、0コストをlifeで払う",
+      args: [
+        {
+          life: 0,
+        } as Idol,
+        { kind: "life", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [{ kind: "life", actual: 0, max: -3 }],
+    },
+    {
+      name: "amountプロパティのmodifierコストで、値がアイドルが持つmodifier以下の時、全部のコストを払う",
+      args: [
+        {
+          modifiers: [{ kind: "focus", amount: 3, id: "a" }],
+        } as Idol,
+        { kind: "focus", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "focus",
+            amount: -3,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+          max: {
+            kind: "focus",
+            amount: -3,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+        },
+      ],
+    },
+    {
+      name: "amountプロパティのmodifierコストで、値がアイドルが持つmodifierを超える時、一部のコストを払う",
+      args: [
+        {
+          modifiers: [{ kind: "focus", amount: 3, id: "a" }],
+        } as Idol,
+        { kind: "focus", value: 4 },
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "focus",
+            amount: -3,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+          max: {
+            kind: "focus",
+            amount: -4,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+        },
+      ],
+    },
+    {
+      name: "amountプロパティのmodifierコストで、アイドルが相当するmodifierを持たない時、結果を返さない",
+      args: [
+        { modifiers: [] as Modifier[] } as Idol,
+        { kind: "focus", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [],
+    },
+    {
+      name: "durationプロパティのmodifierコストで、値がアイドルが持つmodifier以下の時、全部のコストを払う",
+      args: [
+        {
+          modifiers: [{ kind: "goodCondition", duration: 3, id: "a" }],
+        } as Idol,
+        { kind: "goodCondition", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "goodCondition",
+            duration: -3,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+          max: {
+            kind: "goodCondition",
+            duration: -3,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+        },
+      ],
+    },
+    {
+      name: "durationプロパティのmodifierコストで、値がアイドルが持つmodifierを超える時、一部のコストを払う",
+      args: [
+        {
+          modifiers: [{ kind: "goodCondition", duration: 3, id: "a" }],
+        } as Idol,
+        { kind: "goodCondition", value: 4 },
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "goodCondition",
+            duration: -3,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+          max: {
+            kind: "goodCondition",
+            duration: -4,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+        },
+      ],
+    },
+    {
+      name: "amountプロパティのmodifierコストで、アイドルが相当するmodifierを持たない時、結果を返さない",
+      args: [
+        { modifiers: [] as Modifier[] } as Idol,
+        { kind: "goodCondition", value: 3 },
+        createIdGenerator(),
+      ],
+      expected: [],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(calculateCostConsumption(...args)).toStrictEqual(expected);
+  });
+});
 describe("calculatePerformingScoreEffect", () => {
   const testCases: {
     args: Parameters<typeof calculatePerformingScoreEffect>;
@@ -1479,21 +1704,37 @@ describe("activateEffectsOnTurnStart", () => {
     expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "x",
           effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "x",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "x",
         },
         reason: expect.any(Object),
       },
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "y",
           effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "y",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "y",
         },
         reason: expect.any(Object),
       },
@@ -1537,11 +1778,19 @@ describe("activateEffectsOnTurnStart", () => {
     expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "x",
+          id: expect.any(String),
           effect: expect.any(Object),
+          updateTargetId: "x",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          id: expect.any(String),
+          effect: expect.any(Object),
+          updateTargetId: "x",
         },
         reason: expect.any(Object),
       },
@@ -1609,31 +1858,55 @@ describe("activateEffectsOnTurnStart", () => {
     expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "x",
           effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "x",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "x",
         },
         reason: expect.any(Object),
       },
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "y",
           effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "y",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "y",
         },
         reason: expect.any(Object),
       },
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "z",
           effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "z",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "z",
         },
         reason: expect.any(Object),
       },
@@ -1675,11 +1948,19 @@ describe("activateEffectsOnTurnStart", () => {
     expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
-        modifier: {
+        actual: {
           kind: "delayedEffect",
           delay: -1,
-          id: "x",
           effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "x",
+        },
+        max: {
+          kind: "delayedEffect",
+          delay: -1,
+          effect: expect.any(Object),
+          id: expect.any(String),
+          updateTargetId: "x",
         },
         reason: expect.any(Object),
       },
@@ -1730,7 +2011,7 @@ describe("activateEffectsOnTurnStart", () => {
     ]);
   });
 });
-describe("useCard, previe:false", () => {
+describe("useCard preview:false", () => {
   describe("使用した手札を捨札か除外へ移動", () => {
     test("「レッスン中1回」ではない手札を使った時は、捨札へ移動", () => {
       const lesson = createLessonForTest({
@@ -1781,35 +2062,9 @@ describe("useCard, previe:false", () => {
       expect(update.removedCardPile).toStrictEqual(["a"]);
     });
   });
+  // 基本的には calculateCostConsumption のテストで行う
   describe("コスト消費", () => {
-    test("全て元気で賄った時のnormal", () => {
-      const lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("apirunokihon"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a"];
-      lesson.idol.vitality = 4;
-      const { updates } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-        preview: false,
-      });
-      expect(updates.find((e) => e.kind === "vitality")).toStrictEqual({
-        kind: "vitality",
-        actual: -4,
-        max: -4,
-        reason: expect.any(Object),
-      });
-      expect(updates.find((e) => e.kind === "life")).toBeUndefined();
-    });
-    test("一部を元気で賄った時のnormal", () => {
+    test("it works", () => {
       const lesson = createLessonForTest({
         cards: [
           {
@@ -1828,99 +2083,22 @@ describe("useCard, previe:false", () => {
         idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates.find((e) => e.kind === "vitality")).toStrictEqual({
-        kind: "vitality",
-        actual: -3,
-        max: -4,
-        reason: expect.any(Object),
-      });
-      expect(updates.find((e) => e.kind === "life")).toStrictEqual({
-        kind: "life",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      });
-    });
-    test("life", () => {
-      const lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("genkinaaisatsu"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a"];
-      const { updates } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-        preview: false,
-      });
-      expect(updates.find((e) => e.kind === "life")).toStrictEqual({
-        kind: "life",
-        actual: -4,
-        max: -4,
-        reason: expect.any(Object),
-      });
-    });
-    test("プロパティにamountがあるmodifier", () => {
-      const lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("minnadaisuki"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a"];
-      lesson.idol.modifiers = [{ kind: "motivation", amount: 3 }];
-      const { updates } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-        preview: false,
-      });
-      expect(updates.find((e) => e.kind === "modifier")).toStrictEqual({
-        kind: "modifier",
-        modifier: {
-          kind: "motivation",
-          amount: 3,
+      expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([
+        {
+          kind: "vitality",
+          actual: -3,
+          max: -4,
+          reason: expect.any(Object),
         },
-        reason: expect.any(Object),
-      });
-    });
-    test("プロパティにdurationがあるmodifier", () => {
-      const lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("sonzaikan"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a"];
-      lesson.idol.modifiers = [{ kind: "goodCondition", duration: 2 }];
-      const { updates } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-        preview: false,
-      });
-      expect(updates.find((e) => e.kind === "modifier")).toStrictEqual({
-        kind: "modifier",
-        modifier: {
-          kind: "goodCondition",
-          duration: 2,
+      ]);
+      expect(updates.filter((e) => e.kind === "life")).toStrictEqual([
+        {
+          kind: "life",
+          actual: -1,
+          max: -1,
+          reason: expect.any(Object),
         },
-        reason: expect.any(Object),
-      });
+      ]);
     });
     test("状態修正により消費体力が変動", () => {
       const lesson = createLessonForTest({
@@ -1934,7 +2112,9 @@ describe("useCard, previe:false", () => {
         ],
       });
       lesson.hand = ["a"];
-      lesson.idol.modifiers = [{ kind: "lifeConsumptionReduction", value: 1 }];
+      lesson.idol.modifiers = [
+        { kind: "lifeConsumptionReduction", value: 1, id: "x" },
+      ];
       const { updates } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
@@ -1949,7 +2129,7 @@ describe("useCard, previe:false", () => {
       });
     });
   });
-  describe("効果発動・効果適用", () => {
+  describe("効果発動", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {
       test("「飛躍」は、集中が足りない時、パラメータ上昇は1回のみ適用する", () => {
         const lesson = createLessonForTest({
@@ -1985,7 +2165,7 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1 }];
+        lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1, id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -1996,7 +2176,7 @@ describe("useCard, previe:false", () => {
         expect(updates.filter((e) => e.kind === "score")).toHaveLength(2);
         expect(
           updates.filter(
-            (e) => e.kind === "modifier" && e.modifier.kind === "focus",
+            (e) => e.kind === "modifier" && e.actual.kind === "focus",
           ),
         ).toHaveLength(2);
         expect(updates.filter((e) => e.kind === "score")[0]).toStrictEqual({
@@ -2013,7 +2193,7 @@ describe("useCard, previe:false", () => {
         });
         expect(
           updates.filter(
-            (e) => e.kind === "modifier" && e.modifier.kind === "doubleEffect",
+            (e) => e.kind === "modifier" && e.actual.kind === "doubleEffect",
           ),
         ).toHaveLength(1);
       });
@@ -2248,7 +2428,7 @@ describe("useCard, previe:false", () => {
       });
     });
     describe("getModifier", () => {
-      test("it works", () => {
+      test("新規追加の時", () => {
         const lesson = createLessonForTest({
           cards: [
             {
@@ -2266,45 +2446,108 @@ describe("useCard, previe:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "modifier") as any;
-        expect(update).toStrictEqual({
-          kind: "modifier",
-          modifier: {
-            kind: "goodCondition",
-            duration: 2,
+        expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+          {
+            kind: "modifier",
+            actual: {
+              kind: "goodCondition",
+              duration: 2,
+              id: expect.any(String),
+            },
+            max: {
+              kind: "goodCondition",
+              duration: 2,
+              id: expect.any(String),
+            },
+            reason: expect.any(Object),
           },
-          reason: expect.any(Object),
-        });
+        ]);
       });
-      test("delayedEffectを追加する時、更新内容へidが設定されている", () => {
+      test("既存の状態修正と合算の時", () => {
         const lesson = createLessonForTest({
           cards: [
             {
               id: "a",
-              definition: getCardDataById("joju"),
+              definition: getCardDataById("furumainokihon"),
               enabled: true,
               enhanced: false,
             },
           ],
         });
         lesson.hand = ["a"];
+        lesson.idol.modifiers = [
+          { kind: "goodCondition", duration: 1, id: "x" },
+        ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
-          idGenerator: () => "x",
+          idGenerator: createIdGenerator(),
           preview: false,
         });
-        const delayedEffectUpdates = updates.filter(
-          (e) => e.kind === "modifier" && e.modifier.kind === "delayedEffect",
-        ) as any;
-        expect(delayedEffectUpdates).toStrictEqual([
+        expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
           {
             kind: "modifier",
-            modifier: {
-              kind: "delayedEffect",
-              delay: 1,
-              id: "x",
+            actual: {
+              kind: "goodCondition",
+              duration: 2,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            max: {
+              kind: "goodCondition",
+              duration: 2,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            reason: expect.any(Object),
+          },
+        ]);
+      });
+      test("既存の状態修正が存在しても新規追加になる状態修正の時", () => {
+        const lesson = createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("enshutsukeikaku"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        });
+        lesson.hand = ["a"];
+        lesson.idol.modifiers = [
+          {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "active",
+            id: "x",
+          } as Modifier,
+        ];
+        const { updates } = useCard(lesson, 1, {
+          selectedCardInHandIndex: 0,
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+          preview: false,
+        });
+        expect(
+          updates.filter(
+            (e) =>
+              e.kind === "modifier" &&
+              e.actual.kind === "effectActivationUponCardUsage",
+          ),
+        ).toStrictEqual([
+          {
+            kind: "modifier",
+            actual: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
               effect: expect.any(Object),
+              id: expect.any(String),
+            },
+            max: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: expect.any(Object),
+              id: expect.any(String),
             },
             reason: expect.any(Object),
           },
@@ -2324,7 +2567,9 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "positiveImpression", amount: 2 }];
+        lesson.idol.modifiers = [
+          { kind: "positiveImpression", amount: 2, id: "x" },
+        ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2366,8 +2611,8 @@ describe("useCard, previe:false", () => {
         });
         lesson.hand = ["a"];
         lesson.idol.modifiers = [
-          { kind: "focus", amount: 20 },
-          { kind: "positiveImpression", amount: 10 },
+          { kind: "focus", amount: 20, id: "x" },
+          { kind: "positiveImpression", amount: 10, id: "y" },
         ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
@@ -2375,15 +2620,24 @@ describe("useCard, previe:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "modifier") as any;
-        expect(update).toStrictEqual({
-          kind: "modifier",
-          modifier: {
-            kind: "positiveImpression",
-            amount: 5,
+        expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+          {
+            kind: "modifier",
+            actual: {
+              kind: "positiveImpression",
+              amount: 5,
+              id: expect.any(String),
+              updateTargetId: "y",
+            },
+            max: {
+              kind: "positiveImpression",
+              amount: 5,
+              id: expect.any(String),
+              updateTargetId: "y",
+            },
+            reason: expect.any(Object),
           },
-          reason: expect.any(Object),
-        });
+        ]);
       });
     });
     // calculatePerformingScoreEffect と calculatePerformingVitalityEffect のテストで検証できる内容はそちらで行う
@@ -2536,7 +2790,7 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "motivation", amount: 10 }];
+        lesson.idol.modifiers = [{ kind: "motivation", amount: 10, id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2563,7 +2817,9 @@ describe("useCard, previe:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "positiveImpression", amount: 10 }];
+        lesson.idol.modifiers = [
+          { kind: "positiveImpression", amount: 10, id: "x" },
+        ];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2594,7 +2850,7 @@ describe("useCard, previe:false", () => {
           clear: 1,
           perfect: 6,
         };
-        lesson.idol.modifiers = [{ kind: "motivation", amount: 5 }];
+        lesson.idol.modifiers = [{ kind: "motivation", amount: 5, id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -2782,22 +3038,26 @@ describe("useCard, previe:false", () => {
         idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
-        // 「ファンシーチャーム」には、直接好印象を付与する効果もある
+      expect(
+        updates1.filter(
+          (e) =>
+            e.kind === "modifier" &&
+            e.actual.kind === "effectActivationUponCardUsage",
+        ),
+      ).toStrictEqual([
         {
           kind: "modifier",
-          modifier: {
-            kind: "positiveImpression",
-            amount: 3,
-          },
-          reason: expect.any(Object),
-        },
-        {
-          kind: "modifier",
-          modifier: {
+          actual: {
             kind: "effectActivationUponCardUsage",
             cardKind: "mental",
             effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          max: {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "mental",
+            effect: expect.any(Object),
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },
@@ -2814,9 +3074,17 @@ describe("useCard, previe:false", () => {
       expect(updates2a.filter((e) => e.kind === "modifier")).toStrictEqual([
         {
           kind: "modifier",
-          modifier: {
+          actual: {
             kind: "positiveImpression",
             amount: 1,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          max: {
+            kind: "positiveImpression",
+            amount: 1,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
           },
           reason: expect.any(Object),
         },
@@ -2828,7 +3096,7 @@ describe("useCard, previe:false", () => {
         idGenerator,
         preview: false,
       });
-      expect(updates2b.filter((e) => e.kind === "modifier")).toHaveLength(0);
+      expect(updates2b.filter((e) => e.kind === "modifier")).toStrictEqual([]);
     });
     test("「演出計画」は、アクティブスキルカード使用時、固定元気を付与する。メンタルスキルカード使用時は付与しない", () => {
       let lesson = createLessonForTest({
@@ -2861,22 +3129,26 @@ describe("useCard, previe:false", () => {
         idGenerator,
         preview: false,
       });
-      expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
-        // 「演出計画」には、直接絶好調を付与する効果もある
+      expect(
+        updates1.filter(
+          (e) =>
+            e.kind === "modifier" &&
+            e.actual.kind === "effectActivationUponCardUsage",
+        ),
+      ).toStrictEqual([
         {
           kind: "modifier",
-          modifier: {
-            kind: "excellentCondition",
-            duration: 3,
-          },
-          reason: expect.any(Object),
-        },
-        {
-          kind: "modifier",
-          modifier: {
+          actual: {
             kind: "effectActivationUponCardUsage",
             cardKind: "active",
             effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          max: {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "active",
+            effect: expect.any(Object),
+            id: expect.any(String),
           },
           reason: expect.any(Object),
         },

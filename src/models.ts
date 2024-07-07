@@ -37,6 +37,7 @@ import {
   LessonUpdateQuery,
   LessonUpdateQueryDiff,
   Modifier,
+  ModifierDefinition,
 } from "./types";
 import { createIdGenerator, shuffleArray } from "./utils";
 
@@ -226,7 +227,7 @@ export const calculateActualRemainingTurns = (lesson: Lesson): number =>
 /** 「消費体力減少」・「消費体力削減」・「消費体力増加」を反映したコストを返す */
 export const calculateActualActionCost = (
   cost: ActionCost,
-  modifiers: Modifier[],
+  modifiers: ModifierDefinition[],
 ): ActionCost => {
   switch (cost.kind) {
     case "focus":
@@ -322,119 +323,117 @@ export const patchUpdates = (
         break;
       }
       case "modifier": {
-        let newModifiers: Modifier[] = newLesson.idol.modifiers;
-        const sameKindIndex = newLesson.idol.modifiers.findIndex(
-          (e) => e.kind === update.modifier.kind,
-        );
-        // 同種の状態修正がない場合は新規追加、または特殊な状態修正の場合は新規追加
-        if (
-          sameKindIndex === -1 ||
-          update.modifier.kind === "effectActivationAtEndOfTurn" ||
-          update.modifier.kind === "effectActivationUponCardUsage"
-        ) {
-          newModifiers = [...newModifiers, update.modifier];
-        } else if (update.modifier.kind === "delayedEffect") {
-          if (update.modifier.delay >= 1) {
-            newModifiers = [...newModifiers, update.modifier];
-          } else {
-            newModifiers = newModifiers
-              .map((modifier) =>
-                isDelayedEffectModifierType(modifier) &&
-                isDelayedEffectModifierType(update.modifier) &&
-                update.modifier.id === modifier.id
-                  ? {
-                      ...modifier,
-                      delay: modifier.delay - 1,
-                    }
-                  : modifier,
-              )
-              .filter(
-                (modifier) =>
-                  !isDelayedEffectModifierType(modifier) || modifier.delay >= 1,
-              );
-          }
-        } else if (update.modifier.kind === "doubleEffect") {
-          if (update.modifier.times === 1) {
-            newModifiers = [...newModifiers, update.modifier];
-          } else {
-            const foundIndex = newModifiers.findIndex(
-              (e) => e.kind === "doubleEffect",
-            );
-            const tmp = newModifiers.slice();
-            tmp.splice(foundIndex, 1);
-            newModifiers = tmp;
-          }
+        const updateTargetId = update.actual.updateTargetId;
+        let newModifiers = newLesson.idol.modifiers;
+        if (updateTargetId === undefined) {
+          // 新規追加で負の値が入ることは想定していない
+          newModifiers = [...newModifiers, update.actual];
         } else {
-          const updateModifierKind = update.modifier.kind;
-          newModifiers = newModifiers.map((modifier) => {
-            let newModifier: Modifier = modifier;
-            switch (updateModifierKind) {
-              // duration の設定もあるが、現在は常に 1 なので無視する
-              case "additionalCardUsageCount": {
-                if (modifier.kind === update.modifier.kind) {
-                  newModifier = {
-                    ...modifier,
-                    amount: modifier.amount + update.modifier.amount,
-                  };
-                }
-                break;
-              }
-              case "debuffProtection": {
-                if (modifier.kind === update.modifier.kind) {
-                  newModifier = {
-                    ...modifier,
-                    times: modifier.times + update.modifier.times,
-                  };
-                }
-                break;
-              }
-              case "doubleLifeConsumption":
-              case "excellentCondition":
-              case "halfLifeConsumption":
-              case "goodCondition":
-              case "mightyPerformance":
-              case "noVitalityIncrease": {
-                if (modifier.kind === update.modifier.kind) {
-                  newModifier = {
-                    ...modifier,
-                    duration: modifier.duration + update.modifier.duration,
-                  };
-                }
-                break;
-              }
-              case "focus":
-              case "motivation":
-              case "positiveImpression": {
-                if (modifier.kind === update.modifier.kind) {
-                  newModifier = {
-                    ...modifier,
-                    amount: modifier.amount + update.modifier.amount,
-                  };
-                }
-                break;
-              }
-              case "lifeConsumptionReduction": {
-                if (modifier.kind === update.modifier.kind) {
-                  newModifier = {
-                    ...modifier,
-                    value: modifier.value + update.modifier.value,
-                  };
-                }
-                break;
-              }
-              default:
-                const unreachable: never = updateModifierKind;
-                throw new Error(`Unreachable statement`);
-            }
-            return newModifier;
-          });
-          newModifiers = newModifiers.filter(
-            (modifier) =>
-              ("amount" in modifier && modifier.amount > 0) ||
-              ("duration" in modifier && modifier.duration > 0) ||
-              ("times" in modifier && modifier.times > 0) ||
-              ("value" in modifier && modifier.value > 0),
+          const targetedModifier = newLesson.idol.modifiers.find(
+            (e) => e.id === updateTargetId,
           );
+          if (targetedModifier === undefined) {
+            throw new Error(`Targeted modifier not found: ${updateTargetId}`);
+          }
+          let newTargetedModifier = targetedModifier;
+          const updateModifierKind = update.actual.kind;
+          switch (updateModifierKind) {
+            // duration の設定もあるが、現在は常に 1 なので無視する
+            case "additionalCardUsageCount": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  amount: newTargetedModifier.amount + update.actual.amount,
+                };
+              }
+              break;
+            }
+            case "debuffProtection": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  times: newTargetedModifier.times + update.actual.times,
+                };
+              }
+              break;
+            }
+            case "delayedEffect": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  delay: newTargetedModifier.delay + update.actual.delay,
+                };
+              }
+              break;
+            }
+            // 合算できないので、この既存状態修正を指定した処理を行う時は、常に削除の意味になる
+            case "doubleEffect": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  times: 0,
+                };
+              }
+              break;
+            }
+            case "doubleLifeConsumption":
+            case "excellentCondition":
+            case "goodCondition":
+            case "halfLifeConsumption":
+            case "mightyPerformance":
+            case "noVitalityIncrease": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  duration:
+                    newTargetedModifier.duration + update.actual.duration,
+                };
+              }
+              break;
+            }
+            case "focus":
+            case "motivation":
+            case "positiveImpression": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  amount: newTargetedModifier.amount + update.actual.amount,
+                };
+              }
+              break;
+            }
+            case "lifeConsumptionReduction": {
+              if (update.actual.kind === newTargetedModifier.kind) {
+                newTargetedModifier = {
+                  ...newTargetedModifier,
+                  value: newTargetedModifier.value + update.actual.value,
+                };
+              }
+              break;
+            }
+            // 常に新規追加で、かつ削除できないので、ここを通ることはない
+            case "effectActivationAtEndOfTurn":
+            case "effectActivationUponCardUsage": {
+              throw new Error(
+                `Unexpected modifier kind: ${updateModifierKind}`,
+              );
+            }
+            default:
+              const unreachable: never = updateModifierKind;
+              throw new Error(`Unreachable statement`);
+          }
+          newModifiers = newModifiers
+            .map((modifier) =>
+              modifier.id === updateTargetId ? newTargetedModifier : modifier,
+            )
+            .filter(
+              (modifier) =>
+                ("amount" in modifier && modifier.amount > 0) ||
+                ("delay" in modifier && modifier.delay > 0) ||
+                ("duration" in modifier && modifier.duration > 0) ||
+                ("times" in modifier && modifier.times > 0) ||
+                ("value" in modifier && modifier.value > 0),
+            );
         }
         newLesson = {
           ...newLesson,

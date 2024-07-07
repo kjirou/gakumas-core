@@ -147,8 +147,12 @@ export const createCardPlacementDiff = (
   };
 };
 
-/** アイドルがコスト分のリソースを持つかを検証する */
-export const validateCostComsumution = (
+/**
+ * アイドルがコスト分のリソースを持つかを検証する
+ *
+ * - TODO: 戻り値を errors にしないといけなさそう、プレビューや手札上に何のコストが足りなくて効果発動できないかが書いてあるので
+ */
+export const validateCostConsumution = (
   idol: Idol,
   cost: ActionCost,
 ): boolean => {
@@ -205,7 +209,7 @@ export const canUseCard = (
   cost: ActionCost,
   condition: CardUsageCondition | undefined,
 ): boolean => {
-  const costValidation = validateCostComsumution(lesson.idol, cost);
+  const costValidation = validateCostConsumution(lesson.idol, cost);
   if (!costValidation) {
     return false;
   }
@@ -275,7 +279,11 @@ export const canUseCard = (
   }
 };
 
-/** 各効果が適用できるかを判定する */
+/**
+ * 各効果が適用できるかを判定する
+ *
+ * - TODO: 戻り値を errors にする必要がありそう、プレビューや手札上に何が理由で効果が適用できないかが書いてあるので
+ */
 export const canApplyEffect = (
   lesson: Lesson,
   condition: EffectCondition,
@@ -343,12 +351,12 @@ export const canApplyEffect = (
 
 const calculateActualAndMaxComsumution = (
   resourceValue: number,
-  costValue: number,
+  costAbsValue: number,
 ) => {
   return {
-    actual: costValue > resourceValue ? -resourceValue : -costValue,
-    max: -costValue,
-    restCost: resourceValue > costValue ? 0 : costValue - resourceValue,
+    actual: Math.max(-resourceValue, -costAbsValue),
+    max: -costAbsValue,
+    restCost: Math.max(0, costAbsValue - resourceValue),
   };
 };
 
@@ -361,11 +369,18 @@ type CostConsumptionUpdateQueryDiff = Extract<
 /**
  * コスト消費を計算する
  *
- * - 消費分のコストが足りない場合は、最大値まで消費する差分を返す
+ * - 全体的に、 actual が実際にリソースを消費する差分、 max がコスト側から指定がある値、という形で返す
+ *   - つまり、消費分のコストが足りない場合に、actual と max に差が出る
+ *   - コストが払えない状況を考慮しているのは、コストが払えない状況でもスキルカード使用のプレビューはできるようにするため
+ * - 数値に対する `+ 0` は、`-0` を `0` に変換するため
+ * - 状態修正の場合、コストの対象となるリソースがない時は、0コストを返すのではなく全く結果を返さない
+ *   - まず、本家UIのスキルカード使用プレビューの仕様上、この状況の差分は全く画面に表示されないので、切実な必要がない
+ *   - そして、状態修正の新規追加で負の値があることを現状考慮していないので、その分の実装を省略するため
  */
-const calculateCostConsumption = (
+export const calculateCostConsumption = (
   idol: Idol,
   cost: ActionCost,
+  idGenerator: IdGenerator,
 ): CostConsumptionUpdateQueryDiff[] => {
   switch (cost.kind) {
     case "normal": {
@@ -379,52 +394,85 @@ const calculateCostConsumption = (
         restCost = result.restCost;
         updates.push({
           kind: "vitality",
-          actual: result.actual,
-          max: result.max,
+          actual: result.actual + 0,
+          max: result.max + 0,
         });
       }
       if (restCost > 0) {
         const result = calculateActualAndMaxComsumution(idol.life, restCost);
         updates.push({
           kind: "life",
-          actual: result.actual,
-          max: result.max,
+          actual: result.actual + 0,
+          max: result.max + 0,
         });
       }
       return updates;
     }
     case "life": {
+      const result = calculateActualAndMaxComsumution(idol.life, cost.value);
       return [
         {
           kind: "life",
-          actual: -cost.value,
-          max: -cost.value,
+          actual: result.actual + 0,
+          max: result.max + 0,
         },
       ];
     }
     case "focus":
     case "motivation":
     case "positiveImpression": {
-      return [
-        {
-          kind: "modifier",
-          modifier: {
-            kind: cost.kind,
-            amount: cost.value,
+      const id = idGenerator();
+      const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
+      if (sameKindModifier && "amount" in sameKindModifier) {
+        const actual = Math.min(cost.value, sameKindModifier.amount);
+        return [
+          {
+            kind: "modifier",
+            actual: {
+              kind: cost.kind,
+              amount: -actual + 0,
+              id,
+              updateTargetId: sameKindModifier.id,
+            },
+            max: {
+              kind: cost.kind,
+              amount: -cost.value + 0,
+              id,
+              updateTargetId: sameKindModifier.id,
+            },
           },
-        },
-      ];
+        ];
+      } else {
+        // 結果を返す必要があるなら要考慮点がある、関数コメント参照
+        return [];
+      }
     }
     case "goodCondition": {
-      return [
-        {
-          kind: "modifier",
-          modifier: {
-            kind: cost.kind,
-            duration: cost.value,
+      const id = idGenerator();
+      const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
+      if (sameKindModifier && "duration" in sameKindModifier) {
+        const actual = Math.min(cost.value, sameKindModifier.duration);
+        return [
+          {
+            kind: "modifier",
+            actual: {
+              kind: cost.kind,
+              duration: -actual + 0,
+              id,
+              updateTargetId: sameKindModifier.id,
+            },
+            max: {
+              kind: cost.kind,
+              duration: -cost.value + 0,
+              id,
+              updateTargetId: sameKindModifier.id,
+            },
           },
-        },
-      ];
+        ];
+      } else {
+        // 結果を返す必要があるなら要考慮点がある、関数コメント参照
+        return [];
+      }
     }
     default: {
       const unreachable: never = cost.kind;
@@ -492,6 +540,7 @@ export const calculatePerformingScoreEffect = (
   return diffs;
 };
 
+// TODO: 元気が上がらない状態修正の反映
 export const calculatePerformingVitalityEffect = (
   idol: Idol,
   query: VitalityUpdateQuery,
@@ -525,6 +574,7 @@ export const calculatePerformingVitalityEffect = (
  * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
  * - 本処理内では、レッスンその他の状況は変わらない前提
  *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
+ * - TODO: これは1効果だけの計算にして、スキルカード使用・Pアイテム用・Pドリンク用のラッパーにする方が良さそうかも
  */
 const activateEffects = (
   lesson: Lesson,
@@ -674,16 +724,28 @@ const activateEffects = (
         break;
       }
       case "getModifier": {
-        let modifier: Modifier = effect.modifier;
-        if (isDelayedEffectModifierType(modifier)) {
-          modifier = {
-            ...modifier,
-            id: idGenerator(),
-          };
-        }
+        const id = idGenerator();
+        const sameKindModifier = lesson.idol.modifiers.find(
+          (e) => e.kind === effect.modifier.kind,
+        );
+        const isUpdate =
+          sameKindModifier !== undefined &&
+          effect.modifier.kind !== "delayedEffect" &&
+          effect.modifier.kind !== "doubleEffect" &&
+          effect.modifier.kind !== "effectActivationAtEndOfTurn" &&
+          effect.modifier.kind !== "effectActivationUponCardUsage";
         diffs.push({
           kind: "modifier",
-          modifier,
+          actual: {
+            ...effect.modifier,
+            id,
+            ...(isUpdate ? { updateTargetId: sameKindModifier.id } : {}),
+          },
+          max: {
+            ...effect.modifier,
+            id,
+            ...(isUpdate ? { updateTargetId: sameKindModifier.id } : {}),
+          },
         });
         break;
       }
@@ -700,13 +762,22 @@ const activateEffects = (
         );
         // 現在は、好印象に対してしか存在しない効果なので、そのこと前提で実装している
         if (modifier?.kind === "positiveImpression") {
+          const amount =
+            Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
+          const id = idGenerator();
           diffs.push({
             kind: "modifier",
-            modifier: {
+            actual: {
               kind: "positiveImpression",
-              amount:
-                Math.ceil(modifier.amount * effect.multiplier) -
-                modifier.amount,
+              amount,
+              id,
+              updateTargetId: modifier.id,
+            },
+            max: {
+              kind: "positiveImpression",
+              amount,
+              id,
+              updateTargetId: modifier.id,
             },
           });
         }
@@ -829,14 +900,22 @@ const activateDelayedEffectModifier = (
   if (modifier.delay === 1) {
     diffs = activateEffects(lesson, [modifier.effect], getRandom, idGenerator);
   }
+  const id = idGenerator();
   diffs = [
     ...diffs,
     {
       kind: "modifier",
-      modifier: {
+      actual: {
         ...modifier,
         delay: -1,
-        id: modifier.id,
+        id,
+        updateTargetId: modifier.id,
+      },
+      max: {
+        ...modifier,
+        delay: -1,
+        id,
+        updateTargetId: modifier.id,
       },
     },
   ];
@@ -1186,6 +1265,7 @@ export const useCard = (
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
     calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
+    params.idGenerator,
   ).map((diff) => ({
     ...diff,
     reason: {
@@ -1239,14 +1319,21 @@ export const useCard = (
     // 「次に使用するスキルカードの効果をもう1回発動」を消費
     //
     if (hasDoubleEffect && times === 1) {
+      const id = params.idGenerator();
       effectActivationUpdatesOnce = [
         ...effectActivationUpdatesOnce,
         createLessonUpdateQueryFromDiff(
           {
             kind: "modifier",
-            modifier: {
+            actual: {
               kind: "doubleEffect",
               times: 1,
+              id,
+            },
+            max: {
+              kind: "doubleEffect",
+              times: 1,
+              id,
             },
           },
           {

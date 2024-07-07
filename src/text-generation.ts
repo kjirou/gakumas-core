@@ -5,7 +5,7 @@ import type {
   CardUsageCondition,
   Effect,
   EffectCondition,
-  Modifier,
+  ModifierDefinition,
   ProducerItemContentDefinition,
   ProducerItemTrigger,
   RangedNumber,
@@ -120,7 +120,7 @@ const generateModifierKindText = (
 /**
  * 一つの状態修正を表現したテキストを生成する
  */
-const generateModifierText = (modifier: Modifier): string => {
+const generateModifierText = (modifier: ModifierDefinition): string => {
   switch (modifier.kind) {
     case "additionalCardUsageCount":
       return `${kwd("additionalCardUsageCount")}+${modifier.amount}`;

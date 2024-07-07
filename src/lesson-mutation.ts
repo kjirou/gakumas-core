@@ -2,6 +2,7 @@ import type {
   ActionCost,
   Card,
   CardContentDefinition,
+  CardInHandSummary,
   CardInProduction,
   CardUsageCondition,
   Effect,
@@ -952,6 +953,99 @@ const activateEffects = (
     effectActivations = [...effectActivations, activation];
   }
   return effectActivations;
+};
+
+/**
+ * 手札としてスキルカードを表示するために、スキルカード情報を要約する
+ */
+export const summarizeCardInHand = (
+  lesson: Lesson,
+  cardId: Card["id"],
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+): CardInHandSummary => {
+  const card = lesson.cards.find((card) => card.id === cardId);
+  if (!card) {
+    throw new Error(`Card not found in cards: cardId=${cardId}`);
+  }
+  const cardContent = getCardContentDefinition(card);
+  const effectActivations = activateEffects(
+    lesson,
+    cardContent.effects,
+    getRandom,
+    idGenerator,
+  );
+  const effectDiffs = effectActivations.reduce<LessonUpdateQueryDiff[]>(
+    (acc, effectActivation) =>
+      effectActivation ? [...acc, ...effectActivation] : acc,
+    [],
+  );
+  let scores: CardInHandSummary["scores"] = [];
+  for (const effectActivation of effectActivations) {
+    if (effectActivation) {
+      if (effectActivation.length > 0 && effectActivation[0].kind === "score") {
+        scores = [
+          ...scores,
+          {
+            value: effectActivation[0].max,
+            // 1回の効果発動で複数回スコアが上がる時は、全てのスコアの値は同じになる前提
+            times: effectActivation.length,
+          },
+        ];
+      }
+    }
+  }
+  let vitality: CardInHandSummary["vitality"] = undefined;
+  const firstVitalityUpdate = effectDiffs.find((e) => e.kind === "vitality");
+  if (firstVitalityUpdate) {
+    vitality = firstVitalityUpdate.max;
+  }
+  let effects: CardInHandSummary["effects"] = [];
+  for (const [effectIndex, effect] of cardContent.effects.entries()) {
+    if (effect.kind === "getModifier") {
+      effects = [
+        ...effects,
+        {
+          kind: `modifier-${effect.modifier.kind}`,
+          applyable: effectActivations[effectIndex] !== undefined,
+        },
+      ];
+    }
+  }
+  const conditionalScoreEffectIndex = cardContent.effects.findIndex(
+    (e) => e.kind === "perform" && e.score && e.condition,
+  );
+  if (conditionalScoreEffectIndex !== -1) {
+    effects = [
+      ...effects,
+      {
+        kind: "score",
+        applyable: effectActivations[conditionalScoreEffectIndex] !== undefined,
+      },
+    ];
+  }
+  const conditionalVitalityEffectIndex = cardContent.effects.findIndex(
+    (e) => e.kind === "perform" && e.vitality && e.condition,
+  );
+  if (conditionalVitalityEffectIndex !== -1) {
+    effects = [
+      ...effects,
+      {
+        kind: "vitality",
+        applyable:
+          effectActivations[conditionalVitalityEffectIndex] !== undefined,
+      },
+    ];
+  }
+  return {
+    cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),
+    effects,
+    enhancements: card.enhancements,
+    name: card.original.definition.name + "+".repeat(card.enhancements.length),
+    playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
+    scores,
+    vitality,
+  };
 };
 
 type LessonMutationResult = {

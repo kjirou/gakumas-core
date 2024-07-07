@@ -21,6 +21,7 @@ import {
   drawCardsFromDeck,
   drawCardsOnTurnStart,
   useCard,
+  summarizeCardInHand,
   validateCostConsumution,
 } from "./lesson-mutation";
 import {
@@ -1469,6 +1470,358 @@ describe("calculatePerformingVitalityEffect", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
+  });
+});
+describe("summarizeCardInHand", () => {
+  const testCases: Array<{
+    args: Parameters<typeof summarizeCardInHand>;
+    expected: ReturnType<typeof summarizeCardInHand>;
+    name: string;
+  }> = [
+    {
+      name: "基本的なスキルカードを要約できる",
+      args: [
+        createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("apirunokihon"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        }),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: { kind: "normal", value: 4 },
+        effects: [],
+        enhancements: [],
+        name: "アピールの基本",
+        playable: true,
+        scores: [{ value: 9, times: 1 }],
+        vitality: undefined,
+      },
+    },
+    {
+      name: "状態修正によるコストの変化を反映する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                definition: getCardDataById("apirunokihon"),
+                enabled: true,
+                enhanced: false,
+              },
+            ],
+          });
+          lesson.idol.modifiers = [
+            { kind: "halfLifeConsumption", duration: 1, id: "x" },
+          ];
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: { kind: "normal", value: 2 },
+        effects: expect.any(Array),
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: expect.any(Array),
+        vitality: undefined,
+      },
+    },
+    {
+      name: "コストにリソースが足りない時も、消費する分のコストの値を返す",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                definition: getCardDataById("apirunokihon"),
+                enabled: true,
+                enhanced: false,
+              },
+            ],
+          });
+          lesson.idol.life = 0;
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: { kind: "normal", value: 4 },
+        effects: expect.any(Array),
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: expect.any(Array),
+        vitality: undefined,
+      },
+    },
+    {
+      name: "無条件の状態修正と条件付きの状態修正を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たした旨と満たさない旨の2レコードが入る",
+      args: [
+        createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("rakkanteki"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        }),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: [
+          { kind: "modifier-goodCondition", applyable: true },
+          { kind: "modifier-focus", applyable: false },
+        ],
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: expect.any(Array),
+        vitality: undefined,
+      },
+    },
+    {
+      name: "無条件のスコアと条件付きのスコアを持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たさない旨の内容が入り、scoresには無条件のスコアのみ入る",
+      args: [
+        createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("hiyaku"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        }),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: [{ kind: "score", applyable: false }],
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: [{ value: 13, times: 1 }],
+        vitality: undefined,
+      },
+    },
+    {
+      name: "無条件のスコアと条件付きのスコアを持つスキルカードで、後者の条件を満たす時、effectsには条件を満たす旨の内容が入り、scoresには両方のスコアが入る",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                definition: getCardDataById("hiyaku"),
+                enabled: false,
+                enhanced: true,
+              },
+            ],
+          });
+          lesson.idol.modifiers = [{ kind: "focus", amount: 6, id: "x" }];
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: [{ kind: "score", applyable: true }],
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: [
+          { value: 19, times: 1 },
+          { value: 21, times: 1 },
+        ],
+        vitality: undefined,
+      },
+    },
+    {
+      name: "無条件の元気と条件付きの元気を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たさない旨の内容が入り、vitalityには無条件の値のみ入る",
+      args: [
+        createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("honkinoshumi"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        }),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: [{ kind: "vitality", applyable: false }],
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: expect.any(Array),
+        vitality: 5,
+      },
+    },
+    {
+      name: "無条件の元気と条件付きの元気を持つスキルカードで、後者の条件を満たす時、effectsには条件を満たす旨の内容が入り、vitalityには無条件の値のみ入る",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                definition: getCardDataById("honkinoshumi"),
+                enabled: false,
+                enhanced: true,
+              },
+            ],
+          });
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 3, id: "x" }];
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: [{ kind: "vitality", applyable: true }],
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: expect.any(Array),
+        vitality: 10,
+      },
+    },
+    {
+      name: '強化の数と等しい"+"を名称の末尾へ付与する',
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                definition: getCardDataById("apirunokihon"),
+                enabled: true,
+                enhanced: true,
+              },
+            ],
+          });
+          const aCard = lesson.cards.find((e) => e.id === "a");
+          if (aCard) {
+            aCard.enhancements = [
+              ...aCard.enhancements,
+              { kind: "supportCard", supportCardId: "x" },
+            ];
+          }
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: expect.any(Array),
+        enhancements: [
+          { kind: "original" },
+          { kind: "supportCard", supportCardId: "x" },
+        ],
+        name: "アピールの基本++",
+        playable: expect.any(Boolean),
+        scores: expect.any(Array),
+        vitality: undefined,
+      },
+    },
+    {
+      name: "スキルカード使用条件を満たさない時も、スコアの算出を行う",
+      args: [
+        createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              definition: getCardDataById("chosen"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        }),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: expect.any(Array),
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: false,
+        scores: [{ value: 25, times: 1 }],
+        vitality: undefined,
+      },
+    },
+    {
+      name: "無条件の2回のスコアと条件付きのスコアがあり、後者の条件を満たす時、scoresには2回スコアのレコードと1回のレコードの2レコードが入る",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                definition: getCardDataById("wammoasuteppu"),
+                enabled: true,
+                enhanced: false,
+              },
+            ],
+          });
+          lesson.idol.modifiers = [{ kind: "focus", amount: 6, id: "x" }];
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        cost: expect.any(Object),
+        effects: expect.any(Array),
+        enhancements: expect.any(Array),
+        name: expect.any(String),
+        playable: expect.any(Boolean),
+        scores: [
+          { value: 13, times: 2 },
+          { value: 13, times: 1 },
+        ],
+        vitality: undefined,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(summarizeCardInHand(...args)).toStrictEqual(expected);
   });
 });
 describe("drawCardsOnLessonStart", () => {

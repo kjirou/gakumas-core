@@ -24,8 +24,8 @@ import { getIdolDataById } from "./data/idol";
 import { getProducerItemDataById } from "./data/producer-item";
 import {
   Card,
+  CardInHandSummary,
   CardInProduction,
-  CardsInHand,
   GetRandom,
   IdGenerator,
   Idol,
@@ -39,6 +39,7 @@ import {
   activateEffectsOnTurnStart,
   canUseCard,
   drawCardsOnTurnStart,
+  summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
 import {
@@ -175,31 +176,22 @@ export const startLessonTurn = (
 
 /**
  * 手札をリストで取得する
- *
- * - 本家の仕様
- *   - パラメータ/スコア
- *     - 増加するパラメータ/スコアは、各種効果による計算済みの値
- *     - 1効果で複数回増加する場合は、数値x回数の表記
- *     - 2効果で複数回増加する場合は、行が分かれている
- *       - 状態修正アイコンと一緒の場所にアイコンとしても表示される、発動条件を満たさないとx印が付くのも同様
- *   - 状態修正
- *     - 左下へアイコンが一覧で並ぶ
- *     - 条件を満たさずに発動しない効果は、アイコンにx印が付く
  */
-export const getCardsInHand = (lessonGamePlay: LessonGamePlay): CardsInHand => {
+export const getCardsInHand = (
+  lessonGamePlay: LessonGamePlay,
+): CardInHandSummary[] => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
   return lesson.hand.map((cardId) => {
-    const card = lesson.cards.find((e) => e.id === cardId);
-    if (!card) {
-      throw new Error(`Card not found: ${cardId}`);
-    }
-    const cardContent = getCardContentDefinition(card);
     return {
-      card,
-      playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
+      ...summarizeCardInHand(
+        lesson,
+        cardId,
+        lessonGamePlay.getRandom,
+        lessonGamePlay.idGenerator,
+      ),
     };
   });
 };

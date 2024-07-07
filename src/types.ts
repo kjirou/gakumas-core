@@ -1060,6 +1060,12 @@ export type LessonUpdateQueryReason = (
       cardId: Card["id"];
     }
   | {
+      /** スキルカード使用 > 効果発動 */
+      kind: "cardUsage.effectActivation";
+      cardId: Card["id"];
+      effectIndex: number;
+    }
+  | {
       /** スキルカード使用プレビュー */
       kind: "cardUsagePreview";
     }
@@ -1212,12 +1218,31 @@ export type LessonGamePlay = {
 };
 
 /**
- * 公開API用の手札情報
+ * 手札としてスキルカードを表示する場合の要約情報
  *
- * - この配列のインデックスを、手札選択時に渡す
+ * - 各値は、基本的には各種効果による変動を含めた値
  */
-export type CardsInHand = Array<{
-  card: Card;
+export type CardInHandSummary = {
+  cost: ActionCost;
+  /** 効果リスト、本家UIだと左下の縦並びのアイコンリスト */
+  effects: Array<{
+    kind: `modifier-${Modifier["kind"]}` | "score" | "vitality";
+    /** 効果適用条件を満たすか、本家UIだと右にx印が付く */
+    applyable: boolean;
+  }>;
+  enhancements: CardEnhancement[];
+  /** スキルカードの名称、末尾に強化数分の"+"が付く */
+  name: string;
   /** 使用条件を満たすか */
   playable: boolean;
-}>;
+  /** スコア、レッスンのスコア条件を考慮しない最大値 */
+  scores: Array<{ value: number; times: number }>;
+  /**
+   * 元気
+   *
+   * - 1回目に発動する元気のみの値
+   *   - 例えば、「本気の趣味」の2回目の元気の適用条件を満たしていても、1回目の元気の値のみ含める
+   *   - おそらく本家仕様だと、1回目ではなく効果適用条件の無い元気が選ばれているが、現状のデータ上は1つ目に条件の無いものが定義されていて同じ結果なので、一旦気にしない
+   */
+  vitality: number | undefined;
+};

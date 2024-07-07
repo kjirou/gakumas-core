@@ -24,8 +24,8 @@ import { getIdolDataById } from "./data/idol";
 import { getProducerItemDataById } from "./data/producer-item";
 import {
   Card,
+  CardInHandSummary,
   CardInProduction,
-  CardsInHand,
   GetRandom,
   IdGenerator,
   Idol,
@@ -39,6 +39,7 @@ import {
   activateEffectsOnTurnStart,
   canUseCard,
   drawCardsOnTurnStart,
+  summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
 import {
@@ -176,21 +177,21 @@ export const startLessonTurn = (
 /**
  * 手札をリストで取得する
  */
-export const getCardsInHand = (lessonGamePlay: LessonGamePlay): CardsInHand => {
+export const getCardsInHand = (
+  lessonGamePlay: LessonGamePlay,
+): CardInHandSummary[] => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
-  // TODO: 手札一覧で表示されている効果テキストを生成する、またパラメータ増加は状態修正効果込みになっている
   return lesson.hand.map((cardId) => {
-    const card = lesson.cards.find((e) => e.id === cardId);
-    if (!card) {
-      throw new Error(`Card not found: ${cardId}`);
-    }
-    const cardContent = getCardContentDefinition(card);
     return {
-      card,
-      playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
+      ...summarizeCardInHand(
+        lesson,
+        cardId,
+        lessonGamePlay.getRandom,
+        lessonGamePlay.idGenerator,
+      ),
     };
   });
 };

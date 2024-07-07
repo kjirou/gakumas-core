@@ -175,13 +175,22 @@ export const startLessonTurn = (
 
 /**
  * 手札をリストで取得する
+ *
+ * - 本家の仕様
+ *   - パラメータ/スコア
+ *     - 増加するパラメータ/スコアは、各種効果による計算済みの値
+ *     - 1効果で複数回増加する場合は、数値x回数の表記
+ *     - 2効果で複数回増加する場合は、行が分かれている
+ *       - 状態修正アイコンと一緒の場所にアイコンとしても表示される、発動条件を満たさないとx印が付くのも同様
+ *   - 状態修正
+ *     - 左下へアイコンが一覧で並ぶ
+ *     - 条件を満たさずに発動しない効果は、アイコンにx印が付く
  */
 export const getCardsInHand = (lessonGamePlay: LessonGamePlay): CardsInHand => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
-  // TODO: 手札一覧で表示されている効果テキストを生成する、またパラメータ増加は状態修正効果込みになっている
   return lesson.hand.map((cardId) => {
     const card = lesson.cards.find((e) => e.id === cardId);
     if (!card) {

@@ -1,3 +1,7 @@
+/**
+ * ゲームの知識を前提とした共通処理をまとめたモジュール
+ */
+
 import { getCardDataById } from "./data/card";
 import { getCharacterDataById } from "./data/character";
 import { getIdolDataById } from "./data/idol";
@@ -15,7 +19,6 @@ import {
   Lesson,
   LessonGamePlay,
   LessonUpdateQuery,
-  LessonUpdateQueryDiff,
   Modifier,
   ModifierDefinition,
 } from "./types";

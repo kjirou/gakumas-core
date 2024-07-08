@@ -1,3 +1,14 @@
+/**
+ * テキスト生成モジュール
+ *
+ * - スキルカードやPアイテムの効果説明欄のテキストなどを動的に生成する
+ *   - 基本的には、P図鑑の表記を参考にしている
+ * - データとして定義する手段もあると思うが、少なくとも以下の点で動的な生成処理が必要になる
+ *   - スキルカード使用プレビューにおいて、「レッスン中1回」が「試験・ステージ中1回」へ変化する
+ *   - 他は具体的にはわからないが、スキルカード使用プレビューとの差をあまり検証していない
+ * - もし、多言語対応をするなら、このモジュール全体を言語別に作る必要がありそう
+ */
+
 import type {
   ActionCost,
   CardDefinition,
@@ -11,8 +22,6 @@ import type {
   RangedNumber,
   VitalityUpdateQuery,
 } from "./types";
-
-// TODO: そもそもそもそも、テキストを動的に生成せず、キーワードだけ考慮して、データとして固定値で持たせた方が良さそうだった
 
 /**
  * 汎用的な数値範囲テキストを生成する
@@ -65,6 +74,7 @@ const globalKeywords = {
   noVitalityIncrease: "元気増加無効",
   nonDuplicative: "重複不可",
   positiveImpression: "好印象",
+  // TODO: 状況により「試験・ステージ中1回」に変化する、少なくともアイドルの道だとそうだった
   usableOncePerLesson: "レッスン中1回",
   vitality: "元気",
 } as const satisfies Record<string, string>;

@@ -38,7 +38,9 @@ import {
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnStart,
+  consumeRemainingCardUsageCount,
   drawCardsOnTurnStart,
+  initializeActionPoints,
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
@@ -105,6 +107,17 @@ export const startLessonTurn = (
   }
 
   //
+  // アクションポイントを初期化する
+  //
+  const initializeActionPointsResult = initializeActionPoints(
+    lesson,
+    historyResultIndex,
+  );
+  updates = [...updates, ...initializeActionPointsResult.updates];
+  historyResultIndex = initializeActionPointsResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, initializeActionPointsResult.updates);
+
+  //
   // ターン番号を増やす
   //
   const increaseTurnNumberUpdate: LessonUpdateQuery = {
@@ -154,8 +167,6 @@ export const startLessonTurn = (
   };
 };
 
-// export const プレイヤーにスキルカード使用数が残っているか()
-
 /**
  * 手札をリストで取得する
  */
@@ -176,6 +187,17 @@ export const getCardsInHand = (
       ),
     };
   });
+};
+
+/**
+ * ターンが終了しているかを返す
+ */
+export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
+  const lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
+  return lesson.idol.actionPoints === 0;
 };
 
 /**
@@ -245,31 +267,50 @@ export const playCard = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
 ): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
+  let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: スキルカード使用数1以上か検証
+  //
+  // アクションポイントがない場合は実行できない
+  //
+  if (lesson.idol.actionPoints === 0) {
+    throw new Error("No action points");
+  }
 
-  // TODO: スキルカード使用数消費
+  //
+  // スキルカード使用数またはアクションポイントを減らす
+  //
+  const consumeRemainingCardUsageCountResult = consumeRemainingCardUsageCount(
+    lesson,
+    historyResultIndex,
+    {
+      idGenerator: lessonGamePlay.idGenerator,
+    },
+  );
+  updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
+  historyResultIndex =
+    consumeRemainingCardUsageCountResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, consumeRemainingCardUsageCountResult.updates);
 
-  lesson = patchUpdates(lesson, updatesList[updatesList.length - 1]);
-  const result = useCard(lesson, historyResultIndex, {
+  //
+  // スキルカードを使用する
+  //
+  const useCardResult = useCard(lesson, historyResultIndex, {
     getRandom: lessonGamePlay.getRandom,
     idGenerator: lessonGamePlay.idGenerator,
     selectedCardInHandIndex,
     preview: false,
   });
-  updatesList = [...updatesList, result.updates];
-  historyResultIndex = result.nextHistoryResultIndex;
+  updates = [...updates, ...useCardResult.updates];
+  historyResultIndex = useCardResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, useCardResult.updates);
 
   // TODO: スコアパーフェクト達成によるゲーム終了判定、ターン終了処理を待たずに即座に終了している
 
-  // TODO: スキルカード使用数0ならターン終了
-
   return {
     ...lessonGamePlay,
-    updates: updatesList.flat(),
+    updates,
   };
 };
 

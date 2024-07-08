@@ -17,9 +17,11 @@ import {
   calculatePerformingVitalityEffect,
   canApplyEffect,
   canUseCard,
+  consumeRemainingCardUsageCount,
   createCardPlacementDiff,
   drawCardsFromDeck,
   drawCardsOnTurnStart,
+  initializeActionPoints,
   useCard,
   summarizeCardInHand,
   validateCostConsumution,
@@ -1824,6 +1826,59 @@ describe("summarizeCardInHand", () => {
     expect(summarizeCardInHand(...args)).toStrictEqual(expected);
   });
 });
+describe("initializeActionPoints", () => {
+  const testCases: Array<{
+    args: Parameters<typeof initializeActionPoints>;
+    expected: ReturnType<typeof initializeActionPoints>;
+    name: string;
+  }> = [
+    {
+      name: "アクションポイントが0の時、1変更を返す",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 0;
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "actionPoints",
+            amount: 1,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "アクションポイントが1の時、0変更を返す",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 1;
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "actionPoints",
+            amount: 0,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(initializeActionPoints(...args)).toStrictEqual(expected);
+  });
+});
 describe("drawCardsOnLessonStart", () => {
   test("山札に引く数が残っている時、山札はその分減り、捨札に変化はない / 1ターン目でレッスン開始時手札がない時、その更新は発行されない", () => {
     const lesson = createLessonForTest({
@@ -2362,6 +2417,104 @@ describe("activateEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
+  });
+});
+describe("consumeRemainingCardUsageCount", () => {
+  const testCases: Array<{
+    args: Parameters<typeof consumeRemainingCardUsageCount>;
+    expected: ReturnType<typeof consumeRemainingCardUsageCount>;
+    name: string;
+  }> = [
+    {
+      name: "スキルカード使用数追加がない時、アクションポイントを減らす",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 1;
+          return lesson;
+        })(),
+        1,
+        { idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "actionPoints",
+            amount: -1,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "スキルカード使用数追加もアクションポイントもない時、アクションポイントを0変更する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 0;
+          return lesson;
+        })(),
+        1,
+        { idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "actionPoints",
+            amount: 0,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "スキルカード使用数追加とアクションポイントがある時、スキルカード使用数追加を減らす",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 1;
+          lesson.idol.modifiers = [
+            {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+              duration: 1,
+              id: "x",
+            },
+          ];
+          return lesson;
+        })(),
+        1,
+        { idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "additionalCardUsageCount",
+              amount: -1,
+              duration: 0,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            max: {
+              kind: "additionalCardUsageCount",
+              amount: -1,
+              duration: 0,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(consumeRemainingCardUsageCount(...args)).toStrictEqual(expected);
   });
 });
 describe("useCard preview:false", () => {

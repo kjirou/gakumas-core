@@ -82,8 +82,6 @@ export const drawCardsFromDeck = (
  *
  * - 山札から引いた時、レッスン開始時手札を引く時、生成した時、などに使う
  * - 手札が最大枚数の5枚に達した以降は、引いたスキルカードは手札へ加えずに捨札へ移動する
- * - TODO: [仕様確認] 最大手札数は本当に5枚か？
- * - TODO: [仕様確認] 最大手札数を超えて引いた時の捨札へ直行する挙動自体、記憶によるとなので本当かわからない
  */
 export const addCardsToHandOrDiscardPile = (
   drawnCards: Array<Card["id"]>,

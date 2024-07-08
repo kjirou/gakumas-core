@@ -1618,7 +1618,7 @@ describe("summarizeCardInHand", () => {
       ],
       expected: {
         cost: expect.any(Object),
-        effects: [{ kind: "score", applyable: false }],
+        effects: [{ kind: "perform-score", applyable: false }],
         enhancements: expect.any(Array),
         name: expect.any(String),
         playable: expect.any(Boolean),
@@ -1649,7 +1649,7 @@ describe("summarizeCardInHand", () => {
       ],
       expected: {
         cost: expect.any(Object),
-        effects: [{ kind: "score", applyable: true }],
+        effects: [{ kind: "perform-score", applyable: true }],
         enhancements: expect.any(Array),
         name: expect.any(String),
         playable: expect.any(Boolean),
@@ -1679,7 +1679,7 @@ describe("summarizeCardInHand", () => {
       ],
       expected: {
         cost: expect.any(Object),
-        effects: [{ kind: "vitality", applyable: false }],
+        effects: [{ kind: "perform-vitality", applyable: false }],
         enhancements: expect.any(Array),
         name: expect.any(String),
         playable: expect.any(Boolean),
@@ -1710,7 +1710,7 @@ describe("summarizeCardInHand", () => {
       ],
       expected: {
         cost: expect.any(Object),
-        effects: [{ kind: "vitality", applyable: true }],
+        effects: [{ kind: "perform-vitality", applyable: true }],
         enhancements: expect.any(Array),
         name: expect.any(String),
         playable: expect.any(Boolean),

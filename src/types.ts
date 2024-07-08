@@ -1224,9 +1224,18 @@ export type LessonGamePlay = {
  */
 export type CardInHandSummary = {
   cost: ActionCost;
-  /** 効果リスト、本家UIだと左下の縦並びのアイコンリスト */
+  /**
+   * 効果概要リスト
+   *
+   * - 本家UIでは左下の縦並びのアイコンリストで表現している内容
+   * - スコアと元気に関しては、条件付きの時のみここへ表示する
+   */
   effects: Array<{
-    kind: `modifier-${Modifier["kind"]}` | "score" | "vitality";
+    kind:
+      | Exclude<Effect, { kind: "getModifier" } | { kind: "perform" }>["kind"]
+      | `modifier-${Modifier["kind"]}`
+      | "perform-score"
+      | "perform-vitality";
     /** 効果適用条件を満たすか、本家UIだと右にx印が付く */
     applyable: boolean;
   }>;

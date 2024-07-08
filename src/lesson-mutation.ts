@@ -998,43 +998,46 @@ export const summarizeCardInHand = (
   if (firstVitalityUpdate) {
     vitality = firstVitalityUpdate.max;
   }
-  // TODO: 普通に effects でループして左下アイコンリストを作った方がよかった、そしてカードを引く効果などもアイコンになっており、基本あると思って良さそう
   let effects: CardInHandSummary["effects"] = [];
   for (const [effectIndex, effect] of cardContent.effects.entries()) {
+    const applyable = effectActivations[effectIndex] !== undefined;
     if (effect.kind === "getModifier") {
       effects = [
         ...effects,
         {
           kind: `modifier-${effect.modifier.kind}`,
-          applyable: effectActivations[effectIndex] !== undefined,
+          applyable,
+        },
+      ];
+    } else if (effect.kind === "perform") {
+      if (effect.condition) {
+        if (effect.score) {
+          effects = [
+            ...effects,
+            {
+              kind: "perform-score",
+              applyable,
+            },
+          ];
+        } else if (effect.vitality) {
+          effects = [
+            ...effects,
+            {
+              kind: "perform-vitality",
+              applyable,
+            },
+          ];
+        }
+      }
+    } else {
+      effects = [
+        ...effects,
+        {
+          kind: effect.kind,
+          applyable,
         },
       ];
     }
-  }
-  const conditionalScoreEffectIndex = cardContent.effects.findIndex(
-    (e) => e.kind === "perform" && e.score && e.condition,
-  );
-  if (conditionalScoreEffectIndex !== -1) {
-    effects = [
-      ...effects,
-      {
-        kind: "score",
-        applyable: effectActivations[conditionalScoreEffectIndex] !== undefined,
-      },
-    ];
-  }
-  const conditionalVitalityEffectIndex = cardContent.effects.findIndex(
-    (e) => e.kind === "perform" && e.vitality && e.condition,
-  );
-  if (conditionalVitalityEffectIndex !== -1) {
-    effects = [
-      ...effects,
-      {
-        kind: "vitality",
-        applyable:
-          effectActivations[conditionalVitalityEffectIndex] !== undefined,
-      },
-    ];
   }
   return {
     cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),

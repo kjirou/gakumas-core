@@ -1000,6 +1000,7 @@ export const summarizeCardInHand = (
   if (firstVitalityUpdate) {
     vitality = firstVitalityUpdate.max;
   }
+  // TODO: 普通に effects でループして左下アイコンリストを作った方がよかった、そしてカードを引く効果などもアイコンになっており、基本あると思って良さそう
   let effects: CardInHandSummary["effects"] = [];
   for (const [effectIndex, effect] of cardContent.effects.entries()) {
     if (effect.kind === "getModifier") {
@@ -1337,8 +1338,9 @@ export const useCard = (
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
   const cardContent = getCardContentDefinition(card);
-  const hasDoubleEffect =
-    lesson.idol.modifiers.find((e) => e.kind === "doubleEffect") !== undefined;
+  const doubleEffect = lesson.idol.modifiers.find(
+    (e) => e.kind === "doubleEffect",
+  );
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 
@@ -1409,7 +1411,7 @@ export const useCard = (
   // 副作用を含む効果発動を1-2回行う
   //
   let effectActivationUpdates: LessonUpdateQuery[] = [];
-  for (let times = 1; times <= (hasDoubleEffect ? 2 : 1); times++) {
+  for (let times = 1; times <= (doubleEffect ? 2 : 1); times++) {
     //
     // プレビュー時は反映しない効果を除外する
     //
@@ -1454,7 +1456,7 @@ export const useCard = (
     //
     // 「次に使用するスキルカードの効果をもう1回発動」の状態修正を消費
     //
-    if (hasDoubleEffect && times === 1) {
+    if (doubleEffect && times === 1) {
       const id = params.idGenerator();
       effectActivationUpdatesOnce = [
         ...effectActivationUpdatesOnce,
@@ -1463,13 +1465,15 @@ export const useCard = (
             kind: "modifier",
             actual: {
               kind: "doubleEffect",
-              times: 1,
+              times: -1,
               id,
+              updateTargetId: doubleEffect.id,
             },
             max: {
               kind: "doubleEffect",
-              times: 1,
+              times: -1,
               id,
+              updateTargetId: doubleEffect.id,
             },
           },
           {
@@ -1485,29 +1489,31 @@ export const useCard = (
     //
     // 状態修正によるスキルカード使用毎効果発動
     //
-    const effectsUponCardUsage = newLesson.idol.modifiers.filter(
-      (e) =>
-        e.kind === "effectActivationUponCardUsage" &&
-        e.cardKind === card.original.definition.cardSummaryKind,
-    ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
-    for (const { effect } of effectsUponCardUsage) {
-      const effectResult = activateEffect(
-        newLesson,
-        effect,
-        params.getRandom,
-        params.idGenerator,
-      );
-      effectActivationUpdatesOnce = [
-        ...effectActivationUpdatesOnce,
-        ...(effectResult ?? []).map((diff) =>
-          createLessonUpdateQueryFromDiff(diff, {
-            kind: "cardUsageTrigger",
-            cardId: card.id,
-            historyTurnNumber: newLesson.turnNumber,
-            historyResultIndex: nextHistoryResultIndex,
-          }),
-        ),
-      ];
+    if (!params.preview) {
+      const effectsUponCardUsage = newLesson.idol.modifiers.filter(
+        (e) =>
+          e.kind === "effectActivationUponCardUsage" &&
+          e.cardKind === card.original.definition.cardSummaryKind,
+      ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
+      for (const { effect } of effectsUponCardUsage) {
+        const effectResult = activateEffect(
+          newLesson,
+          effect,
+          params.getRandom,
+          params.idGenerator,
+        );
+        effectActivationUpdatesOnce = [
+          ...effectActivationUpdatesOnce,
+          ...(effectResult ?? []).map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "cardUsageTrigger",
+              cardId: card.id,
+              historyTurnNumber: newLesson.turnNumber,
+              historyResultIndex: nextHistoryResultIndex,
+            }),
+          ),
+        ];
+      }
     }
 
     //

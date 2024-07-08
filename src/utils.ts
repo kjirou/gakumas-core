@@ -1,3 +1,7 @@
+/**
+ * ゲームの知識を前提としない共通処理をまとめたモジュール
+ */
+
 import { GetRandom, IdGenerator, RangedNumber } from "./types";
 
 /**

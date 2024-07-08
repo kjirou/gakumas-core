@@ -2548,7 +2548,24 @@ describe("useCard preview:false", () => {
           updates.filter(
             (e) => e.kind === "modifier" && e.actual.kind === "doubleEffect",
           ),
-        ).toHaveLength(1);
+        ).toStrictEqual([
+          {
+            kind: "modifier",
+            actual: {
+              kind: "doubleEffect",
+              times: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            max: {
+              kind: "doubleEffect",
+              times: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            reason: expect.any(Object),
+          },
+        ]);
       });
     });
     describe("drawCards", () => {
@@ -3532,5 +3549,122 @@ describe("useCard preview:false", () => {
       });
       expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
     });
+  });
+});
+describe("useCard preview:true", () => {
+  test("コストに対してリソースが不足している時も、プレビューできる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        {
+          id: "a",
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.hand = ["a"];
+    lesson.idol.life = 0;
+    const { updates } = useCard(lesson, 1, {
+      selectedCardInHandIndex: 0,
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+      preview: true,
+    });
+    expect(updates.filter((e) => e.kind === "life")).toStrictEqual([
+      {
+        kind: "life",
+        actual: 0,
+        max: -4,
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        actual: 9,
+        max: 9,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("コスト以外のスキルカード使用条件を満たさない時も、プレビューできる", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        {
+          id: "a",
+          definition: getCardDataById("chosen"),
+          enabled: true,
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.hand = ["a"];
+    const { updates } = useCard(lesson, 1, {
+      selectedCardInHandIndex: 0,
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+      preview: true,
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        actual: 25,
+        max: 25,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("doubleEffectの効果を反映する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        {
+          id: "a",
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.hand = ["a"];
+    lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1, id: "x" }];
+    const { updates } = useCard(lesson, 1, {
+      selectedCardInHandIndex: 0,
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+      preview: true,
+    });
+    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      {
+        kind: "modifier",
+        actual: {
+          kind: "doubleEffect",
+          times: -1,
+          id: expect.any(String),
+          updateTargetId: "x",
+        },
+        max: {
+          kind: "doubleEffect",
+          times: -1,
+          id: expect.any(String),
+          updateTargetId: "x",
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        actual: 9,
+        max: 9,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "score",
+        actual: 9,
+        max: 9,
+        reason: expect.any(Object),
+      },
+    ]);
   });
 });

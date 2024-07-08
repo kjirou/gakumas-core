@@ -24,6 +24,7 @@ import { getIdolDataById } from "./data/idol";
 import { getProducerItemDataById } from "./data/producer-item";
 import {
   Card,
+  CardDefinition,
   CardInHandSummary,
   CardInProduction,
   GetRandom,
@@ -37,16 +38,12 @@ import {
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnStart,
-  canUseCard,
   drawCardsOnTurnStart,
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
-import {
-  getCardContentDefinition,
-  handSizeOnLessonStart,
-  patchUpdates,
-} from "./models";
+import { getCardContentDefinition, patchUpdates } from "./models";
+import { generateCardDescription } from "./text-generation";
 
 //
 // UI側での想定の呼び出し方
@@ -63,21 +60,6 @@ import {
 // set状態遷移アニメーション(recentUpdates);
 // // アニメーション設定がある場合は、それが終わるまで表示上反映されない
 // setLesson(最新のLessonの状態を返す(newLessonGamePlay));
-// ```
-//
-// カード選択してスキルカード使用プレビュー:
-// ```
-// // 使用できない状況のカードでもプレビューはできる、また、連鎖するPアイテム効果などはプレビュー表示されないなど実際のカード使用処理とは違うところが多いので別にした方が良い
-// const newLessonGamePlay = previewCardUsage(lessonGamePlay, cardInHandIndex);
-// const recentUpdates = newLessonGamePlay.updates.slice(lessonGamePlay.updates.length);
-// // プレビューは差分表示されるがアニメーションはされない
-// const setプレビュー用Updates(recentUpdates)
-// ```
-//
-// 手札のスキルカードを表示:
-// ```
-// const cardsInHand = getCardsInHand(lessonGamePlay);
-// set手札リスト(cardsInHand);
 // ```
 //
 // カード選択してスキルカード使用:
@@ -197,10 +179,8 @@ export const getCardsInHand = (
 };
 
 /**
- * スキルカードの使用結果をプレビューする
+ * スキルカード使用のプレビューを表示するための情報を返す
  *
- * - TODO: 状態修正リストの差分は、本家だと、削除される状態修正は0表記になって残っていた。なので、これから巡り巡って、ModifierはModifierDefinitionと分離する必要がある。
- * - プレビュー用の更新を反映した値を返す
  * - 本家のプレビュー仕様
  *   - 体力・元気
  *     - 効果反映後の値に変わり、その近くに差分アイコンが +n/-n で表示される
@@ -209,19 +189,49 @@ export const getCardsInHand = (
  *     - 新規: スキルカード追加使用など一部のものを除いて、左側の状態修正リストの末尾へ追加
  *     - 既存: 差分がある状態修正アイコンに差分適用後の値を表示し、その右に差分アイコンを表示する
  *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
+ *   - スキルカード詳細ポップアップ
+ *     - 全ての項目が、各効果による変化前のデータ定義時の値
  *
+ * @example
+ *   // 変化する差分は updates に含まれるので、アニメーション処理はこの値を解析して使う
+ *   const { cardDescription, updates } = previewCardPlay(lessonGamePlay, 0);
+ *   // プレビュー用の差分を反映したレッスンの状態、UI側は各値につきこの値との差を使う
+ *   const previewedLesson = patchUpdates(lessonGamePlay.initialLesson, updates);
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
 const previewCardPlay = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
-): LessonGamePlay => {
-  let updates = lessonGamePlay.updates;
-  let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
-
+): { cardDescription: string; updates: LessonUpdateQuery[] } => {
+  const lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
+  const cardId = lesson.hand[selectedCardInHandIndex];
+  if (cardId === undefined) {
+    throw new Error("Invalid card index");
+  }
+  const card = lesson.cards.find((e) => e.id === cardId);
+  if (card === undefined) {
+    throw new Error("Invalid card ID");
+  }
+  const cardContent = getCardContentDefinition(card);
+  const { updates } = useCard(lesson, 1, {
+    getRandom: lessonGamePlay.getRandom,
+    idGenerator: lessonGamePlay.idGenerator,
+    selectedCardInHandIndex,
+    preview: true,
+  });
+  const cardDescription = generateCardDescription({
+    cost: cardContent.cost,
+    condition: cardContent.condition,
+    effects: cardContent.effects,
+    innate: cardContent.innate,
+    nonDuplicative: card.original.definition.nonDuplicative,
+    usableOncePerLesson: cardContent.usableOncePerLesson,
+  });
   return {
-    ...lessonGamePlay,
+    cardDescription,
     updates,
   };
 };

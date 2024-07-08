@@ -166,13 +166,13 @@ describe("createLessonGamePlay", () => {
           vitality: 0,
           modifiers: [],
           totalCardUsageCount: 0,
+          actionPoints: 0,
         },
         cards: expect.any(Array),
         hand: [],
         deck: expect.any(Array),
         discardPile: [],
         removedCardPile: [],
-        selectedCardInHandIndex: undefined,
         score: 0,
         turnNumber: 1,
         lastTurnNumber: 6,
@@ -284,6 +284,27 @@ describe("calculateActualActionCost", () => {
   );
 });
 describe("patchUpdates", () => {
+  describe("actionPoints", () => {
+    test("it works", () => {
+      let lessonMock = {
+        idol: {
+          actionPoints: 1,
+        },
+      } as Lesson;
+      lessonMock = patchUpdates(lessonMock, [
+        {
+          kind: "actionPoints",
+          amount: -1,
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lessonMock.idol.actionPoints).toBe(0);
+    });
+  });
   describe("cardEnhancement", () => {
     test("it works", () => {
       const lessonMock = {
@@ -657,25 +678,6 @@ describe("patchUpdates", () => {
         },
       ]);
       expect(lessonMock.remainingTurns).toBe(1);
-    });
-  });
-  describe("selectedCardInHandIndex", () => {
-    test("it works", () => {
-      const lessonMock = {
-        selectedCardInHandIndex: undefined,
-      } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
-        {
-          kind: "selectedCardInHandIndex",
-          index: 1,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
-        },
-      ]);
-      expect(lesson.selectedCardInHandIndex).toBe(1);
     });
   });
   describe("score", () => {

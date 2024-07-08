@@ -1056,6 +1056,29 @@ type LessonMutationResult = {
 };
 
 /**
+ * アクションポイントを1へ初期化する
+ */
+export const initializeActionPoints = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+): LessonMutationResult => {
+  return {
+    updates: [
+      {
+        kind: "actionPoints",
+        amount: Math.max(1 - lesson.idol.actionPoints),
+        reason: {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ],
+    nextHistoryResultIndex: historyResultIndex + 1,
+  };
+};
+
+/**
  * レッスン開始時に効果を発動する
  */
 export const activateEffectsOnLessonStart = (
@@ -1312,6 +1335,63 @@ export const activateEffectsOnTurnStart = (
       ...enhanceHandDelayedEffectUpdates,
     ],
     nextHistoryResultIndex,
+  };
+};
+
+/**
+ * スキルカード使用数を1消費する
+ *
+ * - 「スキルカード使用数追加」を先に消費し、それがなければアクションポイントを消費する
+ * - 足りない状況で実行したら、0を返す
+ */
+export const consumeRemainingCardUsageCount = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  const additionalCardUsageCount = lesson.idol.modifiers.find(
+    (e) => e.kind === "additionalCardUsageCount",
+  );
+  let diff: LessonUpdateQueryDiff | undefined;
+  if (additionalCardUsageCount) {
+    const id = params.idGenerator();
+    diff = {
+      kind: "modifier",
+      actual: {
+        kind: "additionalCardUsageCount",
+        amount: -1,
+        duration: 0,
+        id: params.idGenerator(),
+        updateTargetId: additionalCardUsageCount.id,
+      },
+      max: {
+        kind: "additionalCardUsageCount",
+        amount: -1,
+        duration: 0,
+        id: params.idGenerator(),
+        updateTargetId: additionalCardUsageCount.id,
+      },
+    };
+  } else {
+    diff = {
+      kind: "actionPoints",
+      amount: Math.max(-1, -lesson.idol.actionPoints) + 0,
+    };
+  }
+  return {
+    updates: [
+      {
+        ...diff,
+        reason: {
+          kind: "cardUsage.remainingCardUsageCountConsumption",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ],
+    nextHistoryResultIndex: historyResultIndex + 1,
   };
 };
 

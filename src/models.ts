@@ -97,6 +97,7 @@ export const createIdolInProduction = (params: {
 
 const createIdol = (params: { idolInProduction: IdolInProduction }): Idol => {
   return {
+    actionPoints: 0,
     life: params.idolInProduction.life,
     modifiers: [],
     original: params.idolInProduction,
@@ -138,7 +139,6 @@ export const createLesson = (params: {
     }),
     lastTurnNumber: params.lastTurnNumber,
     removedCardPile: [],
-    selectedCardInHandIndex: undefined,
     score: 0,
     turnNumber: 1,
     remainingTurns: 0,
@@ -262,6 +262,16 @@ export const patchUpdates = (
   let newLesson = lesson;
   for (const update of updates) {
     switch (update.kind) {
+      case "actionPoints": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            actionPoints: newLesson.idol.actionPoints + update.amount,
+          },
+        };
+        break;
+      }
       case "cardEnhancement": {
         newLesson = {
           ...newLesson,
@@ -438,13 +448,6 @@ export const patchUpdates = (
         newLesson = {
           ...newLesson,
           score: newLesson.score + update.actual,
-        };
-        break;
-      }
-      case "selectedCardInHandIndex": {
-        newLesson = {
-          ...newLesson,
-          selectedCardInHandIndex: update.index,
         };
         break;
       }

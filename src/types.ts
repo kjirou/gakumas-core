@@ -90,7 +90,7 @@ export type ModifierDefinition =
        */
       kind: "additionalCardUsageCount";
       amount: number;
-      /** レッスン中のアイコンからの説明を読むと、「1 1ターン」のように表記されており、効果時間も設定されていそう */
+      /** レッスン中のアイコンからの説明を読むと、「1 1ターン」のように表記されており、効果時間も設定されていそう。実装内ではまだ参照していない */
       duration: number;
     }
   | {
@@ -933,6 +933,17 @@ export type IdolInProduction = {
  * - レッスン開始前に生成され、レッスン終了時に破棄される
  */
 export type Idol = {
+  /**
+   * アクションポイント
+   *
+   * - アイドルの1ターン内の行動回数、本家にあるのか不明な概念、現状は1か0のみ
+   * - 1消費することで、スキルカードを1回使用するかスキップを1回できる
+   * - 本家では、スキルカード使用数バフが残った状態でスキップをすると、その瞬間はスキルカード使用数は消えない
+   *   - つまり、これに相当する概念とスキルカード使用数は別に管理されている可能性が高い
+   *     - なお、その後の残ったスキルカード使用数は、ターン終了処理の効果時間切れで消えているよう
+   *   - 「ターン終了フラグ」も考えたが、コンテストで複数のアイドルがいる状況を考えると、アイドル側に持たせた方が良さそう
+   */
+  actionPoints: number;
   life: number;
   modifiers: Modifier[];
   original: IdolInProduction;
@@ -989,8 +1000,6 @@ export type Lesson = {
   remainingTurns: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */
   removedCardPile: Array<Card["id"]>;
-  /** 選択中の手札インデックス、TODO: いらないかも */
-  selectedCardInHandIndex: number | undefined;
   /**
    * スコア
    *
@@ -1060,7 +1069,11 @@ export type LessonUpdateQueryReason = (
       cardId: Card["id"];
     }
   | {
-      /** スキルカード使用 > 効果発動 */
+      /** スキルカード使用.残りスキルカード使用数消費 */
+      kind: "cardUsage.remainingCardUsageCountConsumption";
+    }
+  | {
+      /** スキルカード使用.効果発動 */
       kind: "cardUsage.effectActivation";
       cardId: Card["id"];
       effectIndex: number;
@@ -1124,6 +1137,10 @@ export type LessonUpdateQueryReason = (
 
 export type LessonUpdateQueryDiff =
   | {
+      kind: "actionPoints";
+      amount: number;
+    }
+  | {
       kind: "cardEnhancement";
       cardIds: Array<Card["id"]>;
     }
@@ -1168,11 +1185,6 @@ export type LessonUpdateQueryDiff =
       /** レッスンなどでパラメータの上限値が決まっている場合に、超過した分を差し引いた実際に上昇した数値 */
       actual: number;
       max: number;
-    }
-  | {
-      /** 手札の選択状態 */
-      kind: "selectedCardInHandIndex";
-      index: Lesson["selectedCardInHandIndex"];
     }
   | {
       kind: "turnNumberIncrease";

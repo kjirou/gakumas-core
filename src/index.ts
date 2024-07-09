@@ -394,7 +394,39 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: ターン数によるゲーム終了判定
 
-  // TODO: スキルカード使用数追加の効果を削除する
+  //
+  // スキルカード使用数追加の状態修正を削除
+  //
+  const additionalCardUsageCount = lesson.idol.modifiers.find(
+    (e) => e.kind === "additionalCardUsageCount",
+  );
+  if (additionalCardUsageCount) {
+    const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
+      {
+        kind: "modifier",
+        actual: {
+          kind: "additionalCardUsageCount",
+          amount: -additionalCardUsageCount.amount,
+          id: lessonGamePlay.idGenerator(),
+          updateTargetId: additionalCardUsageCount.id,
+        },
+        max: {
+          kind: "additionalCardUsageCount",
+          amount: -additionalCardUsageCount.amount,
+          id: lessonGamePlay.idGenerator(),
+          updateTargetId: additionalCardUsageCount.id,
+        },
+        reason: {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    updates = [...updates, ...additionalCardUsageCountUpdates];
+    historyResultIndex++;
+    lesson = patchUpdates(lesson, additionalCardUsageCountUpdates);
+  }
 
   // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。
 

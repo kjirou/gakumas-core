@@ -40,7 +40,6 @@ import {
   activateEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
   drawCardsOnTurnStart,
-  initializeActionPoints,
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
@@ -107,15 +106,22 @@ export const startLessonTurn = (
   }
 
   //
-  // アクションポイントを初期化する
+  // アクションポイントを1にする
   //
-  const initializeActionPointsResult = initializeActionPoints(
-    lesson,
-    historyResultIndex,
-  );
-  updates = [...updates, ...initializeActionPointsResult.updates];
-  historyResultIndex = initializeActionPointsResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, initializeActionPointsResult.updates);
+  const actionPointsUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "actionPoints",
+      amount: -lesson.idol.actionPoints + 1,
+      reason: {
+        kind: "turnSkip",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...actionPointsUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, actionPointsUpdates);
 
   //
   // ターン番号を増やす
@@ -221,7 +227,7 @@ export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
  *   const previewedLesson = patchUpdates(lessonGamePlay.initialLesson, updates);
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
-const previewCardPlay = (
+export const previewCardPlay = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
 ): { cardDescription: string; updates: LessonUpdateQuery[] } => {
@@ -274,6 +280,8 @@ export const playCard = (
   //
   // アクションポイントがない場合は実行できない
   //
+  // - スキルカード使用数が残っていても、使えない
+  //
   if (lesson.idol.actionPoints === 0) {
     throw new Error("No action points");
   }
@@ -321,17 +329,50 @@ export const playCard = (
  * - プレビューはない
  */
 export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
+  let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: スキルカード使用数1以上必要
+  //
+  // アクションポイントを0にする
+  //
+  const actionPointsUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "actionPoints",
+      amount: -lesson.idol.actionPoints + 0,
+      reason: {
+        kind: "turnSkip",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...actionPointsUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, actionPointsUpdates);
 
-  // TODO: 体力回復
+  //
+  // 体力を2回復する
+  //
+  const recoveringLifeUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "life",
+      actual: Math.min(2, lesson.idol.original.maxLife - lesson.idol.life) + 0,
+      max: 2,
+      reason: {
+        kind: "turnSkip",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...recoveringLifeUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, recoveringLifeUpdates);
 
   return {
     ...lessonGamePlay,
-    updates: updatesList.flat(),
+    updates,
   };
 };
 
@@ -341,11 +382,11 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
  * - レッスン終了時に関わる処理は、現在はなさそう
  */
 const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
+  let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: ターン終了時トリガー
+  // TODO: ターン終了時トリガー、都度ゲーム終了判定を含む
 
   // TODO: 応援/トラブルトリガー
 
@@ -353,8 +394,10 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: ターン数によるゲーム終了判定
 
+  // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。
+
   return {
     ...lessonGamePlay,
-    updates: updatesList.flat(),
+    updates,
   };
 };

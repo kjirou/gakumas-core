@@ -1112,6 +1112,10 @@ export type LessonUpdateQueryReason = (
       kind: "turnEndTrigger";
     }
   | {
+      /** ターンのスキップ */
+      kind: "turnSkip";
+    }
+  | {
       /** ターン開始時トリガーにより発動した効果 */
       kind: "turnStartTrigger";
     }

@@ -1056,29 +1056,6 @@ type LessonMutationResult = {
 };
 
 /**
- * アクションポイントを1へ初期化する
- */
-export const initializeActionPoints = (
-  lesson: Lesson,
-  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-): LessonMutationResult => {
-  return {
-    updates: [
-      {
-        kind: "actionPoints",
-        amount: Math.max(1 - lesson.idol.actionPoints),
-        reason: {
-          kind: "turnStartTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        },
-      },
-    ],
-    nextHistoryResultIndex: historyResultIndex + 1,
-  };
-};
-
-/**
  * レッスン開始時に効果を発動する
  */
 export const activateEffectsOnLessonStart = (

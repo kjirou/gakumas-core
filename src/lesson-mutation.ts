@@ -1339,14 +1339,12 @@ export const consumeRemainingCardUsageCount = (
       actual: {
         kind: "additionalCardUsageCount",
         amount: -1,
-        duration: 0,
         id: params.idGenerator(),
         updateTargetId: additionalCardUsageCount.id,
       },
       max: {
         kind: "additionalCardUsageCount",
         amount: -1,
-        duration: 0,
         id: params.idGenerator(),
         updateTargetId: additionalCardUsageCount.id,
       },

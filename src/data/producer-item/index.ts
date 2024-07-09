@@ -540,7 +540,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "getModifier", modifier: { kind: "focus", amount: 2 } },
@@ -563,7 +562,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -593,7 +591,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -619,7 +616,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -648,7 +644,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -666,7 +661,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "perform", vitality: { value: 5 } },
@@ -689,7 +683,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
@@ -705,7 +698,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
@@ -830,7 +822,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -853,7 +844,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1002,7 +992,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1018,7 +1007,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1132,7 +1120,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1153,7 +1140,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1174,7 +1160,6 @@ export const producerItems: ProducerItemDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],

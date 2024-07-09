@@ -1568,7 +1568,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1586,7 +1585,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1754,7 +1752,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1772,7 +1769,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1796,7 +1792,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -1814,7 +1809,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -2148,7 +2142,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -2165,7 +2158,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -2551,7 +2543,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -2568,7 +2559,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3109,7 +3099,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -3131,7 +3120,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -3622,7 +3610,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3641,7 +3628,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3666,7 +3652,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3682,7 +3667,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3714,7 +3698,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3736,7 +3719,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3855,7 +3837,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3870,7 +3851,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "drawCards", amount: 1 },
@@ -3899,7 +3879,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -3917,7 +3896,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "drawCards", amount: 1 },
@@ -4480,7 +4458,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -4503,7 +4480,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         {
@@ -4535,7 +4511,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4550,7 +4525,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4628,7 +4602,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "enhanceHand" },
@@ -4643,7 +4616,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
         { kind: "drawCards", amount: 1 },
@@ -4672,7 +4644,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4690,7 +4661,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4717,7 +4687,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4735,7 +4704,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4814,7 +4782,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],
@@ -4829,7 +4796,6 @@ export const cards: CardDefinition[] = [
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],

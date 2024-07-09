@@ -394,6 +394,8 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: ターン数によるゲーム終了判定
 
+  // TODO: スキルカード使用数追加の効果を削除する
+
   // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。
 
   return {

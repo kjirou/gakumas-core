@@ -2425,7 +2425,6 @@ describe("consumeRemainingCardUsageCount", () => {
             {
               kind: "additionalCardUsageCount",
               amount: 1,
-              duration: 1,
               id: "x",
             },
           ];
@@ -2441,14 +2440,12 @@ describe("consumeRemainingCardUsageCount", () => {
             actual: {
               kind: "additionalCardUsageCount",
               amount: -1,
-              duration: 0,
               id: expect.any(String),
               updateTargetId: "x",
             },
             max: {
               kind: "additionalCardUsageCount",
               amount: -1,
-              duration: 0,
               id: expect.any(String),
               updateTargetId: "x",
             },

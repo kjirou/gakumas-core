@@ -21,7 +21,6 @@ import {
   createCardPlacementDiff,
   drawCardsFromDeck,
   drawCardsOnTurnStart,
-  initializeActionPoints,
   useCard,
   summarizeCardInHand,
   validateCostConsumution,
@@ -1824,59 +1823,6 @@ describe("summarizeCardInHand", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(summarizeCardInHand(...args)).toStrictEqual(expected);
-  });
-});
-describe("initializeActionPoints", () => {
-  const testCases: Array<{
-    args: Parameters<typeof initializeActionPoints>;
-    expected: ReturnType<typeof initializeActionPoints>;
-    name: string;
-  }> = [
-    {
-      name: "アクションポイントが0の時、1変更を返す",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 0;
-          return lesson;
-        })(),
-        1,
-      ],
-      expected: {
-        updates: [
-          {
-            kind: "actionPoints",
-            amount: 1,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
-    },
-    {
-      name: "アクションポイントが1の時、0変更を返す",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 1;
-          return lesson;
-        })(),
-        1,
-      ],
-      expected: {
-        updates: [
-          {
-            kind: "actionPoints",
-            amount: 0,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(initializeActionPoints(...args)).toStrictEqual(expected);
   });
 });
 describe("drawCardsOnLessonStart", () => {

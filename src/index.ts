@@ -40,7 +40,6 @@ import {
   activateEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
   drawCardsOnTurnStart,
-  initializeActionPoints,
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
@@ -107,15 +106,22 @@ export const startLessonTurn = (
   }
 
   //
-  // アクションポイントを初期化する
+  // アクションポイントを1にする
   //
-  const initializeActionPointsResult = initializeActionPoints(
-    lesson,
-    historyResultIndex,
-  );
-  updates = [...updates, ...initializeActionPointsResult.updates];
-  historyResultIndex = initializeActionPointsResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, initializeActionPointsResult.updates);
+  const actionPointsUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "actionPoints",
+      amount: -lesson.idol.actionPoints + 1,
+      reason: {
+        kind: "turnSkip",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...actionPointsUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, actionPointsUpdates);
 
   //
   // ターン番号を増やす
@@ -221,7 +227,7 @@ export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
  *   const previewedLesson = patchUpdates(lessonGamePlay.initialLesson, updates);
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
-const previewCardPlay = (
+export const previewCardPlay = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
 ): { cardDescription: string; updates: LessonUpdateQuery[] } => {
@@ -274,6 +280,8 @@ export const playCard = (
   //
   // アクションポイントがない場合は実行できない
   //
+  // - スキルカード使用数が残っていても、使えない
+  //
   if (lesson.idol.actionPoints === 0) {
     throw new Error("No action points");
   }
@@ -321,17 +329,33 @@ export const playCard = (
  * - プレビューはない
  */
 export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
+  let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: スキルカード使用数1以上必要
+  //
+  // アクションポイントを0にする
+  //
+  const actionPointsUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "actionPoints",
+      amount: -lesson.idol.actionPoints + 0,
+      reason: {
+        kind: "turnSkip",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...actionPointsUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, actionPointsUpdates);
 
   // TODO: 体力回復
 
   return {
     ...lessonGamePlay,
-    updates: updatesList.flat(),
+    updates,
   };
 };
 

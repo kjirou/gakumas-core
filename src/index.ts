@@ -351,7 +351,24 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   historyResultIndex++;
   lesson = patchUpdates(lesson, actionPointsUpdates);
 
-  // TODO: 体力回復
+  //
+  // 体力を2回復する
+  //
+  const recoveringLifeUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "life",
+      actual: Math.min(2, lesson.idol.original.maxLife - lesson.idol.life) + 0,
+      max: 2,
+      reason: {
+        kind: "turnSkip",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...recoveringLifeUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, recoveringLifeUpdates);
 
   return {
     ...lessonGamePlay,
@@ -365,11 +382,11 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
  * - レッスン終了時に関わる処理は、現在はなさそう
  */
 const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
-  let updatesList = [lessonGamePlay.updates];
-  let lesson = lessonGamePlay.initialLesson;
+  let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
+  let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: ターン終了時トリガー
+  // TODO: ターン終了時トリガー、都度ゲーム終了判定を含む
 
   // TODO: 応援/トラブルトリガー
 
@@ -377,8 +394,10 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: ターン数によるゲーム終了判定
 
+  // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。
+
   return {
     ...lessonGamePlay,
-    updates: updatesList.flat(),
+    updates,
   };
 };

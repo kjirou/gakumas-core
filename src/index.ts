@@ -106,6 +106,45 @@ export const startLessonTurn = (
   }
 
   //
+  // スキルカード使用数追加の状態修正を削除
+  //
+  const additionalCardUsageCount = lesson.idol.modifiers.find(
+    (e) => e.kind === "additionalCardUsageCount",
+  );
+  if (additionalCardUsageCount) {
+    const id = lessonGamePlay.idGenerator();
+    const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
+      {
+        kind: "modifier",
+        actual: {
+          kind: "additionalCardUsageCount",
+          amount: -additionalCardUsageCount.amount,
+          id,
+          updateTargetId: additionalCardUsageCount.id,
+        },
+        max: {
+          kind: "additionalCardUsageCount",
+          amount: -additionalCardUsageCount.amount,
+          id,
+          updateTargetId: additionalCardUsageCount.id,
+        },
+        reason: {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    updates = [...updates, ...additionalCardUsageCountUpdates];
+    historyResultIndex++;
+    lesson = patchUpdates(lesson, additionalCardUsageCountUpdates);
+  }
+
+  //
+  // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。この時点で次ターン自然減少リストを保持して、その次のターンで参照して減らすと良さそう。
+  //
+
+  //
   // アクションポイントを1にする
   //
   const actionPointsUpdates: LessonUpdateQuery[] = [
@@ -393,42 +432,6 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   // TODO: 手札を捨てる、山札が0の状態の捨札は次のシャッフル後の捨札に所属する。例えば、手札3枚、山札0枚、手札1枚使って残り捨札、の捨札はシャッフル後
 
   // TODO: ターン数によるゲーム終了判定
-
-  //
-  // スキルカード使用数追加の状態修正を削除
-  //
-  const additionalCardUsageCount = lesson.idol.modifiers.find(
-    (e) => e.kind === "additionalCardUsageCount",
-  );
-  if (additionalCardUsageCount) {
-    const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
-      {
-        kind: "modifier",
-        actual: {
-          kind: "additionalCardUsageCount",
-          amount: -additionalCardUsageCount.amount,
-          id: lessonGamePlay.idGenerator(),
-          updateTargetId: additionalCardUsageCount.id,
-        },
-        max: {
-          kind: "additionalCardUsageCount",
-          amount: -additionalCardUsageCount.amount,
-          id: lessonGamePlay.idGenerator(),
-          updateTargetId: additionalCardUsageCount.id,
-        },
-        reason: {
-          kind: "turnEndTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        },
-      },
-    ];
-    updates = [...updates, ...additionalCardUsageCountUpdates];
-    historyResultIndex++;
-    lesson = patchUpdates(lesson, additionalCardUsageCountUpdates);
-  }
-
-  // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。
 
   return {
     ...lessonGamePlay,

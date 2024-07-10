@@ -539,11 +539,19 @@ export const calculatePerformingScoreEffect = (
   return diffs;
 };
 
-// TODO: 元気が上がらない状態修正の反映
 export const calculatePerformingVitalityEffect = (
   idol: Idol,
   query: VitalityUpdateQuery,
 ): Extract<LessonUpdateQueryDiff, { kind: "vitality" }> => {
+  const hasNoVitalityIncrease =
+    idol.modifiers.find((e) => e.kind === "noVitalityIncrease") !== undefined;
+  if (hasNoVitalityIncrease) {
+    return {
+      kind: "vitality",
+      actual: 0,
+      max: 0,
+    };
+  }
   if (query.fixedValue === true) {
     return {
       kind: "vitality",

@@ -1469,6 +1469,23 @@ describe("calculatePerformingVitalityEffect", () => {
         max: 1,
       },
     },
+    {
+      name: "元気増加無効が付与されている時、増加しない",
+      args: [
+        {
+          vitality: 0,
+          modifiers: [
+            { kind: "noVitalityIncrease", duration: 1, id: "x" },
+          ] as Idol["modifiers"],
+        } as Idol,
+        { value: 1 },
+      ],
+      expected: {
+        kind: "vitality",
+        actual: 0,
+        max: 0,
+      },
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);

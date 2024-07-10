@@ -234,12 +234,14 @@ export const calculateActualActionCost = (
         modifiers.find((e) => e.kind === "halfLifeConsumption") !== undefined;
       const hasDoubleLifeConsumption =
         modifiers.find((e) => e.kind === "doubleLifeConsumption") !== undefined;
-      const value = Math.max(cost.value - lifeConsumptionReductionValue, 0);
       let rate = hasDoubleLifeConsumption ? 2 : 1;
       rate = rate / (halfLifeConsumption ? 2 : 1);
       return {
         kind: cost.kind,
-        value: Math.ceil(value * rate),
+        value: Math.max(
+          Math.ceil(cost.value * rate) - lifeConsumptionReductionValue,
+          0,
+        ),
       };
     }
     default: {

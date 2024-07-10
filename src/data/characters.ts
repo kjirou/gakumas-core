@@ -1,4 +1,4 @@
-import { CharacterDefinition } from "../../types";
+import { CharacterDefinition } from "../types";
 
 export const findCharacterDataById = (
   id: CharacterDefinition["id"],

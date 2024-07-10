@@ -1,4 +1,4 @@
-import { ProducerItemDefinition } from "../../types";
+import { ProducerItemDefinition } from "../types";
 
 export const findProducerItemDataById = (
   id: ProducerItemDefinition["id"],

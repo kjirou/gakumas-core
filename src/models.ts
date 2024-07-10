@@ -2,10 +2,10 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { getCardDataById } from "./data/card";
-import { getCharacterDataById } from "./data/character";
-import { getIdolDataById } from "./data/idol";
-import { getProducerItemDataById } from "./data/producer-item";
+import { getCardDataById } from "./data/cards";
+import { getCharacterDataById } from "./data/characters";
+import { getIdolDataById } from "./data/idols";
+import { getProducerItemDataById } from "./data/producer-items";
 import {
   ActionCost,
   Card,

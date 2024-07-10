@@ -1,5 +1,5 @@
-import { findCardDataById, getCardDataById } from "./data/card";
-import { getProducerItemDataById } from "./data/producer-item";
+import { findCardDataById, getCardDataById } from "./data/cards";
+import { getProducerItemDataById } from "./data/producer-items";
 import {
   generateActionCostText,
   generateCardDescription,

@@ -1,5 +1,5 @@
-import { findCardDataById } from "../card";
-import { producerItems } from "./index";
+import { findCardDataById } from "./cards";
+import { producerItems } from "./producer-items";
 
 test("any id is not duplicated", () => {
   let ids: string[] = [];

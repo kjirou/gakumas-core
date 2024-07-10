@@ -17,7 +17,7 @@ import type {
   Modifier,
   VitalityUpdateQuery,
 } from "./types";
-import { filterGeneratableCardsData } from "./data/card";
+import { filterGeneratableCardsData } from "./data/cards";
 import {
   calculateActualActionCost,
   calculateActualRemainingTurns,

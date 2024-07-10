@@ -1,7 +1,7 @@
-import { cards } from "../card";
-import { characters } from "../character";
-import { producerItems } from "../producer-item";
-import { idols } from "./index";
+import { cards } from "./cards";
+import { characters } from "./characters";
+import { producerItems } from "./producer-items";
+import { idols } from "./idols";
 
 test("any id is not duplicated", () => {
   let ids: string[] = [];

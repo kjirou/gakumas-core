@@ -19,6 +19,7 @@ import {
   canUseCard,
   consumeRemainingCardUsageCount,
   createCardPlacementDiff,
+  decreaseEachModifierDurationOverTime,
   drawCardsFromDeck,
   drawCardsOnTurnStart,
   useCard,
@@ -2363,6 +2364,129 @@ describe("activateEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
+  });
+});
+describe("decreaseEachModifierDurationOverTime", () => {
+  const testCases: Array<{
+    args: Parameters<typeof decreaseEachModifierDurationOverTime>;
+    expected: ReturnType<typeof decreaseEachModifierDurationOverTime>;
+    name: string;
+  }> = [
+    {
+      name: "時間経過で減少する状態修正と減少しない状態修正がある時、減少する状態修正のみ減少する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 1, id: "x" },
+            { kind: "focus", amount: 1, id: "y" },
+          ];
+          lesson.idol.modifierIdsAtTurnStart = ["x", "y"];
+          return lesson;
+        })(),
+        1,
+        { idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "goodCondition",
+              duration: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            max: {
+              kind: "goodCondition",
+              duration: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "前ターン開始時に存在した状態修正とそうではない状態修正がある時、前ターン開始時に存在した状態修正のみ減少する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 1, id: "x" },
+            { kind: "excellentCondition", duration: 1, id: "y" },
+          ];
+          lesson.idol.modifierIdsAtTurnStart = ["x"];
+          return lesson;
+        })(),
+        1,
+        { idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "goodCondition",
+              duration: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            max: {
+              kind: "goodCondition",
+              duration: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "強度のプロパティ名がdurationではない一部も状態修正も、この処理で減少する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "positiveImpression", amount: 1, id: "x" },
+          ];
+          lesson.idol.modifierIdsAtTurnStart = ["x"];
+          return lesson;
+        })(),
+        1,
+        { idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "positiveImpression",
+              amount: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            max: {
+              kind: "positiveImpression",
+              amount: -1,
+              id: expect.any(String),
+              updateTargetId: "x",
+            },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(decreaseEachModifierDurationOverTime(...args)).toStrictEqual(
+      expected,
+    );
   });
 });
 describe("consumeRemainingCardUsageCount", () => {

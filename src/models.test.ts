@@ -165,6 +165,7 @@ describe("createLessonGamePlay", () => {
           life: 32,
           vitality: 0,
           modifiers: [],
+          modifierIdsAtTurnStart: [],
           totalCardUsageCount: 0,
           actionPoints: 0,
         },
@@ -434,6 +435,27 @@ describe("patchUpdates", () => {
         },
       ]);
       expect(lesson.cards).toStrictEqual([]);
+    });
+  });
+  describe("modifierIdsAtTurnStart", () => {
+    test("it works", () => {
+      const lessonMock = {
+        idol: {
+          modifierIdsAtTurnStart: ["1", "2"],
+        },
+      } as Lesson;
+      const lesson = patchUpdates(lessonMock, [
+        {
+          kind: "modifierIdsAtTurnStart",
+          modifierIdsAtTurnStart: ["3", "4"],
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lesson.idol.modifierIdsAtTurnStart).toStrictEqual(["3", "4"]);
     });
   });
   describe("modifier", () => {

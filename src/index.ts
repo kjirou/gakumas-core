@@ -39,6 +39,7 @@ import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
+  decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
   summarizeCardInHand,
   useCard,
@@ -141,8 +142,42 @@ export const startLessonTurn = (
   }
 
   //
-  // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。この時点で次ターン自然減少リストを保持して、その次のターンで参照して減らすと良さそう。
+  // ターン経過に伴い、状態修正の効果時間を減少
   //
+  if (lesson.idol.modifierIdsAtTurnStart.length > 0) {
+    const decreaseEachModifierDurationOverTimeResult =
+      decreaseEachModifierDurationOverTime(lesson, historyResultIndex, {
+        idGenerator: lessonGamePlay.idGenerator,
+      });
+    updates = [
+      ...updates,
+      ...decreaseEachModifierDurationOverTimeResult.updates,
+    ];
+    historyResultIndex =
+      decreaseEachModifierDurationOverTimeResult.nextHistoryResultIndex;
+    lesson = patchUpdates(
+      lesson,
+      decreaseEachModifierDurationOverTimeResult.updates,
+    );
+  }
+
+  //
+  // この時点で存在する状態修正IDリストを更新
+  //
+  const modifierIdsAtTurnStartUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "modifierIdsAtTurnStart",
+      modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
+      reason: {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...modifierIdsAtTurnStartUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
 
   //
   // アクションポイントを1にする

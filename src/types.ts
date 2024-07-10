@@ -946,6 +946,13 @@ export type Idol = {
    */
   actionPoints: number;
   life: number;
+  /**
+   * ターン開始時に付与されている状態修正IDリスト
+   *
+   * - ターン中に付与された状態修正の効果時間は、そのターンは減少しないという仕様がある
+   * - そのため、ターン開始時に存在する状態修正を保持して、次ターン開始時に参照することで、そこにない状態修正の効果は減少させない
+   */
+  modifierIdsAtTurnStart: Array<Modifier["id"]>;
   modifiers: Modifier[];
   original: IdolInProduction;
   /** 本レッスン中にスキルカードを使用した回数、関連する原文は「レッスン中に使用したスキルカード{n}枚ごとに、」 */
@@ -1172,6 +1179,11 @@ export type LessonUpdateQueryDiff =
       actual: number;
       /** アイドルの状態へ本来影響を影響を与えはずだった数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は3になる。 */
       max: number;
+    }
+  | {
+      /** ターン開始時に付与されている状態修正IDリストの上書き */
+      kind: "modifierIdsAtTurnStart";
+      modifierIdsAtTurnStart: Array<Modifier["id"]>;
     }
   | {
       /**

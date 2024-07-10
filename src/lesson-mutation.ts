@@ -1316,6 +1316,82 @@ export const activateEffectsOnTurnStart = (
 };
 
 /**
+ * ターン経過に伴って状態修正の効果時間を減少する
+ */
+export const decreaseEachModifierDurationOverTime = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  let modifierUpdates: LessonUpdateQuery[] = [];
+  for (const modifierId of newLesson.idol.modifierIdsAtTurnStart) {
+    const modifier = newLesson.idol.modifiers.find((e) => e.id === modifierId);
+    const reason = {
+      kind: "turnStartTrigger",
+      historyTurnNumber: lesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    } as const;
+    if (modifier) {
+      switch (modifier.kind) {
+        case "goodCondition":
+        case "doubleLifeConsumption":
+        case "excellentCondition":
+        case "halfLifeConsumption":
+        case "mightyPerformance":
+        case "noVitalityIncrease": {
+          const change = {
+            kind: modifier.kind,
+            duration: -1,
+            id: params.idGenerator(),
+            updateTargetId: modifier.id,
+          };
+          modifierUpdates = [
+            ...modifierUpdates,
+            {
+              kind: "modifier",
+              actual: change,
+              max: change,
+              reason,
+            },
+          ];
+          break;
+        }
+        case "positiveImpression": {
+          const change = {
+            kind: modifier.kind,
+            amount: -1,
+            id: params.idGenerator(),
+            updateTargetId: modifier.id,
+          };
+          modifierUpdates = [
+            ...modifierUpdates,
+            {
+              kind: "modifier",
+              actual: change,
+              max: change,
+              reason,
+            },
+          ];
+          break;
+        }
+      }
+    }
+  }
+  newLesson = patchUpdates(newLesson, modifierUpdates);
+  nextHistoryResultIndex++;
+
+  return {
+    updates: [...modifierUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
  * スキルカード使用数を1消費する
  *
  * - 「スキルカード使用数追加」を先に消費し、それがなければアクションポイントを消費する

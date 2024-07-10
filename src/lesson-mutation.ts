@@ -1675,13 +1675,47 @@ export const useCard = (
   // スキルカード追加発動時は、スキルカード1枚分の結果の中に表示されている
   nextHistoryResultIndex++;
 
-  // TODO: この時点でスキルカード使用数追加があってアクションポイントが0のとき、アクションポイントを1回復して前者を減らす
-  //       - 例えば、こういう状況
-  //         - スキルカード使用数追加のあるカードを、それがない状態で使ったとき
-  //         - Pアイテムのスキルカード使用時効果により、スキルカード使用数追加が発生したとき
-  //       - この使い方をプレビューで見た時、本家UI上は、スキルカード使用数追加へ+1の差分が出ているが、合計数は0という不思議な表記になっている
-  //         - この数は直接取れなくて、UI側でupdatesから拾ってもらうしかなさそう
-  //       - プレビューで出す必要があるので、useCard処理内に含める必要がある
+  //
+  // スキルカード使用数追加が残っている場合、アクションポイントを1回復して消費する
+  //
+  // - 例えば、アクションポイントを消費して使ったスキルカードの効果で、スキルカード使用数追加が発生した時、最終的にそのスキルカード使用数追加が消費され、アクションポイントは残っている
+  // - 上記の状況を、本家UIのスキルカード使用プレビューで見た時、スキルカード使用数追加へ+1の差分が出ているが、その合計数は0という不思議な表記になっている
+  //   - なお、本実装において、UI側はこの状況が発生していることは直接レッスンから取得できず、 updates から解析してもらう必要がある
+  // - スキルカード使用プレビューでこの状況を再現する必要があるので、本処理は useCard 内に含める必要がある
+  //
+  let recoveringActionPointsUpdates: LessonUpdateQuery[] = [];
+  const additionalCardUsageCount = newLesson.idol.modifiers.find(
+    (e) => e.kind === "additionalCardUsageCount",
+  );
+  if (newLesson.idol.actionPoints === 0 && additionalCardUsageCount) {
+    const reason = {
+      kind: "cardUsage",
+      cardId: card.id,
+      historyTurnNumber: newLesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    } as const;
+    const modifierChange: Modifier = {
+      kind: "additionalCardUsageCount",
+      amount: -1,
+      id: params.idGenerator(),
+      updateTargetId: additionalCardUsageCount.id,
+    };
+    recoveringActionPointsUpdates = [
+      {
+        kind: "actionPoints",
+        amount: 1,
+        reason,
+      },
+      {
+        kind: "modifier",
+        actual: modifierChange,
+        max: modifierChange,
+        reason,
+      },
+    ];
+    newLesson = patchUpdates(newLesson, recoveringActionPointsUpdates);
+    nextHistoryResultIndex++;
+  }
 
   return {
     nextHistoryResultIndex,
@@ -1689,6 +1723,7 @@ export const useCard = (
       ...usedCardPlacementUpdates,
       ...costConsumptionUpdates,
       ...effectActivationUpdates,
+      ...recoveringActionPointsUpdates,
     ],
   };
 };

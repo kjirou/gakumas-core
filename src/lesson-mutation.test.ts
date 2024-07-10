@@ -3787,6 +3787,66 @@ describe("useCard preview:false", () => {
       expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
     });
   });
+  describe("スキルカード使用数追加によるアクションポイントの回復", () => {
+    test("it works", () => {
+      const lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("aidorusengen"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a"];
+      const { updates } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates.filter((e) => e.kind === "actionPoints")).toStrictEqual([
+        {
+          kind: "actionPoints",
+          amount: 1,
+          reason: expect.any(Object),
+        },
+      ]);
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "additionalCardUsageCount",
+            amount: 1,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "additionalCardUsageCount",
+            amount: 1,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+        {
+          kind: "modifier",
+          actual: {
+            kind: "additionalCardUsageCount",
+            amount: -1,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          max: {
+            kind: "additionalCardUsageCount",
+            amount: -1,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
 });
 describe("useCard preview:true", () => {
   test("コストに対してリソースが不足している時も、プレビューできる", () => {

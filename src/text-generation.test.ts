@@ -70,7 +70,6 @@ describe("generateEffectText", () => {
           modifier: {
             kind: "additionalCardUsageCount",
             amount: 1,
-            duration: 1,
           },
         },
       ],

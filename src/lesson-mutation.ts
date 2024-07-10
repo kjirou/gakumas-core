@@ -1316,6 +1316,82 @@ export const activateEffectsOnTurnStart = (
 };
 
 /**
+ * ターン経過に伴って状態修正の効果時間を減少する
+ */
+export const decreaseEachModifierDurationOverTime = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  let modifierUpdates: LessonUpdateQuery[] = [];
+  for (const modifierId of newLesson.idol.modifierIdsAtTurnStart) {
+    const modifier = newLesson.idol.modifiers.find((e) => e.id === modifierId);
+    const reason = {
+      kind: "turnStartTrigger",
+      historyTurnNumber: lesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    } as const;
+    if (modifier) {
+      switch (modifier.kind) {
+        case "goodCondition":
+        case "doubleLifeConsumption":
+        case "excellentCondition":
+        case "halfLifeConsumption":
+        case "mightyPerformance":
+        case "noVitalityIncrease": {
+          const change = {
+            kind: modifier.kind,
+            duration: -1,
+            id: params.idGenerator(),
+            updateTargetId: modifier.id,
+          };
+          modifierUpdates = [
+            ...modifierUpdates,
+            {
+              kind: "modifier",
+              actual: change,
+              max: change,
+              reason,
+            },
+          ];
+          break;
+        }
+        case "positiveImpression": {
+          const change = {
+            kind: modifier.kind,
+            amount: -1,
+            id: params.idGenerator(),
+            updateTargetId: modifier.id,
+          };
+          modifierUpdates = [
+            ...modifierUpdates,
+            {
+              kind: "modifier",
+              actual: change,
+              max: change,
+              reason,
+            },
+          ];
+          break;
+        }
+      }
+    }
+  }
+  newLesson = patchUpdates(newLesson, modifierUpdates);
+  nextHistoryResultIndex++;
+
+  return {
+    updates: [...modifierUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
  * スキルカード使用数を1消費する
  *
  * - 「スキルカード使用数追加」を先に消費し、それがなければアクションポイントを消費する
@@ -1339,14 +1415,12 @@ export const consumeRemainingCardUsageCount = (
       actual: {
         kind: "additionalCardUsageCount",
         amount: -1,
-        duration: 0,
         id: params.idGenerator(),
         updateTargetId: additionalCardUsageCount.id,
       },
       max: {
         kind: "additionalCardUsageCount",
         amount: -1,
-        duration: 0,
         id: params.idGenerator(),
         updateTargetId: additionalCardUsageCount.id,
       },
@@ -1592,6 +1666,14 @@ export const useCard = (
   }
   // スキルカード追加発動時は、スキルカード1枚分の結果の中に表示されている
   nextHistoryResultIndex++;
+
+  // TODO: この時点でスキルカード使用数追加があってアクションポイントが0のとき、アクションポイントを1回復して前者を減らす
+  //       - 例えば、こういう状況
+  //         - スキルカード使用数追加のあるカードを、それがない状態で使ったとき
+  //         - Pアイテムのスキルカード使用時効果により、スキルカード使用数追加が発生したとき
+  //       - この使い方をプレビューで見た時、本家UI上は、スキルカード使用数追加へ+1の差分が出ているが、合計数は0という不思議な表記になっている
+  //         - この数は直接取れなくて、UI側でupdatesから拾ってもらうしかなさそう
+  //       - プレビューで出す必要があるので、useCard処理内に含める必要がある
 
   return {
     nextHistoryResultIndex,

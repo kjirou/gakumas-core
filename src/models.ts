@@ -99,6 +99,7 @@ const createIdol = (params: { idolInProduction: IdolInProduction }): Idol => {
   return {
     actionPoints: 0,
     life: params.idolInProduction.life,
+    modifierIdsAtTurnStart: [],
     modifiers: [],
     original: params.idolInProduction,
     totalCardUsageCount: 0,
@@ -433,6 +434,16 @@ export const patchUpdates = (
           idol: {
             ...newLesson.idol,
             modifiers: newModifiers,
+          },
+        };
+        break;
+      }
+      case "modifierIdsAtTurnStart": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            modifierIdsAtTurnStart: update.modifierIdsAtTurnStart,
           },
         };
         break;

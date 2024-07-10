@@ -39,6 +39,7 @@ import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
+  decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
   summarizeCardInHand,
   useCard,
@@ -104,6 +105,79 @@ export const startLessonTurn = (
       activateEffectsOnLessonStartResult.nextHistoryResultIndex;
     lesson = patchUpdates(lesson, activateEffectsOnLessonStartResult.updates);
   }
+
+  //
+  // スキルカード使用数追加の状態修正を削除
+  //
+  const additionalCardUsageCount = lesson.idol.modifiers.find(
+    (e) => e.kind === "additionalCardUsageCount",
+  );
+  if (additionalCardUsageCount) {
+    const id = lessonGamePlay.idGenerator();
+    const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
+      {
+        kind: "modifier",
+        actual: {
+          kind: "additionalCardUsageCount",
+          amount: -additionalCardUsageCount.amount,
+          id,
+          updateTargetId: additionalCardUsageCount.id,
+        },
+        max: {
+          kind: "additionalCardUsageCount",
+          amount: -additionalCardUsageCount.amount,
+          id,
+          updateTargetId: additionalCardUsageCount.id,
+        },
+        reason: {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    updates = [...updates, ...additionalCardUsageCountUpdates];
+    historyResultIndex++;
+    lesson = patchUpdates(lesson, additionalCardUsageCountUpdates);
+  }
+
+  //
+  // ターン経過に伴い、状態修正の効果時間を減少
+  //
+  if (lesson.idol.modifierIdsAtTurnStart.length > 0) {
+    const decreaseEachModifierDurationOverTimeResult =
+      decreaseEachModifierDurationOverTime(lesson, historyResultIndex, {
+        idGenerator: lessonGamePlay.idGenerator,
+      });
+    updates = [
+      ...updates,
+      ...decreaseEachModifierDurationOverTimeResult.updates,
+    ];
+    historyResultIndex =
+      decreaseEachModifierDurationOverTimeResult.nextHistoryResultIndex;
+    lesson = patchUpdates(
+      lesson,
+      decreaseEachModifierDurationOverTimeResult.updates,
+    );
+  }
+
+  //
+  // この時点で存在する状態修正IDリストを更新
+  //
+  const modifierIdsAtTurnStartUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "modifierIdsAtTurnStart",
+      modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
+      reason: {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...modifierIdsAtTurnStartUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
 
   //
   // アクションポイントを1にする
@@ -393,8 +467,6 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   // TODO: 手札を捨てる、山札が0の状態の捨札は次のシャッフル後の捨札に所属する。例えば、手札3枚、山札0枚、手札1枚使って残り捨札、の捨札はシャッフル後
 
   // TODO: ターン数によるゲーム終了判定
-
-  // TODO: 状態修正の効果時間を減らす。新規追加は下がらない点に要注意。
 
   return {
     ...lessonGamePlay,

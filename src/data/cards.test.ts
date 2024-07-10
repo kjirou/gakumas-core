@@ -1,4 +1,4 @@
-import { cards } from "./index";
+import { cards } from "./cards";
 
 test("any id is not duplicated", () => {
   let ids: string[] = [];

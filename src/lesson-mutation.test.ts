@@ -8,7 +8,7 @@ import {
   Lesson,
   Modifier,
 } from "./types";
-import { cards, getCardDataById } from "./data/card";
+import { cards, getCardDataById } from "./data/cards";
 import {
   activateEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,

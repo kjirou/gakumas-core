@@ -1,4 +1,4 @@
-import { CardDefinition, ProducePlan } from "../../types";
+import { CardDefinition, ProducePlan } from "../types";
 
 export const findCardDataById = (
   id: CardDefinition["id"],

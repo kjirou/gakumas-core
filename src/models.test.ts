@@ -6,9 +6,9 @@ import {
   Modifier,
   LessonUpdateQuery,
 } from "./types";
-import { getCardDataById } from "./data/card";
-import { getIdolDataById } from "./data/idol";
-import { getProducerItemDataById } from "./data/producer-item";
+import { getCardDataById } from "./data/cards";
+import { getIdolDataById } from "./data/idols";
+import { getProducerItemDataById } from "./data/producer-items";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,

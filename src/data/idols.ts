@@ -1,4 +1,4 @@
-import { IdolDefinition } from "../../types";
+import { IdolDefinition } from "../types";
 
 export const findIdolDataById = (
   id: IdolDefinition["id"],

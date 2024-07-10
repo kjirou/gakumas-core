@@ -1,4 +1,4 @@
-import { characters } from "./index";
+import { characters } from "./characters";
 
 test("any id is not duplicated", () => {
   let ids: string[] = [];

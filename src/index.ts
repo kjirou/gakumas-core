@@ -18,10 +18,6 @@
 //       - レッスン中に放置するとカードがうっすら光っておすすめカードを教えてくれるが、それがコンテストと同じAIかもしれない
 //         - もしそうだとすると、AIはサーバ側ではなくてクライアント側が計算しているのかもしれない
 
-import { getCardDataById } from "./data/card";
-import { getCharacterDataById } from "./data/character";
-import { getIdolDataById } from "./data/idol";
-import { getProducerItemDataById } from "./data/producer-item";
 import {
   Card,
   CardDefinition,

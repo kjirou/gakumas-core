@@ -458,8 +458,6 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: ターン終了時トリガー、都度ゲーム終了判定を含む
 
-  // TODO: 応援/トラブルトリガー
-
   // TODO: 手札を捨てる、山札が0の状態の捨札は次のシャッフル後の捨札に所属する。例えば、手札3枚、山札0枚、手札1枚使って残り捨札、の捨札はシャッフル後
 
   // TODO: ターン数によるゲーム終了判定

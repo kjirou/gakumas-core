@@ -243,6 +243,16 @@ describe("calculateActualActionCost", () => {
     },
     {
       args: [
+        { kind: "normal", value: 2 },
+        [
+          { kind: "lifeConsumptionReduction", value: 1 },
+          { kind: "doubleLifeConsumption", duration: 1 },
+        ],
+      ],
+      expected: { kind: "normal", value: 3 },
+    },
+    {
+      args: [
         { kind: "life", value: 1 },
         [{ kind: "lifeConsumptionReduction", value: 1 }],
       ],

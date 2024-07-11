@@ -1497,7 +1497,10 @@ export const useCard = (
   }
 
   //
-  // 使用した手札を捨札か除外へ移動
+  // 使用した手札を捨札などへ移動
+  //
+  // - 基本的には、「レッスン中1回」がないものは捨札、あるものは除外へ移動する
+  // - しかし、山札0枚時の特殊仕様を考慮する必要がある、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {

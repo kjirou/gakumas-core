@@ -174,6 +174,7 @@ describe("createLessonGamePlay", () => {
         deck: expect.any(Array),
         discardPile: [],
         removedCardPile: [],
+        playedCardsOnEmptyDeck: [],
         score: 0,
         turnNumber: 1,
         lastTurnNumber: 6,
@@ -691,6 +692,25 @@ describe("patchUpdates", () => {
         },
       ]);
       expect(lessonMock.idol.life).toBe(3);
+    });
+  });
+  describe("playedCardsOnEmptyDeck", () => {
+    test("it works", () => {
+      let lessonMock = {
+        playedCardsOnEmptyDeck: ["1"],
+      } as Lesson;
+      lessonMock = patchUpdates(lessonMock, [
+        {
+          kind: "playedCardsOnEmptyDeck",
+          cardIds: ["2"],
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lessonMock.playedCardsOnEmptyDeck).toStrictEqual(["2"]);
     });
   });
   describe("remainingTurns", () => {

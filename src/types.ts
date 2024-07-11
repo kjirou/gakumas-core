@@ -1004,6 +1004,18 @@ export type Lesson = {
   idol: Idol;
   /** 最終ターン数、この値と同じターン数目の行動で終了、「ターン追加」の効果は含まない */
   lastTurnNumber: number;
+  /**
+   * 山札が0枚の時にプレイされたスキルカードIDリスト
+   *
+   * - 本家仕様には、不具合だと思われる、妙な仕様がある
+   *   - それは「山札が0枚の時にターン終了し、ターン開始時の手札を引いた時、前ターンの最後に使用したスキルカードと使わなかった手札は、山札の再構築に含まれず次の捨札になる」というもの
+   * - これを再現するために、この条件に合致する使用されたスキルカードを保持する
+   *   - ターン終了処理で未使用手札を捨札へ移動する時に、初期化する
+   * - 補足:
+   *   - ターン最後のスキルカードを、スキルカード使用数追加がある状態で使用し、その後にスキップした場合もこの仕様の影響を受ける
+   *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
+   */
+  playedCardsOnEmptyDeck: Array<Card["id"]>;
   /** 最終ターン数への修正、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
   remainingTurns: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */
@@ -1192,6 +1204,10 @@ export type LessonUpdateQueryDiff =
       kind: "modifier";
       actual: Modifier;
       max: Modifier;
+    }
+  | {
+      kind: "playedCardsOnEmptyDeck";
+      cardIds: Lesson["playedCardsOnEmptyDeck"];
     }
   | {
       kind: "remainingTurns";

@@ -140,6 +140,7 @@ export const createLesson = (params: {
     }),
     lastTurnNumber: params.lastTurnNumber,
     removedCardPile: [],
+    playedCardsOnEmptyDeck: [],
     score: 0,
     turnNumber: 1,
     remainingTurns: 0,
@@ -459,6 +460,13 @@ export const patchUpdates = (
             ...newLesson.idol,
             modifierIdsAtTurnStart: update.modifierIdsAtTurnStart,
           },
+        };
+        break;
+      }
+      case "playedCardsOnEmptyDeck": {
+        newLesson = {
+          ...newLesson,
+          playedCardsOnEmptyDeck: update.cardIds,
         };
         break;
       }

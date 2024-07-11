@@ -209,20 +209,6 @@ export const startLessonTurn = (
   lesson = patchUpdates(lesson, [increaseTurnNumberUpdate]);
 
   //
-  // 手札を山札から引く
-  //
-  const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
-    lesson,
-    historyResultIndex,
-    {
-      getRandom: lessonGamePlay.getRandom,
-    },
-  );
-  updates = [...updates, ...drawCardsOnLessonStartResult.updates];
-  historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
-
-  //
   // ターン開始時の効果発動
   //
   const activateEffectsOnTurnStartResult = activateEffectsOnTurnStart(
@@ -236,6 +222,22 @@ export const startLessonTurn = (
   updates = [...updates, ...activateEffectsOnTurnStartResult.updates];
   historyResultIndex = activateEffectsOnTurnStartResult.nextHistoryResultIndex;
   lesson = patchUpdates(lesson, activateEffectsOnTurnStartResult.updates);
+
+  //
+  // 手札を山札から引く
+  //
+  // - ターン開始処理の後であることは、SR咲季のPアイテム発動で確認した
+  //
+  const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
+    lesson,
+    historyResultIndex,
+    {
+      getRandom: lessonGamePlay.getRandom,
+    },
+  );
+  updates = [...updates, ...drawCardsOnLessonStartResult.updates];
+  historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
 
   return {
     ...lessonGamePlay,

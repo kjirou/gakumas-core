@@ -460,10 +460,23 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
   // TODO: 手札を捨てる、山札が0の状態の捨札は次のシャッフル後の捨札に所属する。例えば、手札3枚、山札0枚、手札1枚使って残り捨札、の捨札はシャッフル後
 
-  // TODO: ターン数によるゲーム終了判定
-
   return {
     ...lessonGamePlay,
     updates,
   };
+};
+
+/**
+ * レッスンが終了しているかを返す
+ */
+export const isLessonEnded = (lessonGamePlay: LessonGamePlay): boolean => {
+  const lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
+  // TODO: スコアパーフェクト達成により終了しているか
+  return (
+    lesson.turnNumber === lesson.lastTurnNumber + lesson.remainingTurns &&
+    lesson.idol.actionPoints === 0
+  );
 };

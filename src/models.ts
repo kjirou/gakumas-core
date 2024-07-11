@@ -173,6 +173,18 @@ export const calculateClearScoreProgress = (
   };
 };
 
+/**
+ * スコアがパーフェクトを満たすかを判定する
+ *
+ * @returns false の場合は、パーフェクトを満たしていないか、パーフェクトの閾値が設定されていない
+ */
+export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
+  return lesson.clearScoreThresholds
+    ? calculateClearScoreProgress(lesson.score, lesson.clearScoreThresholds)
+        .remainingPerfectScore === 0
+    : false;
+};
+
 export const createLessonGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   idolInProduction: IdolInProduction;

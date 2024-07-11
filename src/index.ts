@@ -40,7 +40,11 @@ import {
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
-import { getCardContentDefinition, patchUpdates } from "./models";
+import {
+  getCardContentDefinition,
+  isScoreSatisfyingPerfect,
+  patchUpdates,
+} from "./models";
 import { generateCardDescription } from "./text-generation";
 
 //
@@ -223,21 +227,27 @@ export const startLessonTurn = (
   historyResultIndex = activateEffectsOnTurnStartResult.nextHistoryResultIndex;
   lesson = patchUpdates(lesson, activateEffectsOnTurnStartResult.updates);
 
+  const isLessonEnded = isScoreSatisfyingPerfect(lesson);
+
   //
   // 手札を山札から引く
   //
-  // - ターン開始処理の後であることは、SR咲季のPアイテム発動で確認した
+  // - 本家仕様確認
+  //   - ターン開始処理の後であることは、SR咲季のPアイテムで確認した
+  //   - ターン開始処理でスコアパーフェクトを満たした場合、手札を引かないことを、SSR広のPアイテムで確認した
   //
-  const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
-    lesson,
-    historyResultIndex,
-    {
-      getRandom: lessonGamePlay.getRandom,
-    },
-  );
-  updates = [...updates, ...drawCardsOnLessonStartResult.updates];
-  historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+  if (!isLessonEnded) {
+    const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
+      lesson,
+      historyResultIndex,
+      {
+        getRandom: lessonGamePlay.getRandom,
+      },
+    );
+    updates = [...updates, ...drawCardsOnLessonStartResult.updates];
+    historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
+    lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+  }
 
   return {
     ...lessonGamePlay,
@@ -458,7 +468,7 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   let historyResultIndex = 1;
   let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: ターン終了時トリガー、都度ゲーム終了判定を含む
+  // TODO: ターン終了時トリガー。この効果によりスコアパーフェクト条件を満たしてレッスンが終了した時に、後続処理が実行されるのかは不明
 
   // TODO: 手札を捨てる、山札が0の状態の捨札は次のシャッフル後の捨札に所属する。例えば、手札3枚、山札0枚、手札1枚使って残り捨札、の捨札はシャッフル後
 
@@ -470,15 +480,20 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
 /**
  * レッスンが終了しているかを返す
+ *
+ * - 以下の処理の後に本関数を呼び出し、レッスンが終了しているかを判定する。終了していたら、その時点から後続処理を行わない。
+ *   - `startLessonTurn`
+ *   - `playCard`
+ *   - `endLessonTurn`
  */
 export const isLessonEnded = (lessonGamePlay: LessonGamePlay): boolean => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
-  // TODO: スコアパーフェクト達成により終了しているか
   return (
-    lesson.turnNumber === lesson.lastTurnNumber + lesson.remainingTurns &&
-    lesson.idol.actionPoints === 0
+    (lesson.turnNumber === lesson.lastTurnNumber + lesson.remainingTurns &&
+      lesson.idol.actionPoints === 0) ||
+    isScoreSatisfyingPerfect(lesson)
   );
 };

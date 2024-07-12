@@ -51,18 +51,21 @@ export const drawCardsFromDeck = (
   discardPile: Lesson["discardPile"],
   getRandom: GetRandom,
 ): {
-  deck: Array<Card["id"]>;
-  discardPile: Array<Card["id"]>;
+  deck: Lesson["deck"];
+  deckRebuilt: boolean;
+  discardPile: Lesson["discardPile"];
   drawnCards: Array<Card["id"]>;
 } => {
   let newDeck = [...deck];
   let newDiscardPile = [...discardPile];
   let drawnCards = [];
+  let deckRebuilt = false;
   for (let i = 0; i < count; i++) {
     // 捨札を加えても引く数に足りない状況は考慮しない
     if (newDeck.length === 0) {
       newDeck = shuffleArray(newDiscardPile, getRandom);
       newDiscardPile = [];
+      deckRebuilt = true;
     }
     const drawnCard = newDeck.shift();
     if (!drawnCard) {
@@ -72,6 +75,7 @@ export const drawCardsFromDeck = (
   }
   return {
     deck: newDeck,
+    deckRebuilt,
     discardPile: newDiscardPile,
     drawnCards,
   };
@@ -620,7 +624,7 @@ const activateEffect = (
       break;
     }
     case "drawCards": {
-      const { deck, discardPile, drawnCards } = drawCardsFromDeck(
+      const { deck, deckRebuilt, discardPile, drawnCards } = drawCardsFromDeck(
         lesson.deck,
         effect.amount,
         lesson.discardPile,
@@ -631,6 +635,12 @@ const activateEffect = (
         lesson.hand,
         discardPile,
       );
+      if (deckRebuilt) {
+        diffs.push({
+          kind: "playedCardsOnEmptyDeck",
+          cardIds: [],
+        });
+      }
       diffs.push(
         createCardPlacementDiff(
           {
@@ -670,6 +680,7 @@ const activateEffect = (
       const discardPile1 = [...lesson.discardPile, ...lesson.hand];
       const {
         deck,
+        deckRebuilt,
         discardPile: discardPile2,
         drawnCards,
       } = drawCardsFromDeck(
@@ -683,6 +694,12 @@ const activateEffect = (
         [],
         discardPile2,
       );
+      if (deckRebuilt) {
+        diffs.push({
+          kind: "playedCardsOnEmptyDeck",
+          cardIds: [],
+        });
+      }
       diffs.push(
         createCardPlacementDiff(
           {
@@ -1165,6 +1182,38 @@ export const drawCardsOnTurnStart = (
   }
 
   //
+  // 捨札から、山札0枚時に捨札になったスキルカードを一時取り出す
+  //
+  // - 山札の再構築時の候補から外すため
+  // - 山札0枚時の特殊仕様によるもの、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
+  //
+  const playedCardsOnEmptyDeck = newLesson.playedCardsOnEmptyDeck;
+  let playedCardsOnEmptyDeckUpdates: LessonUpdateQuery[] = [];
+  if (playedCardsOnEmptyDeck.length > 0) {
+    // 必ず、山札は0枚のはず
+    if (newLesson.deck.length > 0) {
+      throw new Error(
+        `Unexpected state: deck is not empty: ${newLesson.deck.length}`,
+      );
+    }
+    playedCardsOnEmptyDeckUpdates = [
+      {
+        kind: "cardPlacement",
+        discardPile: newLesson.discardPile.filter(
+          (e) => !playedCardsOnEmptyDeck.includes(e),
+        ),
+        reason: {
+          kind: "turnStartTrigger",
+          historyTurnNumber: newLesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    newLesson = patchUpdates(newLesson, playedCardsOnEmptyDeckUpdates);
+    nextHistoryResultIndex++;
+  }
+
+  //
   // 手札を引く
   //
   let drawCardsInHandUpdates: LessonUpdateQuery[] = [];
@@ -1173,12 +1222,13 @@ export const drawCardsOnTurnStart = (
       newLesson,
       { kind: "drawCards", amount: remainingDrawCount },
       params.getRandom,
+      // "drawCards" に限れば idGenerator は使われない
       () => "",
     );
     drawCardsInHandUpdates = (effectResult ?? []).map((diff) =>
       createLessonUpdateQueryFromDiff(diff, {
         kind: "turnStartTrigger",
-        historyTurnNumber: lesson.turnNumber,
+        historyTurnNumber: newLesson.turnNumber,
         historyResultIndex,
       }),
     );
@@ -1186,8 +1236,45 @@ export const drawCardsOnTurnStart = (
     nextHistoryResultIndex++;
   }
 
+  //
+  // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す
+  //
+  let restoringPlayedCardsOnEmptyDeckUpdates: LessonUpdateQuery[] = [];
+  if (playedCardsOnEmptyDeck.length > 0) {
+    // 必ず、山札は再構築されているはずなので、捨札は空のはず
+    if (newLesson.discardPile.length > 0) {
+      throw new Error(
+        `Unexpected state: discardPile is not empty: ${newLesson.discardPile.length}`,
+      );
+    }
+    // 必ず、"drawCards"の中で山札が再構築されているはずなので、その中でこの値は初期化されているはず
+    if (newLesson.playedCardsOnEmptyDeck.length > 0) {
+      throw new Error(
+        `Unexpected state: playedCardsOnEmptyDeck is not empty: ${newLesson.discardPile.length}`,
+      );
+    }
+    restoringPlayedCardsOnEmptyDeckUpdates = [
+      {
+        kind: "cardPlacement",
+        discardPile: playedCardsOnEmptyDeck,
+        reason: {
+          kind: "turnStartTrigger",
+          historyTurnNumber: newLesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    newLesson = patchUpdates(newLesson, restoringPlayedCardsOnEmptyDeckUpdates);
+    nextHistoryResultIndex++;
+  }
+
   return {
-    updates: [...drawInnateCardsUpdates, ...drawCardsInHandUpdates],
+    updates: [
+      ...drawInnateCardsUpdates,
+      ...playedCardsOnEmptyDeckUpdates,
+      ...drawCardsInHandUpdates,
+      ...restoringPlayedCardsOnEmptyDeckUpdates,
+    ],
     nextHistoryResultIndex,
   };
 };
@@ -1504,6 +1591,12 @@ export const useCard = (
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
+    const reason = {
+      kind: "cardUsage",
+      cardId,
+      historyTurnNumber: newLesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    } as const;
     usedCardPlacementUpdates = [
       {
         ...createCardPlacementDiff(
@@ -1519,14 +1612,19 @@ export const useCard = (
               : { discardPile: [...newLesson.discardPile, cardId] }),
           },
         ),
-        reason: {
-          kind: "cardUsage",
-          cardId,
-          historyTurnNumber: newLesson.turnNumber,
-          historyResultIndex: nextHistoryResultIndex,
-        },
+        reason,
       },
     ];
+    if (newLesson.deck.length === 0 && !cardContent.usableOncePerLesson) {
+      usedCardPlacementUpdates = [
+        ...usedCardPlacementUpdates,
+        {
+          kind: "playedCardsOnEmptyDeck",
+          cardIds: [...newLesson.playedCardsOnEmptyDeck, cardId],
+          reason,
+        },
+      ];
+    }
     newLesson = patchUpdates(newLesson, usedCardPlacementUpdates);
     nextHistoryResultIndex++;
   }

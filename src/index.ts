@@ -473,8 +473,23 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   //
   // 手札を捨てる
   //
-  // - 山札0枚時の特殊仕様がある、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
-  //
+  if (lesson.hand.length > 0) {
+    const discardHandUpdates: LessonUpdateQuery[] = [
+      {
+        kind: "cardPlacement",
+        hand: [],
+        discardPile: [...lesson.discardPile, ...lesson.hand],
+        reason: {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    updates = [...updates, ...discardHandUpdates];
+    historyResultIndex++;
+    lesson = patchUpdates(lesson, discardHandUpdates);
+  }
 
   return {
     ...lessonGamePlay,

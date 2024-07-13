@@ -487,6 +487,17 @@ export const patchUpdates = (
         };
         break;
       }
+      case "producerItem.activationCount": {
+        newLesson = {
+          ...newLesson,
+          producerItems: newLesson.producerItems.map((producerItem) =>
+            producerItem.id === update.producerItemId
+              ? { ...producerItem, activationCount: update.value }
+              : producerItem,
+          ),
+        };
+        break;
+      }
       case "remainingTurns": {
         newLesson = {
           ...newLesson,

@@ -714,6 +714,38 @@ describe("patchUpdates", () => {
       expect(lessonMock.playedCardsOnEmptyDeck).toStrictEqual(["2"]);
     });
   });
+  describe("producerItem.activationCount", () => {
+    test("it works", () => {
+      let lessonMock = {
+        producerItems: [
+          { id: "1", activationCount: 1 },
+          { id: "2", activationCount: 2 },
+        ],
+      } as Lesson;
+      lessonMock = patchUpdates(lessonMock, [
+        {
+          kind: "producerItem.activationCount",
+          producerItemId: "2",
+          value: 3,
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lessonMock.producerItems).toStrictEqual([
+        {
+          id: "1",
+          activationCount: 1,
+        },
+        {
+          id: "2",
+          activationCount: 3,
+        },
+      ]);
+    });
+  });
   describe("remainingTurns", () => {
     test("it works", () => {
       let lessonMock = {

@@ -1238,6 +1238,11 @@ export type LessonUpdateQueryDiff =
       cardIds: Lesson["playedCardsOnEmptyDeck"];
     }
   | {
+      kind: "producerItem.activationCount";
+      producerItemId: ProducerItem["id"];
+      value: ProducerItem["activationCount"];
+    }
+  | {
       kind: "remainingTurns";
       amount: number;
     }

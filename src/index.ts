@@ -33,6 +33,7 @@ import {
 } from "./types";
 import {
   activateEffectsOnLessonStart,
+  activateEffectsOnTurnEnd,
   activateEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
   decreaseEachModifierDurationOverTime,
@@ -482,10 +483,20 @@ export const endLessonTurn = (
     lessonGamePlay.updates,
   );
 
-  // TODO: ターン終了時トリガー。
-  //       - スコア増加系も、少なくとも手札を捨てるより前であることは「夢へのライフログ」で確認。好印象の発動とは違うんやね。
-  //       - 状態修正のeffectActivationAtEndOfTurn、PアイテムのturnEnd,everyTwoTurns。
-  //       - この効果によりスコアパーフェクト条件を満たしてレッスンが終了した時に、後続処理が実行されるのかは不明。たまたま現存の効果だと、ほぼこれで勝負が決まることはなさそう。
+  //
+  // 状態修正やPアイテムによるターン終了時の効果発動
+  //
+  const activateEffectsOnTurnEndUpdates = activateEffectsOnTurnEnd(
+    lesson,
+    historyResultIndex,
+    {
+      getRandom: lessonGamePlay.getRandom,
+      idGenerator: lessonGamePlay.idGenerator,
+    },
+  );
+  updates = [...updates, ...activateEffectsOnTurnEndUpdates.updates];
+  historyResultIndex = activateEffectsOnTurnEndUpdates.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, activateEffectsOnTurnEndUpdates.updates);
 
   // TODO: [仕様確認] ターン終了時トリガーによりスコアパーフェクト条件を満たしている場合、本当に後続処理が実行されないのか
   if (!isScoreSatisfyingPerfect(lesson)) {

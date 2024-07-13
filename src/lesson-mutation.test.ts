@@ -1,15 +1,7 @@
+import { Card, CardDefinition, Idol, Lesson, Modifier } from "./types";
+import { getCardDataById } from "./data/cards";
 import {
-  Card,
-  CardDefinition,
-  CardInProduction,
-  Idol,
-  IdolDefinition,
-  IdolInProduction,
-  Lesson,
-  Modifier,
-} from "./types";
-import { cards, getCardDataById } from "./data/cards";
-import {
+  activateEffectsOnTurnEnd,
   activateEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
   calculateCostConsumption,
@@ -28,12 +20,7 @@ import {
   summarizeCardInHand,
   validateCostConsumution,
 } from "./lesson-mutation";
-import {
-  createIdolInProduction,
-  createLesson,
-  patchUpdates,
-  prepareCardsForLesson,
-} from "./models";
+import { createIdolInProduction, createLesson, patchUpdates } from "./models";
 import { createIdGenerator } from "./utils";
 
 const createLessonForTest = (
@@ -4221,6 +4208,43 @@ describe("useCard preview:true", () => {
         reason: expect.any(Object),
       },
     ]);
+  });
+});
+describe("activateEffectsOnTurnEnd", () => {
+  describe("状態修正による効果発動", () => {
+    test("effectActivationAtEndOfTurn", () => {
+      const lesson = createLessonForTest();
+      lesson.idol.modifiers = [
+        {
+          kind: "effectActivationAtEndOfTurn",
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 1 },
+          },
+          id: "x",
+        },
+      ];
+      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+      });
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "motivation",
+            amount: 1,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 1,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
   });
 });
 // 計算内容は calculatePositiveImpressionScore のテストで検証する

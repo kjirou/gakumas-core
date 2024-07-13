@@ -2781,7 +2781,181 @@ describe("useCard preview:false", () => {
       });
     });
   });
-  describe("効果発動", () => {
+  describe("状態修正に起因する、スキルカード使用毎の効果発動", () => {
+    test("「ファンシーチャーム」は、メンタルスキルカード使用時、好印象を付与する。アクティブスキルカード使用時は付与しない", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("fanshichamu"),
+            enabled: true,
+            enhanced: false,
+          },
+          {
+            id: "b",
+            definition: getCardDataById("hyogennokihon"),
+            enabled: true,
+            enhanced: false,
+          },
+          {
+            id: "c",
+            definition: getCardDataById("apirunokihon"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a", "b", "c"];
+      const idGenerator = createIdGenerator();
+      const { updates: updates1 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(
+        updates1.filter(
+          (e) =>
+            e.kind === "modifier" &&
+            e.actual.kind === "effectActivationUponCardUsage",
+        ),
+      ).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "mental",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          max: {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "mental",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+
+      lesson = patchUpdates(lesson, updates1);
+
+      const { updates: updates2a } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(updates2a.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "positiveImpression",
+            amount: 1,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          max: {
+            kind: "positiveImpression",
+            amount: 1,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+
+      const { updates: updates2b } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 1,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(updates2b.filter((e) => e.kind === "modifier")).toStrictEqual([]);
+    });
+    test("「演出計画」は、アクティブスキルカード使用時、固定元気を付与する。メンタルスキルカード使用時は付与しない", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("enshutsukeikaku"),
+            enabled: true,
+            enhanced: false,
+          },
+          {
+            id: "b",
+            definition: getCardDataById("apirunokihon"),
+            enabled: true,
+            enhanced: false,
+          },
+          {
+            id: "c",
+            definition: getCardDataById("shinkokyu"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a", "b", "c"];
+      const idGenerator = createIdGenerator();
+      const { updates: updates1 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(
+        updates1.filter(
+          (e) =>
+            e.kind === "modifier" &&
+            e.actual.kind === "effectActivationUponCardUsage",
+        ),
+      ).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "active",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          max: {
+            kind: "effectActivationUponCardUsage",
+            cardKind: "active",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+
+      lesson = patchUpdates(lesson, updates1);
+
+      const { updates: updates2a } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(updates2a.filter((e) => e.kind === "vitality")).toStrictEqual([
+        {
+          kind: "vitality",
+          actual: 2,
+          max: 2,
+          reason: expect.any(Object),
+        },
+      ]);
+
+      const { updates: updates2b } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 1,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
+    });
+  });
+  describe("主効果発動", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {
       test("「飛躍」は、集中が足りない時、パラメータ上昇は1回のみ適用する", () => {
         const lesson = createLessonForTest({
@@ -3750,180 +3924,6 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         });
       });
-    });
-  });
-  describe("状態修正によるスキルカード使用毎効果発動", () => {
-    test("「ファンシーチャーム」は、メンタルスキルカード使用時、好印象を付与する。アクティブスキルカード使用時は付与しない", () => {
-      let lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("fanshichamu"),
-            enabled: true,
-            enhanced: false,
-          },
-          {
-            id: "b",
-            definition: getCardDataById("hyogennokihon"),
-            enabled: true,
-            enhanced: false,
-          },
-          {
-            id: "c",
-            definition: getCardDataById("apirunokihon"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a", "b", "c"];
-      const idGenerator = createIdGenerator();
-      const { updates: updates1 } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-        preview: false,
-      });
-      expect(
-        updates1.filter(
-          (e) =>
-            e.kind === "modifier" &&
-            e.actual.kind === "effectActivationUponCardUsage",
-        ),
-      ).toStrictEqual([
-        {
-          kind: "modifier",
-          actual: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "mental",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
-          max: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "mental",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
-          reason: expect.any(Object),
-        },
-      ]);
-
-      lesson = patchUpdates(lesson, updates1);
-
-      const { updates: updates2a } = useCard(lesson, 2, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates2a.filter((e) => e.kind === "modifier")).toStrictEqual([
-        {
-          kind: "modifier",
-          actual: {
-            kind: "positiveImpression",
-            amount: 1,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          max: {
-            kind: "positiveImpression",
-            amount: 1,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          reason: expect.any(Object),
-        },
-      ]);
-
-      const { updates: updates2b } = useCard(lesson, 2, {
-        selectedCardInHandIndex: 1,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates2b.filter((e) => e.kind === "modifier")).toStrictEqual([]);
-    });
-    test("「演出計画」は、アクティブスキルカード使用時、固定元気を付与する。メンタルスキルカード使用時は付与しない", () => {
-      let lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("enshutsukeikaku"),
-            enabled: true,
-            enhanced: false,
-          },
-          {
-            id: "b",
-            definition: getCardDataById("apirunokihon"),
-            enabled: true,
-            enhanced: false,
-          },
-          {
-            id: "c",
-            definition: getCardDataById("shinkokyu"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a", "b", "c"];
-      const idGenerator = createIdGenerator();
-      const { updates: updates1 } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(
-        updates1.filter(
-          (e) =>
-            e.kind === "modifier" &&
-            e.actual.kind === "effectActivationUponCardUsage",
-        ),
-      ).toStrictEqual([
-        {
-          kind: "modifier",
-          actual: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "active",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
-          max: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "active",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
-          reason: expect.any(Object),
-        },
-      ]);
-
-      lesson = patchUpdates(lesson, updates1);
-
-      const { updates: updates2a } = useCard(lesson, 2, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates2a.filter((e) => e.kind === "vitality")).toStrictEqual([
-        {
-          kind: "vitality",
-          actual: 2,
-          max: 2,
-          reason: expect.any(Object),
-        },
-      ]);
-
-      const { updates: updates2b } = useCard(lesson, 2, {
-        selectedCardInHandIndex: 1,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
     });
   });
   describe("スキルカード使用数追加によるアクションポイントの回復", () => {

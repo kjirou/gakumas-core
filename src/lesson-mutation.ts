@@ -1690,31 +1690,70 @@ export const useCard = (
   //
   let effectActivationUpdates: LessonUpdateQuery[] = [];
   for (let times = 1; times <= (doubleEffect ? 2 : 1); times++) {
+    let effectActivationUpdatesOnce: LessonUpdateQuery[] = [];
+
     //
-    // プレビュー時は反映しない効果を除外する
+    // 状態修正に起因する、スキルカード使用毎の効果発動
     //
-    const filteredEffects = cardContent.effects.filter(
-      (effect) =>
-        !params.preview ||
-        !(
-          effect.kind === "drawCards" ||
-          effect.kind === "enhanceHand" ||
-          effect.kind === "exchangeHand" ||
-          effect.kind === "generateCard"
-        ),
-    );
+    // - 「ファンシーチャーム」で確認したところ、スキルカードの主効果発動の前に作用していた
+    //
+    if (!params.preview) {
+      const effectsUponCardUsage = newLesson.idol.modifiers.filter(
+        (e) =>
+          e.kind === "effectActivationUponCardUsage" &&
+          e.cardKind === card.original.definition.cardSummaryKind,
+      ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
+      for (const { effect } of effectsUponCardUsage) {
+        const effectResult = activateEffect(
+          newLesson,
+          effect,
+          params.getRandom,
+          params.idGenerator,
+        );
+        effectActivationUpdatesOnce = [
+          ...effectActivationUpdatesOnce,
+          ...(effectResult ?? []).map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "cardUsageTrigger",
+              cardId: card.id,
+              historyTurnNumber: newLesson.turnNumber,
+              historyResultIndex: nextHistoryResultIndex,
+            }),
+          ),
+        ];
+      }
+    }
+
+    //
+    // TODO: Pアイテムに起因する、スキルカード使用毎の効果発動
+    //       - スキルカード使用がトリガーのものと、スキルカード使用による状態修正がトリガーのものがある
+    //
+    // - 「満開ペアヘアピン」で確認したところ、スキルカードの主効果発動の前に作用していた
+    //
 
     //
     // 主効果発動
     //
-    const effectActivations = activateEffects(
+    const mainEffectActivations = activateEffects(
       newLesson,
-      filteredEffects,
+      // プレビュー時は、一部の効果は発動されていない
+      cardContent.effects.filter(
+        (effect) =>
+          !params.preview ||
+          !(
+            effect.kind === "drawCards" ||
+            effect.kind === "enhanceHand" ||
+            effect.kind === "exchangeHand" ||
+            effect.kind === "generateCard"
+          ),
+      ),
       params.getRandom,
       params.idGenerator,
     );
-    let effectActivationUpdatesOnce: LessonUpdateQuery[] = [];
-    for (const [effectIndex, effectActivation] of effectActivations.entries()) {
+    for (const [
+      effectIndex,
+      effectActivation,
+    ] of mainEffectActivations.entries()) {
       if (effectActivation) {
         effectActivationUpdatesOnce = [
           ...effectActivationUpdatesOnce,
@@ -1763,41 +1802,6 @@ export const useCard = (
         ),
       ];
     }
-
-    //
-    // 状態修正に起因する、スキルカード使用毎の効果発動
-    //
-    if (!params.preview) {
-      const effectsUponCardUsage = newLesson.idol.modifiers.filter(
-        (e) =>
-          e.kind === "effectActivationUponCardUsage" &&
-          e.cardKind === card.original.definition.cardSummaryKind,
-      ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
-      for (const { effect } of effectsUponCardUsage) {
-        const effectResult = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        effectActivationUpdatesOnce = [
-          ...effectActivationUpdatesOnce,
-          ...(effectResult ?? []).map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "cardUsageTrigger",
-              cardId: card.id,
-              historyTurnNumber: newLesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          ),
-        ];
-      }
-    }
-
-    //
-    // TODO: Pアイテムに起因する、スキルカード使用毎の効果発動
-    //       - スキルカード使用がトリガーのものと、スキルカード使用による状態修正がトリガーのものがある
-    //
 
     // 1回分のスキルカード使用に対する副作用を含んで完了してから、1ループに1回のみレッスンの状態を更新する
     // 例えば、「ファンシーチャーム」は「以降、メンタルスキルカード使用時、好印象+1」の効果だが、自身の使用によって発動はしないことを担保する必要がある

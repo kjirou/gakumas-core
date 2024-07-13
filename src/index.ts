@@ -86,7 +86,10 @@ export const startLessonTurn = (
 ): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
   // レッスン開始時の効果発動
@@ -359,7 +362,10 @@ export const playCard = (
 ): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
   // アクションポイントがない場合は実行できない
@@ -415,7 +421,10 @@ export const playCard = (
 export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
   // アクションポイントを0にする
@@ -468,7 +477,10 @@ export const endLessonTurn = (
 ): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   // TODO: ターン終了時トリガー。
   //       - スコア増加系も、少なくとも手札を捨てるより前であることは「夢へのライフログ」で確認。好印象の発動とは違うんやね。

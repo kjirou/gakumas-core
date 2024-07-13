@@ -1024,8 +1024,6 @@ export type Lesson = {
   /** 手札、原文でも「手札」、最大5枚 */
   hand: Array<Card["id"]>;
   idol: Idol;
-  /** 最終ターン数、この値と同じターン数目の行動で終了、「ターン追加」の効果は含まない、TODO: ターン別にVo/Da/Viがあるので、これだとダメだ */
-  lastTurnNumber: number;
   /**
    * 山札が0枚の時にプレイされたスキルカードIDリスト
    *
@@ -1051,6 +1049,13 @@ export type Lesson = {
   score: number;
   /** ターン番号、初期化時は0でプレイヤー行動可能時点で1になる、関連する原文は「{turnNumber}目以降の場合、使用可」 */
   turnNumber: number;
+  /**
+   * ターン別のパラメータ種別リスト
+   *
+   * - 0要素目が1ターン目で、末尾要素が最終ターンになる
+   * - 「ターン追加」の効果は、この値には含まれない
+   */
+  turns: Array<IdolParameterKind>;
 };
 
 /**

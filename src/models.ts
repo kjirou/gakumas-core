@@ -137,7 +137,7 @@ export const createLesson = (params: {
   clearScoreThresholds: Lesson["clearScoreThresholds"];
   getRandom: GetRandom;
   idolInProduction: IdolInProduction;
-  lastTurnNumber: Lesson["lastTurnNumber"];
+  turns: Lesson["turns"];
 }): Lesson => {
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
@@ -155,7 +155,7 @@ export const createLesson = (params: {
     idol: createIdol({
       idolInProduction: params.idolInProduction,
     }),
-    lastTurnNumber: params.lastTurnNumber,
+    turns: params.turns,
     removedCardPile: [],
     playedCardsOnEmptyDeck: [],
     score: 0,
@@ -208,7 +208,7 @@ export const createLessonGamePlay = (params: {
   idolInProduction: IdolInProduction;
   getRandom?: GetRandom;
   idGenerator?: IdGenerator;
-  lastTurnNumber: Lesson["lastTurnNumber"];
+  turns: Lesson["turns"];
 }): LessonGamePlay => {
   const clearScoreThresholds =
     params.clearScoreThresholds !== undefined
@@ -225,18 +225,18 @@ export const createLessonGamePlay = (params: {
       clearScoreThresholds,
       getRandom,
       idolInProduction: params.idolInProduction,
-      lastTurnNumber: params.lastTurnNumber,
+      turns: params.turns,
     }),
     updates: [],
   };
 };
 
-export const calculateActualLastTurnNumber = (lesson: Lesson): number =>
-  lesson.lastTurnNumber + lesson.remainingTurns;
+export const calculateLastTurnNumber = (lesson: Lesson): number =>
+  lesson.turns.length + lesson.remainingTurns;
 
 /** 残りターン数を計算する、最終ターンは1 */
-export const calculateActualRemainingTurns = (lesson: Lesson): number =>
-  calculateActualLastTurnNumber(lesson) - lesson.turnNumber + 1;
+export const calculateRemainingTurns = (lesson: Lesson): number =>
+  calculateLastTurnNumber(lesson) - lesson.turnNumber + 1;
 
 /** 「消費体力減少」・「消費体力削減」・「消費体力増加」を反映したコストを返す */
 export const calculateActualActionCost = (

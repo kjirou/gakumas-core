@@ -39,7 +39,7 @@ const createLessonForTest = (
     clearScoreThresholds: undefined,
     getRandom: Math.random,
     idolInProduction,
-    lastTurnNumber: 6,
+    turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
   });
 };
 
@@ -893,7 +893,7 @@ describe("canApplyEffect", () => {
       args: [
         {
           turnNumber: 4,
-          lastTurnNumber: 6,
+          turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
           remainingTurns: 0,
         } as Lesson,
         { kind: "countReminingTurns", max: 3 },
@@ -905,7 +905,7 @@ describe("canApplyEffect", () => {
       args: [
         {
           turnNumber: 4,
-          lastTurnNumber: 6,
+          turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
           remainingTurns: 0,
         } as Lesson,
         { kind: "countReminingTurns", max: 2 },

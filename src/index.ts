@@ -44,6 +44,7 @@ import {
 } from "./lesson-mutation";
 import {
   calculateClearScoreProgress,
+  calculateRemainingTurns,
   getCardContentDefinition,
   isScoreSatisfyingPerfect,
   patchUpdates,
@@ -558,8 +559,7 @@ export const isLessonEnded = (lessonGamePlay: LessonGamePlay): boolean => {
     lessonGamePlay.updates,
   );
   return (
-    (lesson.turnNumber === lesson.lastTurnNumber + lesson.remainingTurns &&
-      lesson.idol.actionPoints === 0) ||
+    (calculateRemainingTurns(lesson) === 1 && lesson.idol.actionPoints === 0) ||
     isScoreSatisfyingPerfect(lesson)
   );
 };

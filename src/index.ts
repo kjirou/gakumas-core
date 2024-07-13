@@ -405,8 +405,6 @@ export const playCard = (
   historyResultIndex = useCardResult.nextHistoryResultIndex;
   lesson = patchUpdates(lesson, useCardResult.updates);
 
-  // TODO: スコアパーフェクト達成によるゲーム終了判定、ターン終了処理を待たずに即座に終了している
-
   return {
     ...lessonGamePlay,
     updates,

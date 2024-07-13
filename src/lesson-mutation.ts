@@ -1576,6 +1576,10 @@ export const consumeRemainingCardUsageCount = (
 
 /**
  * スキルカードを使用する
+ *
+ * - TODO: [仕様確認] 主効果発動によりスコアパーフェクトを達成した後、スキルカード使用がトリガーの追加効果発動は発動されるか？
+ *         - 例えば、「願いの力」「曇りをぬぐったタオル」など
+ *         - 多分されそうな気がする
  */
 export const useCard = (
   lesson: Lesson,
@@ -1761,7 +1765,7 @@ export const useCard = (
     }
 
     //
-    // 状態修正によるスキルカード使用毎効果発動
+    // 状態修正に起因する、スキルカード使用毎の効果発動
     //
     if (!params.preview) {
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
@@ -1791,11 +1795,8 @@ export const useCard = (
     }
 
     //
-    // TODO: Pアイテムのスキルカード使用時に効果発動
-    //
-
-    //
-    // TODO: Pアイテムのスキルカード使用による状態修正増加時トリガー
+    // TODO: Pアイテムに起因する、スキルカード使用毎の効果発動
+    //       - スキルカード使用がトリガーのものと、スキルカード使用による状態修正がトリガーのものがある
     //
 
     // 1回分のスキルカード使用に対する副作用を含んで完了してから、1ループに1回のみレッスンの状態を更新する

@@ -468,7 +468,10 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   let historyResultIndex = 1;
   let lesson = lessonGamePlay.initialLesson;
 
-  // TODO: ターン終了時トリガー。この効果によりスコアパーフェクト条件を満たしてレッスンが終了した時に、後続処理が実行されるのかは不明
+  // TODO: ターン終了時トリガー。
+  //       - スコア増加系も、少なくとも手札を捨てるより前であることは「夢へのライフログ」で確認。好印象の発動とは違うんやね。
+  //       - 状態修正のeffectActivationAtEndOfTurn、PアイテムのturnEnd,everyTwoTurns。
+  //       - この効果によりスコアパーフェクト条件を満たしてレッスンが終了した時に、後続処理が実行されるのかは不明。たまたま現存の効果だと、ほぼこれで勝負が決まることはなさそう。
 
   //
   // 手札を捨てる
@@ -490,6 +493,8 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
     historyResultIndex++;
     lesson = patchUpdates(lesson, discardHandUpdates);
   }
+
+  // TODO: 好印象によるスコア増加、ターン終了時トリガーの効果発動とは明らかに時点が異なる。こっちは手札を捨てた後発動。
 
   return {
     ...lessonGamePlay,

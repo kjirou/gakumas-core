@@ -153,8 +153,6 @@ export const createCardPlacementDiff = (
 
 /**
  * アイドルがコスト分のリソースを持つかを検証する
- *
- * - TODO: 戻り値を errors にしないといけなさそう、プレビューや手札上に何のコストが足りなくて効果発動できないかが書いてあるので
  */
 export const validateCostConsumution = (
   idol: Idol,

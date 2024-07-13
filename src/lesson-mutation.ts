@@ -20,8 +20,8 @@ import type {
 import { filterGeneratableCardsData } from "./data/cards";
 import {
   calculateActualActionCost,
-  calculateActualRemainingTurns,
   calculateClearScoreProgress,
+  calculateRemainingTurns,
   getCardContentDefinition,
   handSizeOnLessonStart,
   isDelayedEffectModifierType,
@@ -329,7 +329,7 @@ export const canApplyEffect = (
       return targetValue >= condition.min;
     }
     case "countReminingTurns": {
-      return calculateActualRemainingTurns(lesson) <= condition.max;
+      return calculateRemainingTurns(lesson) <= condition.max;
     }
     case "countVitality": {
       return validateNumberInRange(lesson.idol.vitality, condition.range);

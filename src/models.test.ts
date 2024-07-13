@@ -153,7 +153,7 @@ describe("createLessonGamePlay", () => {
     });
     const lessonGamePlay = createLessonGamePlay({
       idolInProduction,
-      lastTurnNumber: 6,
+      turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });
     expect(lessonGamePlay).toStrictEqual({
       getRandom: expect.any(Function),
@@ -178,7 +178,7 @@ describe("createLessonGamePlay", () => {
         producerItems: expect.any(Array),
         score: 0,
         turnNumber: 1,
-        lastTurnNumber: 6,
+        turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
         remainingTurns: 0,
       },
       updates: [],

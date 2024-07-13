@@ -543,6 +543,35 @@ export const calculatePerformingScoreEffect = (
   return diffs;
 };
 
+/**
+ * 好印象によるスコア増加の計算をする
+ */
+export const calculatePositiveImpressionScore = (
+  modifiers: Modifier[],
+  remainingIncrementableScore: number | undefined,
+): Extract<LessonUpdateQueryDiff, { kind: "score" }> => {
+  const positiveImpression = modifiers.find(
+    (e) => e.kind === "positiveImpression",
+  );
+  const positiveImpressionAmount =
+    positiveImpression && "amount" in positiveImpression
+      ? positiveImpression.amount
+      : 0;
+  const hasMightyPerformance =
+    modifiers.find((e) => e.kind === "mightyPerformance") !== undefined;
+  const score = Math.ceil(
+    positiveImpressionAmount * (hasMightyPerformance ? 1.5 : 1.0),
+  );
+  return {
+    kind: "score",
+    actual:
+      remainingIncrementableScore !== undefined
+        ? Math.min(score, remainingIncrementableScore)
+        : score,
+    max: score,
+  };
+};
+
 export const calculatePerformingVitalityEffect = (
   idol: Idol,
   query: VitalityUpdateQuery,
@@ -1826,5 +1855,48 @@ export const useCard = (
       ...effectActivationUpdates,
       ...recoveringActionPointsUpdates,
     ],
+  };
+};
+
+/**
+ * スキルカードを使用する
+ */
+export const obtainPositiveImpressionScoreOnTurnEnd = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+): LessonMutationResult => {
+  let updates: LessonUpdateQuery[] = [];
+
+  const hasPositiveImpression =
+    lesson.idol.modifiers.find((e) => e.kind === "positiveImpression") !==
+    undefined;
+  if (hasPositiveImpression) {
+    let remainingIncrementableScore: number | undefined = undefined;
+    if (lesson.clearScoreThresholds !== undefined) {
+      const progress = calculateClearScoreProgress(
+        lesson.score,
+        lesson.clearScoreThresholds,
+      );
+      if (progress.remainingPerfectScore !== undefined) {
+        remainingIncrementableScore = progress.remainingPerfectScore;
+      }
+    }
+    const diff = calculatePositiveImpressionScore(
+      lesson.idol.modifiers,
+      remainingIncrementableScore,
+    );
+    updates = [
+      ...updates,
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      }),
+    ];
+  }
+
+  return {
+    nextHistoryResultIndex: historyResultIndex + 1,
+    updates,
   };
 };

@@ -37,10 +37,12 @@ import {
   consumeRemainingCardUsageCount,
   decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
+  obtainPositiveImpressionScoreOnTurnEnd,
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
 import {
+  calculateClearScoreProgress,
   getCardContentDefinition,
   isScoreSatisfyingPerfect,
   patchUpdates,
@@ -460,10 +462,10 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
 /**
  * レッスンのターンを終了する
- *
- * - レッスン終了時に関わる処理は、現在はなさそう
  */
-const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
+export const endLessonTurn = (
+  lessonGamePlay: LessonGamePlay,
+): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
   let lesson = lessonGamePlay.initialLesson;
@@ -473,28 +475,47 @@ const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   //       - 状態修正のeffectActivationAtEndOfTurn、PアイテムのturnEnd,everyTwoTurns。
   //       - この効果によりスコアパーフェクト条件を満たしてレッスンが終了した時に、後続処理が実行されるのかは不明。たまたま現存の効果だと、ほぼこれで勝負が決まることはなさそう。
 
-  //
-  // 手札を捨てる
-  //
-  if (lesson.hand.length > 0) {
-    const discardHandUpdates: LessonUpdateQuery[] = [
-      {
-        kind: "cardPlacement",
-        hand: [],
-        discardPile: [...lesson.discardPile, ...lesson.hand],
-        reason: {
-          kind: "turnEndTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
+  // TODO: [仕様確認] ターン終了時トリガーによりスコアパーフェクト条件を満たしている場合、本当に後続処理が実行されないのか
+  if (!isScoreSatisfyingPerfect(lesson)) {
+    //
+    // 手札を捨てる
+    //
+    if (lesson.hand.length > 0) {
+      const discardHandUpdates: LessonUpdateQuery[] = [
+        {
+          kind: "cardPlacement",
+          hand: [],
+          discardPile: [...lesson.discardPile, ...lesson.hand],
+          reason: {
+            kind: "turnEndTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          },
         },
-      },
-    ];
-    updates = [...updates, ...discardHandUpdates];
-    historyResultIndex++;
-    lesson = patchUpdates(lesson, discardHandUpdates);
-  }
+      ];
+      updates = [...updates, ...discardHandUpdates];
+      historyResultIndex++;
+      lesson = patchUpdates(lesson, discardHandUpdates);
+    }
 
-  // TODO: 好印象によるスコア増加、ターン終了時トリガーの効果発動とは明らかに時点が異なる。こっちは手札を捨てた後発動。
+    //
+    // 好印象によるスコア増加
+    //
+    // - ターン終了時トリガーの効果発動とは明らかに時点が異なる、こちらは手札を捨てた後発動している
+    //
+    const obtainPositiveImpressionScoreOnTurnEndResult =
+      obtainPositiveImpressionScoreOnTurnEnd(lesson, historyResultIndex);
+    updates = [
+      ...updates,
+      ...obtainPositiveImpressionScoreOnTurnEndResult.updates,
+    ];
+    historyResultIndex =
+      obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
+    lesson = patchUpdates(
+      lesson,
+      obtainPositiveImpressionScoreOnTurnEndResult.updates,
+    );
+  }
 
   return {
     ...lessonGamePlay,

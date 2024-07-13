@@ -1,20 +1,13 @@
+import { Card, CardDefinition, Idol, Lesson, Modifier } from "./types";
+import { getCardDataById } from "./data/cards";
 import {
-  Card,
-  CardDefinition,
-  CardInProduction,
-  Idol,
-  IdolDefinition,
-  IdolInProduction,
-  Lesson,
-  Modifier,
-} from "./types";
-import { cards, getCardDataById } from "./data/cards";
-import {
+  activateEffectsOnTurnEnd,
   activateEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
   calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
+  calculatePositiveImpressionScore,
   canApplyEffect,
   canUseCard,
   consumeRemainingCardUsageCount,
@@ -22,16 +15,12 @@ import {
   decreaseEachModifierDurationOverTime,
   drawCardsFromDeck,
   drawCardsOnTurnStart,
+  obtainPositiveImpressionScoreOnTurnEnd,
   useCard,
   summarizeCardInHand,
   validateCostConsumution,
 } from "./lesson-mutation";
-import {
-  createIdolInProduction,
-  createLesson,
-  patchUpdates,
-  prepareCardsForLesson,
-} from "./models";
+import { createIdolInProduction, createLesson, patchUpdates } from "./models";
 import { createIdGenerator } from "./utils";
 
 const createLessonForTest = (
@@ -1404,6 +1393,41 @@ describe("calculatePerformingScoreEffect", () => {
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(calculatePerformingScoreEffect(...args)).toStrictEqual(expected);
   });
+});
+describe("calculatePositiveImpressionScore", () => {
+  const testCases: Array<{
+    args: Parameters<typeof calculatePositiveImpressionScore>;
+    expected: ReturnType<typeof calculatePositiveImpressionScore>;
+  }> = [
+    {
+      args: [[], undefined],
+      expected: { kind: "score", actual: 0, max: 0 },
+    },
+    {
+      args: [[{ kind: "positiveImpression", amount: 1, id: "a" }], undefined],
+      expected: { kind: "score", actual: 1, max: 1 },
+    },
+    {
+      args: [
+        [
+          { kind: "positiveImpression", amount: 2, id: "a" },
+          { kind: "mightyPerformance", duration: 1, id: "b" },
+        ],
+        undefined,
+      ],
+      expected: { kind: "score", actual: 3, max: 3 },
+    },
+    {
+      args: [[{ kind: "positiveImpression", amount: 3, id: "a" }], 2],
+      expected: { kind: "score", actual: 2, max: 3 },
+    },
+  ];
+  test.each(testCases)(
+    "$args.0.0, $args.0.1 (Limit: $args.1) => $expected",
+    ({ args, expected }) => {
+      expect(calculatePositiveImpressionScore(...args)).toStrictEqual(expected);
+    },
+  );
 });
 describe("calculatePerformingVitalityEffect", () => {
   const testCases: {
@@ -4184,5 +4208,83 @@ describe("useCard preview:true", () => {
         reason: expect.any(Object),
       },
     ]);
+  });
+});
+describe("activateEffectsOnTurnEnd", () => {
+  describe("状態修正による効果発動", () => {
+    test("effectActivationAtEndOfTurn", () => {
+      const lesson = createLessonForTest();
+      lesson.idol.modifiers = [
+        {
+          kind: "effectActivationAtEndOfTurn",
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 1 },
+          },
+          id: "x",
+        },
+      ];
+      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+      });
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "motivation",
+            amount: 1,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 1,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
+});
+// 計算内容は calculatePositiveImpressionScore のテストで検証する
+describe("obtainPositiveImpressionScoreOnTurnEnd", () => {
+  const testCases: Array<{
+    args: Parameters<typeof obtainPositiveImpressionScoreOnTurnEnd>;
+    expected: ReturnType<typeof obtainPositiveImpressionScoreOnTurnEnd>;
+    name: string;
+  }> = [
+    {
+      name: "好印象がない時、更新を返さない",
+      args: [createLessonForTest(), 1],
+      expected: {
+        updates: [],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "好印象がある時、スコアを獲得する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "positiveImpression", amount: 1, id: "x" },
+          ];
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          { kind: "score", actual: 1, max: 1, reason: expect.any(Object) },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(obtainPositiveImpressionScoreOnTurnEnd(...args)).toStrictEqual(
+      expected,
+    );
   });
 });

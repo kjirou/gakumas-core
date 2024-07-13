@@ -33,14 +33,17 @@ import {
 } from "./types";
 import {
   activateEffectsOnLessonStart,
+  activateEffectsOnTurnEnd,
   activateEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
   decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
+  obtainPositiveImpressionScoreOnTurnEnd,
   summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
 import {
+  calculateClearScoreProgress,
   getCardContentDefinition,
   isScoreSatisfyingPerfect,
   patchUpdates,
@@ -84,7 +87,10 @@ export const startLessonTurn = (
 ): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
   // レッスン開始時の効果発動
@@ -357,7 +363,10 @@ export const playCard = (
 ): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
   // アクションポイントがない場合は実行できない
@@ -413,7 +422,10 @@ export const playCard = (
 export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
   // アクションポイントを0にする
@@ -460,35 +472,72 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 
 /**
  * レッスンのターンを終了する
- *
- * - レッスン終了時に関わる処理は、現在はなさそう
  */
-const endLessonTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
+export const endLessonTurn = (
+  lessonGamePlay: LessonGamePlay,
+): LessonGamePlay => {
   let updates = lessonGamePlay.updates;
   let historyResultIndex = 1;
-  let lesson = lessonGamePlay.initialLesson;
-
-  // TODO: ターン終了時トリガー。この効果によりスコアパーフェクト条件を満たしてレッスンが終了した時に、後続処理が実行されるのかは不明
+  let lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
 
   //
-  // 手札を捨てる
+  // 状態修正やPアイテムによるターン終了時の効果発動
   //
-  if (lesson.hand.length > 0) {
-    const discardHandUpdates: LessonUpdateQuery[] = [
-      {
-        kind: "cardPlacement",
-        hand: [],
-        discardPile: [...lesson.discardPile, ...lesson.hand],
-        reason: {
-          kind: "turnEndTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
+  const activateEffectsOnTurnEndUpdates = activateEffectsOnTurnEnd(
+    lesson,
+    historyResultIndex,
+    {
+      getRandom: lessonGamePlay.getRandom,
+      idGenerator: lessonGamePlay.idGenerator,
+    },
+  );
+  updates = [...updates, ...activateEffectsOnTurnEndUpdates.updates];
+  historyResultIndex = activateEffectsOnTurnEndUpdates.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, activateEffectsOnTurnEndUpdates.updates);
+
+  // TODO: [仕様確認] ターン終了時トリガーによりスコアパーフェクト条件を満たしている場合、本当に後続処理が実行されないのか
+  if (!isScoreSatisfyingPerfect(lesson)) {
+    //
+    // 手札を捨てる
+    //
+    if (lesson.hand.length > 0) {
+      const discardHandUpdates: LessonUpdateQuery[] = [
+        {
+          kind: "cardPlacement",
+          hand: [],
+          discardPile: [...lesson.discardPile, ...lesson.hand],
+          reason: {
+            kind: "turnEndTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          },
         },
-      },
+      ];
+      updates = [...updates, ...discardHandUpdates];
+      historyResultIndex++;
+      lesson = patchUpdates(lesson, discardHandUpdates);
+    }
+
+    //
+    // 好印象によるスコア増加
+    //
+    // - ターン終了時トリガーの効果発動とは明らかに時点が異なる、こちらは手札を捨てた後発動している
+    //
+    const obtainPositiveImpressionScoreOnTurnEndResult =
+      obtainPositiveImpressionScoreOnTurnEnd(lesson, historyResultIndex);
+    updates = [
+      ...updates,
+      ...obtainPositiveImpressionScoreOnTurnEndResult.updates,
     ];
-    updates = [...updates, ...discardHandUpdates];
-    historyResultIndex++;
-    lesson = patchUpdates(lesson, discardHandUpdates);
+    historyResultIndex =
+      obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
+    lesson = patchUpdates(
+      lesson,
+      obtainPositiveImpressionScoreOnTurnEndResult.updates,
+    );
   }
 
   return {

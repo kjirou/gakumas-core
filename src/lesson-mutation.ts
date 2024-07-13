@@ -28,6 +28,7 @@ import {
   isDrawCardsEffectType,
   isEnhanceHandEffectType,
   isPerformEffectType,
+  isScoreSatisfyingPerfect,
   maxHandSize,
   patchUpdates,
   prepareCardsForLesson,
@@ -541,6 +542,35 @@ export const calculatePerformingScoreEffect = (
     }
   }
   return diffs;
+};
+
+/**
+ * 好印象によるスコア増加の計算をする
+ */
+export const calculatePositiveImpressionScore = (
+  modifiers: Modifier[],
+  remainingIncrementableScore: number | undefined,
+): Extract<LessonUpdateQueryDiff, { kind: "score" }> => {
+  const positiveImpression = modifiers.find(
+    (e) => e.kind === "positiveImpression",
+  );
+  const positiveImpressionAmount =
+    positiveImpression && "amount" in positiveImpression
+      ? positiveImpression.amount
+      : 0;
+  const hasMightyPerformance =
+    modifiers.find((e) => e.kind === "mightyPerformance") !== undefined;
+  const score = Math.ceil(
+    positiveImpressionAmount * (hasMightyPerformance ? 1.5 : 1.0),
+  );
+  return {
+    kind: "score",
+    actual:
+      remainingIncrementableScore !== undefined
+        ? Math.min(score, remainingIncrementableScore)
+        : score,
+    max: score,
+  };
 };
 
 export const calculatePerformingVitalityEffect = (
@@ -1075,6 +1105,9 @@ export const summarizeCardInHand = (
   };
 };
 
+/**
+ * レッスンの状態を更新する関数が返す結果
+ */
 type LessonMutationResult = {
   nextHistoryResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"];
   updates: LessonUpdateQuery[];
@@ -1826,5 +1859,113 @@ export const useCard = (
       ...effectActivationUpdates,
       ...recoveringActionPointsUpdates,
     ],
+  };
+};
+
+/**
+ * ターン終了時の各種効果を発動する
+ *
+ * - TODO: [仕様確認] それぞれの効果によりスコアパーフェクト条件を満たした時、後続処理が実行されるのか不明。現在存在する効果だと、ほぼこれで勝負が決まることはなさそうではある。
+ */
+export const activateEffectsOnTurnEnd = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  //
+  // 状態修正による効果発動
+  //
+  // - TODO: [仕様確認] Pアイテムより先に発動しているか？
+  //
+  let modifierUpdates: LessonUpdateQuery[] = [];
+  for (const modifier of newLesson.idol.modifiers) {
+    let innerUpdates: LessonUpdateQuery[] = [];
+    if (modifier.kind === "effectActivationAtEndOfTurn") {
+      const diffs = activateEffect(
+        newLesson,
+        modifier.effect,
+        params.getRandom,
+        params.idGenerator,
+      );
+      if (diffs) {
+        innerUpdates = diffs.map((diff) =>
+          createLessonUpdateQueryFromDiff(diff, {
+            kind: "turnEndTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          }),
+        );
+      }
+    }
+    newLesson = patchUpdates(newLesson, innerUpdates);
+    modifierUpdates = [...modifierUpdates, ...innerUpdates];
+    if (isScoreSatisfyingPerfect(newLesson)) {
+      break;
+    }
+  }
+  if (modifierUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  //
+  // TODO: Pアイテムによる効果発動、turnEnd,everyTwoTurns
+  //
+  // - TODO: [仕様確認] Pアイテム内の発動順はどうなっている？
+  //
+  if (!isScoreSatisfyingPerfect(newLesson)) {
+  }
+
+  return {
+    updates: [...modifierUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
+ * ターン終了時の好印象の発動によりスコアを獲得する
+ */
+export const obtainPositiveImpressionScoreOnTurnEnd = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+): LessonMutationResult => {
+  let updates: LessonUpdateQuery[] = [];
+
+  const hasPositiveImpression =
+    lesson.idol.modifiers.find((e) => e.kind === "positiveImpression") !==
+    undefined;
+  if (hasPositiveImpression) {
+    let remainingIncrementableScore: number | undefined = undefined;
+    if (lesson.clearScoreThresholds !== undefined) {
+      const progress = calculateClearScoreProgress(
+        lesson.score,
+        lesson.clearScoreThresholds,
+      );
+      if (progress.remainingPerfectScore !== undefined) {
+        remainingIncrementableScore = progress.remainingPerfectScore;
+      }
+    }
+    const diff = calculatePositiveImpressionScore(
+      lesson.idol.modifiers,
+      remainingIncrementableScore,
+    );
+    updates = [
+      ...updates,
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      }),
+    ];
+  }
+
+  return {
+    nextHistoryResultIndex: historyResultIndex + 1,
+    updates,
   };
 };

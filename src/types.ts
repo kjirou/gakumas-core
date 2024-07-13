@@ -654,7 +654,7 @@ export type CardInProduction = {
   enabled: boolean;
   enhanced: boolean;
   /**
-   * IdolInProduction["deck"] 内で一意のID
+   * IdolInProduction["cards"] 内で一意のID
    *
    * - 本番では、常に IdGenerator で生成する
    * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
@@ -696,8 +696,9 @@ export type Card = {
    * スキルカードID
    *
    * - 1レッスン内で一意
-   * - 所持しているスキルカードは CardInProduction["id"] を複製する、一方で生成したスキルカードは新たにIDを生成して割り振る
-   *   - CardInProduction["id"] を複製する仕様を維持しないと、テストコードが複雑になる
+   * - レッスン前に所持しているスキルカードについては CardInProduction["id"] を複製する
+   *   - テストコード内で IdGenerator を渡さないで良いようにするため
+   * - 一方で、生成したスキルカードは新たにIDを生成して割り振る
    */
   id: string;
   original: CardInProduction;
@@ -876,6 +877,12 @@ export type ProducerItemDefinition = {
 export type ProducerItemInProduction = {
   definition: ProducerItemDefinition;
   enhanced?: boolean;
+  /**
+   * IdolInProduction["producerItems"] 内で一意のID
+   *
+   * - 本番では、常に IdGenerator で生成する
+   * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
+   */
   id: string;
 };
 
@@ -885,6 +892,16 @@ export type ProducerItemInProduction = {
  * - レッスン開始前に生成され、レッスン終了時に破棄される
  */
 export type ProducerItem = {
+  /** 発動した回数 */
+  activationCount: number;
+  /**
+   * PアイテムID
+   *
+   * - 1レッスン内で一意
+   * - ProducerItemInProduction["id"] を複製する
+   *   - テストコード内で IdGenerator を渡さないで良いようにするため
+   */
+  id: string;
   original: ProducerItemInProduction;
 };
 
@@ -1021,6 +1038,7 @@ export type Lesson = {
    *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
    */
   playedCardsOnEmptyDeck: Array<Card["id"]>;
+  producerItems: ProducerItem[];
   /** 最終ターン数への修正、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
   remainingTurns: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */

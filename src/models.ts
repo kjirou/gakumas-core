@@ -21,6 +21,8 @@ import {
   LessonUpdateQuery,
   Modifier,
   ModifierDefinition,
+  ProducerItem,
+  ProducerItemInProduction,
 } from "./types";
 import { createIdGenerator, shuffleArray } from "./utils";
 
@@ -119,6 +121,18 @@ export const prepareCardsForLesson = (
   });
 };
 
+export const prepareProducerItemsForLesson = (
+  producerItemsInProduction: ProducerItemInProduction[],
+): ProducerItem[] => {
+  return producerItemsInProduction.map((producerItemInProduction) => {
+    return {
+      activationCount: 0,
+      id: producerItemInProduction.id,
+      original: producerItemInProduction,
+    };
+  });
+};
+
 export const createLesson = (params: {
   clearScoreThresholds: Lesson["clearScoreThresholds"];
   getRandom: GetRandom;
@@ -128,6 +142,9 @@ export const createLesson = (params: {
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
     cards,
+    producerItems: prepareProducerItemsForLesson(
+      params.idolInProduction.producerItems,
+    ),
     clearScoreThresholds: params.clearScoreThresholds,
     deck: shuffleArray(
       cards.map((card) => card.id),

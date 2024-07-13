@@ -175,6 +175,7 @@ describe("createLessonGamePlay", () => {
         discardPile: [],
         removedCardPile: [],
         playedCardsOnEmptyDeck: [],
+        producerItems: expect.any(Array),
         score: 0,
         turnNumber: 1,
         lastTurnNumber: 6,

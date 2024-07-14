@@ -10,7 +10,8 @@ import {
 import { getCardDataById } from "./data/cards";
 import {
   activateEffectsOnTurnEnd,
-  activateEffectsOnTurnStart,
+  activateModifierEffectsOnTurnStart,
+  activateProducerItemEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
   calculateCostConsumption,
   calculatePerformingScoreEffect,
@@ -2183,8 +2184,8 @@ describe("drawCardsOnLessonStart", () => {
     ]);
   });
 });
-// Pアイテム発動条件については、canActivateProducerItem のテストケースで可能な範囲はそちらで検証する
-describe("activateEffectsOnTurnStart", () => {
+// canActivateProducerItem のテストケースで可能な範囲はそちらで検証する
+describe("activateProducerItemEffectsOnTurnStart", () => {
   test("「ばくおんライオン」を、好調状態の時、発動する", () => {
     const lesson = createLessonForTest({
       producerItems: [
@@ -2196,7 +2197,7 @@ describe("activateEffectsOnTurnStart", () => {
       ],
     });
     lesson.idol.modifiers = [{ kind: "goodCondition", duration: 1, id: "x" }];
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
       idGenerator: createIdGenerator(),
     });
@@ -2220,7 +2221,7 @@ describe("activateEffectsOnTurnStart", () => {
         },
       ],
     });
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
       idGenerator: createIdGenerator(),
     });
@@ -2237,7 +2238,7 @@ describe("activateEffectsOnTurnStart", () => {
       ],
     });
     lesson.turnNumber = 2;
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
       idGenerator: createIdGenerator(),
     });
@@ -2261,12 +2262,15 @@ describe("activateEffectsOnTurnStart", () => {
       ],
     });
     lesson.turnNumber = 1;
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
       idGenerator: createIdGenerator(),
     });
     expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([]);
   });
+});
+// Pアイテム発動条件については、canActivateProducerItem のテストケースで可能な範囲はそちらで検証する
+describe("activateModifierEffectsOnTurnStart", () => {
   test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
     const lesson = createLessonForTest({
       cards: [
@@ -2302,7 +2306,7 @@ describe("activateEffectsOnTurnStart", () => {
         },
       },
     ];
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });
@@ -2376,7 +2380,7 @@ describe("activateEffectsOnTurnStart", () => {
         },
       },
     ];
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });
@@ -2450,7 +2454,7 @@ describe("activateEffectsOnTurnStart", () => {
         },
       },
     ];
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });
@@ -2547,7 +2551,7 @@ describe("activateEffectsOnTurnStart", () => {
         },
       },
     ];
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });
@@ -2611,7 +2615,7 @@ describe("activateEffectsOnTurnStart", () => {
         },
       },
     ];
-    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });

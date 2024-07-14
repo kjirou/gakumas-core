@@ -1159,9 +1159,9 @@ export const activateEffectsOnLessonStart = (
 };
 
 /**
- * ターン開始時の効果を発動する
+ * ターン開始時のPアイテムの効果を発動する
  */
-export const activateEffectsOnTurnStart = (
+export const activateProducerItemEffectsOnTurnStart = (
   lesson: Lesson,
   historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
   params: {
@@ -1173,9 +1173,9 @@ export const activateEffectsOnTurnStart = (
   let nextHistoryResultIndex = historyResultIndex;
 
   //
-  // Pアイテム起因の、ターン開始時の効果発動
+  // ターン開始時の効果発動
   //
-  let producerItemTurnStartUpdates: LessonUpdateQuery[] = [];
+  let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
@@ -1201,20 +1201,17 @@ export const activateEffectsOnTurnStart = (
         }
       }
       newLesson = patchUpdates(newLesson, innerUpdates);
-      producerItemTurnStartUpdates = [
-        ...producerItemTurnStartUpdates,
-        ...innerUpdates,
-      ];
+      turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
     }
   }
-  if (producerItemTurnStartUpdates.length > 0) {
+  if (turnStartUpdates.length > 0) {
     nextHistoryResultIndex++;
   }
 
   //
-  // Pアイテム起因の、2ターンごとターン開始時の効果発動
+  // 2ターンごとターン開始時の効果発動
   //
-  let producerItemTurnStart2Updates: LessonUpdateQuery[] = [];
+  let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
@@ -1242,20 +1239,41 @@ export const activateEffectsOnTurnStart = (
         }
       }
       newLesson = patchUpdates(newLesson, innerUpdates);
-      producerItemTurnStart2Updates = [
-        ...producerItemTurnStart2Updates,
+      turnStartEveryTwoTurnsUpdates = [
+        ...turnStartEveryTwoTurnsUpdates,
         ...innerUpdates,
       ];
     }
   }
-  if (producerItemTurnStart2Updates.length > 0) {
+  if (turnStartEveryTwoTurnsUpdates.length > 0) {
     nextHistoryResultIndex++;
   }
 
+  return {
+    updates: [...turnStartUpdates, ...turnStartEveryTwoTurnsUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
+ * ターン開始時の効果を発動する
+ */
+export const activateModifierEffectsOnTurnStart = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
   //
-  // 状態修正の「次ターン/nターン後、パラメータ+n」による効果発動
+  // 「(次ターン|nターン後)、パラメータ+n」による効果発動
   //
   // - 実装上、元気更新も実行できるが、本家にその効果は存在しない
+  // - TODO: [仕様確認] スキルパーフェクトを達成した場合に、後続処理は処理されるのか
   //
   let performDelayedEffectUpdates: LessonUpdateQuery[] = [];
   for (const modifier of newLesson.idol.modifiers) {
@@ -1287,7 +1305,7 @@ export const activateEffectsOnTurnStart = (
   }
 
   //
-  // 状態修正の「次ターン/nターン後、スキルカードを引く」による効果発動
+  // 状態修正の「(次ターン|nターン後)、スキルカードを引く」による効果発動
   //
   let drawCardDelayedEffectUpdates: LessonUpdateQuery[] = [];
   for (const modifier of newLesson.idol.modifiers) {
@@ -1319,7 +1337,7 @@ export const activateEffectsOnTurnStart = (
   }
 
   //
-  // 状態修正の「次ターン/nターン後、スキルカードを強化」による効果発動
+  // 状態修正の「(次ターン|nターン後)、スキルカードを強化」による効果発動
   //
   let enhanceHandDelayedEffectUpdates: LessonUpdateQuery[] = [];
   for (const modifier of newLesson.idol.modifiers) {
@@ -1352,8 +1370,6 @@ export const activateEffectsOnTurnStart = (
 
   return {
     updates: [
-      ...producerItemTurnStartUpdates,
-      ...producerItemTurnStart2Updates,
       ...performDelayedEffectUpdates,
       ...drawCardDelayedEffectUpdates,
       ...enhanceHandDelayedEffectUpdates,

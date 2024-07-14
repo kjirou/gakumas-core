@@ -34,7 +34,8 @@ import {
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
-  activateEffectsOnTurnStart,
+  activateModifierEffectsOnTurnStart,
+  activateProducerItemEffectsOnTurnStart,
   consumeRemainingCardUsageCount,
   decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
@@ -242,26 +243,27 @@ export const startLessonTurn = (
   // - 1 > 3 > 4
   //   - 「星のリトルプリンス」-> 手札を引く -> 「成就」の順序で発動していることを以下で確認
   //     - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=u1CdnIForY12KtF1&t=5256
-  //     - TODO: 成就の発動は、手札を引いた後だった。てか、よく考えたら、手札を引いた後に強化じゃないとおかしいので、そこの辻褄ともあってそう。
   // - TODO: [仕様確認] ターン開始時処理の起因別の発動順序についての情報が全般的に足りない
   //
 
   //
-  // ターン開始時の効果発動
+  // Pアイテム起因の、ターン開始時の効果発動
   //
-  const activateEffectsOnTurnStartResult = activateEffectsOnTurnStart(
-    lesson,
-    historyResultIndex,
-    {
+  const activateProducerItemEffectsOnTurnStartResult =
+    activateProducerItemEffectsOnTurnStart(lesson, historyResultIndex, {
       getRandom: lessonGamePlay.getRandom,
       idGenerator: lessonGamePlay.idGenerator,
-    },
+    });
+  updates = [
+    ...updates,
+    ...activateProducerItemEffectsOnTurnStartResult.updates,
+  ];
+  historyResultIndex =
+    activateProducerItemEffectsOnTurnStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(
+    lesson,
+    activateProducerItemEffectsOnTurnStartResult.updates,
   );
-  updates = [...updates, ...activateEffectsOnTurnStartResult.updates];
-  historyResultIndex = activateEffectsOnTurnStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, activateEffectsOnTurnStartResult.updates);
-
-  const isLessonEnded = isScoreSatisfyingPerfect(lesson);
 
   //
   // 手札を山札から引く
@@ -270,18 +272,32 @@ export const startLessonTurn = (
   //   - ターン開始処理の後であることは、SR咲季のPアイテムで確認した
   //   - ターン開始処理でスコアパーフェクトを満たした場合、手札を引かないことを、SSR広のPアイテムで確認した
   //
-  if (!isLessonEnded) {
-    const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
-      lesson,
-      historyResultIndex,
-      {
-        getRandom: lessonGamePlay.getRandom,
-      },
-    );
-    updates = [...updates, ...drawCardsOnLessonStartResult.updates];
-    historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
-    lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
-  }
+  const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
+    lesson,
+    historyResultIndex,
+    {
+      getRandom: lessonGamePlay.getRandom,
+    },
+  );
+  updates = [...updates, ...drawCardsOnLessonStartResult.updates];
+  historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+
+  //
+  // 状態修正起因の、ターン開始時の効果発動
+  //
+  const activateModifierEffectsOnTurnStartResult =
+    activateModifierEffectsOnTurnStart(lesson, historyResultIndex, {
+      getRandom: lessonGamePlay.getRandom,
+      idGenerator: lessonGamePlay.idGenerator,
+    });
+  updates = [...updates, ...activateModifierEffectsOnTurnStartResult.updates];
+  historyResultIndex =
+    activateModifierEffectsOnTurnStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(
+    lesson,
+    activateModifierEffectsOnTurnStartResult.updates,
+  );
 
   return {
     ...lessonGamePlay,

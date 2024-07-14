@@ -403,7 +403,7 @@ export const generateProducerItemTriggerAndConditionText = (params: {
         "、",
       ].join("");
       break;
-    case "everyTwoTurns":
+    case "turnStartEveryTwoTurns":
       text += [
         "2ターンごとに",
         condition ? generateEffectConditionText(condition) : "",

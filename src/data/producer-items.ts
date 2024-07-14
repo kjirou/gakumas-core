@@ -518,12 +518,12 @@ export const producerItems: ProducerItemDefinition[] = [
     base: {
       effects: [{ kind: "perform", vitality: { value: 5 } }],
       times: 2,
-      trigger: { kind: "everyTwoTurns" },
+      trigger: { kind: "turnStartEveryTwoTurns" },
     },
     enhanced: {
       effects: [{ kind: "perform", vitality: { value: 5 } }],
       times: 3,
-      trigger: { kind: "everyTwoTurns" },
+      trigger: { kind: "turnStartEveryTwoTurns" },
     },
   },
   {

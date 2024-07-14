@@ -354,16 +354,16 @@ export const canApplyEffect = (
   }
 };
 
-/** Pアイテムが発動できる条件を満たしているかを判定する */
+/**
+ * Pアイテムが発動できる条件を満たしているかを判定する
+ */
 export const canActivateProducerItem = (
-  timing: ProducerItemContentDefinition["trigger"]["kind"],
   lesson: Lesson,
   producerItem: ProducerItem,
 ) => {
   const producerItemContent = getProducerItemContentDefinition(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   return (
-    producerItemContent.trigger.kind === timing &&
     (producerItemContent.trigger.idolParameterKind === undefined ||
       producerItemContent.trigger.idolParameterKind === idolParameterKind) &&
     (producerItemContent.condition === undefined ||
@@ -1160,8 +1160,6 @@ export const activateEffectsOnLessonStart = (
 
 /**
  * ターン開始時の効果を発動する
- *
- * - TODO: [仕様確認] 状態修正の「次ターン」or「nターン後」 と Pアイテム による発動があるが、その順序が不明。また、おそらくカード引き→カード強化の順にもなってそうで内容によるのかも。
  */
 export const activateEffectsOnTurnStart = (
   lesson: Lesson,
@@ -1177,14 +1175,13 @@ export const activateEffectsOnTurnStart = (
   //
   // Pアイテム起因の、ターン開始時の効果発動
   //
-  // - 「次ターン/nターン後」の効果発動よりも前に発動する
-  //   - 「成就」の前に「星のリトルプリンス」が発動していることを確認
-  //
-  let producerItemUpdates: LessonUpdateQuery[] = [];
+  let producerItemTurnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.producerItems) {
-    if (canActivateProducerItem("turnStart", newLesson, producerItem)) {
-      const producerItemContent =
-        getProducerItemContentDefinition(producerItem);
+    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    if (
+      producerItemContent.trigger.kind === "turnStart" &&
+      canActivateProducerItem(newLesson, producerItem)
+    ) {
       let innerUpdates: LessonUpdateQuery[] = [];
       for (const effect of producerItemContent.effects) {
         const diffs = activateEffect(
@@ -1204,17 +1201,60 @@ export const activateEffectsOnTurnStart = (
         }
       }
       newLesson = patchUpdates(newLesson, innerUpdates);
-      producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+      producerItemTurnStartUpdates = [
+        ...producerItemTurnStartUpdates,
+        ...innerUpdates,
+      ];
     }
   }
-  if (producerItemUpdates.length > 0) {
+  if (producerItemTurnStartUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  //
+  // Pアイテム起因の、2ターンごとターン開始時の効果発動
+  //
+  let producerItemTurnStart2Updates: LessonUpdateQuery[] = [];
+  for (const producerItem of newLesson.producerItems) {
+    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    if (
+      producerItemContent.trigger.kind === "turnStartEveryTwoTurns" &&
+      newLesson.turnNumber >= 2 &&
+      newLesson.turnNumber % 2 === 0 &&
+      canActivateProducerItem(newLesson, producerItem)
+    ) {
+      let innerUpdates: LessonUpdateQuery[] = [];
+      for (const effect of producerItemContent.effects) {
+        const diffs = activateEffect(
+          newLesson,
+          effect,
+          params.getRandom,
+          params.idGenerator,
+        );
+        if (diffs) {
+          innerUpdates = diffs.map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "turnStartTrigger",
+              historyTurnNumber: lesson.turnNumber,
+              historyResultIndex: nextHistoryResultIndex,
+            }),
+          );
+        }
+      }
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      producerItemTurnStart2Updates = [
+        ...producerItemTurnStart2Updates,
+        ...innerUpdates,
+      ];
+    }
+  }
+  if (producerItemTurnStart2Updates.length > 0) {
     nextHistoryResultIndex++;
   }
 
   //
   // 状態修正の「次ターン/nターン後、パラメータ+n」による効果発動
   //
-  // - TODO: [仕様確認] 他ふたつの手札関連の発動より先だっけ？
   // - 実装上、元気更新も実行できるが、本家にその効果は存在しない
   //
   let performDelayedEffectUpdates: LessonUpdateQuery[] = [];
@@ -1248,8 +1288,6 @@ export const activateEffectsOnTurnStart = (
 
   //
   // 状態修正の「次ターン/nターン後、スキルカードを引く」による効果発動
-  //
-  // - スキルカードを引く → スキルカードを強化 の順に処理する必要がある
   //
   let drawCardDelayedEffectUpdates: LessonUpdateQuery[] = [];
   for (const modifier of newLesson.idol.modifiers) {
@@ -1314,7 +1352,8 @@ export const activateEffectsOnTurnStart = (
 
   return {
     updates: [
-      ...producerItemUpdates,
+      ...producerItemTurnStartUpdates,
+      ...producerItemTurnStart2Updates,
       ...performDelayedEffectUpdates,
       ...drawCardDelayedEffectUpdates,
       ...enhanceHandDelayedEffectUpdates,
@@ -1972,7 +2011,7 @@ export const activateEffectsOnTurnEnd = (
   }
 
   //
-  // TODO: Pアイテムによる効果発動、turnEnd,everyTwoTurns
+  // TODO: Pアイテムによる効果発動、turnEnd
   //
   // - TODO: [仕様確認] Pアイテム内の発動順はどうなっている？
   //

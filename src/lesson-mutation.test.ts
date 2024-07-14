@@ -1016,9 +1016,8 @@ describe("canActivateProducerItem", () => {
     name: string;
   }> = [
     {
-      name: "時点以外の条件がなく、時点が合致する時、trueを返す",
+      name: "条件がない時、trueを返す",
       args: [
-        "turnStart",
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
@@ -1030,23 +1029,8 @@ describe("canActivateProducerItem", () => {
       expected: true,
     },
     {
-      name: "時点以外の条件がなく、時点が合致しない時、falseを返す",
-      args: [
-        "turnStart",
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            definition: { base: { trigger: { kind: "turnEnd" } } },
-          },
-        } as ProducerItem,
-      ],
-      expected: false,
-    },
-    {
       name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
       args: [
-        "turnStart",
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
@@ -1064,7 +1048,6 @@ describe("canActivateProducerItem", () => {
     {
       name: "アイドルパラメータ種別条件があり、合致しない時、falseを返す",
       args: [
-        "turnStart",
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
@@ -1082,7 +1065,6 @@ describe("canActivateProducerItem", () => {
     {
       name: "発動回数条件があり、残り発動回数が足りている時、trueを返す",
       args: [
-        "turnStart",
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 1,
@@ -1096,7 +1078,6 @@ describe("canActivateProducerItem", () => {
     {
       name: "発動回数条件があり、残り発動回数が足りていない時、falseを返す",
       args: [
-        "turnStart",
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 2,
@@ -2202,7 +2183,7 @@ describe("drawCardsOnLessonStart", () => {
     ]);
   });
 });
-// Pアイテム発動のテストは、基本的に canActivateProducerItem のテストケースで行う
+// Pアイテム発動条件については、canActivateProducerItem のテストケースで可能な範囲はそちらで検証する
 describe("activateEffectsOnTurnStart", () => {
   test("「ばくおんライオン」を、好調状態の時、発動する", () => {
     const lesson = createLessonForTest({
@@ -2244,6 +2225,47 @@ describe("activateEffectsOnTurnStart", () => {
       idGenerator: createIdGenerator(),
     });
     expect(updates.filter((e) => e.kind === "score")).toStrictEqual([]);
+  });
+  test("「柴犬ポシェット」を、2ターン目の時、発動する", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("shibainuposhetto"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.turnNumber = 2;
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([
+      {
+        kind: "vitality",
+        actual: 5,
+        max: 5,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("「柴犬ポシェット」を、1ターン目の時、発動しない", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("shibainuposhetto"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.turnNumber = 1;
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([]);
   });
   test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
     const lesson = createLessonForTest({

@@ -220,6 +220,33 @@ export const startLessonTurn = (
   lesson = patchUpdates(lesson, [increaseTurnNumberUpdate]);
 
   //
+  // 効果発動順序のまとめ
+  //
+  // 1. Pアイテム起因の、「ターン開始時」の効果発動
+  //    ProducerItemTrigger["kind"] === "turnStart"
+  // 2. Pアイテム起因の、「2ターンごと」の効果発動
+  //    ProducerItemTrigger["kind"] === "turnStartEveryTwoTurns"
+  // 3. 手札を山札から引く
+  // 4. 状態修正起因の、「(次ターン|nターン後)、パラメータ+n」の効果発動
+  //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "perform"
+  // 5. 状態修正起因の、「(次ターン|nターン後)、スキルカードを引く」の効果発動
+  //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "drawCards"
+  // 6. 状態修正起因の、「(次ターン|nターン後)、スキルカードを強化」の効果発動
+  //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "enhanceHand"
+  //
+  // 仕様確認済み情報のまとめ
+  //
+  // - 1 > 2
+  //   - 「はつぼしキーホルダー」->「柴犬ポシェット」の順序で発動していることを以下で確認
+  //     - 参考動画: https://www.youtube.com/live/6LEmq_eZTE4?si=ZPlHH-4Nw0kb4aoC&t=16768
+  // - 1 > 3 > 4
+  //   - 「星のリトルプリンス」-> 手札を引く -> 「成就」の順序で発動していることを以下で確認
+  //     - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=u1CdnIForY12KtF1&t=5256
+  //     - TODO: 成就の発動は、手札を引いた後だった。てか、よく考えたら、手札を引いた後に強化じゃないとおかしいので、そこの辻褄ともあってそう。
+  // - TODO: [仕様確認] ターン開始時処理の起因別の発動順序についての情報が全般的に足りない
+  //
+
+  //
   // ターン開始時の効果発動
   //
   const activateEffectsOnTurnStartResult = activateEffectsOnTurnStart(
@@ -308,6 +335,9 @@ export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
  *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
  *   - スキルカード詳細ポップアップ
  *     - 全ての項目が、各効果による変化前のデータ定義時の値
+ *   - プレビュー時には、選択したスキルカードの効果のみ反映される
+ *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
+ *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
  *
  * @example
  *   // 変化する差分は updates に含まれるので、アニメーション処理はこの値を解析して使う

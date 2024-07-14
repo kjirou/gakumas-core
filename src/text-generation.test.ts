@@ -816,21 +816,21 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     {
       args: [
         {
-          trigger: { kind: "everyTwoTurns" },
+          trigger: { kind: "turnStartEveryTwoTurns" },
         },
       ],
       expected: "2ターンごとに、",
-      name: "everyTwoTurns",
+      name: "turnStartEveryTwoTurns",
     },
     {
       args: [
         {
           condition: { kind: "hasGoodCondition" },
-          trigger: { kind: "everyTwoTurns" },
+          trigger: { kind: "turnStartEveryTwoTurns" },
         },
       ],
       expected: "2ターンごとに{{好調}}状態の場合、",
-      name: "everyTwoTurns - condition",
+      name: "turnStartEveryTwoTurns - condition",
     },
     {
       args: [

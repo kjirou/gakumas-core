@@ -1,4 +1,12 @@
-import { Card, CardDefinition, Idol, Lesson, Modifier } from "./types";
+import {
+  Card,
+  CardDefinition,
+  Idol,
+  Lesson,
+  Modifier,
+  ProducerItem,
+  ProducerItemContentDefinition,
+} from "./types";
 import { getCardDataById } from "./data/cards";
 import {
   activateEffectsOnTurnEnd,
@@ -8,6 +16,7 @@ import {
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
   calculatePositiveImpressionScore,
+  canActivateProducerItem,
   canApplyEffect,
   canUseCard,
   consumeRemainingCardUsageCount,
@@ -22,6 +31,7 @@ import {
 } from "./lesson-mutation";
 import { createIdolInProduction, createLesson, patchUpdates } from "./models";
 import { createIdGenerator } from "./utils";
+import { getProducerItemDataById } from "./data/producer-items";
 
 const createLessonForTest = (
   overwrites: Partial<Parameters<typeof createIdolInProduction>[0]> = {},
@@ -30,6 +40,7 @@ const createLessonForTest = (
     // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
     idolDefinitionId: "shinosawahiro-r-1",
     cards: [],
+    producerItems: [],
     specificCardEnhanced: false,
     specificProducerItemEnhanced: false,
     idGenerator: createIdGenerator(),
@@ -995,6 +1006,110 @@ describe("canApplyEffect", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(canApplyEffect(...args)).toBe(expected);
+  });
+});
+// condition 条件は canApplyEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
+describe("canActivateProducerItem", () => {
+  const testCases: Array<{
+    args: Parameters<typeof canActivateProducerItem>;
+    expected: ReturnType<typeof canActivateProducerItem>;
+    name: string;
+  }> = [
+    {
+      name: "時点以外の条件がなく、時点が合致する時、trueを返す",
+      args: [
+        "turnStart",
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: { base: { trigger: { kind: "turnStart" } } },
+          },
+        } as ProducerItem,
+      ],
+      expected: true,
+    },
+    {
+      name: "時点以外の条件がなく、時点が合致しない時、falseを返す",
+      args: [
+        "turnStart",
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: { base: { trigger: { kind: "turnEnd" } } },
+          },
+        } as ProducerItem,
+      ],
+      expected: false,
+    },
+    {
+      name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
+      args: [
+        "turnStart",
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "vocal" },
+              },
+            },
+          },
+        } as ProducerItem,
+      ],
+      expected: true,
+    },
+    {
+      name: "アイドルパラメータ種別条件があり、合致しない時、falseを返す",
+      args: [
+        "turnStart",
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              },
+            },
+          },
+        } as ProducerItem,
+      ],
+      expected: false,
+    },
+    {
+      name: "発動回数条件があり、残り発動回数が足りている時、trueを返す",
+      args: [
+        "turnStart",
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 1,
+          original: {
+            definition: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+          },
+        } as ProducerItem,
+      ],
+      expected: true,
+    },
+    {
+      name: "発動回数条件があり、残り発動回数が足りていない時、falseを返す",
+      args: [
+        "turnStart",
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 2,
+          original: {
+            definition: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+          },
+        } as ProducerItem,
+      ],
+      expected: false,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(canActivateProducerItem(...args)).toStrictEqual(expected);
   });
 });
 describe("calculateCostConsumption", () => {
@@ -2087,7 +2202,49 @@ describe("drawCardsOnLessonStart", () => {
     ]);
   });
 });
+// Pアイテム発動のテストは、基本的に canActivateProducerItem のテストケースで行う
 describe("activateEffectsOnTurnStart", () => {
+  test("「ばくおんライオン」を、好調状態の時、発動する", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("bakuonraion"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.idol.modifiers = [{ kind: "goodCondition", duration: 1, id: "x" }];
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        // 好調が付与されているので1.5倍になっている
+        actual: 9,
+        max: 9,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("「ばくおんライオン」を、好調状態ではない時、発動しない", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("bakuonraion"),
+          enhanced: false,
+        },
+      ],
+    });
+    const { updates } = activateEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([]);
+  });
   test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
     const lesson = createLessonForTest({
       cards: [

@@ -14,6 +14,7 @@ import {
   calculateClearScoreProgress,
   createIdolInProduction,
   createLessonGamePlay,
+  getIdolParameterKindOnTurn,
   patchUpdates,
   prepareCardsForLesson,
 } from "./models";
@@ -43,6 +44,12 @@ describe("createIdolInProduction", () => {
           enabled: true,
         },
       ],
+      producerItems: [
+        {
+          id: idGenerator(),
+          definition: getProducerItemDataById("hatsuboshitecho"),
+        },
+      ],
       specificCardEnhanced: false,
       specificProducerItemEnhanced: false,
       idGenerator,
@@ -50,13 +57,13 @@ describe("createIdolInProduction", () => {
     expect(idolInProduction).toStrictEqual({
       deck: [
         {
-          id: "2",
+          id: expect.any(String),
           definition: getCardDataById("shinshinkiei"),
           enhanced: false,
           enabled: true,
         },
         {
-          id: "1",
+          id: expect.any(String),
           definition: getCardDataById("apirunokihon"),
           enhanced: false,
           enabled: true,
@@ -67,9 +74,13 @@ describe("createIdolInProduction", () => {
       maxLife: 32,
       producerItems: [
         {
-          id: "3",
+          id: expect.any(String),
           definition: getProducerItemDataById("bakuonraion"),
           enhanced: false,
+        },
+        {
+          id: expect.any(String),
+          definition: getProducerItemDataById("hatsuboshitecho"),
         },
       ],
     });
@@ -128,6 +139,31 @@ describe("calculateClearScoreProgress", () => {
     },
   );
 });
+describe("getIdolParameterKindOnTurn", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getIdolParameterKindOnTurn>;
+    expected: ReturnType<typeof getIdolParameterKindOnTurn>;
+  }> = [
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 1 } as Lesson],
+      expected: "vocal",
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 2 } as Lesson],
+      expected: "dance",
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 3 } as Lesson],
+      expected: "dance",
+    },
+  ];
+  test.each(testCases)(
+    "$args.0.turns, $args.0.turnNumber => $expected",
+    ({ args, expected }) => {
+      expect(getIdolParameterKindOnTurn(...args)).toBe(expected);
+    },
+  );
+});
 describe("createLessonGamePlay", () => {
   test("it creates a lesson game play", () => {
     const idGenerator = createIdGenerator();
@@ -145,6 +181,12 @@ describe("createLessonGamePlay", () => {
           definition: getCardDataById("pozunokihon"),
           enhanced: false,
           enabled: true,
+        },
+      ],
+      producerItems: [
+        {
+          id: idGenerator(),
+          definition: getProducerItemDataById("hatsuboshitecho"),
         },
       ],
       specificCardEnhanced: false,
@@ -712,6 +754,38 @@ describe("patchUpdates", () => {
         },
       ]);
       expect(lessonMock.playedCardsOnEmptyDeck).toStrictEqual(["2"]);
+    });
+  });
+  describe("producerItem.activationCount", () => {
+    test("it works", () => {
+      let lessonMock = {
+        producerItems: [
+          { id: "1", activationCount: 1 },
+          { id: "2", activationCount: 2 },
+        ],
+      } as Lesson;
+      lessonMock = patchUpdates(lessonMock, [
+        {
+          kind: "producerItem.activationCount",
+          producerItemId: "2",
+          value: 3,
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lessonMock.producerItems).toStrictEqual([
+        {
+          id: "1",
+          activationCount: 1,
+        },
+        {
+          id: "2",
+          activationCount: 3,
+        },
+      ]);
     });
   });
   describe("remainingTurns", () => {

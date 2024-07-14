@@ -16,12 +16,14 @@ import {
   IdGenerator,
   Idol,
   IdolInProduction,
+  IdolParameterKind,
   Lesson,
   LessonGamePlay,
   LessonUpdateQuery,
   Modifier,
   ModifierDefinition,
   ProducerItem,
+  ProducerItemContentDefinition,
   ProducerItemInProduction,
 } from "./types";
 import { createIdGenerator, shuffleArray } from "./utils";
@@ -58,12 +60,33 @@ export const getCardContentDefinition = (card: Card): CardContentDefinition => {
     : card.original.definition.base;
 };
 
+export const getProducerItemContentDefinition = (
+  producerItem: ProducerItem,
+): ProducerItemContentDefinition => {
+  return producerItem.original.definition.enhanced !== undefined &&
+    producerItem.original.enhanced
+    ? producerItem.original.definition.enhanced
+    : producerItem.original.definition.base;
+};
+
+/** Pアイテムの使用回数が足りているか */
+export const isRemainingProducerItemTimes = (
+  producerItem: ProducerItem,
+): boolean => {
+  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  return (
+    producerItemContent.times === undefined ||
+    producerItem.activationCount < producerItemContent.times
+  );
+};
+
 // TODO: 初期カードセットをどこかに定義する
 //       - 集中型: 試行錯誤、アピールの基本x2, ポーズの基本, 表情の基本x2, 表現の基本x2
 export const createIdolInProduction = (params: {
   cards: CardInProduction[];
   idGenerator: IdGenerator;
   idolDefinitionId: string;
+  producerItems: ProducerItemInProduction[];
   specificCardEnhanced: boolean;
   specificProducerItemEnhanced: boolean;
 }): IdolInProduction => {
@@ -93,6 +116,7 @@ export const createIdolInProduction = (params: {
         definition: specificProducerItemDefinition,
         enhanced: params.specificProducerItemEnhanced,
       },
+      ...params.producerItems,
     ],
   };
 };
@@ -230,6 +254,15 @@ export const createLessonGamePlay = (params: {
     updates: [],
   };
 };
+
+/**
+ * 現在のターンのアイドルパラメータ種別を返す
+ *
+ * - 指定したターン番号が存在しない時は、最終ターンの内容を返す
+ * - 「ターン追加」による最終ターンの延長時に、最終ターンの内容が継続する仕様を表現したものでもある
+ */
+export const getIdolParameterKindOnTurn = (lesson: Lesson): IdolParameterKind =>
+  lesson.turns[lesson.turnNumber - 1] || lesson.turns[lesson.turns.length - 1];
 
 export const calculateLastTurnNumber = (lesson: Lesson): number =>
   lesson.turns.length + lesson.remainingTurns;
@@ -484,6 +517,17 @@ export const patchUpdates = (
         newLesson = {
           ...newLesson,
           playedCardsOnEmptyDeck: update.cardIds,
+        };
+        break;
+      }
+      case "producerItem.activationCount": {
+        newLesson = {
+          ...newLesson,
+          producerItems: newLesson.producerItems.map((producerItem) =>
+            producerItem.id === update.producerItemId
+              ? { ...producerItem, activationCount: update.value }
+              : producerItem,
+          ),
         };
         break;
       }

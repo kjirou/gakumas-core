@@ -20,17 +20,6 @@ import {
 } from "./models";
 import { createIdGenerator } from "./utils";
 
-const createCardsForTest = (ids: Array<Card["id"]>): Card[] => {
-  return prepareCardsForLesson(
-    ids.map((id) => ({
-      id,
-      definition: getCardDataById("apirunokihon"),
-      enhanced: false,
-      enabled: true,
-    })),
-  );
-};
-
 describe("createIdolInProduction", () => {
   test("it creates an idol in production", () => {
     const idGenerator = createIdGenerator();

@@ -2055,15 +2055,15 @@ describe("drawCardsOnLessonStart", () => {
   test("1ターン目でレッスン開始時手札が1枚ある時、更新は2回発行され、手札は最終的にその札を含む3枚になる", () => {
     const lesson = createLessonForTest({
       cards: [
-        ...["a"].map((id) => ({
+        ...["a", "b", "c"].map((id) => ({
           id,
-          definition: getCardDataById("shizukanaishi"),
+          definition: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
-        ...["b", "c", "d"].map((id) => ({
+        ...["d"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          definition: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
@@ -2077,19 +2077,18 @@ describe("drawCardsOnLessonStart", () => {
     expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
       {
         kind: "cardPlacement",
-        hand: ["a"],
-        deck: ["b", "c", "d"],
+        deck: ["d", "a", "b", "c"],
         reason: expect.any(Object),
       },
       {
         kind: "cardPlacement",
-        hand: ["a", "b", "c"],
-        deck: ["d"],
+        hand: ["d", "a", "b"],
+        deck: ["c"],
         reason: expect.any(Object),
       },
     ]);
   });
-  test("1ターン目でレッスン開始時手札が3枚ある時、更新は1回のみ発行され、手札は最終的に開始時手札のみの3枚になる", () => {
+  test("1ターン目でレッスン開始時手札が5枚ある時、手札は最終的にレッスン開始時手札のみの5枚になる", () => {
     const lesson = createLessonForTest({
       cards: [
         ...["a", "b", "c"].map((id) => ({
@@ -2104,34 +2103,9 @@ describe("drawCardsOnLessonStart", () => {
           enabled: true,
           enhanced: false,
         })),
-      ],
-    });
-    lesson.deck = ["a", "b", "c", "d"];
-    lesson.turnNumber = 1;
-    const { updates } = drawCardsOnTurnStart(lesson, 1, {
-      getRandom: Math.random,
-    });
-    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
-      {
-        kind: "cardPlacement",
-        hand: ["a", "b", "c"],
-        deck: ["d"],
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("1ターン目でレッスン開始時手札が5枚ある時、更新は1回のみ発行され、手札は最終的に開始時手札のみの5枚になる", () => {
-    const lesson = createLessonForTest({
-      cards: [
-        ...["a", "b", "c", "d", "e"].map((id) => ({
+        ...["e", "f"].map((id) => ({
           id,
           definition: getCardDataById("shizukanaishi"),
-          enabled: true,
-          enhanced: false,
-        })),
-        ...["f"].map((id) => ({
-          id,
-          definition: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -2142,25 +2116,39 @@ describe("drawCardsOnLessonStart", () => {
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
     });
-    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+    expect(
+      updates.filter((e) => e.kind === "cardPlacement").slice(-1),
+    ).toStrictEqual([
       {
         kind: "cardPlacement",
-        hand: ["a", "b", "c", "d", "e"],
-        deck: ["f"],
+        hand: ["a", "b", "c", "e", "f"],
+        deck: ["d"],
         reason: expect.any(Object),
       },
     ]);
   });
-  test("1ターン目でレッスン開始時手札が6枚ある時、更新は1回のみ発行され、手札は最終的に開始時手札のみの5枚になり、6枚目の開始時手札は捨札になる", () => {
+  test("1ターン目でレッスン開始時手札が8枚ある時、手札は最終的にレッスン開始時手札のみの5枚になり、山札の先頭3枚はレッスン開始時手札である", () => {
     const lesson = createLessonForTest({
       cards: [
-        ...["a", "b", "c", "d", "e", "f"].map((id) => ({
+        ...["a", "b", "c"].map((id) => ({
           id,
           definition: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
-        ...["g"].map((id) => ({
+        ...["d"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+        ...["e", "f", "g", "h"].map((id) => ({
+          id,
+          definition: getCardDataById("shizukanaishi"),
+          enabled: true,
+          enhanced: false,
+        })),
+        ...["i"].map((id) => ({
           id,
           definition: getCardDataById("apirunokihon"),
           enabled: true,
@@ -2168,17 +2156,18 @@ describe("drawCardsOnLessonStart", () => {
         })),
       ],
     });
-    lesson.deck = ["a", "b", "c", "d", "e", "f", "g"];
+    lesson.deck = ["a", "b", "c", "d", "e", "f", "g", "h", "i"];
     lesson.turnNumber = 1;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
     });
-    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+    expect(
+      updates.filter((e) => e.kind === "cardPlacement").slice(-1),
+    ).toStrictEqual([
       {
         kind: "cardPlacement",
-        hand: ["a", "b", "c", "d", "e"],
-        deck: ["g"],
-        discardPile: ["f"],
+        hand: ["a", "b", "c", "e", "f"],
+        deck: ["g", "h", "d", "i"],
         reason: expect.any(Object),
       },
     ]);

@@ -1392,15 +1392,16 @@ export const drawCardsOnTurnStart = (
   let nextHistoryResultIndex = historyResultIndex;
 
   //
-  // 「レッスン開始時手札に入る」のスキルカードを引く
+  // 「レッスン開始時手札に入る」のスキルカードを山札の先頭へ移動する
   //
-  // - TODO: [仕様確認] レッスン開始時手札が6枚あるとき、6枚目以降は山札に残るのか捨札に行くのか？今は捨札へ移動している。
+  // - TODO: 少なくともレッスン開始時手札が8枚の時、この挙動にならないことがある、Ref: https://github.com/kjirou/gakumas-core/issues/37
+  // - TODO: [仕様確認] レッスン開始時手札が9枚以上の時、2ターン目は3枚？4枚？引くのか
   //
-  let drawInnateCardsUpdates: LessonUpdateQuery[] = [];
-  let remainingDrawCount = handSizeOnLessonStart;
+  let innateCardCount = 0;
+  let moveInnateCardsUpdates: LessonUpdateQuery[] = [];
   if (newLesson.turnNumber === 1) {
-    let deck: Array<Card["id"]> = [];
     let innateCardIds: Array<Card["id"]> = [];
+    let restCardids: Array<Card["id"]> = [];
     for (const deckCardId of newLesson.deck) {
       const card = newLesson.cards.find((card) => card.id === deckCardId);
       if (!card) {
@@ -1409,38 +1410,15 @@ export const drawCardsOnTurnStart = (
       if (getCardContentDefinition(card).innate) {
         innateCardIds = [...innateCardIds, deckCardId];
       } else {
-        deck = [...deck, deckCardId];
+        restCardids = [...restCardids, deckCardId];
       }
     }
-    if (innateCardIds.length > 0) {
-      remainingDrawCount = Math.max(
-        0,
-        remainingDrawCount - innateCardIds.length,
-      );
-      const drawnCards = innateCardIds.slice(0, maxHandSize);
-      const discardPile = [
-        ...newLesson.discardPile,
-        ...innateCardIds.slice(maxHandSize),
-      ];
-      const { hand, discardPile: discardPile2 } = addCardsToHandOrDiscardPile(
-        drawnCards,
-        newLesson.hand,
-        discardPile,
-      );
-      drawInnateCardsUpdates = [
+    if (innateCardIds.length) {
+      innateCardCount = innateCardIds.length;
+      moveInnateCardsUpdates = [
         {
-          ...createCardPlacementDiff(
-            {
-              deck: newLesson.deck,
-              discardPile: newLesson.discardPile,
-              hand: newLesson.hand,
-            },
-            {
-              deck,
-              discardPile: discardPile2,
-              hand,
-            },
-          ),
+          kind: "cardPlacement",
+          deck: [...innateCardIds, ...restCardids],
           reason: {
             kind: "turnStartTrigger",
             historyTurnNumber: newLesson.turnNumber,
@@ -1448,7 +1426,7 @@ export const drawCardsOnTurnStart = (
           },
         },
       ];
-      newLesson = patchUpdates(newLesson, drawInnateCardsUpdates);
+      newLesson = patchUpdates(newLesson, moveInnateCardsUpdates);
       nextHistoryResultIndex++;
     }
   }
@@ -1488,23 +1466,23 @@ export const drawCardsOnTurnStart = (
   //
   // 手札を引く
   //
-  let drawCardsInHandUpdates: LessonUpdateQuery[] = [];
-  if (remainingDrawCount > 0) {
-    const effectResult = activateEffect(
-      newLesson,
-      { kind: "drawCards", amount: remainingDrawCount },
-      params.getRandom,
-      // "drawCards" に限れば idGenerator は使われない
-      () => "",
-    );
-    drawCardsInHandUpdates = (effectResult ?? []).map((diff) =>
+  let drawCardsEffectUpdates: LessonUpdateQuery[] = [];
+  const drawCardsEffectDiffs = activateEffect(
+    newLesson,
+    { kind: "drawCards", amount: Math.min(Math.max(innateCardCount, 3), 5) },
+    params.getRandom,
+    // "drawCards" に限れば idGenerator は使われない
+    () => "",
+  );
+  if (drawCardsEffectDiffs) {
+    drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
       createLessonUpdateQueryFromDiff(diff, {
         kind: "turnStartTrigger",
         historyTurnNumber: newLesson.turnNumber,
         historyResultIndex,
       }),
     );
-    newLesson = patchUpdates(newLesson, drawCardsInHandUpdates);
+    newLesson = patchUpdates(newLesson, drawCardsEffectUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -1542,9 +1520,9 @@ export const drawCardsOnTurnStart = (
 
   return {
     updates: [
-      ...drawInnateCardsUpdates,
+      ...moveInnateCardsUpdates,
       ...playedCardsOnEmptyDeckUpdates,
-      ...drawCardsInHandUpdates,
+      ...drawCardsEffectUpdates,
       ...restoringPlayedCardsOnEmptyDeckUpdates,
     ],
     nextHistoryResultIndex,

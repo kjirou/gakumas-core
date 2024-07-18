@@ -4383,6 +4383,39 @@ describe("useCard preview:true", () => {
   });
 });
 describe("activateEffectsOnTurnEnd", () => {
+  describe('Pアイテムの "turnEnd" による効果発動', () => {
+    test("「お気にのスニーカー」を発動する", () => {
+      const lesson = createLessonForTest({
+        producerItems: [
+          {
+            id: "a",
+            definition: getProducerItemDataById("okininosunika"),
+          },
+        ],
+      });
+      lesson.idol.vitality = 7;
+      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+      });
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "positiveImpression",
+            amount: 4,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "positiveImpression",
+            amount: 4,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
   describe("状態修正による効果発動", () => {
     test("effectActivationAtEndOfTurn", () => {
       const lesson = createLessonForTest();

@@ -221,7 +221,7 @@ export const startLessonTurn = (
   lesson = patchUpdates(lesson, [increaseTurnNumberUpdate]);
 
   //
-  // 効果発動順序のまとめ
+  // ターン開始時の効果発動順序のまとめ
   //
   // 1. Pアイテム起因の、「ターン開始時」の効果発動
   //    ProducerItemTrigger["kind"] === "turnStart"
@@ -529,6 +529,26 @@ export const endLessonTurn = (
   );
 
   //
+  // ターン終了時の効果発動順序のまとめ
+  //
+  // 1. Pアイテム起因の、「ターン終了時」の効果発動
+  //    ProducerItemTrigger["kind"] === "turnEnd"
+  // 2. 状態修正起因の、「ターン終了時」の効果発動
+  //    Modifier["kind"] === "effectActivationAtEndOfTurn"
+  // 3. 未使用の手札を捨てる
+  // 4. 好印象の評価によるスコア増加効果発動
+  //
+  // 仕様確認済み情報のまとめ
+  //
+  // - 1 > 2
+  //   - SSRリーリヤが、ちょうど固有の「もう怖くないから」と「夢へのライフログ」で両方の効果を持っている
+  //     - 参考動画: https://www.youtube.com/live/fiQjD6lhsso?si=25gkSXymj3FEkXQA&t=5591
+  //       - 一瞬、「夢へのライフログ」による好印象 14->21 が表示され、それによるスコア増加が続き、「もう怖くないから」による好印象21->22、が発動している
+  // - 2 > 3 > 4
+  //   - 好印象によるスコア増加は手札を捨てた後に発動している。見ると明らかにわかる。
+  //
+
+  //
   // 状態修正やPアイテムによるターン終了時の効果発動
   //
   const activateEffectsOnTurnEndUpdates = activateEffectsOnTurnEnd(
@@ -564,25 +584,23 @@ export const endLessonTurn = (
       updates = [...updates, ...discardHandUpdates];
       historyResultIndex++;
       lesson = patchUpdates(lesson, discardHandUpdates);
-    }
 
-    //
-    // 好印象によるスコア増加
-    //
-    // - ターン終了時トリガーの効果発動とは明らかに時点が異なる、こちらは手札を捨てた後発動している
-    //
-    const obtainPositiveImpressionScoreOnTurnEndResult =
-      obtainPositiveImpressionScoreOnTurnEnd(lesson, historyResultIndex);
-    updates = [
-      ...updates,
-      ...obtainPositiveImpressionScoreOnTurnEndResult.updates,
-    ];
-    historyResultIndex =
-      obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
-    lesson = patchUpdates(
-      lesson,
-      obtainPositiveImpressionScoreOnTurnEndResult.updates,
-    );
+      //
+      // 好印象によるスコア増加
+      //
+      const obtainPositiveImpressionScoreOnTurnEndResult =
+        obtainPositiveImpressionScoreOnTurnEnd(lesson, historyResultIndex);
+      updates = [
+        ...updates,
+        ...obtainPositiveImpressionScoreOnTurnEndResult.updates,
+      ];
+      historyResultIndex =
+        obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
+      lesson = patchUpdates(
+        lesson,
+        obtainPositiveImpressionScoreOnTurnEndResult.updates,
+      );
+    }
   }
 
   return {

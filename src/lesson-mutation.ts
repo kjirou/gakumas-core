@@ -1970,50 +1970,78 @@ export const activateEffectsOnTurnEnd = (
   let nextHistoryResultIndex = historyResultIndex;
 
   //
-  // 状態修正による効果発動
+  // Pアイテム起因の、ターン終了時の効果発動
   //
-  // - TODO: [仕様確認] Pアイテムより先に発動しているか？
-  //
-  let modifierUpdates: LessonUpdateQuery[] = [];
-  for (const modifier of newLesson.idol.modifiers) {
-    let innerUpdates: LessonUpdateQuery[] = [];
-    if (modifier.kind === "effectActivationAtEndOfTurn") {
-      const diffs = activateEffect(
-        newLesson,
-        modifier.effect,
-        params.getRandom,
-        params.idGenerator,
-      );
-      if (diffs) {
-        innerUpdates = diffs.map((diff) =>
-          createLessonUpdateQueryFromDiff(diff, {
-            kind: "turnEndTrigger",
-            historyTurnNumber: lesson.turnNumber,
-            historyResultIndex,
-          }),
+  let producerItemUpdates: LessonUpdateQuery[] = [];
+  for (const producerItem of newLesson.producerItems) {
+    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    if (
+      producerItemContent.trigger.kind === "turnEnd" &&
+      canActivateProducerItem(newLesson, producerItem)
+    ) {
+      let innerUpdates: LessonUpdateQuery[] = [];
+      for (const effect of producerItemContent.effects) {
+        const diffs = activateEffect(
+          newLesson,
+          effect,
+          params.getRandom,
+          params.idGenerator,
         );
+        if (diffs) {
+          innerUpdates = diffs.map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "turnEndTrigger",
+              historyTurnNumber: lesson.turnNumber,
+              historyResultIndex,
+            }),
+          );
+        }
       }
-    }
-    newLesson = patchUpdates(newLesson, innerUpdates);
-    modifierUpdates = [...modifierUpdates, ...innerUpdates];
-    if (isScoreSatisfyingPerfect(newLesson)) {
-      break;
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
     }
   }
-  if (modifierUpdates.length > 0) {
+  if (producerItemUpdates.length > 0) {
     nextHistoryResultIndex++;
   }
 
   //
-  // TODO: Pアイテムによる効果発動、turnEnd
+  // 状態修正起因の、ターン終了時の効果発動
   //
-  // - TODO: [仕様確認] Pアイテム内の発動順はどうなっている？
-  //
+  let modifierUpdates: LessonUpdateQuery[] = [];
   if (!isScoreSatisfyingPerfect(newLesson)) {
+    for (const modifier of newLesson.idol.modifiers) {
+      let innerUpdates: LessonUpdateQuery[] = [];
+      if (modifier.kind === "effectActivationAtEndOfTurn") {
+        const diffs = activateEffect(
+          newLesson,
+          modifier.effect,
+          params.getRandom,
+          params.idGenerator,
+        );
+        if (diffs) {
+          innerUpdates = diffs.map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "turnEndTrigger",
+              historyTurnNumber: lesson.turnNumber,
+              historyResultIndex,
+            }),
+          );
+        }
+      }
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      modifierUpdates = [...modifierUpdates, ...innerUpdates];
+      if (isScoreSatisfyingPerfect(newLesson)) {
+        break;
+      }
+    }
+    if (modifierUpdates.length > 0) {
+      nextHistoryResultIndex++;
+    }
   }
 
   return {
-    updates: [...modifierUpdates],
+    updates: [...producerItemUpdates, ...modifierUpdates],
     nextHistoryResultIndex,
   };
 };

@@ -54,7 +54,7 @@ type ProducerItemPossessionKind = ProducePlan["kind"] | "free";
  * - 現状は、パラメータ増加が設定されているものがアクティブへ分類されているよう
  *   - 一部例外があり、スキルカードデータのテストにメモしている
  */
-type CardSummaryKind = "active" | "mental" | "trouble";
+export type CardSummaryKind = "active" | "mental" | "trouble";
 
 /**
  * 元気更新要求
@@ -1136,7 +1136,7 @@ export type LessonUpdateQueryReason = (
     }
   | {
       /** スキルカード使用.効果発動 */
-      kind: "cardUsage.effectActivation";
+      kind: "cardUsage.mainEffectActivation";
       cardId: Card["id"];
       effectIndex: number;
     }

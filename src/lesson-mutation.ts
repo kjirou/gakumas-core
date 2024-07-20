@@ -765,6 +765,7 @@ const activateEffect = (
       );
       break;
     }
+    // TODO: 手札5枚で生成した場合、現在は捨札に入れているが、本家は山札の先頭へスタックされる、Ref: https://youtu.be/40E2XOr0q2w
     case "generateCard": {
       const candidates = filterGeneratableCardsData(
         lesson.idol.original.definition.producePlan.kind,
@@ -1707,10 +1708,10 @@ export const useCard = (
   }
 
   //
-  // 使用した手札を捨札などへ移動
+  // 使用した手札を消費
   //
-  // - 基本的には、「レッスン中1回」がないものは捨札、あるものは除外へ移動する
-  // - しかし、山札0枚時の特殊仕様を考慮する必要がある、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
+  // - 「レッスン中1回」がないものは捨札、あるものは除外へ移動する
+  // - 加えて、山札0枚時の特殊仕様のためのフラグを保存する、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
@@ -1779,9 +1780,40 @@ export const useCard = (
     let effectActivationUpdatesOnce: LessonUpdateQuery[] = [];
 
     //
-    // 状態修正に起因する、スキルカード使用毎の効果発動
+    // 「次に使用するスキルカードの効果をもう1回発動」の状態修正があれば、 1 つ消費
     //
-    // - 「ファンシーチャーム」で確認したところ、スキルカードの主効果発動の前に作用していた
+    if (doubleEffect && times === 1) {
+      const id = params.idGenerator();
+      effectActivationUpdatesOnce = [
+        ...effectActivationUpdatesOnce,
+        createLessonUpdateQueryFromDiff(
+          {
+            kind: "modifier",
+            actual: {
+              kind: "doubleEffect",
+              times: -1,
+              id,
+              updateTargetId: doubleEffect.id,
+            },
+            max: {
+              kind: "doubleEffect",
+              times: -1,
+              id,
+              updateTargetId: doubleEffect.id,
+            },
+          },
+          {
+            kind: "cardUsage",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+        ),
+      ];
+    }
+
+    //
+    // 状態修正に起因する、スキルカード使用毎の効果発動
     //
     if (!params.preview) {
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
@@ -1813,8 +1845,6 @@ export const useCard = (
     //
     // TODO: Pアイテムに起因する、スキルカード使用毎の効果発動
     //       - スキルカード使用がトリガーのものと、スキルカード使用による状態修正がトリガーのものがある
-    //
-    // - 「満開ペアヘアピン」で確認したところ、スキルカードの主効果発動の前に作用していた
     //
 
     //
@@ -1854,39 +1884,6 @@ export const useCard = (
           ),
         ];
       }
-    }
-
-    //
-    // 「次に使用するスキルカードの効果をもう1回発動」の状態修正を消費
-    //
-    if (doubleEffect && times === 1) {
-      const id = params.idGenerator();
-      effectActivationUpdatesOnce = [
-        ...effectActivationUpdatesOnce,
-        createLessonUpdateQueryFromDiff(
-          {
-            kind: "modifier",
-            actual: {
-              kind: "doubleEffect",
-              times: -1,
-              id,
-              updateTargetId: doubleEffect.id,
-            },
-            max: {
-              kind: "doubleEffect",
-              times: -1,
-              id,
-              updateTargetId: doubleEffect.id,
-            },
-          },
-          {
-            kind: "cardUsage",
-            cardId: card.id,
-            historyTurnNumber: newLesson.turnNumber,
-            historyResultIndex: nextHistoryResultIndex,
-          },
-        ),
-      ];
     }
 
     // 1回分のスキルカード使用に対する副作用を含んで完了してから、1ループに1回のみレッスンの状態を更新する

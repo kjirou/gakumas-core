@@ -425,6 +425,25 @@ export const playCard = (
   }
 
   //
+  // スキルカード使用数またはアクションポイントを減らす
+  //
+  const consumeRemainingCardUsageCountResult = consumeRemainingCardUsageCount(
+    lesson,
+    historyResultIndex,
+    {
+      idGenerator: lessonGamePlay.idGenerator,
+    },
+  );
+  updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
+  historyResultIndex =
+    consumeRemainingCardUsageCountResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, consumeRemainingCardUsageCountResult.updates);
+
+  //
+  // ------------------
+  // スキルカードを使用する
+  // ------------------
+  //
   // スキルカード使用時の効果発動順序のまとめ
   //
   // 1. 手札の消費
@@ -467,25 +486,6 @@ export const playCard = (
   //   - どちらもキャラ固有にしか存在しなく、同時に所持できないので、現在は気にしないで良い
   //
   // - TODO: [仕様確認] 3-b と 3-c の発動順序。体力回復2のPアイテムとSRの継続効果のスキルカードの組み合わせでわかりそう
-  //
-
-  //
-  // スキルカード使用数またはアクションポイントを減らす
-  //
-  const consumeRemainingCardUsageCountResult = consumeRemainingCardUsageCount(
-    lesson,
-    historyResultIndex,
-    {
-      idGenerator: lessonGamePlay.idGenerator,
-    },
-  );
-  updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
-  historyResultIndex =
-    consumeRemainingCardUsageCountResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, consumeRemainingCardUsageCountResult.updates);
-
-  //
-  // スキルカードを使用する
   //
   const useCardResult = useCard(lesson, historyResultIndex, {
     getRandom: lessonGamePlay.getRandom,

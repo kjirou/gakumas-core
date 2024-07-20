@@ -382,7 +382,24 @@ export const generateProducerItemTriggerAndConditionText = (params: {
       break;
   }
   switch (trigger.kind) {
-    case "cardUsage":
+    case "afterCardEffectActivation":
+      text += [
+        (() => {
+          switch (trigger.cardSummaryKind) {
+            case "active":
+              return kwd("activeSkillCard");
+            case "mental":
+              return kwd("mentalSkillCard");
+            default:
+              return "スキルカード";
+          }
+        })(),
+        "使用後",
+        condition ? generateEffectConditionText(condition) : "",
+        "、",
+      ].join("");
+      break;
+    case "beforeCardEffectActivation":
       text += [
         (() => {
           if (trigger.cardDefinitionId !== undefined) {
@@ -397,8 +414,7 @@ export const generateProducerItemTriggerAndConditionText = (params: {
               return "スキルカード";
           }
         })(),
-        "使用",
-        condition?.kind === "countModifier" ? "後" : "時",
+        "使用時",
         condition ? generateEffectConditionText(condition) : "",
         "、",
       ].join("");

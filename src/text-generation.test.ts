@@ -760,58 +760,90 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     {
       args: [
         {
-          trigger: { kind: "cardUsage" },
+          trigger: { kind: "beforeCardEffectActivation" },
         },
       ],
       expected: "スキルカード使用時、",
-      name: "cardUsage - no options",
+      name: "beforeCardEffectActivation - no options",
     },
     {
       args: [
         {
-          trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+          trigger: {
+            kind: "beforeCardEffectActivation",
+            cardSummaryKind: "active",
+          },
         },
       ],
       expected: "{{アクティブスキルカード}}使用時、",
-      name: "cardUsage - cardSummaryKind: active",
+      name: "beforeCardEffectActivation - cardSummaryKind: active",
     },
     {
       args: [
         {
-          trigger: { kind: "cardUsage", cardSummaryKind: "mental" },
+          trigger: {
+            kind: "beforeCardEffectActivation",
+            cardSummaryKind: "mental",
+          },
         },
       ],
       expected: "{{メンタルスキルカード}}使用時、",
-      name: "cardUsage - cardSummaryKind: mental",
+      name: "beforeCardEffectActivation - cardSummaryKind: mental",
     },
     {
       args: [
         {
-          trigger: { kind: "cardUsage", cardDefinitionId: "adorenarinzenkai" },
+          trigger: {
+            kind: "beforeCardEffectActivation",
+            cardDefinitionId: "adorenarinzenkai",
+          },
         },
       ],
       expected: "{{アドレナリン全開}}使用時、",
-      name: "cardUsage - cardDefinitionId",
+      name: "beforeCardEffectActivation - cardDefinitionId",
     },
     {
       args: [
         {
           condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          trigger: { kind: "cardUsage" },
+          trigger: { kind: "beforeCardEffectActivation" },
         },
       ],
       expected: "スキルカード使用時体力が50%以上の場合、",
-      name: "cardUsage - condition - not countModifier",
+      name: "beforeCardEffectActivation - condition - not countModifier",
     },
     {
       args: [
         {
-          condition: { kind: "countModifier", modifierKind: "focus", min: 1 },
-          trigger: { kind: "cardUsage" },
+          trigger: { kind: "afterCardEffectActivation" },
         },
       ],
-      expected: "スキルカード使用後{{集中}}が1以上の場合、",
-      name: "cardUsage - condition - countModifier",
+      expected: "スキルカード使用後、",
+      name: "afterCardEffectActivation - no options",
+    },
+    {
+      args: [
+        {
+          trigger: {
+            kind: "afterCardEffectActivation",
+            cardSummaryKind: "active",
+          },
+        },
+      ],
+      expected: "{{アクティブスキルカード}}使用後、",
+      name: "afterCardEffectActivation - cardSummaryKind: active",
+    },
+    {
+      args: [
+        {
+          trigger: {
+            kind: "afterCardEffectActivation",
+            cardSummaryKind: "mental",
+          },
+        },
+      ],
+      expected: "{{メンタルスキルカード}}使用後、",
+      name: "afterCardEffectActivation - cardSummaryKind: mental",
     },
     {
       args: [

@@ -1,8 +1,10 @@
 import type {
   ActionCost,
   Card,
+  CardDefinition,
   CardInHandSummary,
   CardInProduction,
+  CardSummaryKind,
   CardUsageCondition,
   Effect,
   EffectCondition,
@@ -360,12 +362,29 @@ export const canApplyEffect = (
 export const canActivateProducerItem = (
   lesson: Lesson,
   producerItem: ProducerItem,
+  options: {
+    cardDefinitionId?: CardDefinition["id"];
+    cardSummaryKind?: CardSummaryKind;
+  } = {},
 ) => {
   const producerItemContent = getProducerItemContentDefinition(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+  const cardSummaryKindCondition =
+    !(
+      producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
+      producerItemContent.trigger.kind === "afterCardEffectActivation"
+    ) ||
+    producerItemContent.trigger.cardSummaryKind === undefined ||
+    producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
+  const cardDefinitionIdCondition =
+    !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
+    producerItemContent.trigger.cardDefinitionId === undefined ||
+    producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
   return (
     (producerItemContent.trigger.idolParameterKind === undefined ||
       producerItemContent.trigger.idolParameterKind === idolParameterKind) &&
+    cardSummaryKindCondition &&
+    cardDefinitionIdCondition &&
     (producerItemContent.condition === undefined ||
       canApplyEffect(lesson, producerItemContent.condition)) &&
     isRemainingProducerItemTimes(producerItem)
@@ -765,6 +784,7 @@ const activateEffect = (
       );
       break;
     }
+    // TODO: 手札5枚で生成した場合、現在は捨札に入れているが、本家は山札の先頭へスタックされる、Ref: https://youtu.be/40E2XOr0q2w
     case "generateCard": {
       const candidates = filterGeneratableCardsData(
         lesson.idol.original.definition.producePlan.kind,
@@ -1707,10 +1727,10 @@ export const useCard = (
   }
 
   //
-  // 使用した手札を捨札などへ移動
+  // 手札の消費
   //
-  // - 基本的には、「レッスン中1回」がないものは捨札、あるものは除外へ移動する
-  // - しかし、山札0枚時の特殊仕様を考慮する必要がある、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
+  // - 「レッスン中1回」がないものは捨札、あるものは除外へ移動する
+  // - 加えて、山札0枚時の特殊仕様のためのフラグを保存する、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
@@ -1753,7 +1773,7 @@ export const useCard = (
   }
 
   //
-  // コスト消費
+  // コストの消費
   //
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
@@ -1772,16 +1792,83 @@ export const useCard = (
   nextHistoryResultIndex++;
 
   //
-  // 副作用を含む効果発動を1-2回行う
+  // 効果発動
   //
   let effectActivationUpdates: LessonUpdateQuery[] = [];
   for (let times = 1; times <= (doubleEffect ? 2 : 1); times++) {
-    let effectActivationUpdatesOnce: LessonUpdateQuery[] = [];
+    //
+    // 「次に使用するスキルカードの効果をもう1回発動」があれば、1 つ消費
+    //
+    if (doubleEffect && times === 1) {
+      const modifier = {
+        kind: "doubleEffect",
+        times: -1,
+        id: params.idGenerator(),
+        updateTargetId: doubleEffect.id,
+      } as const;
+      const innerUpdates = [
+        createLessonUpdateQueryFromDiff(
+          {
+            kind: "modifier",
+            actual: modifier,
+            max: modifier,
+          },
+          {
+            kind: "cardUsage",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+        ),
+      ];
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
+    }
 
     //
-    // 状態修正に起因する、スキルカード使用毎の効果発動
+    // Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動
     //
-    // - 「ファンシーチャーム」で確認したところ、スキルカードの主効果発動の前に作用していた
+    if (!params.preview) {
+      const beforeEffectProducerItems = newLesson.producerItems.filter(
+        (producerItem) => {
+          const producerItemContent =
+            getProducerItemContentDefinition(producerItem);
+          return (
+            producerItemContent.trigger.kind === "beforeCardEffectActivation" &&
+            canActivateProducerItem(newLesson, producerItem, {
+              cardDefinitionId: card.original.definition.id,
+              cardSummaryKind: card.original.definition.cardSummaryKind,
+            })
+          );
+        },
+      );
+      for (const producerItem of beforeEffectProducerItems) {
+        const effectActivations = activateEffects(
+          newLesson,
+          getProducerItemContentDefinition(producerItem).effects,
+          params.getRandom,
+          params.idGenerator,
+        );
+        const diffs = effectActivations
+          .filter((e) => e !== undefined)
+          .reduce((acc, e) => [...acc, ...e], []);
+        const innerUpdates = [
+          ...diffs.map((diff) =>
+            createLessonUpdateQueryFromDiff(diff, {
+              kind: "cardUsageTrigger",
+              cardId: card.id,
+              historyTurnNumber: newLesson.turnNumber,
+              historyResultIndex: nextHistoryResultIndex,
+            }),
+          ),
+        ];
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
+      }
+    }
+
+    //
+    // 状態修正に起因する、スキルカード使用時の効果発動
     //
     if (!params.preview) {
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
@@ -1796,8 +1883,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
         );
-        effectActivationUpdatesOnce = [
-          ...effectActivationUpdatesOnce,
+        const innerUpdates = [
           ...(effectResult ?? []).map((diff) =>
             createLessonUpdateQueryFromDiff(diff, {
               kind: "cardUsageTrigger",
@@ -1807,15 +1893,10 @@ export const useCard = (
             }),
           ),
         ];
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
       }
     }
-
-    //
-    // TODO: Pアイテムに起因する、スキルカード使用毎の効果発動
-    //       - スキルカード使用がトリガーのものと、スキルカード使用による状態修正がトリガーのものがある
-    //
-    // - 「満開ペアヘアピン」で確認したところ、スキルカードの主効果発動の前に作用していた
-    //
 
     //
     // 主効果発動
@@ -1841,11 +1922,11 @@ export const useCard = (
       effectActivation,
     ] of mainEffectActivations.entries()) {
       if (effectActivation) {
-        effectActivationUpdatesOnce = [
-          ...effectActivationUpdatesOnce,
+        const innerUpdates = [
           ...effectActivation.map((diff) =>
             createLessonUpdateQueryFromDiff(diff, {
-              kind: "cardUsage.effectActivation",
+              // プレビュー時に、発動されない効果を表示する必要があるので、この reason の形式で更新を返す必要がある
+              kind: "cardUsage.mainEffectActivation",
               cardId: card.id,
               effectIndex,
               historyTurnNumber: newLesson.turnNumber,
@@ -1853,49 +1934,10 @@ export const useCard = (
             }),
           ),
         ];
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
       }
     }
-
-    //
-    // 「次に使用するスキルカードの効果をもう1回発動」の状態修正を消費
-    //
-    if (doubleEffect && times === 1) {
-      const id = params.idGenerator();
-      effectActivationUpdatesOnce = [
-        ...effectActivationUpdatesOnce,
-        createLessonUpdateQueryFromDiff(
-          {
-            kind: "modifier",
-            actual: {
-              kind: "doubleEffect",
-              times: -1,
-              id,
-              updateTargetId: doubleEffect.id,
-            },
-            max: {
-              kind: "doubleEffect",
-              times: -1,
-              id,
-              updateTargetId: doubleEffect.id,
-            },
-          },
-          {
-            kind: "cardUsage",
-            cardId: card.id,
-            historyTurnNumber: newLesson.turnNumber,
-            historyResultIndex: nextHistoryResultIndex,
-          },
-        ),
-      ];
-    }
-
-    // 1回分のスキルカード使用に対する副作用を含んで完了してから、1ループに1回のみレッスンの状態を更新する
-    // 例えば、「ファンシーチャーム」は「以降、メンタルスキルカード使用時、好印象+1」の効果だが、自身の使用によって発動はしないことを担保する必要がある
-    newLesson = patchUpdates(newLesson, effectActivationUpdatesOnce);
-    effectActivationUpdates = [
-      ...effectActivationUpdates,
-      ...effectActivationUpdatesOnce,
-    ];
   }
   // スキルカード追加発動時は、スキルカード1枚分の結果の中に表示されている
   nextHistoryResultIndex++;

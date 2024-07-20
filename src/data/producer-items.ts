@@ -116,7 +116,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 2 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardSummaryKind: "active",
+      },
     },
     enhanced: {
       condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
@@ -124,7 +127,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardSummaryKind: "active",
+      },
     },
   },
   {
@@ -273,7 +279,7 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage" },
+      trigger: { kind: "afterCardEffectActivation" },
     },
     enhanced: {
       condition: { kind: "countModifier", modifierKind: "motivation", min: 3 },
@@ -284,7 +290,7 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage" },
+      trigger: { kind: "afterCardEffectActivation" },
     },
   },
   {
@@ -379,7 +385,7 @@ export const producerItems: ProducerItemDefinition[] = [
   },
   {
     id: "hokagonorakugaki",
-    name: "放課後の落書き",
+    name: "放課後のらくがき",
     producerItemPossessionKind: "sense",
     producerItemProviderKind: "idol",
     rarity: "sr",
@@ -498,7 +504,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "drainLife", value: 2 },
       ],
       times: 2,
-      trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "active",
+      },
     },
     enhanced: {
       effects: [
@@ -506,7 +515,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "drainLife", value: 2 },
       ],
       times: 2,
-      trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "active",
+      },
     },
   },
   {
@@ -648,7 +660,10 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "active",
+      },
     },
     enhanced: {
       effects: [
@@ -666,7 +681,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "perform", vitality: { value: 5 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardSummaryKind: "active" },
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "active",
+      },
     },
   },
   {
@@ -688,7 +706,7 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage" },
+      trigger: { kind: "beforeCardEffectActivation" },
     },
     enhanced: {
       condition: { kind: "countModifier", modifierKind: "focus", min: 5 },
@@ -703,7 +721,7 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage" },
+      trigger: { kind: "beforeCardEffectActivation" },
     },
   },
   {
@@ -786,7 +804,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "perform", vitality: { fixedValue: true, value: 5 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardDefinitionId: "adorenarinzenkai" },
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardDefinitionId: "adorenarinzenkai",
+      },
     },
     enhanced: {
       effects: [
@@ -797,7 +818,10 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "perform", vitality: { fixedValue: true, value: 11 } },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardDefinitionId: "adorenarinzenkai" },
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardDefinitionId: "adorenarinzenkai",
+      },
     },
   },
   {
@@ -826,7 +850,7 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage" },
+      trigger: { kind: "afterCardEffectActivation" },
     },
     enhanced: {
       condition: {
@@ -848,7 +872,7 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage" },
+      trigger: { kind: "afterCardEffectActivation" },
     },
   },
   {
@@ -996,7 +1020,10 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardSummaryKind: "mental" },
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "mental",
+      },
     },
     enhanced: {
       condition: { kind: "countModifier", modifierKind: "motivation", min: 5 },
@@ -1011,7 +1038,10 @@ export const producerItems: ProducerItemDefinition[] = [
         },
       ],
       times: 1,
-      trigger: { kind: "cardUsage", cardSummaryKind: "mental" },
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "mental",
+      },
     },
   },
   {
@@ -1070,7 +1100,7 @@ export const producerItems: ProducerItemDefinition[] = [
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: {
-        kind: "cardUsage",
+        kind: "beforeCardEffectActivation",
         cardSummaryKind: "active",
         idolParameterKind: "vocal",
       },
@@ -1101,7 +1131,7 @@ export const producerItems: ProducerItemDefinition[] = [
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: {
-        kind: "cardUsage",
+        kind: "beforeCardEffectActivation",
         cardSummaryKind: "active",
         idolParameterKind: "visual",
       },
@@ -1177,7 +1207,7 @@ export const producerItems: ProducerItemDefinition[] = [
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: {
-        kind: "cardUsage",
+        kind: "beforeCardEffectActivation",
         cardSummaryKind: "active",
         idolParameterKind: "dance",
       },

@@ -779,14 +779,14 @@ export const producerItems: ProducerItemDefinition[] = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
       ],
       times: 1,
-      trigger: { kind: "turnStart" },
+      trigger: { kind: "lessonStart" },
     },
     enhanced: {
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
       ],
       times: 1,
-      trigger: { kind: "turnStart" },
+      trigger: { kind: "lessonStart" },
     },
   },
   {

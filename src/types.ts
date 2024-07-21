@@ -48,7 +48,7 @@ type CardPossessionKind = ProducePlan["kind"] | "free";
 type ProducerItemPossessionKind = ProducePlan["kind"] | "free";
 
 /**
- * カード概要種別
+ * スキルカード概要種別
  *
  * - 値は原文の「アクティブスキルカード」「メンタルスキルカード」「トラブルカード」に準拠
  * - 現状は、パラメータ増加が設定されているものがアクティブへ分類されているよう

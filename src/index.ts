@@ -18,19 +18,7 @@
 //       - レッスン中に放置するとカードがうっすら光っておすすめカードを教えてくれるが、それがコンテストと同じAIかもしれない
 //         - もしそうだとすると、AIはサーバ側ではなくてクライアント側が計算しているのかもしれない
 
-import {
-  Card,
-  CardDefinition,
-  CardInHandSummary,
-  CardInProduction,
-  GetRandom,
-  IdGenerator,
-  Idol,
-  IdolInProduction,
-  Lesson,
-  LessonGamePlay,
-  LessonUpdateQuery,
-} from "./types";
+import { CardInHandSummary, LessonGamePlay, LessonUpdateQuery } from "./types";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -44,7 +32,6 @@ import {
   useCard,
 } from "./lesson-mutation";
 import {
-  calculateClearScoreProgress,
   calculateRemainingTurns,
   getCardContentDefinition,
   isScoreSatisfyingPerfect,

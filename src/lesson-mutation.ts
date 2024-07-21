@@ -19,6 +19,7 @@ import type {
   ProducePlan,
   ProducerItem,
   ProducerItemContentDefinition,
+  ProducerItemTrigger,
   VitalityUpdateQuery,
 } from "./types";
 import { filterGeneratableCardsData } from "./data/cards";
@@ -357,17 +358,53 @@ export const canApplyEffect = (
 };
 
 /**
- * Pアイテムが発動できる共通の条件を満たしているかを判定する
+ * Pアイテムが作動できるかを判定する
  *
- * - この関数では、全てのPアイテムのトリガーが持ち得る共通の条件のみを判定する
+ * - Pアイテムの場合は、作動すれば、全ての効果の発動と反映も確定する
+ *   - というよりは、スキルカード側では「効果発動するが反映されない」という状況があるが、Pアイテム側では「効果反映までできるか」が作動条件に含まれているので、結果としてそうなる
+ *   - なお、体力消費や体力減少があるPアイテムもあるが、条件として機能するのかは不明。本実装では一旦は条件として考慮せず、リソースが足りなくても実行している。
+ *
+ * @param options.cardDefinitionId 一部のトリガーでのみ有効、直前で使用したスキルカード定義IDを指定する
+ * @param options.cardSummaryKind 一部のトリガーでのみ有効、直前で使用したスキルカード概要種別を指定する
+ * @param options.increasedModifierKinds 一部のトリガーでのみ有効、直前で使用したスキルカードにより上昇した状態修正の種別リストを指定する
  */
-export const canActivateProducerItem = (
+export const canTriggerProducerItem = (
   lesson: Lesson,
   producerItem: ProducerItem,
-) => {
+  callFrom: ProducerItemTrigger["kind"],
+  options: {
+    cardDefinitionId?: CardDefinition["id"];
+    cardSummaryKind?: CardSummaryKind;
+    increasedModifierKinds?: Modifier["kind"][];
+  } = {},
+): boolean => {
   const producerItemContent = getProducerItemContentDefinition(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+  const everyTwoTurnsCondition =
+    !(producerItemContent.trigger.kind === "turnStartEveryTwoTurns") ||
+    (lesson.turnNumber >= 2 && lesson.turnNumber % 2 === 0);
+  const cardDefinitionIdCondition =
+    !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
+    producerItemContent.trigger.cardDefinitionId === undefined ||
+    producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
+  const cardSummaryKindCondition =
+    !(
+      producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
+      producerItemContent.trigger.kind === "afterCardEffectActivation"
+    ) ||
+    producerItemContent.trigger.cardSummaryKind === undefined ||
+    producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
+  const modifierIncreaseCondition =
+    !(producerItemContent.trigger.kind === "modifierIncrease") ||
+    (options.increasedModifierKinds || []).includes(
+      producerItemContent.trigger.modifierKind,
+    );
   return (
+    producerItemContent.trigger.kind === callFrom &&
+    everyTwoTurnsCondition &&
+    cardDefinitionIdCondition &&
+    cardSummaryKindCondition &&
+    modifierIncreaseCondition &&
     (producerItemContent.trigger.idolParameterKind === undefined ||
       producerItemContent.trigger.idolParameterKind === idolParameterKind) &&
     (producerItemContent.condition === undefined ||
@@ -1011,7 +1048,7 @@ const activateDelayedEffectModifier = (
 type EffectActivations = Array<LessonUpdateQueryDiff[] | undefined>;
 
 /**
- * 効果リストを発動をして、効果発動結果リストを返す
+ * 効果リストを発動する
  *
  * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
  * - 本処理内では、レッスンその他の状況は変わらない前提
@@ -1032,7 +1069,29 @@ const activateEffects = (
 };
 
 /**
- * スキルカード使用に伴うPアイテムの効果を発動する
+ * Pアイテムの効果リストを発動する
+ *
+ * - スキルカードとは異なり、プレビューがないので、EffectActivations の形式でなくても良い
+ */
+const activateEffectsOfProducerItem = (
+  lesson: Lesson,
+  producerItem: ProducerItem,
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+): LessonUpdateQueryDiff[] => {
+  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  return activateEffects(
+    lesson,
+    producerItemContent.effects,
+    getRandom,
+    idGenerator,
+  )
+    .filter((e) => e !== undefined)
+    .reduce((acc, e) => [...acc, ...e], []);
+};
+
+/**
+ * スキルカード使用に伴うPアイテムの効果を発動して反映する
  */
 export const applyEffectsEachProducerItemsAccordingToCardUsage = (
   lesson: Lesson,
@@ -1054,46 +1113,21 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
 } => {
   let updates: LessonUpdateQuery[] = [];
   let newLesson = lesson;
-  const targetProducerItems = lesson.idol.producerItems.filter(
-    (producerItem) => {
-      const producerItemContent =
-        getProducerItemContentDefinition(producerItem);
-      const cardDefinitionIdCondition =
-        !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-        producerItemContent.trigger.cardDefinitionId === undefined ||
-        producerItemContent.trigger.cardDefinitionId ===
-          options.cardDefinitionId;
-      const cardSummaryKindCondition =
-        !(
-          producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
-          producerItemContent.trigger.kind === "afterCardEffectActivation"
-        ) ||
-        producerItemContent.trigger.cardSummaryKind === undefined ||
-        producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
-      const modifierIncreaseCondition =
-        !(producerItemContent.trigger.kind === "modifierIncrease") ||
-        (options.increasedModifierKinds || []).includes(
-          producerItemContent.trigger.modifierKind,
-        );
-      return (
-        producerItemContent.trigger.kind === producerItemTriggerKind &&
-        cardDefinitionIdCondition &&
-        cardSummaryKindCondition &&
-        modifierIncreaseCondition &&
-        canActivateProducerItem(lesson, producerItem)
-      );
-    },
+  const targetProducerItems = lesson.idol.producerItems.filter((producerItem) =>
+    canTriggerProducerItem(
+      lesson,
+      producerItem,
+      producerItemTriggerKind,
+      options,
+    ),
   );
   for (const producerItem of targetProducerItems) {
-    const effectActivations = activateEffects(
+    const diffs = activateEffectsOfProducerItem(
       lesson,
-      getProducerItemContentDefinition(producerItem).effects,
+      producerItem,
       getRandom,
       idGenerator,
     );
-    const diffs = effectActivations
-      .filter((e) => e !== undefined)
-      .reduce((acc, e) => [...acc, ...e], []);
     const innerUpdates = diffs.map((diff) =>
       createLessonUpdateQueryFromDiff(diff, reason),
     );
@@ -1213,6 +1247,8 @@ type LessonMutationResult = {
 
 /**
  * レッスン開始時に効果を発動する
+ *
+ * - 「レッスン開始時手札に入る」は、ターン開始時の手札を引く処理に関連するので、ここでは処理しない
  */
 export const activateEffectsOnLessonStart = (
   lesson: Lesson,
@@ -1226,13 +1262,36 @@ export const activateEffectsOnLessonStart = (
   let nextHistoryResultIndex = historyResultIndex;
 
   //
-  // TODO: Pアイテムによるレッスン開始時の効果発動
+  // Pアイテム起因の、レッスン開始時の効果発動
   //
-  // - 「レッスン開始時手札に入る」は、ターン開始時の手札を引く処理に関連するので、ここでは処理しない
+  // - 現状は、恒常SSR清夏の「ゲーセンの戦利品」のみ、このトリガーで効果が発動する
   //
+  let producerItemUpdates: LessonUpdateQuery[] = [];
+  for (const producerItem of newLesson.idol.producerItems) {
+    if (canTriggerProducerItem(newLesson, producerItem, "lessonStart")) {
+      const diffs = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diffs.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "lessonStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        }),
+      );
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+    }
+  }
+  if (producerItemUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
 
   return {
-    updates: [],
+    updates: [...producerItemUpdates],
     nextHistoryResultIndex,
   };
 };
@@ -1256,80 +1315,31 @@ export const activateProducerItemEffectsOnTurnStart = (
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
-      producerItemContent.trigger.kind === "turnStart" &&
-      canActivateProducerItem(newLesson, producerItem)
+      canTriggerProducerItem(newLesson, producerItem, "turnStart") ||
+      canTriggerProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
     ) {
-      let innerUpdates: LessonUpdateQuery[] = [];
-      for (const effect of producerItemContent.effects) {
-        const diffs = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        if (diffs) {
-          innerUpdates = diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnStartTrigger",
-              historyTurnNumber: lesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          );
-        }
-      }
+      const diff = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diff.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      );
       newLesson = patchUpdates(newLesson, innerUpdates);
       turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
+      nextHistoryResultIndex++;
     }
-  }
-  if (turnStartUpdates.length > 0) {
-    nextHistoryResultIndex++;
-  }
-
-  //
-  // 2ターンごとターン開始時の効果発動
-  //
-  let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.idol.producerItems) {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
-    if (
-      producerItemContent.trigger.kind === "turnStartEveryTwoTurns" &&
-      newLesson.turnNumber >= 2 &&
-      newLesson.turnNumber % 2 === 0 &&
-      canActivateProducerItem(newLesson, producerItem)
-    ) {
-      let innerUpdates: LessonUpdateQuery[] = [];
-      for (const effect of producerItemContent.effects) {
-        const diffs = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        if (diffs) {
-          innerUpdates = diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnStartTrigger",
-              historyTurnNumber: lesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          );
-        }
-      }
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      turnStartEveryTwoTurnsUpdates = [
-        ...turnStartEveryTwoTurnsUpdates,
-        ...innerUpdates,
-      ];
-    }
-  }
-  if (turnStartEveryTwoTurnsUpdates.length > 0) {
-    nextHistoryResultIndex++;
   }
 
   return {
-    updates: [...turnStartUpdates, ...turnStartEveryTwoTurnsUpdates],
+    updates: [...turnStartUpdates],
     nextHistoryResultIndex,
   };
 };
@@ -2109,35 +2119,24 @@ export const activateEffectsOnTurnEnd = (
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
-    if (
-      producerItemContent.trigger.kind === "turnEnd" &&
-      canActivateProducerItem(newLesson, producerItem)
-    ) {
-      let innerUpdates: LessonUpdateQuery[] = [];
-      for (const effect of producerItemContent.effects) {
-        const diffs = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        if (diffs) {
-          innerUpdates = diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnEndTrigger",
-              historyTurnNumber: lesson.turnNumber,
-              historyResultIndex,
-            }),
-          );
-        }
-      }
+    if (canTriggerProducerItem(newLesson, producerItem, "turnEnd")) {
+      const diffs = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diffs.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      );
       newLesson = patchUpdates(newLesson, innerUpdates);
       producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+      nextHistoryResultIndex++;
     }
-  }
-  if (producerItemUpdates.length > 0) {
-    nextHistoryResultIndex++;
   }
 
   //

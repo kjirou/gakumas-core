@@ -1279,15 +1279,18 @@ export const activateEffectsOnLessonStart = (
         createLessonUpdateQueryFromDiff(diff, {
           kind: "lessonStartTrigger",
           historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
+          historyResultIndex: nextHistoryResultIndex,
         }),
       );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+        nextHistoryResultIndex++;
+        if (isScoreSatisfyingPerfect(newLesson)) {
+          break;
+        }
+      }
     }
-  }
-  if (producerItemUpdates.length > 0) {
-    nextHistoryResultIndex++;
   }
 
   return {
@@ -1332,9 +1335,14 @@ export const activateProducerItemEffectsOnTurnStart = (
           historyResultIndex: nextHistoryResultIndex,
         }),
       );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
-      nextHistoryResultIndex++;
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
+        nextHistoryResultIndex++;
+        if (isScoreSatisfyingPerfect(newLesson)) {
+          break;
+        }
+      }
     }
   }
 
@@ -1369,27 +1377,31 @@ export const activateModifierEffectsOnTurnStart = (
       isDelayedEffectModifierType(modifier) &&
       isPerformEffectType(modifier.effect)
     ) {
-      const innerUpdates = activateDelayedEffectModifier(
+      const diffs = activateDelayedEffectModifier(
         newLesson,
         modifier,
         params.getRandom,
         params.idGenerator,
-      ).map((diff) =>
+      );
+      const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
           kind: "turnStartTrigger",
           historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
+          historyResultIndex: nextHistoryResultIndex,
         }),
       );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      performDelayedEffectUpdates = [
-        ...performDelayedEffectUpdates,
-        ...innerUpdates,
-      ];
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        performDelayedEffectUpdates = [
+          ...performDelayedEffectUpdates,
+          ...innerUpdates,
+        ];
+        nextHistoryResultIndex++;
+        if (isScoreSatisfyingPerfect(newLesson)) {
+          break;
+        }
+      }
     }
-  }
-  if (performDelayedEffectUpdates.length > 0) {
-    nextHistoryResultIndex++;
   }
 
   //
@@ -1402,27 +1414,28 @@ export const activateModifierEffectsOnTurnStart = (
         isDelayedEffectModifierType(modifier) &&
         isDrawCardsEffectType(modifier.effect)
       ) {
-        const innerUpdates = activateDelayedEffectModifier(
+        const diffs = activateDelayedEffectModifier(
           newLesson,
           modifier,
           params.getRandom,
           params.idGenerator,
-        ).map((diff) =>
+        );
+        const innerUpdates = diffs.map((diff) =>
           createLessonUpdateQueryFromDiff(diff, {
             kind: "turnStartTrigger",
             historyTurnNumber: lesson.turnNumber,
-            historyResultIndex,
+            historyResultIndex: nextHistoryResultIndex,
           }),
         );
-        newLesson = patchUpdates(newLesson, innerUpdates);
-        drawCardDelayedEffectUpdates = [
-          ...drawCardDelayedEffectUpdates,
-          ...innerUpdates,
-        ];
+        if (innerUpdates.length > 0) {
+          newLesson = patchUpdates(newLesson, innerUpdates);
+          drawCardDelayedEffectUpdates = [
+            ...drawCardDelayedEffectUpdates,
+            ...innerUpdates,
+          ];
+          nextHistoryResultIndex++;
+        }
       }
-    }
-    if (drawCardDelayedEffectUpdates.length > 0) {
-      nextHistoryResultIndex++;
     }
   }
 
@@ -1436,27 +1449,28 @@ export const activateModifierEffectsOnTurnStart = (
         isDelayedEffectModifierType(modifier) &&
         isEnhanceHandEffectType(modifier.effect)
       ) {
-        const innerUpdates = activateDelayedEffectModifier(
+        const diffs = activateDelayedEffectModifier(
           newLesson,
           modifier,
           params.getRandom,
           params.idGenerator,
-        ).map((diff) =>
+        );
+        const innerUpdates = diffs.map((diff) =>
           createLessonUpdateQueryFromDiff(diff, {
             kind: "turnStartTrigger",
             historyTurnNumber: lesson.turnNumber,
-            historyResultIndex,
+            historyResultIndex: nextHistoryResultIndex,
           }),
         );
-        newLesson = patchUpdates(newLesson, innerUpdates);
-        enhanceHandDelayedEffectUpdates = [
-          ...enhanceHandDelayedEffectUpdates,
-          ...innerUpdates,
-        ];
+        if (innerUpdates.length > 0) {
+          newLesson = patchUpdates(newLesson, innerUpdates);
+          enhanceHandDelayedEffectUpdates = [
+            ...enhanceHandDelayedEffectUpdates,
+            ...innerUpdates,
+          ];
+          nextHistoryResultIndex++;
+        }
       }
-    }
-    if (enhanceHandDelayedEffectUpdates.length > 0) {
-      nextHistoryResultIndex++;
     }
   }
 
@@ -1515,7 +1529,7 @@ export const drawCardsOnTurnStart = (
           reason: {
             kind: "turnStartTrigger",
             historyTurnNumber: newLesson.turnNumber,
-            historyResultIndex,
+            historyResultIndex: nextHistoryResultIndex,
           },
         },
       ];
@@ -1548,7 +1562,7 @@ export const drawCardsOnTurnStart = (
         reason: {
           kind: "turnStartTrigger",
           historyTurnNumber: newLesson.turnNumber,
-          historyResultIndex,
+          historyResultIndex: nextHistoryResultIndex,
         },
       },
     ];
@@ -1572,7 +1586,7 @@ export const drawCardsOnTurnStart = (
       createLessonUpdateQueryFromDiff(diff, {
         kind: "turnStartTrigger",
         historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex,
+        historyResultIndex: nextHistoryResultIndex,
       }),
     );
     newLesson = patchUpdates(newLesson, drawCardsEffectUpdates);
@@ -1603,7 +1617,7 @@ export const drawCardsOnTurnStart = (
         reason: {
           kind: "turnStartTrigger",
           historyTurnNumber: newLesson.turnNumber,
-          historyResultIndex,
+          historyResultIndex: nextHistoryResultIndex,
         },
       },
     ];
@@ -2133,9 +2147,14 @@ export const activateEffectsOnTurnEnd = (
           historyResultIndex: nextHistoryResultIndex,
         }),
       );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
-      nextHistoryResultIndex++;
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+        nextHistoryResultIndex++;
+        if (isScoreSatisfyingPerfect(newLesson)) {
+          break;
+        }
+      }
     }
   }
 
@@ -2158,19 +2177,19 @@ export const activateEffectsOnTurnEnd = (
             createLessonUpdateQueryFromDiff(diff, {
               kind: "turnEndTrigger",
               historyTurnNumber: lesson.turnNumber,
-              historyResultIndex,
+              historyResultIndex: nextHistoryResultIndex,
             }),
           );
         }
       }
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      modifierUpdates = [...modifierUpdates, ...innerUpdates];
-      if (isScoreSatisfyingPerfect(newLesson)) {
-        break;
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        modifierUpdates = [...modifierUpdates, ...innerUpdates];
+        nextHistoryResultIndex++;
+        if (isScoreSatisfyingPerfect(newLesson)) {
+          break;
+        }
       }
-    }
-    if (modifierUpdates.length > 0) {
-      nextHistoryResultIndex++;
     }
   }
 

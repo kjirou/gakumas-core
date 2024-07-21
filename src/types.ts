@@ -202,7 +202,6 @@ export type ModifierDefinition =
        * 「パラメータ上昇量増加50%（{duration}ターン）」
        *
        * - 「ビジュアルレッスン・ビジュアルターンのみ」のような条件を伴うものが多いが、これは付与条件なので、状態修正としては付与されたら一律に効果を発する
-       * - TODO: [仕様確認] 端数処理というか計算式
        */
       kind: "mightyPerformance";
       duration: number;

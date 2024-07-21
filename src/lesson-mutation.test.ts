@@ -5,7 +5,6 @@ import {
   Lesson,
   Modifier,
   ProducerItem,
-  ProducerItemContentDefinition,
 } from "./types";
 import { getCardDataById } from "./data/cards";
 import {
@@ -18,9 +17,9 @@ import {
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
   calculatePositiveImpressionScore,
-  canActivateProducerItem,
   canApplyEffect,
   canUseCard,
+  canTriggerProducerItem,
   consumeRemainingCardUsageCount,
   createCardPlacementDiff,
   decreaseEachModifierDurationOverTime,
@@ -1011,14 +1010,14 @@ describe("canApplyEffect", () => {
   });
 });
 // condition 条件は canApplyEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
-describe("canActivateProducerItem", () => {
+describe("canTriggerProducerItem", () => {
   const testCases: Array<{
-    args: Parameters<typeof canActivateProducerItem>;
-    expected: ReturnType<typeof canActivateProducerItem>;
+    args: Parameters<typeof canTriggerProducerItem>;
+    expected: ReturnType<typeof canTriggerProducerItem>;
     name: string;
   }> = [
     {
-      name: "条件がない時、trueを返す",
+      name: "トリガー種別以外の条件がなく、トリガー種別が一致する時、trueを返す",
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
@@ -1027,8 +1026,23 @@ describe("canActivateProducerItem", () => {
             definition: { base: { trigger: { kind: "turnStart" } } },
           },
         } as ProducerItem,
+        "turnStart",
       ],
       expected: true,
+    },
+    {
+      name: "トリガー種別以外の条件がなく、トリガー種別が一致しない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: { base: { trigger: { kind: "turnStart" } } },
+          },
+        } as ProducerItem,
+        "turnEnd",
+      ],
+      expected: false,
     },
     {
       name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
@@ -1044,6 +1058,7 @@ describe("canActivateProducerItem", () => {
             },
           },
         } as ProducerItem,
+        "turnStart",
       ],
       expected: true,
     },
@@ -1061,6 +1076,7 @@ describe("canActivateProducerItem", () => {
             },
           },
         } as ProducerItem,
+        "turnStart",
       ],
       expected: false,
     },
@@ -1074,6 +1090,7 @@ describe("canActivateProducerItem", () => {
             definition: { base: { trigger: { kind: "turnStart" }, times: 2 } },
           },
         } as ProducerItem,
+        "turnStart",
       ],
       expected: true,
     },
@@ -1087,12 +1104,225 @@ describe("canActivateProducerItem", () => {
             definition: { base: { trigger: { kind: "turnStart" }, times: 2 } },
           },
         } as ProducerItem,
+        "turnStart",
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryTwoTurns で、2ターン目の時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 2 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
+            },
+          },
+        } as ProducerItem,
+        "turnStartEveryTwoTurns",
+      ],
+      expected: true,
+    },
+    {
+      name: "turnStartEveryTwoTurns で、1ターン目の時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
+            },
+          },
+        } as ProducerItem,
+        "turnStartEveryTwoTurns",
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryTwoTurns で、0ターン目の時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 0 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
+            },
+          },
+        } as ProducerItem,
+        "turnStartEveryTwoTurns",
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation で、スキルカード定義IDとスキルカード概要種別が一致する時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "beforeCardEffectActivation",
+                  cardDefinitionId: "a",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "beforeCardEffectActivation",
+        {
+          cardDefinitionId: "a",
+          cardSummaryKind: "active",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivation で、スキルカード定義IDが一致せず、スキルカード概要種別が一致する時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "beforeCardEffectActivation",
+                  cardDefinitionId: "a",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "beforeCardEffectActivation",
+        {
+          cardDefinitionId: "b",
+          cardSummaryKind: "active",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation で、スキルカード定義IDが一致し、スキルカード概要種別が一致しない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "beforeCardEffectActivation",
+                  cardDefinitionId: "a",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "beforeCardEffectActivation",
+        {
+          cardDefinitionId: "a",
+          cardSummaryKind: "mental",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "afterCardEffectActivation で、スキルカード概要種別が一致する時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "afterCardEffectActivation",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "afterCardEffectActivation",
+        {
+          cardSummaryKind: "active",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "afterCardEffectActivation で、スキルカード概要種別が一致しない時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "afterCardEffectActivation",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "afterCardEffectActivation",
+        {
+          cardSummaryKind: "mental",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれる時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "modifierIncrease",
+                  modifierKind: "focus",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "modifierIncrease",
+        {
+          increasedModifierKinds: ["focus"],
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            definition: {
+              base: {
+                trigger: {
+                  kind: "modifierIncrease",
+                  modifierKind: "focus",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "modifierIncrease",
+        {
+          increasedModifierKinds: ["goodCondition"],
+        },
       ],
       expected: false,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canActivateProducerItem(...args)).toStrictEqual(expected);
+    expect(canTriggerProducerItem(...args)).toStrictEqual(expected);
   });
 });
 describe("calculateCostConsumption", () => {
@@ -2482,7 +2712,7 @@ describe("drawCardsOnLessonStart", () => {
     ]);
   });
 });
-// canActivateProducerItem のテストケースで可能な範囲はそちらで検証する
+// canTriggerProducerItem のテストケースで可能な範囲はそちらで検証する
 describe("activateProducerItemEffectsOnTurnStart", () => {
   test("「ばくおんライオン」を、好調状態の時、発動する", () => {
     const lesson = createLessonForTest({
@@ -2567,7 +2797,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
     expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([]);
   });
 });
-// Pアイテム発動条件については、canActivateProducerItem のテストケースで可能な範囲はそちらで検証する
+// Pアイテム発動条件については、canTriggerProducerItem のテストケースで可能な範囲はそちらで検証する
 describe("activateModifierEffectsOnTurnStart", () => {
   test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
     const lesson = createLessonForTest({

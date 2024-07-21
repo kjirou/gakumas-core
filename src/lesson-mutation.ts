@@ -1122,15 +1122,12 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
     ),
   );
   for (const producerItem of targetProducerItems) {
-    const effectActivations = activateEffects(
+    const diffs = activateEffectsOfProducerItem(
       lesson,
-      getProducerItemContentDefinition(producerItem).effects,
+      producerItem,
       getRandom,
       idGenerator,
     );
-    const diffs = effectActivations
-      .filter((e) => e !== undefined)
-      .reduce((acc, e) => [...acc, ...e], []);
     const innerUpdates = diffs.map((diff) =>
       createLessonUpdateQueryFromDiff(diff, reason),
     );
@@ -2122,32 +2119,24 @@ export const activateEffectsOnTurnEnd = (
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (canTriggerProducerItem(newLesson, producerItem, "turnEnd")) {
-      let innerUpdates: LessonUpdateQuery[] = [];
-      for (const effect of producerItemContent.effects) {
-        const diffs = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        if (diffs) {
-          innerUpdates = diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnEndTrigger",
-              historyTurnNumber: lesson.turnNumber,
-              historyResultIndex,
-            }),
-          );
-        }
-      }
+      const diffs = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diffs.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      );
       newLesson = patchUpdates(newLesson, innerUpdates);
       producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+      nextHistoryResultIndex++;
     }
-  }
-  if (producerItemUpdates.length > 0) {
-    nextHistoryResultIndex++;
   }
 
   //

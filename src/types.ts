@@ -628,7 +628,6 @@ export type CardDefinition = {
   cardPossessionKind: CardPossessionKind;
   cardProviderKind: CardProviderKind;
   cardSummaryKind: CardSummaryKind;
-  // TODO: Pアイテム側と同じくenumにする
   /** 強化済み時の内容 */
   enhanced?: CardContentDefinition;
   id: string;
@@ -961,7 +960,7 @@ export type IdolDefinition = {
 export type IdolInProduction = {
   deck: CardInProduction[];
   definition: IdolDefinition;
-  // TODO: まだ使わないので一旦コメントアウト
+  // NOTE: まだ使わないので一旦コメントアウト
   // idolParameters: IdolParameters;
   life: number;
   maxLife: number;
@@ -1098,8 +1097,7 @@ export type Lesson = {
 /**
  * レッスン履歴レコード
  *
- * TODO: 全般的に後回し
- * TODO: kind が山ほど必要そう、また階層があると都合がいいので "foo.bar.baz" みたいな感じになりそう
+ * TODO: 本家のレッスン履歴の再現は、全般的に後回し。表示パターンの精査に対して個別のkindを割り振ることから始める必要がある。
  *
  * - 本家で、レッスン中に右下のボタンから表示できる履歴を再現するためのもの
  * - 原文の構文は、以下の通り
@@ -1314,8 +1312,6 @@ export type LessonUpdateQuery = LessonUpdateQueryDiff & {
 
 /**
  * レッスン中の状態
- *
- * - TODO: 本家の履歴に合わせて差分表現ができるようにする
  */
 export type LessonGamePlay = {
   getRandom: GetRandom;

@@ -859,7 +859,6 @@ export type ProducerItemContentDefinition = {
  *     【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）
  *     （レッスン内3回）
  * - レッスン中に効果を及ぼさないものは、一旦除外している
- * - TODO: [仕様確認] 右側アイコンに並ぶ順番は取得した順番か？
  */
 export type ProducerItemDefinition = {
   /** 未強化時の内容 */
@@ -956,6 +955,13 @@ export type IdolInProduction = {
   // idolParameters: IdolParameters;
   life: number;
   maxLife: number;
+  /**
+   * Pアイテムリスト
+   *
+   * - 上からプロデュース中に取得した順になる
+   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
+   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
+   */
   producerItems: ProducerItemInProduction[];
 };
 
@@ -1047,6 +1053,13 @@ export type Lesson = {
    *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
    */
   playedCardsOnEmptyDeck: Array<Card["id"]>;
+  /**
+   * Pアイテムリスト
+   *
+   * - 上からプロデュース中に取得した順になり、かつレッスン中に使える可能性のあるもののみに絞り込まれる
+   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
+   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
+   */
   producerItems: ProducerItem[];
   /** 最終ターン数への修正、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
   remainingTurns: number;

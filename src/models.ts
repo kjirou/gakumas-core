@@ -166,6 +166,7 @@ export const createLesson = (params: {
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
     cards,
+    // TODO: そのレッスン中に使用できる可能性があるPアイテムのみへ絞り込む
     producerItems: prepareProducerItemsForLesson(
       params.idolInProduction.producerItems,
     ),

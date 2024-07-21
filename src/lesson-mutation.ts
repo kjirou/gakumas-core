@@ -1318,74 +1318,31 @@ export const activateProducerItemEffectsOnTurnStart = (
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
-    if (canTriggerProducerItem(newLesson, producerItem, "turnStart")) {
-      let innerUpdates: LessonUpdateQuery[] = [];
-      for (const effect of producerItemContent.effects) {
-        const diffs = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        if (diffs) {
-          innerUpdates = diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnStartTrigger",
-              historyTurnNumber: lesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          );
-        }
-      }
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
-    }
-  }
-  if (turnStartUpdates.length > 0) {
-    nextHistoryResultIndex++;
-  }
-
-  //
-  // 2ターンごとターン開始時の効果発動
-  //
-  let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.idol.producerItems) {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
+      canTriggerProducerItem(newLesson, producerItem, "turnStart") ||
       canTriggerProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
     ) {
-      let innerUpdates: LessonUpdateQuery[] = [];
-      for (const effect of producerItemContent.effects) {
-        const diffs = activateEffect(
-          newLesson,
-          effect,
-          params.getRandom,
-          params.idGenerator,
-        );
-        if (diffs) {
-          innerUpdates = diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnStartTrigger",
-              historyTurnNumber: lesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          );
-        }
-      }
+      const diff = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diff.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      );
       newLesson = patchUpdates(newLesson, innerUpdates);
-      turnStartEveryTwoTurnsUpdates = [
-        ...turnStartEveryTwoTurnsUpdates,
-        ...innerUpdates,
-      ];
+      turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
+      nextHistoryResultIndex++;
     }
-  }
-  if (turnStartEveryTwoTurnsUpdates.length > 0) {
-    nextHistoryResultIndex++;
   }
 
   return {
-    updates: [...turnStartUpdates, ...turnStartEveryTwoTurnsUpdates],
+    updates: [...turnStartUpdates],
     nextHistoryResultIndex,
   };
 };

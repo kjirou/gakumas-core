@@ -534,7 +534,7 @@ export type CardUsageCondition =
        * - 原文は、「{valueKind}が{percentage}%{criterionKind}の場合、使用可」
        *   - 「ご指導ご鞭撻」は、「体力の50%以上の場合、使用可」
        *   - 「お姉ちゃんだもの！」は、「レッスンCLEARの100%以下の場合、使用可」
-       * - TODO: [仕様確認] life と score 両方での端数処理、多分プレイヤー有利側だと思うので一旦それで実装
+       * - 本家の端数処理は未調査、現状は「以上」は切り上げ、「以下」は切り捨てで判定している。
        */
       kind: "measureValue";
       valueKind: "life" | "score";

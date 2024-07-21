@@ -1055,32 +1055,36 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
 } => {
   let updates: LessonUpdateQuery[] = [];
   let newLesson = lesson;
-  const targetProducerItems = lesson.producerItems.filter((producerItem) => {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
-    const cardDefinitionIdCondition =
-      !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-      producerItemContent.trigger.cardDefinitionId === undefined ||
-      producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
-    const cardSummaryKindCondition =
-      !(
-        producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
-        producerItemContent.trigger.kind === "afterCardEffectActivation"
-      ) ||
-      producerItemContent.trigger.cardSummaryKind === undefined ||
-      producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
-    const modifierIncreaseCondition =
-      !(producerItemContent.trigger.kind === "modifierIncrease") ||
-      (options.increasedModifierKinds || []).includes(
-        producerItemContent.trigger.modifierKind,
+  const targetProducerItems = lesson.idol.producerItems.filter(
+    (producerItem) => {
+      const producerItemContent =
+        getProducerItemContentDefinition(producerItem);
+      const cardDefinitionIdCondition =
+        !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
+        producerItemContent.trigger.cardDefinitionId === undefined ||
+        producerItemContent.trigger.cardDefinitionId ===
+          options.cardDefinitionId;
+      const cardSummaryKindCondition =
+        !(
+          producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
+          producerItemContent.trigger.kind === "afterCardEffectActivation"
+        ) ||
+        producerItemContent.trigger.cardSummaryKind === undefined ||
+        producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
+      const modifierIncreaseCondition =
+        !(producerItemContent.trigger.kind === "modifierIncrease") ||
+        (options.increasedModifierKinds || []).includes(
+          producerItemContent.trigger.modifierKind,
+        );
+      return (
+        producerItemContent.trigger.kind === producerItemTriggerKind &&
+        cardDefinitionIdCondition &&
+        cardSummaryKindCondition &&
+        modifierIncreaseCondition &&
+        canActivateProducerItem(lesson, producerItem)
       );
-    return (
-      producerItemContent.trigger.kind === producerItemTriggerKind &&
-      cardDefinitionIdCondition &&
-      cardSummaryKindCondition &&
-      modifierIncreaseCondition &&
-      canActivateProducerItem(lesson, producerItem)
-    );
-  });
+    },
+  );
   for (const producerItem of targetProducerItems) {
     const effectActivations = activateEffects(
       lesson,
@@ -1252,7 +1256,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   // ターン開始時の効果発動
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.producerItems) {
+  for (const producerItem of newLesson.idol.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
       producerItemContent.trigger.kind === "turnStart" &&
@@ -1288,7 +1292,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   // 2ターンごとターン開始時の効果発動
   //
   let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.producerItems) {
+  for (const producerItem of newLesson.idol.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
       producerItemContent.trigger.kind === "turnStartEveryTwoTurns" &&
@@ -2105,7 +2109,7 @@ export const activateEffectsOnTurnEnd = (
   // Pアイテム起因の、ターン終了時の効果発動
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.producerItems) {
+  for (const producerItem of newLesson.idol.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
       producerItemContent.trigger.kind === "turnEnd" &&

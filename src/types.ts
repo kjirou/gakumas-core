@@ -992,6 +992,14 @@ export type Idol = {
   modifierIdsAtTurnStart: Array<Modifier["id"]>;
   modifiers: Modifier[];
   original: IdolInProduction;
+  /**
+   * Pアイテムリスト
+   *
+   * - 上からプロデュース中に取得した順になり、かつレッスン中に使える可能性のあるもののみに絞り込まれる
+   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
+   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
+   */
+  producerItems: ProducerItem[];
   /** 本レッスン中にスキルカードを使用した回数、関連する原文は「レッスン中に使用したスキルカード{n}枚ごとに、」 */
   totalCardUsageCount: number;
   /**
@@ -1053,14 +1061,6 @@ export type Lesson = {
    *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
    */
   playedCardsOnEmptyDeck: Array<Card["id"]>;
-  /**
-   * Pアイテムリスト
-   *
-   * - 上からプロデュース中に取得した順になり、かつレッスン中に使える可能性のあるもののみに絞り込まれる
-   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
-   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
-   */
-  producerItems: ProducerItem[];
   /** 最終ターン数への修正、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
   remainingTurns: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */

@@ -811,8 +811,6 @@ export type ProducerItemContentDefinition = {
    *
    * - Pアイテム全体の効果発動条件を意味する
    *   - 原文の効果説明欄の構造上は、複数の効果があるときも、効果1行目に埋め込まれて記載されているよう
-   * - TODO: [仕様確認] 「私の「初」の楽譜」の効果に「体力減少1」があるが、体力が0の時発動するのか
-   * - TODO: [仕様確認] 「超絶あんみんマスク」の効果に「体力消費1」があるが、体力が0の時発動するのか
    */
   condition?: EffectCondition;
   cost?: ActionCost;

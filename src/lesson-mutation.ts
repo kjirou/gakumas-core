@@ -2089,8 +2089,6 @@ export const useCard = (
 
 /**
  * ターン終了時の各種効果を発動する
- *
- * - TODO: [仕様確認] それぞれの効果によりスコアパーフェクト条件を満たした時、後続処理が実行されるのか不明。現在存在する効果だと、ほぼこれで勝負が決まることはなさそうではある。
  */
 export const activateEffectsOnTurnEnd = (
   lesson: Lesson,

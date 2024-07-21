@@ -609,7 +609,6 @@ export const endLessonTurn = (
   historyResultIndex = activateEffectsOnTurnEndUpdates.nextHistoryResultIndex;
   lesson = patchUpdates(lesson, activateEffectsOnTurnEndUpdates.updates);
 
-  // TODO: [仕様確認] ターン終了時トリガーによりスコアパーフェクト条件を満たしている場合、本当に後続処理が実行されないのか
   if (!isScoreSatisfyingPerfect(lesson)) {
     //
     // 手札を捨てる

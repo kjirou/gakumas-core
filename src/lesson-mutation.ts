@@ -1473,8 +1473,9 @@ export const drawCardsOnTurnStart = (
   //
   // 「レッスン開始時手札に入る」のスキルカードを山札の先頭へ移動する
   //
-  // - TODO: 少なくともレッスン開始時手札が8枚の時、この挙動にならないことがある、Ref: https://github.com/kjirou/gakumas-core/issues/37
-  // - TODO: [仕様確認] レッスン開始時手札が9枚以上の時、2ターン目は3枚？4枚？引くのか
+  // - TODO: レッスン開始時手札が8枚以上の時の挙動が、本家と異なる
+  //         - レッスン開始時手札が8枚の時、1ターン目:5枚->2ターン目:2枚->不定ターン目:1枚、Ref: https://github.com/kjirou/gakumas-core/issues/37
+  //         - レッスン開始時手札が9枚の時、1ターン目:5枚->2ターン目:3枚->不定ターン目:1枚、Ref: https://github.com/kjirou/gakumas-core/issues/42
   //
   let innateCardCount = 0;
   let moveInnateCardsUpdates: LessonUpdateQuery[] = [];

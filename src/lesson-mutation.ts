@@ -357,34 +357,19 @@ export const canApplyEffect = (
 };
 
 /**
- * Pアイテムが発動できる条件を満たしているかを判定する
+ * Pアイテムが発動できる共通の条件を満たしているかを判定する
+ *
+ * - この関数では、全てのPアイテムのトリガーが持ち得る共通の条件のみを判定する
  */
 export const canActivateProducerItem = (
   lesson: Lesson,
   producerItem: ProducerItem,
-  options: {
-    cardDefinitionId?: CardDefinition["id"];
-    cardSummaryKind?: CardSummaryKind;
-  } = {},
 ) => {
   const producerItemContent = getProducerItemContentDefinition(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
-  const cardSummaryKindCondition =
-    !(
-      producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
-      producerItemContent.trigger.kind === "afterCardEffectActivation"
-    ) ||
-    producerItemContent.trigger.cardSummaryKind === undefined ||
-    producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
-  const cardDefinitionIdCondition =
-    !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-    producerItemContent.trigger.cardDefinitionId === undefined ||
-    producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
   return (
     (producerItemContent.trigger.idolParameterKind === undefined ||
       producerItemContent.trigger.idolParameterKind === idolParameterKind) &&
-    cardSummaryKindCondition &&
-    cardDefinitionIdCondition &&
     (producerItemContent.condition === undefined ||
       canApplyEffect(lesson, producerItemContent.condition)) &&
     isRemainingProducerItemTimes(producerItem)
@@ -1045,6 +1030,77 @@ const activateEffects = (
     effectActivations = [...effectActivations, activation];
   }
   return effectActivations;
+};
+
+/**
+ * スキルカード使用に伴うPアイテムの効果を発動する
+ */
+export const applyEffectsEachProducerItemsAccordingToCardUsage = (
+  lesson: Lesson,
+  producerItemTriggerKind:
+    | "afterCardEffectActivation"
+    | "beforeCardEffectActivation"
+    | "modifierIncrease",
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+  reason: LessonUpdateQueryReason,
+  options: {
+    cardDefinitionId?: CardDefinition["id"];
+    cardSummaryKind?: CardSummaryKind;
+    increasedModifierKinds?: Modifier["kind"][];
+  } = {},
+): {
+  lesson: Lesson;
+  updates: LessonUpdateQuery[];
+} => {
+  let updates: LessonUpdateQuery[] = [];
+  let newLesson = lesson;
+  const targetProducerItems = lesson.producerItems.filter((producerItem) => {
+    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    const cardDefinitionIdCondition =
+      !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
+      producerItemContent.trigger.cardDefinitionId === undefined ||
+      producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
+    const cardSummaryKindCondition =
+      !(
+        producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
+        producerItemContent.trigger.kind === "afterCardEffectActivation"
+      ) ||
+      producerItemContent.trigger.cardSummaryKind === undefined ||
+      producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
+    const modifierIncreaseCondition =
+      !(producerItemContent.trigger.kind === "modifierIncrease") ||
+      (options.increasedModifierKinds || []).includes(
+        producerItemContent.trigger.modifierKind,
+      );
+    return (
+      producerItemContent.trigger.kind === producerItemTriggerKind &&
+      cardDefinitionIdCondition &&
+      cardSummaryKindCondition &&
+      modifierIncreaseCondition &&
+      canActivateProducerItem(lesson, producerItem)
+    );
+  });
+  for (const producerItem of targetProducerItems) {
+    const effectActivations = activateEffects(
+      lesson,
+      getProducerItemContentDefinition(producerItem).effects,
+      getRandom,
+      idGenerator,
+    );
+    const diffs = effectActivations
+      .filter((e) => e !== undefined)
+      .reduce((acc, e) => [...acc, ...e], []);
+    const innerUpdates = diffs.map((diff) =>
+      createLessonUpdateQueryFromDiff(diff, reason),
+    );
+    newLesson = patchUpdates(newLesson, innerUpdates);
+    updates = [...updates, ...innerUpdates];
+  }
+  return {
+    lesson: newLesson,
+    updates,
+  };
 };
 
 /**
@@ -1829,42 +1885,25 @@ export const useCard = (
     // Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動
     //
     if (!params.preview) {
-      const beforeEffectProducerItems = newLesson.producerItems.filter(
-        (producerItem) => {
-          const producerItemContent =
-            getProducerItemContentDefinition(producerItem);
-          return (
-            producerItemContent.trigger.kind === "beforeCardEffectActivation" &&
-            canActivateProducerItem(newLesson, producerItem, {
-              cardDefinitionId: card.original.definition.id,
-              cardSummaryKind: card.original.definition.cardSummaryKind,
-            })
-          );
-        },
-      );
-      for (const producerItem of beforeEffectProducerItems) {
-        const effectActivations = activateEffects(
+      const { lesson: updatedLesson, updates } =
+        applyEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
-          getProducerItemContentDefinition(producerItem).effects,
+          "beforeCardEffectActivation",
           params.getRandom,
           params.idGenerator,
+          {
+            kind: "cardUsageTrigger",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+          {
+            cardDefinitionId: card.original.definition.id,
+            cardSummaryKind: card.original.definition.cardSummaryKind,
+          },
         );
-        const diffs = effectActivations
-          .filter((e) => e !== undefined)
-          .reduce((acc, e) => [...acc, ...e], []);
-        const innerUpdates = [
-          ...diffs.map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "cardUsageTrigger",
-              cardId: card.id,
-              historyTurnNumber: newLesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          ),
-        ];
-        newLesson = patchUpdates(newLesson, innerUpdates);
-        effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
-      }
+      newLesson = updatedLesson;
+      effectActivationUpdates = [...effectActivationUpdates, ...updates];
     }
 
     //
@@ -1938,8 +1977,61 @@ export const useCard = (
         effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
       }
     }
+
+    //
+    // Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動
+    //
+    if (!params.preview) {
+      const { lesson: updatedLesson, updates } =
+        applyEffectsEachProducerItemsAccordingToCardUsage(
+          newLesson,
+          "afterCardEffectActivation",
+          params.getRandom,
+          params.idGenerator,
+          {
+            kind: "cardUsageTrigger",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+          {
+            cardDefinitionId: card.original.definition.id,
+            cardSummaryKind: card.original.definition.cardSummaryKind,
+          },
+        );
+      newLesson = updatedLesson;
+      effectActivationUpdates = [...effectActivationUpdates, ...updates];
+    }
+
+    //
+    // Pアイテムに起因する、スキルカードの主効果による状態修正増加後の効果発動
+    //
+    if (!params.preview) {
+      const { lesson: updatedLesson, updates } =
+        applyEffectsEachProducerItemsAccordingToCardUsage(
+          newLesson,
+          "modifierIncrease",
+          params.getRandom,
+          params.idGenerator,
+          {
+            kind: "cardUsageTrigger",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+          {
+            increasedModifierKinds: mainEffectActivations
+              .filter((e) => e !== undefined)
+              .reduce((acc, e) => [...acc, ...e], [])
+              .filter((e) => e.kind === "modifier")
+              .map((e) => e.actual.kind),
+          },
+        );
+      newLesson = updatedLesson;
+      effectActivationUpdates = [...effectActivationUpdates, ...updates];
+    }
   }
-  // スキルカード追加発動時は、スキルカード1枚分の結果の中に表示されている
+  // スキルカードが 2 回効果発動しても、履歴上は 1 つの結果になっている
   nextHistoryResultIndex++;
 
   //

@@ -13,6 +13,7 @@ import {
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
+  applyEffectsEachProducerItemsAccordingToCardUsage,
   calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
@@ -1089,86 +1090,6 @@ describe("canActivateProducerItem", () => {
       ],
       expected: false,
     },
-    {
-      name: "スキルカード種類条件があり、渡された値と一致している時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            definition: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        { cardSummaryKind: "active" },
-      ],
-      expected: true,
-    },
-    {
-      name: "スキルカード種類条件があり、渡された値と一致しない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            definition: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        { cardSummaryKind: "mental" },
-      ],
-      expected: false,
-    },
-    {
-      name: "スキルカードID条件があり、渡された値と一致している時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            definition: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDefinitionId: "a",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        { cardDefinitionId: "a" },
-      ],
-      expected: true,
-    },
-    {
-      name: "スキルカードID条件があり、渡された値と一致していない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            definition: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDefinitionId: "a",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        { cardDefinitionId: "b" },
-      ],
-      expected: false,
-    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(canActivateProducerItem(...args)).toStrictEqual(expected);
@@ -1694,6 +1615,314 @@ describe("calculatePerformingVitalityEffect", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
+  });
+});
+describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
+  test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("itsumonomeikupochi"),
+          enhanced: false,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardSummaryKind: "active",
+        },
+      );
+    expect(updates1).toStrictEqual([
+      {
+        kind: "modifier",
+        actual: {
+          kind: "focus",
+          amount: 2,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "focus",
+          amount: 2,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+    const { updates: updates2 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardSummaryKind: "mental",
+        },
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+  test("「最高にハッピーの源」は、「アドレナリン全開」スキルカード使用時、好調と固定元気を付与する。他スキルカード使用時は付与しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("saikonihappinominamoto"),
+          enhanced: false,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardDefinitionId: "adorenarinzenkai",
+        },
+      );
+    expect(updates1).toStrictEqual([
+      {
+        kind: "modifier",
+        actual: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "vitality",
+        actual: 5,
+        max: 5,
+        reason: expect.any(Object),
+      },
+    ]);
+    const { updates: updates2 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardDefinitionId: "apirunokihon",
+        },
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+  test("「最高にハッピーの源」と「曇りをぬぐったタオル」は、1枚のアクティブスキルカード使用時に同時に効果発動し得る", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("saikonihappinominamoto"),
+          enhanced: false,
+        },
+        {
+          id: "b",
+          definition: getProducerItemDataById("kumoriwonuguttataoru"),
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates } = applyEffectsEachProducerItemsAccordingToCardUsage(
+      lesson,
+      "beforeCardEffectActivation",
+      () => 0,
+      createIdGenerator(),
+      dummyReason,
+      {
+        cardDefinitionId: "adorenarinzenkai",
+        cardSummaryKind: "active",
+      },
+    );
+    expect(updates).toStrictEqual([
+      {
+        kind: "modifier",
+        actual: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "vitality",
+        actual: 5,
+        max: 5,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "life",
+        actual: 0,
+        max: 2,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("スキルカード使用後トリガーである、「ビッグドリーム貯金箱」を、好印象が6以上の時、発動する。好印象が6未満の時、発動しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("biggudorimuchokimbako"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.idol.modifiers = [
+      { kind: "positiveImpression", amount: 6, id: "m1" },
+    ];
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "afterCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+      );
+    expect(updates1).toStrictEqual([
+      {
+        kind: "modifier",
+        actual: {
+          kind: "positiveImpression",
+          amount: 3,
+          id: expect.any(String),
+          updateTargetId: "m1",
+        },
+        max: {
+          kind: "positiveImpression",
+          amount: 3,
+          id: expect.any(String),
+          updateTargetId: "m1",
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifier",
+        actual: {
+          kind: "additionalCardUsageCount",
+          amount: 1,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "additionalCardUsageCount",
+          amount: 1,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+    lesson.idol.modifiers = [
+      { kind: "positiveImpression", amount: 5, id: "m1" },
+    ];
+    const { updates: updates2 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "afterCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+  test("状態修正トリガーである、「ひみつ特訓カーデ」を、やる気が上昇した時、発動する。やる気ではない時、発動しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          definition: getProducerItemDataById("himitsutokkunkade"),
+          enhanced: false,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "modifierIncrease",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          increasedModifierKinds: ["motivation"],
+        },
+      );
+    expect(updates1).toStrictEqual([
+      {
+        kind: "modifier",
+        actual: {
+          kind: "motivation",
+          amount: 3,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "motivation",
+          amount: 3,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+    const { updates: updates2 } =
+      applyEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "modifierIncrease",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          increasedModifierKinds: ["positiveImpression"],
+        },
+      );
+    expect(updates2).toStrictEqual([]);
   });
 });
 describe("summarizeCardInHand", () => {
@@ -3033,75 +3262,14 @@ describe("useCard preview:false", () => {
       });
     });
   });
+  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動", () => {
-    test("「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
-      let lesson = createLessonForTest({
-        cards: [
-          {
-            id: "a",
-            definition: getCardDataById("apirunokihon"),
-            enabled: true,
-            enhanced: false,
-          },
-          {
-            id: "b",
-            definition: getCardDataById("hyogennokihon"),
-            enabled: true,
-            enhanced: false,
-          },
-        ],
-        producerItems: [
-          {
-            id: "p",
-            definition: getProducerItemDataById("itsumonomeikupochi"),
-            enhanced: false,
-          },
-        ],
-      });
-      lesson.hand = ["a", "b"];
-      const idGenerator = createIdGenerator();
-      const { updates: updates1 } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 0,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
-        {
-          kind: "modifier",
-          actual: {
-            kind: "focus",
-            amount: 2,
-            id: expect.any(String),
-          },
-          max: {
-            kind: "focus",
-            amount: 2,
-            id: expect.any(String),
-          },
-          reason: expect.any(Object),
-        },
-      ]);
-      const { updates: updates2 } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 1,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates2.filter((e) => e.kind === "modifier")).toStrictEqual([]);
-    });
-    test("「最高にハッピーの源」は、「アドレナリン全開」スキルカード使用時、好調と固定元気を付与する。他スキルカード使用時は付与しない", () => {
+    test("「アドレナリン全開」の使用により「最高にハッピーの源」が発動する", () => {
       let lesson = createLessonForTest({
         cards: [
           {
             id: "a",
             definition: getCardDataById("adorenarinzenkai"),
-            enabled: true,
-            enhanced: false,
-          },
-          {
-            id: "b",
-            definition: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -3114,15 +3282,14 @@ describe("useCard preview:false", () => {
           },
         ],
       });
-      lesson.hand = ["a", "b"];
-      const idGenerator = createIdGenerator();
-      const { updates: updates1 } = useCard(lesson, 1, {
+      lesson.hand = ["a"];
+      const { updates } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,
-        idGenerator,
+        idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
         {
           kind: "modifier",
           actual: {
@@ -3168,13 +3335,6 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
       ]);
-      const { updates: updates2 } = useCard(lesson, 1, {
-        selectedCardInHandIndex: 1,
-        getRandom: () => 0,
-        idGenerator,
-        preview: false,
-      });
-      expect(updates2.filter((e) => e.kind === "modifier")).toStrictEqual([]);
     });
   });
   describe("状態修正に起因する、スキルカード使用時の効果発動", () => {
@@ -4320,6 +4480,128 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         });
       });
+    });
+  });
+  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  describe("Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動", () => {
+    test("「えいえいおー」の使用により「テクノドッグ」が発動する", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("eieio"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+        producerItems: [
+          {
+            id: "p1",
+            definition: getProducerItemDataById("tekunodoggu"),
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a"];
+      const { updates } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "motivation",
+            amount: 3,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 3,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+        {
+          kind: "modifier",
+          actual: {
+            kind: "motivation",
+            amount: 2,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 2,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
+  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  describe("Pアイテムに起因する、スキルカードの主効果による状態修正増加後の効果発動", () => {
+    test("「意識の基本」の使用により「ひみつ特訓カーデ」が発動する", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("ishikinokihon"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+        producerItems: [
+          {
+            id: "p1",
+            definition: getProducerItemDataById("himitsutokkunkade"),
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a"];
+      const { updates } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "motivation",
+            amount: 2,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 2,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+        {
+          kind: "modifier",
+          actual: {
+            kind: "motivation",
+            amount: 3,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 3,
+            id: expect.any(String),
+            updateTargetId: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
     });
   });
   describe("スキルカード使用数追加によるアクションポイントの回復", () => {

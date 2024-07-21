@@ -826,7 +826,7 @@ export const producerItems: ProducerItemDefinition[] = [
   },
   {
     id: "biggudorimuchokimbako",
-    name: "ビッグドリームの貯金箱",
+    name: "ビッグドリーム貯金箱",
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "ssr",

@@ -758,7 +758,6 @@ export type ProducerItemTrigger = (
        *   - Pドリンクの効果による増加では発動しない
        *     - 例えば、「ひみつ特訓カーデ」は、「ホットコーヒー」の効果によるやる気増加では発動しない
        *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=ioUWJCIpHTBUYk7W&t=6052
-       *   - TODO: [仕様確認] Pアイテムにより増加した場合は発動するのか？
        */
       kind: "modifierIncrease";
       modifierKind:

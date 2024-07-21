@@ -243,7 +243,6 @@ export const startLessonTurn = (
   // - 1 > 3 > 4
   //   - 「星のリトルプリンス」-> 手札を引く -> 「成就」の順序で発動していることを以下で確認
   //     - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=u1CdnIForY12KtF1&t=5256
-  // - TODO: [仕様確認] ターン開始時処理の起因別の発動順序についての情報が全般的に足りない
   //
 
   //
@@ -268,36 +267,38 @@ export const startLessonTurn = (
   //
   // 手札を山札から引く
   //
-  // - 本家仕様確認
-  //   - ターン開始処理の後であることは、SR咲季のPアイテムで確認した
-  //   - ターン開始処理でスコアパーフェクトを満たした場合、手札を引かないことを、SSR広のPアイテムで確認した
+  // - Pアイテム起因のターン開始処理でスコアパーフェクトを満たした場合、手札を引かないことを、SSR広のPアイテムで確認した
   //
-  const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
-    lesson,
-    historyResultIndex,
-    {
-      getRandom: lessonGamePlay.getRandom,
-    },
-  );
-  updates = [...updates, ...drawCardsOnLessonStartResult.updates];
-  historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+  if (!isScoreSatisfyingPerfect(lesson)) {
+    const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
+      lesson,
+      historyResultIndex,
+      {
+        getRandom: lessonGamePlay.getRandom,
+      },
+    );
+    updates = [...updates, ...drawCardsOnLessonStartResult.updates];
+    historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
+    lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+  }
 
   //
   // 状態修正起因の、ターン開始時の効果発動
   //
-  const activateModifierEffectsOnTurnStartResult =
-    activateModifierEffectsOnTurnStart(lesson, historyResultIndex, {
-      getRandom: lessonGamePlay.getRandom,
-      idGenerator: lessonGamePlay.idGenerator,
-    });
-  updates = [...updates, ...activateModifierEffectsOnTurnStartResult.updates];
-  historyResultIndex =
-    activateModifierEffectsOnTurnStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(
-    lesson,
-    activateModifierEffectsOnTurnStartResult.updates,
-  );
+  if (!isScoreSatisfyingPerfect(lesson)) {
+    const activateModifierEffectsOnTurnStartResult =
+      activateModifierEffectsOnTurnStart(lesson, historyResultIndex, {
+        getRandom: lessonGamePlay.getRandom,
+        idGenerator: lessonGamePlay.idGenerator,
+      });
+    updates = [...updates, ...activateModifierEffectsOnTurnStartResult.updates];
+    historyResultIndex =
+      activateModifierEffectsOnTurnStartResult.nextHistoryResultIndex;
+    lesson = patchUpdates(
+      lesson,
+      activateModifierEffectsOnTurnStartResult.updates,
+    );
+  }
 
   return {
     ...lessonGamePlay,

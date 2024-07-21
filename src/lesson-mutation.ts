@@ -1349,7 +1349,6 @@ export const activateModifierEffectsOnTurnStart = (
   // 「(次ターン|nターン後)、パラメータ+n」による効果発動
   //
   // - 実装上、元気更新も実行できるが、本家にその効果は存在しない
-  // - TODO: [仕様確認] スキルパーフェクトを達成した場合に、後続処理は処理されるのか
   //
   let performDelayedEffectUpdates: LessonUpdateQuery[] = [];
   for (const modifier of newLesson.idol.modifiers) {
@@ -1384,64 +1383,68 @@ export const activateModifierEffectsOnTurnStart = (
   // 状態修正の「(次ターン|nターン後)、スキルカードを引く」による効果発動
   //
   let drawCardDelayedEffectUpdates: LessonUpdateQuery[] = [];
-  for (const modifier of newLesson.idol.modifiers) {
-    if (
-      isDelayedEffectModifierType(modifier) &&
-      isDrawCardsEffectType(modifier.effect)
-    ) {
-      const innerUpdates = activateDelayedEffectModifier(
-        newLesson,
-        modifier,
-        params.getRandom,
-        params.idGenerator,
-      ).map((diff) =>
-        createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        }),
-      );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      drawCardDelayedEffectUpdates = [
-        ...drawCardDelayedEffectUpdates,
-        ...innerUpdates,
-      ];
+  if (!isScoreSatisfyingPerfect(newLesson)) {
+    for (const modifier of newLesson.idol.modifiers) {
+      if (
+        isDelayedEffectModifierType(modifier) &&
+        isDrawCardsEffectType(modifier.effect)
+      ) {
+        const innerUpdates = activateDelayedEffectModifier(
+          newLesson,
+          modifier,
+          params.getRandom,
+          params.idGenerator,
+        ).map((diff) =>
+          createLessonUpdateQueryFromDiff(diff, {
+            kind: "turnStartTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          }),
+        );
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        drawCardDelayedEffectUpdates = [
+          ...drawCardDelayedEffectUpdates,
+          ...innerUpdates,
+        ];
+      }
     }
-  }
-  if (drawCardDelayedEffectUpdates.length > 0) {
-    nextHistoryResultIndex++;
+    if (drawCardDelayedEffectUpdates.length > 0) {
+      nextHistoryResultIndex++;
+    }
   }
 
   //
   // 状態修正の「(次ターン|nターン後)、スキルカードを強化」による効果発動
   //
   let enhanceHandDelayedEffectUpdates: LessonUpdateQuery[] = [];
-  for (const modifier of newLesson.idol.modifiers) {
-    if (
-      isDelayedEffectModifierType(modifier) &&
-      isEnhanceHandEffectType(modifier.effect)
-    ) {
-      const innerUpdates = activateDelayedEffectModifier(
-        newLesson,
-        modifier,
-        params.getRandom,
-        params.idGenerator,
-      ).map((diff) =>
-        createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        }),
-      );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      enhanceHandDelayedEffectUpdates = [
-        ...enhanceHandDelayedEffectUpdates,
-        ...innerUpdates,
-      ];
+  if (!isScoreSatisfyingPerfect(newLesson)) {
+    for (const modifier of newLesson.idol.modifiers) {
+      if (
+        isDelayedEffectModifierType(modifier) &&
+        isEnhanceHandEffectType(modifier.effect)
+      ) {
+        const innerUpdates = activateDelayedEffectModifier(
+          newLesson,
+          modifier,
+          params.getRandom,
+          params.idGenerator,
+        ).map((diff) =>
+          createLessonUpdateQueryFromDiff(diff, {
+            kind: "turnStartTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          }),
+        );
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        enhanceHandDelayedEffectUpdates = [
+          ...enhanceHandDelayedEffectUpdates,
+          ...innerUpdates,
+        ];
+      }
     }
-  }
-  if (enhanceHandDelayedEffectUpdates.length > 0) {
-    nextHistoryResultIndex++;
+    if (enhanceHandDelayedEffectUpdates.length > 0) {
+      nextHistoryResultIndex++;
+    }
   }
 
   return {

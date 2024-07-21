@@ -397,7 +397,10 @@ export type Effect = (
        *
        * - 原文の構文は、「{modifierKind}{multiplier}倍」
        *   - 「夢へのライフログ」は、「好印象1.5倍」
-       * - TODO: [仕様確認] 端数処理
+       * - 少なくとも、1.5倍の時の端数は切り上げ
+       *   - 「夢へのライフログ」の参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=Ig8yc0Q9MK4bLdj_&t=3474
+       *     - 好印象が 5 -> 8 になっている
+       *   - 現状は「夢へのライフログ」の1.5倍しかないので、本実装では切り上げる
        */
       kind: "multiplyModifier";
       modifierKind: "positiveImpression";

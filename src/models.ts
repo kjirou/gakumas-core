@@ -259,12 +259,18 @@ export const createLessonGamePlay = (params: {
 /**
  * 現在のターンのアイドルパラメータ種別を返す
  *
+ * - 0ターン目は1ターン目の値を返す
  * - 指定したターン番号が存在しない時は、最終ターンの内容を返す
  * - 「ターン追加」による最終ターンの延長時に、最終ターンの内容が継続する仕様を表現したものでもある
  */
-export const getIdolParameterKindOnTurn = (lesson: Lesson): IdolParameterKind =>
-  lesson.turns[lesson.turnNumber - 1] || lesson.turns[lesson.turns.length - 1];
-
+export const getIdolParameterKindOnTurn = (
+  lesson: Lesson,
+): IdolParameterKind => {
+  return lesson.turnNumber === 0
+    ? lesson.turns[0]
+    : lesson.turns[lesson.turnNumber - 1] ||
+        lesson.turns[lesson.turns.length - 1];
+};
 export const calculateLastTurnNumber = (lesson: Lesson): number =>
   lesson.turns.length + lesson.remainingTurns;
 

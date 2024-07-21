@@ -8,6 +8,7 @@ import {
 } from "./types";
 import { getCardDataById } from "./data/cards";
 import {
+  activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
@@ -2505,6 +2506,47 @@ describe("summarizeCardInHand", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(summarizeCardInHand(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffectsOnLessonStart", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOnLessonStart>;
+    expected: ReturnType<typeof activateEffectsOnLessonStart>;
+    name: string;
+  }> = [
+    {
+      name: "「ゲーセンの戦利品」を発動する",
+      args: [
+        createLessonForTest({
+          producerItems: [
+            {
+              id: "a",
+              definition: getProducerItemDataById("gesennosenrihin"),
+              enhanced: false,
+            },
+          ],
+        }),
+        1,
+        {
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier",
+            actual: { kind: "focus", amount: 3, id: expect.any(String) },
+            max: { kind: "focus", amount: 3, id: expect.any(String) },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOnLessonStart(...args)).toStrictEqual(expected);
   });
 });
 describe("drawCardsOnLessonStart", () => {

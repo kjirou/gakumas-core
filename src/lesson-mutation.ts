@@ -1048,7 +1048,7 @@ const activateDelayedEffectModifier = (
 type EffectActivations = Array<LessonUpdateQueryDiff[] | undefined>;
 
 /**
- * 効果リストを発動をして、効果発動結果リストを返す
+ * 効果リストを発動する
  *
  * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
  * - 本処理内では、レッスンその他の状況は変わらない前提
@@ -1066,6 +1066,28 @@ const activateEffects = (
     effectActivations = [...effectActivations, activation];
   }
   return effectActivations;
+};
+
+/**
+ * Pアイテムの効果リストを発動する
+ *
+ * - スキルカードとは異なり、プレビューがないので、EffectActivations の形式でなくても良い
+ */
+const activateEffectsOfProducerItem = (
+  lesson: Lesson,
+  producerItem: ProducerItem,
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+): LessonUpdateQueryDiff[] => {
+  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  return activateEffects(
+    lesson,
+    producerItemContent.effects,
+    getRandom,
+    idGenerator,
+  )
+    .filter((e) => e !== undefined)
+    .reduce((acc, e) => [...acc, ...e], []);
 };
 
 /**
@@ -1247,9 +1269,32 @@ export const activateEffectsOnLessonStart = (
   //
   // - 現状は、恒常SSR清夏の「ゲーセンの戦利品」のみ、このトリガーで効果が発動する
   //
+  let producerItemUpdates: LessonUpdateQuery[] = [];
+  for (const producerItem of newLesson.idol.producerItems) {
+    if (canTriggerProducerItem(newLesson, producerItem, "lessonStart")) {
+      const diffs = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diffs.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "lessonStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        }),
+      );
+      newLesson = patchUpdates(newLesson, innerUpdates);
+      producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
+    }
+  }
+  if (producerItemUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
 
   return {
-    updates: [],
+    updates: [...producerItemUpdates],
     nextHistoryResultIndex,
   };
 };

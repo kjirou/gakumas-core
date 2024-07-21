@@ -137,6 +137,10 @@ describe("getIdolParameterKindOnTurn", () => {
       args: [{ turns: ["vocal", "dance"], turnNumber: 3 } as Lesson],
       expected: "dance",
     },
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 0 } as Lesson],
+      expected: "vocal",
+    },
   ];
   test.each(testCases)(
     "$args.0.turns, $args.0.turnNumber => $expected",

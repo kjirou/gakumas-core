@@ -202,7 +202,6 @@ export type ModifierDefinition =
        * 「パラメータ上昇量増加50%（{duration}ターン）」
        *
        * - 「ビジュアルレッスン・ビジュアルターンのみ」のような条件を伴うものが多いが、これは付与条件なので、状態修正としては付与されたら一律に効果を発する
-       * - TODO: [仕様確認] 端数処理というか計算式
        */
       kind: "mightyPerformance";
       duration: number;
@@ -308,7 +307,6 @@ export type EffectCondition =
        * - 原文の構文は、「体力が50%以上の場合、」
        *   - 「ファーストステップ」は、「体力が50%以上の場合、消費体力削減1」
        *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
-       * - TODO: [仕様確認] 端数処理
        */
       kind: "measureIfLifeIsEqualGreaterThanHalf";
     };
@@ -399,7 +397,10 @@ export type Effect = (
        *
        * - 原文の構文は、「{modifierKind}{multiplier}倍」
        *   - 「夢へのライフログ」は、「好印象1.5倍」
-       * - TODO: [仕様確認] 端数処理
+       * - 少なくとも、1.5倍の時の端数は切り上げ
+       *   - 「夢へのライフログ」の参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=Ig8yc0Q9MK4bLdj_&t=3474
+       *     - 好印象が 5 -> 8 になっている
+       *   - 現状は「夢へのライフログ」の1.5倍しかないので、本実装では切り上げる
        */
       kind: "multiplyModifier";
       modifierKind: "positiveImpression";
@@ -533,7 +534,7 @@ export type CardUsageCondition =
        * - 原文は、「{valueKind}が{percentage}%{criterionKind}の場合、使用可」
        *   - 「ご指導ご鞭撻」は、「体力の50%以上の場合、使用可」
        *   - 「お姉ちゃんだもの！」は、「レッスンCLEARの100%以下の場合、使用可」
-       * - TODO: [仕様確認] life と score 両方での端数処理、多分プレイヤー有利側だと思うので一旦それで実装
+       * - 本家の端数処理は未調査、現状は「以上」は切り上げ、「以下」は切り捨てで判定している。
        */
       kind: "measureValue";
       valueKind: "life" | "score";
@@ -577,8 +578,14 @@ export type CardContentDefinition = {
    * レッスン開始時に手札に入るか
    *
    * - 原文は、「レッスン開始時手札に入る」
-   * - 4枚以上所持している時は、初期手札に4枚入る
-   *   - TODO: [仕様確認] 手札最大の5枚を超えた時にどうなるか、特に溢れた分が山札に残るか捨札になるか
+   * - 4枚以上を所持した時に手札の状況例
+   *   - 4枚所持: 1ターン目:レッスン開始時手札4枚
+   *   - 5枚所持: 1ターン目:レッスン開始時手札5枚
+   *   - 6枚所持: 1ターン目:レッスン開始時手札5枚, 2ターン目:レッスン開始時手札1枚
+   *   - 7枚所持: 1ターン目:レッスン開始時手札5枚, 2ターン目:レッスン開始時手札2枚
+   *   - 8枚以上所持は、仕様が不明瞭で要調査。本実装では、とりあえず、あるだけ山札の先頭へ積むようにしている。
+   *     - Ref: https://github.com/kjirou/gakumas-core/issues/37
+   *     - Ref: https://github.com/kjirou/gakumas-core/issues/42
    */
   innate?: boolean;
   /** 使用後に除外するか、原文は「レッスン中1回」、デフォルトは false */
@@ -621,7 +628,6 @@ export type CardDefinition = {
   cardPossessionKind: CardPossessionKind;
   cardProviderKind: CardProviderKind;
   cardSummaryKind: CardSummaryKind;
-  // TODO: Pアイテム側と同じくenumにする
   /** 強化済み時の内容 */
   enhanced?: CardContentDefinition;
   id: string;
@@ -687,9 +693,12 @@ export type Card = {
   /**
    * カード強化状態
    *
-   * - 通常強化・「レッスン中強化」・サポートカードによる強化状態
-   * - TODO: [仕様確認] サポカによるレッスン中のカード強化の仕様がわからない
-   *   - 「静かな意志」が、カードの強化＆サポカ強化1で、コストが4から3に下がっていたのは確認した
+   * - スキルカードは、以下の強化状態を持つ。
+   *   - A) プロデュース中の所持手札上で反映されている強化、ここでは「通常強化」と呼ぶ
+   *   - B) 「レッスン中強化」
+   *   - C) サポートカードによる、そのレッスン中のみの強化、ここでは「サポートカード強化」と呼ぶ
+   * - A と B は排他でどちらかだけ有効になる、それに C の数を加えたものが、そのカードの強化数になる
+   * - TODO: 強化数が2以上の場合の追加の強化が反映されていない
    */
   enhancements: CardEnhancement[];
   /**
@@ -811,8 +820,6 @@ export type ProducerItemContentDefinition = {
    *
    * - Pアイテム全体の効果発動条件を意味する
    *   - 原文の効果説明欄の構造上は、複数の効果があるときも、効果1行目に埋め込まれて記載されているよう
-   * - TODO: [仕様確認] 「私の「初」の楽譜」の効果に「体力減少1」があるが、体力が0の時発動するのか
-   * - TODO: [仕様確認] 「超絶あんみんマスク」の効果に「体力消費1」があるが、体力が0の時発動するのか
    */
   condition?: EffectCondition;
   cost?: ActionCost;
@@ -861,7 +868,6 @@ export type ProducerItemContentDefinition = {
  *     【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）
  *     （レッスン内3回）
  * - レッスン中に効果を及ぼさないものは、一旦除外している
- * - TODO: [仕様確認] 右側アイコンに並ぶ順番は取得した順番か？
  */
 export type ProducerItemDefinition = {
   /** 未強化時の内容 */
@@ -954,10 +960,17 @@ export type IdolDefinition = {
 export type IdolInProduction = {
   deck: CardInProduction[];
   definition: IdolDefinition;
-  // TODO: まだ使わないので一旦コメントアウト
+  // NOTE: まだ使わないので一旦コメントアウト
   // idolParameters: IdolParameters;
   life: number;
   maxLife: number;
+  /**
+   * Pアイテムリスト
+   *
+   * - 上からプロデュース中に取得した順になる
+   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
+   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
+   */
   producerItems: ProducerItemInProduction[];
 };
 
@@ -988,6 +1001,14 @@ export type Idol = {
   modifierIdsAtTurnStart: Array<Modifier["id"]>;
   modifiers: Modifier[];
   original: IdolInProduction;
+  /**
+   * Pアイテムリスト
+   *
+   * - 上からプロデュース中に取得した順になり、かつレッスン中に使える可能性のあるもののみに絞り込まれる
+   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
+   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
+   */
+  producerItems: ProducerItem[];
   /** 本レッスン中にスキルカードを使用した回数、関連する原文は「レッスン中に使用したスキルカード{n}枚ごとに、」 */
   totalCardUsageCount: number;
   /**
@@ -1014,12 +1035,15 @@ export type Lesson = {
    *
    * - 本家の仕様
    *   - レッスン
-   *     - 通常/SPレッスンは、クリアスコアの倍がバーフェクト
-   *     - 中間試験追い込みは90/270
-   *     - 最終試験追い込みは165/600
-   *   - 試験
-   *     - 中間試験の方は、「スコア1700以上で中間試験突破」のように書いてあるので、これがそれに相当しそう？
-   * - TODO: [仕様確認] 試験やコンテストの際に「レッスンCLEARの100%以下の場合、使用可」の条件はどうなっている？
+   *     - 通常/SPレッスンは、クリアスコアの倍がバーフェクトスコア
+   *     - 中間試験追い込みレッスンは、90/270
+   *     - 最終試験追い込みレッスンは、165/600
+   *   - 中間試験
+   *     - クリアスコアは不明
+   *     - パーフェクトスコアは1700、ゲーム内に「スコア1700以上で中間試験突破」という記述がある
+   *   - 最終試験・コンテスト・アイドルの道
+   *     - クリアスコアはそれぞれ不明
+   *     - パーフェクトスコアはなさそう
    */
   clearScoreThresholds:
     | {
@@ -1049,7 +1073,6 @@ export type Lesson = {
    *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
    */
   playedCardsOnEmptyDeck: Array<Card["id"]>;
-  producerItems: ProducerItem[];
   /** 最終ターン数への修正、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
   remainingTurns: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */
@@ -1074,8 +1097,7 @@ export type Lesson = {
 /**
  * レッスン履歴レコード
  *
- * TODO: 全般的に後回し
- * TODO: kind が山ほど必要そう、また階層があると都合がいいので "foo.bar.baz" みたいな感じになりそう
+ * TODO: 本家のレッスン履歴の再現は、全般的に後回し。表示パターンの精査に対して個別のkindを割り振ることから始める必要がある。
  *
  * - 本家で、レッスン中に右下のボタンから表示できる履歴を再現するためのもの
  * - 原文の構文は、以下の通り
@@ -1290,8 +1312,6 @@ export type LessonUpdateQuery = LessonUpdateQueryDiff & {
 
 /**
  * レッスン中の状態
- *
- * - TODO: 本家の履歴に合わせて差分表現ができるようにする
  */
 export type LessonGamePlay = {
   getRandom: GetRandom;

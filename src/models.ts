@@ -128,6 +128,10 @@ const createIdol = (params: { idolInProduction: IdolInProduction }): Idol => {
     modifierIdsAtTurnStart: [],
     modifiers: [],
     original: params.idolInProduction,
+    // TODO: そのレッスン中に使用できる可能性があるPアイテムのみへ絞り込む
+    producerItems: prepareProducerItemsForLesson(
+      params.idolInProduction.producerItems,
+    ),
     totalCardUsageCount: 0,
     vitality: 0,
   };
@@ -166,9 +170,6 @@ export const createLesson = (params: {
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
     cards,
-    producerItems: prepareProducerItemsForLesson(
-      params.idolInProduction.producerItems,
-    ),
     clearScoreThresholds: params.clearScoreThresholds,
     deck: shuffleArray(
       cards.map((card) => card.id),
@@ -523,11 +524,14 @@ export const patchUpdates = (
       case "producerItem.activationCount": {
         newLesson = {
           ...newLesson,
-          producerItems: newLesson.producerItems.map((producerItem) =>
-            producerItem.id === update.producerItemId
-              ? { ...producerItem, activationCount: update.value }
-              : producerItem,
-          ),
+          idol: {
+            ...newLesson.idol,
+            producerItems: newLesson.idol.producerItems.map((producerItem) =>
+              producerItem.id === update.producerItemId
+                ? { ...producerItem, activationCount: update.value }
+                : producerItem,
+            ),
+          },
         };
         break;
       }

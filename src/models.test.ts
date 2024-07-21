@@ -1,11 +1,4 @@
-import {
-  Card,
-  Idol,
-  IdolInProduction,
-  Lesson,
-  Modifier,
-  LessonUpdateQuery,
-} from "./types";
+import { Card, Lesson, LessonUpdateQuery } from "./types";
 import { getCardDataById } from "./data/cards";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -16,7 +9,6 @@ import {
   createLessonGamePlay,
   getIdolParameterKindOnTurn,
   patchUpdates,
-  prepareCardsForLesson,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
@@ -195,6 +187,7 @@ describe("createLessonGamePlay", () => {
           original: idolInProduction,
           life: 32,
           vitality: 0,
+          producerItems: expect.any(Array),
           modifiers: [],
           modifierIdsAtTurnStart: [],
           totalCardUsageCount: 0,
@@ -206,7 +199,6 @@ describe("createLessonGamePlay", () => {
         discardPile: [],
         removedCardPile: [],
         playedCardsOnEmptyDeck: [],
-        producerItems: expect.any(Array),
         score: 0,
         turnNumber: 1,
         turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
@@ -748,10 +740,12 @@ describe("patchUpdates", () => {
   describe("producerItem.activationCount", () => {
     test("it works", () => {
       let lessonMock = {
-        producerItems: [
-          { id: "1", activationCount: 1 },
-          { id: "2", activationCount: 2 },
-        ],
+        idol: {
+          producerItems: [
+            { id: "1", activationCount: 1 },
+            { id: "2", activationCount: 2 },
+          ],
+        },
       } as Lesson;
       lessonMock = patchUpdates(lessonMock, [
         {
@@ -765,7 +759,7 @@ describe("patchUpdates", () => {
           },
         },
       ]);
-      expect(lessonMock.producerItems).toStrictEqual([
+      expect(lessonMock.idol.producerItems).toStrictEqual([
         {
           id: "1",
           activationCount: 1,

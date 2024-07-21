@@ -520,7 +520,6 @@ export const calculateCostConsumption = (
  *     - `(23 + 4 * 2.0) * (1.5 + 0.6) = 65.10`
  *   - 集中:4, 好調:6, 絶好調:有, 初星水（+10） => 30
  *     - `(10 + 4) * (1.5 + 0.6) = 29.40`
- * - TODO: 集中増幅効果が端数の時、そこで端数処理が入るのか、小数のまま計算されるのか。とりあえず小数のまま計算されると仮定している。
  *
  * @param remainingIncrementableScore 残りの増加可能スコア。undefined の場合は、無限大として扱う。
  */
@@ -1055,32 +1054,36 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
 } => {
   let updates: LessonUpdateQuery[] = [];
   let newLesson = lesson;
-  const targetProducerItems = lesson.producerItems.filter((producerItem) => {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
-    const cardDefinitionIdCondition =
-      !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-      producerItemContent.trigger.cardDefinitionId === undefined ||
-      producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
-    const cardSummaryKindCondition =
-      !(
-        producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
-        producerItemContent.trigger.kind === "afterCardEffectActivation"
-      ) ||
-      producerItemContent.trigger.cardSummaryKind === undefined ||
-      producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
-    const modifierIncreaseCondition =
-      !(producerItemContent.trigger.kind === "modifierIncrease") ||
-      (options.increasedModifierKinds || []).includes(
-        producerItemContent.trigger.modifierKind,
+  const targetProducerItems = lesson.idol.producerItems.filter(
+    (producerItem) => {
+      const producerItemContent =
+        getProducerItemContentDefinition(producerItem);
+      const cardDefinitionIdCondition =
+        !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
+        producerItemContent.trigger.cardDefinitionId === undefined ||
+        producerItemContent.trigger.cardDefinitionId ===
+          options.cardDefinitionId;
+      const cardSummaryKindCondition =
+        !(
+          producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
+          producerItemContent.trigger.kind === "afterCardEffectActivation"
+        ) ||
+        producerItemContent.trigger.cardSummaryKind === undefined ||
+        producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
+      const modifierIncreaseCondition =
+        !(producerItemContent.trigger.kind === "modifierIncrease") ||
+        (options.increasedModifierKinds || []).includes(
+          producerItemContent.trigger.modifierKind,
+        );
+      return (
+        producerItemContent.trigger.kind === producerItemTriggerKind &&
+        cardDefinitionIdCondition &&
+        cardSummaryKindCondition &&
+        modifierIncreaseCondition &&
+        canActivateProducerItem(lesson, producerItem)
       );
-    return (
-      producerItemContent.trigger.kind === producerItemTriggerKind &&
-      cardDefinitionIdCondition &&
-      cardSummaryKindCondition &&
-      modifierIncreaseCondition &&
-      canActivateProducerItem(lesson, producerItem)
-    );
-  });
+    },
+  );
   for (const producerItem of targetProducerItems) {
     const effectActivations = activateEffects(
       lesson,
@@ -1252,7 +1255,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   // ターン開始時の効果発動
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.producerItems) {
+  for (const producerItem of newLesson.idol.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
       producerItemContent.trigger.kind === "turnStart" &&
@@ -1288,7 +1291,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   // 2ターンごとターン開始時の効果発動
   //
   let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.producerItems) {
+  for (const producerItem of newLesson.idol.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
       producerItemContent.trigger.kind === "turnStartEveryTwoTurns" &&
@@ -1349,7 +1352,6 @@ export const activateModifierEffectsOnTurnStart = (
   // 「(次ターン|nターン後)、パラメータ+n」による効果発動
   //
   // - 実装上、元気更新も実行できるが、本家にその効果は存在しない
-  // - TODO: [仕様確認] スキルパーフェクトを達成した場合に、後続処理は処理されるのか
   //
   let performDelayedEffectUpdates: LessonUpdateQuery[] = [];
   for (const modifier of newLesson.idol.modifiers) {
@@ -1384,64 +1386,68 @@ export const activateModifierEffectsOnTurnStart = (
   // 状態修正の「(次ターン|nターン後)、スキルカードを引く」による効果発動
   //
   let drawCardDelayedEffectUpdates: LessonUpdateQuery[] = [];
-  for (const modifier of newLesson.idol.modifiers) {
-    if (
-      isDelayedEffectModifierType(modifier) &&
-      isDrawCardsEffectType(modifier.effect)
-    ) {
-      const innerUpdates = activateDelayedEffectModifier(
-        newLesson,
-        modifier,
-        params.getRandom,
-        params.idGenerator,
-      ).map((diff) =>
-        createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        }),
-      );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      drawCardDelayedEffectUpdates = [
-        ...drawCardDelayedEffectUpdates,
-        ...innerUpdates,
-      ];
+  if (!isScoreSatisfyingPerfect(newLesson)) {
+    for (const modifier of newLesson.idol.modifiers) {
+      if (
+        isDelayedEffectModifierType(modifier) &&
+        isDrawCardsEffectType(modifier.effect)
+      ) {
+        const innerUpdates = activateDelayedEffectModifier(
+          newLesson,
+          modifier,
+          params.getRandom,
+          params.idGenerator,
+        ).map((diff) =>
+          createLessonUpdateQueryFromDiff(diff, {
+            kind: "turnStartTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          }),
+        );
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        drawCardDelayedEffectUpdates = [
+          ...drawCardDelayedEffectUpdates,
+          ...innerUpdates,
+        ];
+      }
     }
-  }
-  if (drawCardDelayedEffectUpdates.length > 0) {
-    nextHistoryResultIndex++;
+    if (drawCardDelayedEffectUpdates.length > 0) {
+      nextHistoryResultIndex++;
+    }
   }
 
   //
   // 状態修正の「(次ターン|nターン後)、スキルカードを強化」による効果発動
   //
   let enhanceHandDelayedEffectUpdates: LessonUpdateQuery[] = [];
-  for (const modifier of newLesson.idol.modifiers) {
-    if (
-      isDelayedEffectModifierType(modifier) &&
-      isEnhanceHandEffectType(modifier.effect)
-    ) {
-      const innerUpdates = activateDelayedEffectModifier(
-        newLesson,
-        modifier,
-        params.getRandom,
-        params.idGenerator,
-      ).map((diff) =>
-        createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        }),
-      );
-      newLesson = patchUpdates(newLesson, innerUpdates);
-      enhanceHandDelayedEffectUpdates = [
-        ...enhanceHandDelayedEffectUpdates,
-        ...innerUpdates,
-      ];
+  if (!isScoreSatisfyingPerfect(newLesson)) {
+    for (const modifier of newLesson.idol.modifiers) {
+      if (
+        isDelayedEffectModifierType(modifier) &&
+        isEnhanceHandEffectType(modifier.effect)
+      ) {
+        const innerUpdates = activateDelayedEffectModifier(
+          newLesson,
+          modifier,
+          params.getRandom,
+          params.idGenerator,
+        ).map((diff) =>
+          createLessonUpdateQueryFromDiff(diff, {
+            kind: "turnStartTrigger",
+            historyTurnNumber: lesson.turnNumber,
+            historyResultIndex,
+          }),
+        );
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        enhanceHandDelayedEffectUpdates = [
+          ...enhanceHandDelayedEffectUpdates,
+          ...innerUpdates,
+        ];
+      }
     }
-  }
-  if (enhanceHandDelayedEffectUpdates.length > 0) {
-    nextHistoryResultIndex++;
+    if (enhanceHandDelayedEffectUpdates.length > 0) {
+      nextHistoryResultIndex++;
+    }
   }
 
   return {
@@ -1470,8 +1476,9 @@ export const drawCardsOnTurnStart = (
   //
   // 「レッスン開始時手札に入る」のスキルカードを山札の先頭へ移動する
   //
-  // - TODO: 少なくともレッスン開始時手札が8枚の時、この挙動にならないことがある、Ref: https://github.com/kjirou/gakumas-core/issues/37
-  // - TODO: [仕様確認] レッスン開始時手札が9枚以上の時、2ターン目は3枚？4枚？引くのか
+  // - TODO: レッスン開始時手札が8枚以上の時の挙動が、本家と異なる
+  //         - レッスン開始時手札が8枚の時、1ターン目:5枚->2ターン目:2枚->不定ターン目:1枚、Ref: https://github.com/kjirou/gakumas-core/issues/37
+  //         - レッスン開始時手札が9枚の時、1ターン目:5枚->2ターン目:3枚->不定ターン目:1枚、Ref: https://github.com/kjirou/gakumas-core/issues/42
   //
   let innateCardCount = 0;
   let moveInnateCardsUpdates: LessonUpdateQuery[] = [];
@@ -1738,10 +1745,6 @@ export const consumeRemainingCardUsageCount = (
 
 /**
  * スキルカードを使用する
- *
- * - TODO: [仕様確認] 主効果発動によりスコアパーフェクトを達成した後、スキルカード使用がトリガーの追加効果発動は発動されるか？
- *         - 例えば、「願いの力」「曇りをぬぐったタオル」など
- *         - 多分されそうな気がする
  */
 export const useCard = (
   lesson: Lesson,
@@ -2089,8 +2092,6 @@ export const useCard = (
 
 /**
  * ターン終了時の各種効果を発動する
- *
- * - TODO: [仕様確認] それぞれの効果によりスコアパーフェクト条件を満たした時、後続処理が実行されるのか不明。現在存在する効果だと、ほぼこれで勝負が決まることはなさそうではある。
  */
 export const activateEffectsOnTurnEnd = (
   lesson: Lesson,
@@ -2107,7 +2108,7 @@ export const activateEffectsOnTurnEnd = (
   // Pアイテム起因の、ターン終了時の効果発動
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
-  for (const producerItem of newLesson.producerItems) {
+  for (const producerItem of newLesson.idol.producerItems) {
     const producerItemContent = getProducerItemContentDefinition(producerItem);
     if (
       producerItemContent.trigger.kind === "turnEnd" &&

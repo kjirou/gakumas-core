@@ -1742,10 +1742,6 @@ export const consumeRemainingCardUsageCount = (
 
 /**
  * スキルカードを使用する
- *
- * - TODO: [仕様確認] 主効果発動によりスコアパーフェクトを達成した後、スキルカード使用がトリガーの追加効果発動は発動されるか？
- *         - 例えば、「願いの力」「曇りをぬぐったタオル」など
- *         - 多分されそうな気がする
  */
 export const useCard = (
   lesson: Lesson,

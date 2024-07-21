@@ -307,7 +307,6 @@ export type EffectCondition =
        * - 原文の構文は、「体力が50%以上の場合、」
        *   - 「ファーストステップ」は、「体力が50%以上の場合、消費体力削減1」
        *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
-       * - TODO: [仕様確認] 端数処理
        */
       kind: "measureIfLifeIsEqualGreaterThanHalf";
     };

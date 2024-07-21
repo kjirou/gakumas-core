@@ -20,9 +20,9 @@ export const getIdolDataById = (id: IdolDefinition["id"]): IdolDefinition => {
  *     - なお、これはおそらく「アイドル」＞「Pアイドル育成」＞「アイドル」順、と同じ
  *   - プロパティの定義順は、アルファベット順
  * - TODO: eslint
+ * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
 export const idols: IdolDefinition[] = [
-  // TODO: さきのBoom Boom Powを足す
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",

@@ -476,6 +476,9 @@ export const playCard = (
   //     - 参考動画: https://www.youtube.com/live/UEyfJE3u2dg?si=iEEZZ8gCItrptYVX&t=2711
   //       - 「輝くキミへ」状態修正発動 → 「ファンシーチャーム」状態修正発動 → 「ファンシーチャーム」主効果発動
   //       - 状態修正リストの上から発動していそうなこともわかる
+  // - 3-b > 3-c
+  //   - 「いつものメイクポーチ」と「願いの力」を同時に発動したら、前者が先に発動していた
+  //     - 参考動画: https://youtube.com/shorts/359RrA1iIWo?feature=share
   // - 3-d > 3-e
   //   - 「ビッグドリーム貯金箱」で確認
   //     - 参考動画: https://www.youtube.com/live/UEyfJE3u2dg?si=Dy0wKkkmMi2YPElw&t=2371
@@ -484,8 +487,6 @@ export const playCard = (
   //     - 参考動画: https://youtu.be/Z_ls8y-ar4k?si=HUYDzJ31ptVfRVvR&t=265
   // - 3-e と 3-f の順序
   //   - どちらもキャラ固有にしか存在しなく、同時に所持できないので、現在は気にしないで良い
-  //
-  // - TODO: [仕様確認] 3-b と 3-c の発動順序。体力回復2のPアイテムとSRの継続効果のスキルカードの組み合わせでわかりそう
   //
   const useCardResult = useCard(lesson, historyResultIndex, {
     getRandom: lessonGamePlay.getRandom,

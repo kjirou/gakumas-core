@@ -219,12 +219,14 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  * レッスンのゲームプレイを初期化する
  *
  * - ここの「レッスン」には、試験・コンテスト・アイドルの道なども含む
+ *
+ * @param params.idGenerator createIdolInProduction で使用した関数と同じものを渡す
  */
 export const createLessonGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   idolInProduction: IdolInProduction;
   getRandom?: GetRandom;
-  idGenerator?: IdGenerator;
+  idGenerator: IdGenerator;
   turns: Lesson["turns"];
 }): LessonGamePlay => {
   const clearScoreThresholds =
@@ -232,13 +234,10 @@ export const createLessonGamePlay = (params: {
       ? params.clearScoreThresholds
       : undefined;
   const getRandom = params.getRandom ? params.getRandom : Math.random;
-  const idGenerator = params.idGenerator
-    ? params.idGenerator
-    : createIdGenerator();
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
     getRandom,
-    idGenerator,
+    idGenerator: params.idGenerator,
     initialLesson: {
       cards,
       clearScoreThresholds,

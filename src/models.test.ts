@@ -188,6 +188,7 @@ describe("createLessonGamePlay", () => {
       idGenerator,
     });
     const lessonGamePlay = createLessonGamePlay({
+      idGenerator,
       idolInProduction,
       turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });

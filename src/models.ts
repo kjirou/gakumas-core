@@ -254,7 +254,7 @@ export const createLessonGamePlay = (params: {
       removedCardPile: [],
       playedCardsOnEmptyDeck: [],
       score: 0,
-      turnNumber: 1,
+      turnNumber: 0,
       remainingTurns: 0,
     },
     updates: [],

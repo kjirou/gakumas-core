@@ -214,7 +214,7 @@ describe("createLessonGamePlay", () => {
         removedCardPile: [],
         playedCardsOnEmptyDeck: [],
         score: 0,
-        turnNumber: 1,
+        turnNumber: 0,
         turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
         remainingTurns: 0,
       },

@@ -176,34 +176,6 @@ export const prepareProducerItemsForLesson = (
   });
 };
 
-export const createLesson = (params: {
-  clearScoreThresholds: Lesson["clearScoreThresholds"];
-  getRandom: GetRandom;
-  idolInProduction: IdolInProduction;
-  turns: Lesson["turns"];
-}): Lesson => {
-  const cards = prepareCardsForLesson(params.idolInProduction.deck);
-  return {
-    cards,
-    clearScoreThresholds: params.clearScoreThresholds,
-    deck: shuffleArray(
-      cards.map((card) => card.id),
-      params.getRandom,
-    ),
-    discardPile: [],
-    hand: [],
-    idol: createIdol({
-      idolInProduction: params.idolInProduction,
-    }),
-    turns: params.turns,
-    removedCardPile: [],
-    playedCardsOnEmptyDeck: [],
-    score: 0,
-    turnNumber: 1,
-    remainingTurns: 0,
-  };
-};
-
 /**
  * レッスンのクリアに対するスコア進捗を計算する
  */
@@ -243,6 +215,11 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
     : false;
 };
 
+/**
+ * レッスンのゲームプレイを初期化する
+ *
+ * - ここの「レッスン」には、試験・コンテスト・アイドルの道なども含む
+ */
 export const createLessonGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   idolInProduction: IdolInProduction;
@@ -258,15 +235,29 @@ export const createLessonGamePlay = (params: {
   const idGenerator = params.idGenerator
     ? params.idGenerator
     : createIdGenerator();
+  const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
     getRandom,
     idGenerator,
-    initialLesson: createLesson({
+    initialLesson: {
+      cards,
       clearScoreThresholds,
-      getRandom,
-      idolInProduction: params.idolInProduction,
+      deck: shuffleArray(
+        cards.map((card) => card.id),
+        getRandom,
+      ),
+      discardPile: [],
+      hand: [],
+      idol: createIdol({
+        idolInProduction: params.idolInProduction,
+      }),
       turns: params.turns,
-    }),
+      removedCardPile: [],
+      playedCardsOnEmptyDeck: [],
+      score: 0,
+      turnNumber: 1,
+      remainingTurns: 0,
+    },
     updates: [],
   };
 };

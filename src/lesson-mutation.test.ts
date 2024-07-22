@@ -31,13 +31,18 @@ import {
   summarizeCardInHand,
   validateCostConsumution,
 } from "./lesson-mutation";
-import { createIdolInProduction, createLesson, patchUpdates } from "./models";
+import {
+  createIdolInProduction,
+  createLessonGamePlay,
+  patchUpdates,
+} from "./models";
 import { createIdGenerator } from "./utils";
 import { getProducerItemDataById } from "./data/producer-items";
 
 const createLessonForTest = (
   overwrites: Partial<Parameters<typeof createIdolInProduction>[0]> = {},
 ): Lesson => {
+  const idGenerator = createIdGenerator();
   const idolInProduction = createIdolInProduction({
     // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
     idolDefinitionId: "shinosawahiro-r-1",
@@ -45,15 +50,16 @@ const createLessonForTest = (
     producerItems: [],
     specificCardEnhanced: false,
     specificProducerItemEnhanced: false,
-    idGenerator: createIdGenerator(),
+    idGenerator,
     ...overwrites,
   });
-  return createLesson({
+  const lessonGamePlay = createLessonGamePlay({
     clearScoreThresholds: undefined,
-    getRandom: Math.random,
+    idGenerator,
     idolInProduction,
     turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
   });
+  return lessonGamePlay.initialLesson;
 };
 
 describe("drawCardsFromDeck", () => {

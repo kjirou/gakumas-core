@@ -3,6 +3,7 @@
  */
 
 import { getCardDataById } from "./data/cards";
+import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -11,6 +12,7 @@ import {
   Card,
   CardContentDefinition,
   CardInProduction,
+  CardSetDefinition,
   Effect,
   GetRandom,
   IdGenerator,
@@ -22,6 +24,7 @@ import {
   LessonUpdateQuery,
   Modifier,
   ModifierDefinition,
+  ProducePlan,
   ProducerItem,
   ProducerItemContentDefinition,
   ProducerItemInProduction,
@@ -91,11 +94,14 @@ export const createIdolInProduction = (params: {
   const idolDefinition = getIdolDataById(params.idolDefinitionId);
   const characterDefinition = getCharacterDataById(idolDefinition.characterId);
   const specificCardDefinition = getCardDataById(idolDefinition.specificCardId);
+  const defaultCardSetDefinition = getDefaultCardSetData(
+    idolDefinition.producePlan,
+  );
   const specificProducerItemDefinition = getProducerItemDataById(
     idolDefinition.specificProducerItemId,
   );
   return {
-    // アイドル固有 ＞ メモリーカード供給 ＞ 初期カード、の順でデッキを構築する
+    // 本家仕様は、アイドル固有 ＞ メモリーから供給（現在考慮外） ＞ 初期セット、の順でデッキを構築しているよう
     deck: [
       {
         id: params.idGenerator(),
@@ -103,6 +109,17 @@ export const createIdolInProduction = (params: {
         enhanced: params.specificCardEnhanced,
         enabled: true,
       },
+      // TODO: 引数から強化済みスキルカードを指定できるようにする、主に特訓用
+      // TODO: デフォルトスキルカード内での整列順を本家に合わせる
+      ...defaultCardSetDefinition.cardDefinitionIds.map((cardDefinitionId) => {
+        const cardDefinition = getCardDataById(cardDefinitionId);
+        return {
+          id: params.idGenerator(),
+          definition: cardDefinition,
+          enhanced: false,
+          enabled: true,
+        };
+      }),
       ...params.cards,
     ],
     definition: idolDefinition,

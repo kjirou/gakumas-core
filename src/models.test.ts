@@ -20,8 +20,8 @@ describe("createIdolInProduction", () => {
       cards: [
         {
           id: idGenerator(),
-          definition: getCardDataById("apirunokihon"),
-          enhanced: false,
+          definition: getCardDataById("haitatchi"),
+          enhanced: true,
           enabled: true,
         },
       ],
@@ -43,10 +43,19 @@ describe("createIdolInProduction", () => {
           enhanced: false,
           enabled: true,
         },
+        // 初期分
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
         {
           id: expect.any(String),
-          definition: getCardDataById("apirunokihon"),
-          enhanced: false,
+          definition: getCardDataById("haitatchi"),
+          enhanced: true,
           enabled: true,
         },
       ],

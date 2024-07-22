@@ -4156,14 +4156,19 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         const cardsUpdate = updates.find((e) => e.kind === "cards") as any;
-        // アイドル固有 + 上記で足している hanamoyukisetsu + 生成したカード
-        expect(cardsUpdate.cards).toHaveLength(3);
-        expect(cardsUpdate.cards[2].enhancements).toStrictEqual([
+        // アイドル固有 + 初期カードx8 + 上記で足している hanamoyukisetsu + 生成したカード
+        expect(cardsUpdate.cards).toHaveLength(1 + 8 + 1 + 1);
+        expect(
+          cardsUpdate.cards[cardsUpdate.cards.length - 1].enhancements,
+        ).toStrictEqual([
           {
             kind: "original",
           },
         ]);
-        expect(cardsUpdate.cards[2].original.definition.rarity).toBe("ssr");
+        expect(
+          cardsUpdate.cards[cardsUpdate.cards.length - 1].original.definition
+            .rarity,
+        ).toBe("ssr");
         const cardPlacementUpdate = updates
           .slice()
           .reverse()

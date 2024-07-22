@@ -1,4 +1,4 @@
-import type { CardSetDefinition } from "../types";
+import type { CardSetDefinition, ProducePlan } from "../types";
 
 export const findCardSetDataById = (
   id: CardSetDefinition["id"],
@@ -13,6 +13,21 @@ export const getCardSetDataById = (
     throw new Error(`Card set not found: ${id}`);
   }
   return cardSet;
+};
+
+/** 初期スキルカードセットを返す */
+export const getDefaultCardSetData = (
+  proeducePlan: ProducePlan,
+): CardSetDefinition => {
+  if (proeducePlan.kind === "logic") {
+    return proeducePlan.recommendedEffect === "motivation"
+      ? getCardSetDataById("defaultLogicMotivation")
+      : getCardSetDataById("defaultLogicPositiveImpression");
+  } else {
+    return proeducePlan.recommendedEffect === "focus"
+      ? getCardSetDataById("defaultSenseFocus")
+      : getCardSetDataById("defaultSenseGoodCondition");
+  }
 };
 
 export const cardSets: CardSetDefinition[] = [

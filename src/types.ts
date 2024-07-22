@@ -713,6 +713,14 @@ export type Card = {
   original: CardInProduction;
 };
 
+/**
+ * カードセット定義
+ */
+export type CardSetDefinition = {
+  cardDefinitionIds: Array<CardDefinition["id"]>;
+  id: string;
+};
+
 export type ProducerItemTrigger = (
   | {
       /**

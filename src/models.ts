@@ -80,8 +80,6 @@ export const isRemainingProducerItemTimes = (
   );
 };
 
-// TODO: 初期カードセットをどこかに定義する
-//       - 集中型: 試行錯誤、アピールの基本x2, ポーズの基本, 表情の基本x2, 表現の基本x2
 export const createIdolInProduction = (params: {
   cards: CardInProduction[];
   idGenerator: IdGenerator;

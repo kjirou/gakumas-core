@@ -27,7 +27,7 @@ export const getProducerItemDataById = (
  *     - rarity: "r" > "sr" > "ssr"
  *     - producerItemProviderKind: "others" > "idol" > "supportCard"
  *     - アイドル固有なら: さき > てまり > なお > りなみ > せいか > ことね > ひろ > リーリヤ > ちな > うめ > (新規アイドルはおそらくは追加順)
- *     - producerItemPossessionKind: "free" > "sence" > "logic"
+ *     - producerItemPossessionKind: "free" > "sense" > "logic"
  *   - プロパティの定義順
  *     - 第1階層
  *       - id, name は先頭

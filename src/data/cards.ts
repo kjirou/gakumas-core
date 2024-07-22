@@ -37,7 +37,7 @@ export const filterGeneratableCardsData = (
  *     - 固有種別: 非固有 > アイドル固有 > サポカ固有
  *     - cardKind: "active" > "mental" > "trouble"
  *     - アイドル固有カードなら: さき > てまり > なお > りなみ > せいか > ことね > ひろ > リーリヤ > ちな > うめ > (新規アイドルはおそらくは追加順)
- *     - cardPossessionKind: "free" > "sence" > "logic"
+ *     - cardPossessionKind: "free" > "sense" > "logic"
  *     - necessaryProducerLevel: ASC
  *   - プロパティの定義順
  *     - 第1階層

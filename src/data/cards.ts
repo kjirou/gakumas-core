@@ -4240,6 +4240,25 @@ export const cards: CardDefinition[] = [
     },
   },
   {
+    id: "hinyarihitoyasumi",
+    name: "ひんやり一休み",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    base: {
+      cost: { kind: "normal", value: 8 },
+      effects: [{ kind: "perform", score: { times: 3, value: 9 } }],
+      usableOncePerLesson: true,
+    },
+    enhanced: {
+      cost: { kind: "normal", value: 8 },
+      effects: [{ kind: "perform", score: { times: 3, value: 14 } }],
+      usableOncePerLesson: true,
+    },
+  },
+  {
     id: "yosomihadame",
     name: "よそ見はダメ♪",
     cardPossessionKind: "logic",

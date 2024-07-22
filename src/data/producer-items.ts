@@ -825,6 +825,25 @@ export const producerItems: ProducerItemDefinition[] = [
     },
   },
   {
+    id: "saigononatsunoomoide",
+    name: "最後の夏の思い出",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      effects: [{ kind: "perform", vitality: { value: 10 } }],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      effects: [{ kind: "perform", vitality: { value: 14 } }],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "biggudorimuchokimbako",
     name: "ビッグドリーム貯金箱",
     producerItemPossessionKind: "logic",

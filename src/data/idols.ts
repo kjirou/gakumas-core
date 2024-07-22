@@ -156,6 +156,18 @@ export const idols: IdolDefinition[] = [
     title: "学園生活",
   },
   {
+    id: "arimuramao-ssr-2",
+    characterId: "arimuramao",
+    producePlan: {
+      kind: "sense",
+      recommendedEffect: "focus",
+    },
+    rarity: "ssr",
+    specificCardId: "hinyarihitoyasumi",
+    specificProducerItemId: "saigononatsunoomoide",
+    title: "キミとセミブルー",
+  },
+  {
     id: "arimuramao-ssr-1",
     characterId: "arimuramao",
     producePlan: {

@@ -1,4 +1,4 @@
-import { CardDefinition, ProducePlan } from "../types";
+import { CardContentDefinition, CardDefinition, ProducePlan } from "../types";
 
 export const findCardDataById = (
   id: CardDefinition["id"],
@@ -23,6 +23,34 @@ export const filterGeneratableCardsData = (
         card.cardPossessionKind === producePlanKind) &&
       card.rarity === "ssr",
   );
+
+/** 全ての強化数の内容リストを返す */
+export const getCardContentDefinitions = (
+  card: CardDefinition,
+): [
+  CardContentDefinition,
+  CardContentDefinition,
+  CardContentDefinition,
+  CardContentDefinition,
+] => {
+  const noEnhanced = card.contents[0];
+  if (card.contents[1] === undefined) {
+    return [noEnhanced, noEnhanced, noEnhanced, noEnhanced];
+  }
+  const enhanced1: CardContentDefinition = {
+    ...noEnhanced,
+    ...card.contents[1],
+  };
+  const enhanced2: CardContentDefinition = {
+    ...enhanced1,
+    ...card.contents[2],
+  };
+  const enhanced3: CardContentDefinition = {
+    ...enhanced2,
+    ...card.contents[3],
+  };
+  return [noEnhanced, enhanced1, enhanced2, enhanced3];
+};
 
 /**
  * プロデュース中やレッスン中の山札の整列順のための比較をする
@@ -73,8 +101,7 @@ export const compareDeckOrder = (a: CardDefinition, b: CardDefinition) => {
  *   - プロパティの定義順
  *     - 第1階層
  *       - id, name は先頭
- *       - base と enhanced を除いて、先にアルファベット順
- *       - base > enhanced
+ *       - contents を除いて、先にアルファベット順
  *     - 第2階層以降
  *       - kind > *Kind > それ以外をアルファベット順
  * - TODO: eslint
@@ -88,14 +115,23 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [{ kind: "perform", score: { value: 9 } }],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [{ kind: "perform", score: { value: 13 } }],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [{ kind: "perform", score: { value: 9 } }],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [{ kind: "perform", score: { value: 14 } }],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [{ kind: "perform", score: { value: 15 } }],
+      },
+    ],
   },
   {
     id: "pozunokihon",
@@ -105,26 +141,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "perform",
-          score: { value: 2 },
-          vitality: { value: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "perform",
-          score: { value: 6 },
-          vitality: { value: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "perform",
+            score: { value: 2 },
+            vitality: { value: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "perform",
+            score: { value: 6 },
+            vitality: { value: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "perform",
+            score: { value: 8 },
+            vitality: { value: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "perform",
+            score: { value: 10 },
+            vitality: { value: 6 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "chosen",
@@ -134,18 +189,23 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "c",
-    base: {
-      condition: { kind: "hasGoodCondition" },
-      cost: { kind: "normal", value: 7 },
-      effects: [{ kind: "perform", score: { value: 25 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: { kind: "hasGoodCondition" },
-      cost: { kind: "normal", value: 7 },
-      effects: [{ kind: "perform", score: { value: 37 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        condition: { kind: "hasGoodCondition" },
+        cost: { kind: "normal", value: 7 },
+        effects: [{ kind: "perform", score: { value: 25 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 37 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 44 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 50 } }],
+      },
+    ],
   },
   {
     id: "shikosakugo",
@@ -155,16 +215,23 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 7 },
-      effects: [{ kind: "perform", score: { times: 2, value: 8 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [{ kind: "perform", score: { times: 2, value: 10 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 7 },
+        effects: [{ kind: "perform", score: { times: 2, value: 8 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { times: 2, value: 10 } }],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [{ kind: "perform", score: { times: 2, value: 11 } }],
+      },
+    ],
   },
   {
     id: "kawaiishigusa",
@@ -174,42 +241,48 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "positiveImpression",
-            amount: 2,
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "positiveImpression",
+              amount: 2,
+            },
           },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 100,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "positiveImpression",
-            amount: 3,
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 100,
           },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 120,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "positiveImpression",
+              amount: 3,
+            },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 120,
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+    ],
   },
   {
     id: "kibuntenkan",
@@ -219,16 +292,23 @@ export const cards: CardDefinition[] = [
     cardPossessionKind: "logic",
     cardSummaryKind: "active",
     rarity: "c",
-    base: {
-      cost: { kind: "life", value: 5 },
-      effects: [{ kind: "performLeveragingVitality", percentage: 100 }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 3 },
-      effects: [{ kind: "performLeveragingVitality", percentage: 110 }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 5 },
+        effects: [{ kind: "performLeveragingVitality", percentage: 100 }],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [{ kind: "performLeveragingVitality", percentage: 110 }],
+      },
+      {
+        effects: [{ kind: "performLeveragingVitality", percentage: 130 }],
+      },
+      {
+        effects: [{ kind: "performLeveragingVitality", percentage: 140 }],
+      },
+    ],
   },
   {
     id: "hyogennokihon",
@@ -238,16 +318,22 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [{ kind: "perform", vitality: { value: 4 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [{ kind: "perform", vitality: { value: 7 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [{ kind: "perform", vitality: { value: 4 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", vitality: { value: 7 } }],
+      },
+      {
+        effects: [{ kind: "perform", vitality: { value: 8 } }],
+      },
+      {
+        effects: [{ kind: "perform", vitality: { value: 10 } }],
+      },
+    ],
   },
   {
     id: "furumainokihon",
@@ -257,26 +343,38 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "hyojonokihon",
@@ -286,26 +384,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "mesennokihon",
@@ -315,26 +432,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "ishikinokihon",
@@ -344,26 +480,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "nemuke",
@@ -373,11 +528,13 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "trouble",
     rarity: "c",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [],
+        usableOncePerLesson: true,
+      },
+    ],
   },
   {
     id: "karuiashidori",
@@ -386,26 +543,33 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 9 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "aikyo",
@@ -414,14 +578,21 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [{ kind: "perform", score: { value: 13 } }],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [{ kind: "perform", score: { value: 21 } }],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [{ kind: "perform", score: { value: 13 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 21 } }],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "jumbiundo",
@@ -430,26 +601,40 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 9 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "fansa",
@@ -459,14 +644,20 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 2,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [{ kind: "perform", score: { value: 10 } }],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [{ kind: "perform", score: { value: 16 } }],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [{ kind: "perform", score: { value: 10 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 16 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 19 } }],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "ikioimakase",
@@ -476,28 +667,50 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 9,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          condition: { kind: "hasGoodCondition" },
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 9 } },
-        {
-          kind: "getModifier",
-          condition: { kind: "hasGoodCondition" },
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 10 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "haitatchi",
@@ -507,18 +720,29 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 13,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { focusMultiplier: 1.5, value: 17 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [{ kind: "perform", score: { focusMultiplier: 2, value: 23 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 1.5, value: 17 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2, value: 23 } },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2, value: 24 } },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "tokutaimu",
@@ -528,18 +752,23 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 14,
     rarity: "r",
-    base: {
-      condition: { kind: "hasGoodCondition" },
-      cost: { kind: "normal", value: 6 },
-      effects: [{ kind: "perform", score: { value: 27 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: { kind: "hasGoodCondition" },
-      cost: { kind: "normal", value: 6 },
-      effects: [{ kind: "perform", score: { value: 38 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        condition: { kind: "hasGoodCondition" },
+        cost: { kind: "normal", value: 6 },
+        effects: [{ kind: "perform", score: { value: 27 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 38 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 44 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 50 } }],
+      },
+    ],
   },
   {
     id: "kyomoohayo",
@@ -548,26 +777,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 7 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 9 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 16 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "yurufuwaoshaveri",
@@ -576,28 +824,39 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "r",
-    base: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-        { kind: "performLeveragingVitality", percentage: 60 },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-        { kind: "performLeveragingVitality", percentage: 80 },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          { kind: "performLeveragingVitality", percentage: 60 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+          { kind: "performLeveragingVitality", percentage: 80 },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+          { kind: "performLeveragingVitality", percentage: 100 },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "mosukoshidake",
@@ -606,26 +865,38 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 10 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 15 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 15 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 19 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "tebyoshi",
@@ -635,28 +906,35 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 13,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 150,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 200,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 150,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 200,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+    ],
   },
   {
     id: "genkinaaisatsu",
@@ -666,16 +944,23 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 14,
     rarity: "r",
-    base: {
-      cost: { kind: "life", value: 4 },
-      effects: [{ kind: "performLeveragingVitality", percentage: 110 }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 3 },
-      effects: [{ kind: "performLeveragingVitality", percentage: 120 }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [{ kind: "performLeveragingVitality", percentage: 110 }],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [{ kind: "performLeveragingVitality", percentage: 120 }],
+      },
+      {
+        effects: [{ kind: "performLeveragingVitality", percentage: 140 }],
+      },
+      {
+        effects: [{ kind: "performLeveragingVitality", percentage: 150 }],
+      },
+    ],
   },
   {
     id: "kiaijubun",
@@ -685,26 +970,38 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 16,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "fasutosuteppu",
@@ -715,30 +1012,50 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 16,
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          modifier: { kind: "lifeConsumptionReduction", value: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          modifier: { kind: "lifeConsumptionReduction", value: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 9 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "baransukankaku",
@@ -747,25 +1064,44 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "rakkanteki",
@@ -775,34 +1111,41 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 4,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          condition: { kind: "hasGoodCondition" },
-          modifier: { kind: "focus", amount: 1 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          condition: { kind: "hasGoodCondition" },
-          modifier: { kind: "focus", amount: 1 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 1 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 1 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "shinkokyu",
@@ -812,34 +1155,91 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 19,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 2 },
-        },
-        {
-          kind: "getModifier",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 2 },
+          },
+          {
+            kind: "getModifier",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
+  },
+  {
+    id: "hitokokyu",
+    name: "ひと呼吸",
+    cardPossessionKind: "sense",
+    cardProviderKind: "others",
+    cardSummaryKind: "mental",
+    necessaryProducerLevel: 47,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 7 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "risutato",
@@ -848,26 +1248,41 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "eieio",
@@ -876,26 +1291,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "rizumikaru",
@@ -905,16 +1339,22 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 2,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [{ kind: "perform", vitality: { value: 6 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [{ kind: "perform", vitality: { value: 8 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [{ kind: "perform", vitality: { value: 6 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", vitality: { value: 8 } }],
+      },
+      {
+        effects: [{ kind: "perform", vitality: { value: 10 } }],
+      },
+      {
+        effects: [{ kind: "perform", vitality: { value: 12 } }],
+      },
+    ],
   },
   {
     id: "omoidashiwarai",
@@ -924,42 +1364,77 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 4,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "positiveImpression",
-            min: 3,
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
           },
-          modifier: { kind: "motivation", amount: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "positiveImpression",
-            min: 3,
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              min: 3,
+            },
+            modifier: { kind: "motivation", amount: 2 },
           },
-          modifier: { kind: "motivation", amount: 3 },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              min: 3,
+            },
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              min: 1,
+            },
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              min: 1,
+            },
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "pasuterukibun",
@@ -969,36 +1444,43 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 9,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 3,
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 3,
+            },
+            modifier: { kind: "positiveImpression", amount: 3 },
           },
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 7 } },
-        {
-          kind: "getModifier",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 3,
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 3,
+            },
+            modifier: { kind: "positiveImpression", amount: 4 },
           },
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+    ],
   },
   {
     id: "hagemashi",
@@ -1008,36 +1490,76 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 19,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
-        {
-          kind: "getModifier",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 6,
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 6,
+            },
+            modifier: { kind: "positiveImpression", amount: 4 },
           },
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 4 } },
-        {
-          kind: "getModifier",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 6,
+        ],
+      },
+      {
+        effects: [
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 4 } },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 6,
+            },
+            modifier: { kind: "positiveImpression", amount: 5 },
           },
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+    ],
+  },
+  {
+    id: "shiawasenoomajinai",
+    name: "幸せのおまじない",
+    cardPossessionKind: "logic",
+    cardProviderKind: "others",
+    cardSummaryKind: "mental",
+    necessaryProducerLevel: 46,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 8 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 7 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 9 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "shinshinkiei",
@@ -1047,16 +1569,20 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [{ kind: "perform", score: { value: 17 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [{ kind: "perform", score: { value: 25 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [{ kind: "perform", score: { value: 17 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 25 } }],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "ijippari",
@@ -1066,28 +1592,32 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 7 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 7 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", score: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "ritorupurinsu",
@@ -1097,30 +1627,50 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { value: 8 } },
-        {
-          kind: "perform",
-          condition: { kind: "hasGoodCondition" },
-          score: { value: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { value: 13 } },
-        {
-          kind: "perform",
-          condition: { kind: "hasGoodCondition" },
-          score: { value: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 8 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 13 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 15 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 6 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 19 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 6 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "hoyoryoku",
@@ -1130,22 +1680,26 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 2 }, vitality: { value: 1 } },
-        { kind: "recoverLife", value: 2 },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 3 }, vitality: { value: 4 } },
-        { kind: "recoverLife", value: 2 },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", score: { value: 2 }, vitality: { value: 1 } },
+          { kind: "recoverLife", value: 2 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 3 }, vitality: { value: 4 } },
+          { kind: "recoverLife", value: 2 },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "furendori",
@@ -1155,23 +1709,27 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 10 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
-          score: { value: 10 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [{ kind: "perform", score: { times: 2, value: 12 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", score: { value: 10 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            score: { value: 10 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { times: 2, value: 12 } }],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "arubaita",
@@ -1181,28 +1739,39 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 6 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", score: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "chokougakurekiaidoru",
@@ -1212,38 +1781,42 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "perform",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 6,
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 6,
+            },
+            vitality: { value: 2 },
           },
-          vitality: { value: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 4 } },
-        {
-          kind: "perform",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 6,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 6,
+            },
+            vitality: { value: 5 },
           },
-          vitality: { value: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "uchikikeishojo",
@@ -1253,46 +1826,51 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 1 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "genkiippai",
@@ -1302,53 +1880,77 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        { kind: "performLeveragingVitality", percentage: 50 },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        { kind: "performLeveragingVitality", percentage: 70 },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          { kind: "performLeveragingVitality", percentage: 50 },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          { kind: "performLeveragingVitality", percentage: 70 },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          { kind: "performLeveragingVitality", percentage: 80 },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          { kind: "performLeveragingVitality", percentage: 90 },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "mikannotaiki",
-    name: "未完成の大器",
+    name: "未完の大器",
     cardPossessionKind: "logic",
     cardProviderKind: "idol",
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "r",
-    base: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { boostPerCardUsed: 3, value: 2 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { boostPerCardUsed: 3, value: 4 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { boostPerCardUsed: 3, value: 2 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { boostPerCardUsed: 3, value: 4 } },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "zentoyoyo",
@@ -1358,18 +1960,27 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 3,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 8 }, vitality: { value: 7 } },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 12 }, vitality: { value: 10 } },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 8 }, vitality: { value: 7 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 }, vitality: { value: 10 } },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 13 }, vitality: { value: 10 } },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "kimepozu",
@@ -1378,16 +1989,20 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [{ kind: "perform", score: { value: 18 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [{ kind: "perform", score: { value: 27 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [{ kind: "perform", score: { value: 18 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 27 } }],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "adoribu",
@@ -1396,26 +2011,39 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 9 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "jonetsutan",
@@ -1424,26 +2052,40 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 11 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 18 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", score: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 18 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 19 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+    ],
   },
   {
     id: "hiyaku",
@@ -1453,30 +2095,29 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 6,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 13 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
-          score: { value: 15 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", score: { value: 13 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
-          score: { value: 15 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 13 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            score: { value: 15 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+    ],
   },
   {
     id: "shukufuku",
@@ -1486,28 +2127,46 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 7,
     rarity: "sr",
-    base: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 26 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", score: { value: 40 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 26 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 40 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 46 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 52 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "sutatodasshu",
@@ -1518,26 +2177,38 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 22,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 30 }, vitality: { value: 10 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 40 }, vitality: { value: 10 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 30 }, vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 40 }, vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 45 }, vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "sutandopure",
@@ -1548,34 +2219,41 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 24,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 12 }, vitality: { value: 7 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 12 }, vitality: { value: 7 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 7 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 12 }, vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 }, vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+    ],
   },
   {
     id: "shupurehikoru",
@@ -1586,40 +2264,109 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 33,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "focus", value: 3 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "focus", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 2 },
           },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "focus", value: 2 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        cost: { kind: "focus", value: 2 },
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 16 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "tachiichichekku",
+    name: "立ち位置チェック",
+    cardPossessionKind: "sense",
+    cardProviderKind: "others",
+    cardSummaryKind: "active",
+    necessaryProducerLevel: 51,
+    rarity: "sr",
+    contents: [
+      {
+        cost: { kind: "focus", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 25 }, vitality: { value: 15 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "noVitalityIncrease", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 40 }, vitality: { value: 15 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "noVitalityIncrease", duration: 2 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "raburiuinku",
@@ -1628,36 +2375,64 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 60,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 80,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 60,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 80,
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 90,
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 100,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "arigatonokotoba",
@@ -1666,28 +2441,46 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "active",
     rarity: "sr",
-    base: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 9 } },
-        {
-          kind: "performLeveragingVitality",
-          percentage: 40,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 11 } },
-        {
-          kind: "performLeveragingVitality",
-          percentage: 70,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 9 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 40,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 70,
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 14 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 70,
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 17 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 70,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "hatonoaizu",
@@ -1697,28 +2490,46 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 6,
     rarity: "sr",
-    base: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        {
-          kind: "performLeveragingVitality",
-          reductionKind: "halve",
-          percentage: 130,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        {
-          kind: "performLeveragingVitality",
-          reductionKind: "halve",
-          percentage: 180,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "halve",
+            percentage: 130,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "halve",
+            percentage: 180,
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "halve",
+            percentage: 200,
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "halve",
+            percentage: 230,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "kirameki",
@@ -1728,38 +2539,44 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     necessaryProducerLevel: 24,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 200,
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 250,
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 200,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 250,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+    ],
   },
   {
     id: "minnadaisuki",
@@ -1770,40 +2587,74 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 34,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "motivation", value: 3 },
-      effects: [
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 90,
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "motivation", value: 3 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 90,
           },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "motivation", value: 2 },
-      effects: [
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 120,
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        cost: { kind: "motivation", value: 2 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 120,
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 140,
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 160,
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "aidorusengen",
@@ -1814,41 +2665,80 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 23,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "life", value: 1 },
-      effects: [
-        { kind: "drawCards", amount: 2 },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "life", value: 1 },
+        effects: [
+          { kind: "drawCards", amount: 2 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        {
-          kind: "drawCards",
-          amount: 2,
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          {
+            kind: "drawCards",
+            amount: 2,
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 1 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "drawCards",
+            amount: 2,
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "drawCards",
+            amount: 2,
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "haitenshon",
@@ -1858,36 +2748,62 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 23,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 11 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "noVitalityIncrease", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 13 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "noVitalityIncrease", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "noVitalityIncrease", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 13 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "noVitalityIncrease", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 15 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "noVitalityIncrease", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 17 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "noVitalityIncrease", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "ganriki",
@@ -1896,28 +2812,46 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 8 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 14 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "daiseien",
@@ -1926,28 +2860,39 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 8 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "enshutsukeikaku",
@@ -1958,48 +2903,87 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 17,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "active",
-            effect: {
-              kind: "perform",
-              vitality: { fixedValue: true, value: 2 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "perform",
+                vitality: { fixedValue: true, value: 2 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "active",
-            effect: {
-              kind: "perform",
-              vitality: { fixedValue: true, value: 2 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "perform",
+                vitality: { fixedValue: true, value: 2 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "perform",
+                vitality: { fixedValue: true, value: 2 },
+              },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "perform",
+                vitality: { fixedValue: true, value: 2 },
+              },
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "negainochikari",
@@ -2010,48 +2994,70 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 18,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "active",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "focus", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "focus", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "active",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "focus", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "focus", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "focus", amount: 1 },
+              },
+            },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "shizukanaishi",
@@ -2061,36 +3067,41 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 20,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 2 },
-        },
-      ],
-      innate: true,
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-      innate: true,
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 2 },
+          },
+        ],
+        innate: true,
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "hajimarinoaizu",
@@ -2100,26 +3111,31 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 28,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 7 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 5 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 7 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "iji",
@@ -2129,28 +3145,33 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 29,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "sonzaikan",
@@ -2161,38 +3182,70 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 31,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "goodCondition", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "goodCondition", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
           },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "goodCondition", value: 1 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        cost: { kind: "goodCondition", value: 1 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "seikohenomichisuji",
@@ -2202,28 +3255,80 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 36,
     rarity: "sr",
-    base: {
-      cost: { kind: "goodCondition", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 7 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "goodCondition", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 4 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 9 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "goodCondition", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 7 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 9 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 10 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 11 },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "supottoraito",
+    name: "スポットライト",
+    cardPossessionKind: "sense",
+    cardProviderKind: "others",
+    cardSummaryKind: "mental",
+    necessaryProducerLevel: 49,
+    rarity: "sr",
+    contents: [
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 5 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "afureruomoide",
@@ -2232,26 +3337,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { value: 4 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 5 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "fureai",
@@ -2260,26 +3384,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 13 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "shiawasenajikan",
@@ -2289,24 +3432,31 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 7,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 6 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 8 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+    ],
   },
   {
     id: "fanshichamu",
@@ -2317,48 +3467,53 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 17,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "mental",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "mental",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "mental",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "mental",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "wakuwakugatomaranai",
@@ -2369,48 +3524,71 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 18,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "mental",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "motivation", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "mental",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "motivation", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationUponCardUsage",
-            cardKind: "mental",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "motivation", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "mental",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "motivation", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "mental",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "motivation", amount: 1 },
+              },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+    ],
   },
   {
     id: "hombanzenya",
@@ -2420,36 +3598,41 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 20,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-      ],
-      innate: true,
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-      ],
-      innate: true,
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        ],
+        innate: true,
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+    ],
   },
   {
     id: "hinatabokko",
@@ -2460,36 +3643,62 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 22,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 11 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 11 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 7 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "doubleLifeConsumption", duration: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 13 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 15 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "doubleLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "imetore",
@@ -2499,28 +3708,34 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 28,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 7 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 11 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "yarukihamanten",
@@ -2530,28 +3745,46 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     necessaryProducerLevel: 29,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 1 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "yumemigokochi",
@@ -2562,38 +3795,183 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 32,
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "positiveImpression", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "positiveImpression", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
           },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "positiveImpression", value: 1 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-    },
+        ],
+      },
+      {
+        cost: { kind: "positiveImpression", value: 1 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "tomerarenaiomoi",
+    name: "止められない想い",
+    cardPossessionKind: "logic",
+    cardProviderKind: "others",
+    cardSummaryKind: "mental",
+    necessaryProducerLevel: 48,
+    nonDuplicative: true,
+    rarity: "sr",
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "otomegokoro",
+    name: "オトメゴコロ",
+    cardPossessionKind: "logic",
+    cardProviderKind: "others",
+    cardSummaryKind: "mental",
+    necessaryProducerLevel: 52,
+    nonDuplicative: true,
+    rarity: "sr",
+    contents: [
+      {
+        cost: { kind: "motivation", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "motivation", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              min: 10,
+            },
+            modifier: { kind: "positiveImpression", amount: 2 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "ichibanhayuzuranai",
@@ -2603,28 +3981,33 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 18 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 26 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", score: { value: 18 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 26 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "ronurufu",
@@ -2634,30 +4017,29 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 12 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
-          score: { value: 12 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", score: { value: 12 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
-          score: { value: 12 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            score: { value: 12 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+    ],
   },
   {
     id: "rashisa",
@@ -2667,30 +4049,34 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 4 } },
-        {
-          kind: "getModifier",
-          condition: { kind: "hasGoodCondition" },
-          modifier: { kind: "focus", amount: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 6 } },
-        {
-          kind: "getModifier",
-          condition: { kind: "hasGoodCondition" },
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", score: { value: 4 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 6 } },
+          {
+            kind: "getModifier",
+            condition: { kind: "hasGoodCondition" },
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "yorisokimochi",
@@ -2700,28 +4086,40 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", vitality: { value: 10 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", vitality: { value: 12 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", vitality: { value: 12 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 16 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 5 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "yukinoippo",
@@ -2731,18 +4129,30 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [{ kind: "perform", score: { focusMultiplier: 2, value: 17 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { focusMultiplier: 2.5, value: 24 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2, value: 17 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2.5, value: 24 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2.5, value: 28 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2.5, value: 32 } },
+        ],
+      },
+    ],
   },
   {
     id: "colorfulcute",
@@ -2753,26 +4163,32 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 6 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 8 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "kurushinogasuki",
@@ -2782,30 +4198,50 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "motivation",
-          percentage: 250,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 7 } },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "motivation",
-          percentage: 350,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 250,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 7 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 350,
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 350,
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 14 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 350,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "jumpakunoyose",
@@ -2815,36 +4251,42 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 2 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 120,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 2 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 160,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 2 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 120,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 2 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 160,
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "isshokemmei",
@@ -2854,28 +4296,39 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 4 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 6 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 6 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 7 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "datoonechan",
@@ -2885,28 +4338,46 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "performLeveragingVitality",
-          percentage: 100,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "performLeveragingVitality",
-          percentage: 140,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 100,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 140,
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 160,
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 180,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "onechandamono",
@@ -2916,48 +4387,59 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      condition: {
-        kind: "measureValue",
-        criterionKind: "lessEqual",
-        valueKind: "score",
-        percentage: 100,
-      },
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { value: 6 }, vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
-          },
+    contents: [
+      {
+        condition: {
+          kind: "measureValue",
+          criterionKind: "lessEqual",
+          valueKind: "score",
+          percentage: 100,
         },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: {
-        kind: "measureValue",
-        criterionKind: "lessEqual",
-        valueKind: "score",
-        percentage: 100,
-      },
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { value: 10 }, vitality: { value: 9 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 6 }, vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 10 }, vitality: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", score: { value: 11 }, vitality: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+    ],
   },
   {
     id: "oatsuishisen",
@@ -2967,46 +4449,64 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      condition: { kind: "countVitalityZero" },
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+    contents: [
+      {
+        condition: { kind: "countVitalityZero" },
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: { kind: "countVitalityZero" },
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "goshidogobentatsu",
@@ -3016,48 +4516,37 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      condition: {
-        kind: "measureValue",
-        criterionKind: "greaterEqual",
-        valueKind: "life",
-        percentage: 50,
-      },
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 4 }, vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
-          },
+    contents: [
+      {
+        condition: {
+          kind: "measureValue",
+          criterionKind: "greaterEqual",
+          valueKind: "life",
+          percentage: 50,
         },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: {
-        kind: "measureValue",
-        criterionKind: "greaterEqual",
-        valueKind: "life",
-        percentage: 50,
-      },
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", score: { value: 4 }, vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 4 }, vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "sutoretchidangi",
@@ -3067,52 +4556,38 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      condition: {
-        kind: "countTurnNumber",
-        min: 3,
-      },
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
+    contents: [
+      {
+        condition: {
+          kind: "countTurnNumber",
+          min: 3,
         },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: {
-        kind: "countTurnNumber",
-        min: 3,
-      },
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "zenryokusapoto",
@@ -3122,48 +4597,88 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 2 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 2 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 2 },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 2 },
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "kimegaodejidori",
@@ -3173,52 +4688,58 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 2 },
-        },
-        {
-          kind: "getModifier",
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+          {
+            kind: "getModifier",
+            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "nanikiteruno",
@@ -3228,22 +4749,30 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "sr",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        { kind: "recoverLife", value: 3 },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        { kind: "recoverLife", value: 5 },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          { kind: "recoverLife", value: 3 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          { kind: "recoverLife", value: 5 },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          { kind: "recoverLife", value: 6 },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "koruresuponsu",
@@ -3254,30 +4783,36 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 11,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", vitality: { value: 15 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
-          score: { value: 15 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", vitality: { value: 15 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
-          score: { value: 34 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", vitality: { value: 15 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            score: { value: 15 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 15 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            score: { value: 34 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+    ],
   },
   {
     id: "bazuwado",
@@ -3288,26 +4823,45 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 12,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 7 },
-      effects: [
-        {
-          kind: "perform",
-          condition: { kind: "hasGoodCondition" },
-          score: { value: 38 },
-        },
-      ],
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 7 },
-      effects: [
-        {
-          kind: "perform",
-          condition: { kind: "hasGoodCondition" },
-          score: { value: 54 },
-        },
-      ],
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 7 },
+        effects: [
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 38 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 54 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 63 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 71 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "joju",
@@ -3318,42 +4872,76 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 41,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 10 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "perform", score: { value: 32 } },
+    contents: [
+      {
+        cost: { kind: "normal", value: 10 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 10 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 7 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "perform", score: { value: 40 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 32 } },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 40 } },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 9 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 44 } },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 8 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 46 } },
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "miwakunopafomansu",
@@ -3364,44 +4952,170 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 43,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      condition: { kind: "hasGoodCondition" },
-      cost: { kind: "normal", value: 8 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "perform", score: { value: 38 } },
+    contents: [
+      {
+        condition: { kind: "hasGoodCondition" },
+        cost: { kind: "normal", value: 8 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      condition: { kind: "hasGoodCondition" },
-      cost: { kind: "normal", value: 8 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "perform", score: { value: 47 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 38 } },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 7 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 47 } },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 56 } },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "perform", score: { value: 65 } },
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "shikonoentame",
+    name: "至高のエンタメ",
+    cardPossessionKind: "sense",
+    cardProviderKind: "others",
+    cardSummaryKind: "active",
+    necessaryProducerLevel: 50,
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "focus", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: { kind: "perform", score: { value: 4 } },
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "focus", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              cardKind: "active",
+              effect: { kind: "perform", score: { value: 5 } },
+            },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "kakusei",
+    name: "覚醒",
+    cardPossessionKind: "sense",
+    cardProviderKind: "others",
+    cardSummaryKind: "active",
+    necessaryProducerLevel: 53,
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "goodCondition", value: 1 },
+        effects: [
+          { kind: "perform", score: { times: 2, value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 4 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { times: 2, value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 6 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "200sumairu",
@@ -3412,36 +5126,42 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 11,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 100,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 6 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "positiveImpression",
-          percentage: 170,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 100,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            percentage: 170,
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+    ],
   },
   {
     id: "kaika",
@@ -3452,36 +5172,51 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 12,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 6 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "motivation",
-          percentage: 200,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 8 },
-        },
-        {
-          kind: "performLeveragingModifier",
-          modifierKind: "motivation",
-          percentage: 300,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 6 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 200,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 8 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 300,
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 9 },
+          },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 300,
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "todoite",
@@ -3492,28 +5227,148 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 44,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "life", value: 2 },
-      effects: [
-        {
-          kind: "performLeveragingVitality",
-          reductionKind: "zero",
-          percentage: 160,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 2 },
-      effects: [
-        {
-          kind: "performLeveragingVitality",
-          reductionKind: "zero",
-          percentage: 220,
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 2 },
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "zero",
+            percentage: 160,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "zero",
+            percentage: 220,
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "zero",
+            percentage: 250,
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingVitality",
+            reductionKind: "zero",
+            percentage: 280,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kagayakukimihe",
+    name: "輝くキミへ",
+    cardPossessionKind: "logic",
+    cardProviderKind: "others",
+    cardSummaryKind: "active",
+    necessaryProducerLevel: 50,
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "motivation", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              effect: {
+                kind: "performLeveragingModifier",
+                modifierKind: "positiveImpression",
+                percentage: 30,
+              },
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationUponCardUsage",
+              effect: {
+                kind: "performLeveragingModifier",
+                modifierKind: "positiveImpression",
+                percentage: 50,
+              },
+            },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "anotokinoyakusoku",
+    name: "あのときの約束",
+    cardPossessionKind: "logic",
+    cardProviderKind: "others",
+    cardSummaryKind: "active",
+    necessaryProducerLevel: 54,
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "positiveImpression", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 9 } },
+          { kind: "performLeveragingVitality", percentage: 100 },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 150,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 14 } },
+          { kind: "performLeveragingVitality", percentage: 130 },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "motivation",
+            percentage: 200,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "terebishutsuen",
@@ -3524,28 +5379,39 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 5,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 4 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 5 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 5 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "kanaetaiyume",
@@ -3556,28 +5422,46 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 10,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "life", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 8 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "lifeConsumptionReduction", value: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 9 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "lifeConsumptionReduction", value: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 12 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 2 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 15 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 2 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "aidorudamashii",
@@ -3588,36 +5472,41 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 35,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "life", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "debuffProtection", times: 1 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 6 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "debuffProtection", times: 1 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+    contents: [
+      {
+        cost: { kind: "life", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "debuffProtection", times: 1 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 6 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "debuffProtection", times: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "life", value: 1 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "shikirinaoshi",
@@ -3628,42 +5517,34 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 40,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "exchangeHand" },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "exchangeHand" },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 4 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "exchangeHand" },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "kokumintekiaidoru",
@@ -3674,35 +5555,61 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 25,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "goodCondition", value: 1 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "goodCondition", value: 1 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "goodCondition", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 8 } },
-        { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 13 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 16 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "miwakunoshisen",
@@ -3713,48 +5620,86 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 30,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "focus", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "focus", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 4 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "focus", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "nariyamanaihakushu",
@@ -3765,36 +5710,42 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 38,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+    ],
   },
   {
     id: "tenshinramman",
@@ -3805,50 +5756,37 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 45,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              condition: {
-                kind: "countModifier",
-                modifierKind: "focus",
-                min: 3,
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "focus",
+                  min: 3,
+                },
+                modifier: { kind: "focus", amount: 2 },
               },
-              modifier: { kind: "focus", amount: 2 },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              condition: {
-                kind: "countModifier",
-                modifierKind: "focus",
-                min: 3,
-              },
-              modifier: { kind: "focus", amount: 2 },
-            },
-          },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "watashigasta",
@@ -3859,35 +5797,64 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 25,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "positiveImpression", value: 2 },
-      effects: [
-        { kind: "increaseRemainingTurns", amount: 1 },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "positiveImpression", value: 2 },
+        effects: [
+          { kind: "increaseRemainingTurns", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "positiveImpression", value: 1 },
-      effects: [
-        { kind: "increaseRemainingTurns", amount: 1 },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "positiveImpression", value: 1 },
+        effects: [
+          { kind: "increaseRemainingTurns", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        { kind: "drawCards", amount: 1 },
-      ],
-      usableOncePerLesson: true,
-    },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          { kind: "increaseRemainingTurns", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          { kind: "increaseRemainingTurns", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+    ],
   },
   {
     id: "hoshikuzusenseshon",
@@ -3898,41 +5865,73 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 30,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "motivation", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "motivation", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "motivation", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 7 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        { kind: "drawCards", amount: 1 },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 7 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 9 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          { kind: "drawCards", amount: 2 },
+        ],
+      },
+    ],
   },
   {
     id: "notonohashinoketsui",
@@ -3943,42 +5942,48 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 37,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "motivation", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 3 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 3 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "tegakinomesseji",
@@ -3989,22 +5994,31 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 39,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "goodCondition", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 9 } },
-        { kind: "perform", vitality: { value: 9 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "goodCondition", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 10 } },
-        { kind: "perform", vitality: { value: 10 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "goodCondition", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 9 } },
+          { kind: "perform", vitality: { value: 9 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "goodCondition", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 10 } },
+          { kind: "perform", vitality: { value: 10 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          { kind: "perform", vitality: { value: 11 } },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "tokimeki",
@@ -4015,28 +6029,41 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 42,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 10 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 8 },
-        },
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 5 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 9 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 10 },
-        },
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 6 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 10 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 5 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 9 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 10 },
+          },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 6 } },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 8 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 10 },
+          },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 7 } },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "nijiirodorima",
@@ -4047,56 +6074,83 @@ export const cards: CardDefinition[] = [
     necessaryProducerLevel: 45,
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 9 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 1 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              condition: {
-                kind: "countModifier",
-                modifierKind: "positiveImpression",
-                min: 3,
+    contents: [
+      {
+        cost: { kind: "normal", value: 9 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "positiveImpression",
+                  min: 3,
+                },
+                modifier: { kind: "positiveImpression", amount: 3 },
               },
-              modifier: { kind: "positiveImpression", amount: 3 },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 9 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              condition: {
-                kind: "countModifier",
-                modifierKind: "positiveImpression",
-                min: 3,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "positiveImpression",
+                  min: 3,
+                },
+                modifier: { kind: "positiveImpression", amount: 3 },
               },
-              modifier: { kind: "positiveImpression", amount: 3 },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 8 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "positiveImpression",
+                  min: 3,
+                },
+                modifier: { kind: "positiveImpression", amount: 3 },
+              },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 7 },
+      },
+    ],
   },
   {
     id: "zettainimakenai",
@@ -4106,16 +6160,24 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [{ kind: "perform", score: { value: 34 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [{ kind: "perform", score: { value: 48 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [{ kind: "perform", score: { value: 34 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { value: 48 } }],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [{ kind: "perform", score: { value: 49 } }],
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [{ kind: "perform", score: { value: 50 } }],
+      },
+    ],
   },
   {
     id: "sorezorenomichi",
@@ -4125,22 +6187,37 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 14 } },
-        { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", score: { value: 15 } },
-        { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 7 },
+        effects: [
+          { kind: "perform", score: { value: 14 } },
+          { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { value: 15 } },
+          { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { value: 16 } },
+          { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", score: { value: 17 } },
+          { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+        ],
+      },
+    ],
   },
   {
     id: "seisonohanagata",
@@ -4150,30 +6227,50 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 12 } },
-        {
-          kind: "perform",
-          condition: { kind: "hasGoodCondition" },
-          score: { value: 14 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", score: { value: 18 } },
-        {
-          kind: "perform",
-          condition: { kind: "hasGoodCondition" },
-          score: { value: 20 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 14 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 18 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 20 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 22 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 23 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 25 } },
+          {
+            kind: "perform",
+            condition: { kind: "hasGoodCondition" },
+            score: { value: 26 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "kyorikan",
@@ -4183,22 +6280,28 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
-        { kind: "recoverLife", value: 4 },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
-        { kind: "recoverLife", value: 5 },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
+          { kind: "recoverLife", value: 4 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+          { kind: "recoverLife", value: 5 },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "wammoasuteppu",
@@ -4208,30 +6311,45 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "perform", score: { times: 2, value: 7 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
-          score: { value: 7 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "perform", score: { times: 2, value: 9 } },
-        {
-          kind: "perform",
-          condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
-          score: { value: 9 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", score: { times: 2, value: 7 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            score: { value: 7 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", score: { times: 2, value: 9 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            score: { value: 9 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", score: { times: 2, value: 10 } },
+          {
+            kind: "perform",
+            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            score: { value: 9 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+    ],
   },
   {
     id: "adorenarinzenkai",
@@ -4241,34 +6359,49 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: { kind: "excellentCondition", duration: 5 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 4 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 5 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 6 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 5 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "hinyarihitoyasumi",
@@ -4278,16 +6411,21 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 8 },
-      effects: [{ kind: "perform", score: { times: 3, value: 9 } }],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 8 },
-      effects: [{ kind: "perform", score: { times: 3, value: 14 } }],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 8 },
+        effects: [{ kind: "perform", score: { times: 3, value: 9 } }],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [{ kind: "perform", score: { times: 3, value: 14 } }],
+      },
+      {
+        effects: [{ kind: "perform", score: { times: 3, value: 17 } }],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "yosomihadame",
@@ -4297,28 +6435,34 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 7 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "perform", vitality: { value: 4 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 9 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 7 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 9 },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+    ],
   },
   {
     id: "honkinoshumi",
@@ -4328,38 +6472,66 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        {
-          kind: "perform",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 3,
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 3,
+            },
+            vitality: { value: 4 },
           },
-          vitality: { value: 4 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", vitality: { value: 7 } },
-        {
-          kind: "perform",
-          condition: {
-            kind: "countModifier",
-            modifierKind: "motivation",
-            min: 3,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 7 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 3,
+            },
+            vitality: { value: 7 },
           },
-          vitality: { value: 7 },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 3,
+            },
+            vitality: { value: 8 },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 10 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              min: 3,
+            },
+            vitality: { value: 9 },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "mokowakunaikara",
@@ -4369,46 +6541,53 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 3 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationAtEndOfTurn",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "effectActivationAtEndOfTurn",
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+    ],
   },
   {
     id: "ojosamanoharebutai",
@@ -4418,24 +6597,38 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 2 } },
-        { kind: "performLeveragingVitality", percentage: 100 },
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 2 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 4 },
-      effects: [
-        { kind: "perform", vitality: { value: 5 } },
-        { kind: "performLeveragingVitality", percentage: 120 },
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          { kind: "performLeveragingVitality", percentage: 100 },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 2 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          { kind: "performLeveragingVitality", percentage: 120 },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          { kind: "performLeveragingVitality", percentage: 130 },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 11 } },
+          { kind: "performLeveragingVitality", percentage: 140 },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
+        ],
+      },
+    ],
   },
   {
     id: "karamaruomoi",
@@ -4445,28 +6638,37 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 8 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 8 },
-        },
-      ],
-      innate: true,
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 8 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 10 },
-        },
-      ],
-      innate: true,
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "normal", value: 8 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
+        ],
+        innate: true,
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 10 },
+          },
+        ],
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 11 },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "okkinaonigiri",
@@ -4476,20 +6678,30 @@ export const cards: CardDefinition[] = [
     cardProviderKind: "idol",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { boostPerCardUsed: 5, value: 2 } },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 3 },
-      effects: [
-        { kind: "perform", vitality: { boostPerCardUsed: 8, value: 2 } },
-      ],
-      usableOncePerLesson: true,
-    },
+    contents: [
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { boostPerCardUsed: 5, value: 2 } },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { boostPerCardUsed: 8, value: 2 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { boostPerCardUsed: 9, value: 2 } },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { boostPerCardUsed: 10, value: 2 } },
+        ],
+      },
+    ],
   },
   {
     id: "hanamoyukisetsu",
@@ -4499,50 +6711,57 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        { kind: "generateCard" },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "generateCard" },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        { kind: "generateCard" },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          { kind: "generateCard" },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+    ],
   },
   {
     id: "hidamarinoseitokaishitsu",
@@ -4552,34 +6771,40 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        { kind: "recoverLife", value: 3 },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "recoverLife", value: 3 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "recoverLife", value: 5 },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "recoverLife", value: 5 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "kokoronoarubamu",
@@ -4589,52 +6814,94 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "active",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 3 }, vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+    contents: [
+      {
+        cost: { kind: "normal", value: 0 },
+        effects: [
+          { kind: "perform", score: { value: 3 }, vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 2,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 2,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        { kind: "perform", score: { value: 6 }, vitality: { value: 5 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "drawCards", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 6 }, vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 2,
-            effect: { kind: "drawCards", amount: 1 },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 2,
+              effect: { kind: "drawCards", amount: 1 },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 7 }, vitality: { value: 7 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 2,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 8 }, vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 2,
+              effect: { kind: "drawCards", amount: 1 },
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "teipatei",
@@ -4644,35 +6911,53 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        { kind: "enhanceHand" },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 1 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          { kind: "enhanceHand" },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-        { kind: "drawCards", amount: 1 },
-        { kind: "enhanceHand" },
-      ],
-      usableOncePerLesson: true,
-    },
+          { kind: "drawCards", amount: 1 },
+          { kind: "enhanceHand" },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+          { kind: "drawCards", amount: 1 },
+          { kind: "enhanceHand" },
+        ],
+      },
+    ],
   },
   {
     id: "hikarinosuteji",
@@ -4682,40 +6967,60 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 3 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "lifeConsumptionReduction", value: 1 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 0 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "lifeConsumptionReduction", value: 1 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 1 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 2 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "shinseitokaibakutan",
@@ -4725,40 +7030,47 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 4 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "halfLifeConsumption", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+    ],
   },
   {
     id: "usureyukukabe",
@@ -4768,52 +7080,40 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 5 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
           },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 2,
-            effect: { kind: "enhanceHand" },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 2,
+              effect: { kind: "enhanceHand" },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 2 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
-          },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 2,
-            effect: { kind: "enhanceHand" },
-          },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 2 },
+      },
+      {
+        cost: { kind: "normal", value: 1 },
+      },
+      {
+        cost: { kind: "normal", value: 0 },
+      },
+    ],
   },
   {
     id: "mizutamarisuteppu",
@@ -4823,34 +7123,58 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "life", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 3 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+    contents: [
+      {
+        cost: { kind: "life", value: 1 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "life", value: 1 },
-      effects: [
-        { kind: "perform", vitality: { value: 8 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "additionalCardUsageCount",
-            amount: 1,
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 8 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 10 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 12 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: "kenkasuruhodonakagaii",
@@ -4860,44 +7184,49 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 2 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 2 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
-        {
-          kind: "getModifier",
-          modifier: { kind: "goodCondition", duration: 4 },
-        },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+      },
+      // TODO: +++
+      {},
+    ],
   },
   {
     id: "damedamekukkingu",
@@ -4907,43 +7236,50 @@ export const cards: CardDefinition[] = [
     cardSummaryKind: "mental",
     nonDuplicative: true,
     rarity: "ssr",
-    base: {
-      cost: { kind: "normal", value: 7 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 4 },
-        },
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+    contents: [
+      {
+        cost: { kind: "normal", value: 7 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
-    enhanced: {
-      cost: { kind: "normal", value: 6 },
-      effects: [
-        {
-          kind: "getModifier",
-          modifier: { kind: "positiveImpression", amount: 5 },
-        },
-        { kind: "getModifier", modifier: { kind: "motivation", amount: 4 } },
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
           },
-        },
-      ],
-      usableOncePerLesson: true,
-    },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 4 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "delayedEffect",
+              delay: 1,
+              effect: { kind: "enhanceHand" },
+            },
+          },
+        ],
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+      },
+      {
+        cost: { kind: "normal", value: 4 },
+      },
+    ],
   },
 ];

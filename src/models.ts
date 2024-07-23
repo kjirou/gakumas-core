@@ -2,7 +2,11 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { compareDeckOrder, getCardDataById } from "./data/cards";
+import {
+  compareDeckOrder,
+  getCardDataById,
+  getCardContentDefinitions,
+} from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById } from "./data/idols";
@@ -58,10 +62,16 @@ export const isPerformEffectType = (
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
 export const getCardContentDefinition = (card: Card): CardContentDefinition => {
-  return card.original.definition.enhanced !== undefined &&
-    card.enhancements.length > 0
-    ? card.original.definition.enhanced
-    : card.original.definition.base;
+  const contents = getCardContentDefinitions(card.original.definition);
+  if (card.enhancements.length === 0) {
+    return contents[0];
+  } else if (card.enhancements.length === 1) {
+    return contents[1];
+  } else if (card.enhancements.length === 2) {
+    return contents[2];
+  } else {
+    return contents[3];
+  }
 };
 
 export const getProducerItemContentDefinition = (

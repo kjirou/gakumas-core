@@ -1,5 +1,11 @@
+import { get } from "http";
 import type { CardDefinition } from "../types";
-import { cards, compareDeckOrder, getCardDataById } from "./cards";
+import {
+  cards,
+  compareDeckOrder,
+  getCardContentDefinitions,
+  getCardDataById,
+} from "./cards";
 
 test("any id is not duplicated", () => {
   let ids: string[] = [];
@@ -39,85 +45,104 @@ for (const card of cards) {
     }
   });
   describe(`${card.name}(${card.id})`, () => {
-    test("a character specific card should be non-duplicative and usable once per lesson", () => {
+    test("アイドル固有スキルカードは、必ず「重複不可」「レッスン中1回」を持つ", () => {
       if (card.cardProviderKind === "idol") {
         expect(card.nonDuplicative).toBe(true);
-        expect(card.base.usableOncePerLesson).toBe(true);
-      }
-    });
-    test("a support-card specific card should be non-duplicative and usable once per lesson", () => {
-      if (card.cardProviderKind === "supportCard") {
-        expect(card.nonDuplicative).toBe(true);
-        expect(card.base.usableOncePerLesson).toBe(true);
-      }
-    });
-    test("a `innate` property should not change if the card is enhanced", () => {
-      if (card.enhanced) {
-        expect(card.base.innate).toBe(card.base.innate);
-      }
-    });
-    test("a `usableOncePerLesson` property should not change if the card is enhanced", () => {
-      if (card.enhanced) {
-        expect(card.base.usableOncePerLesson).toBe(
-          card.base.usableOncePerLesson,
-        );
-      }
-    });
-    test("a kind of cost for a enhanced card is generally the same as that for the basic card", () => {
-      // kind:"life" の種類がコストが 0 になり、kind:"normal" になることはあるので、それは除外する
-      if (
-        card.enhanced &&
-        !(
-          card.base.cost.kind === "life" &&
-          card.enhanced.cost.kind === "normal" &&
-          card.enhanced.cost.value === 0
-        )
-      ) {
-        expect(card.enhanced.cost.kind).toBe(card.base.cost.kind);
-      }
-    });
-    test("a card has a number of cost that is equal to or greater than its pre-enhanced value", () => {
-      if (card.enhanced) {
-        expect(card.enhanced.cost.value).toBeLessThanOrEqual(
-          card.base.cost.value,
-        );
-      }
-    });
-    test("an active card should have score performance", () => {
-      // 「なに聴いているの？」は、元気と体力回復だけだがアクティブになっていて、データ設定がおかしそう？
-      // 体力回復はアクティブではないのは、「距離感」や「陽だまりの生徒会室」がメンタルであることから。
-      if (card.id !== "nanikiteruno") {
-        const hasScorePerformance = card.base.effects.some(
-          (effect) =>
-            (effect.kind === "perform" && effect.score) ||
-            effect.kind === "performLeveragingModifier" ||
-            effect.kind === "performLeveragingVitality" ||
-            (effect.kind === "getModifier" &&
-              effect.modifier.kind === "delayedEffect" &&
-              effect.modifier.effect.kind === "perform"),
-        );
-        if (card.cardSummaryKind === "active") {
-          expect(hasScorePerformance).toBe(true);
-        } else if (card.cardSummaryKind === "mental") {
-          expect(hasScorePerformance).toBe(false);
+        for (const content of getCardContentDefinitions(card)) {
+          expect(content.usableOncePerLesson).toBe(true);
         }
       }
     });
-    // TODO: delayedEffect 内の effect を検証できていない
-    test("`perform` effect should have a score or a vitality or both", () => {
-      const performEffects: any[] = [
-        ...card.base.effects.filter((effect) => effect.kind === "perform"),
-        ...(card.enhanced
-          ? card.enhanced.effects.filter((effect) => effect.kind === "perform")
-          : []),
-      ];
-      for (const effect of performEffects) {
-        expect(effect.score || effect.vitality).toBeDefined();
+    test("サポートカード固有スキルカードは、必ず「重複不可」「レッスン中1回」を持つ", () => {
+      if (card.cardProviderKind === "supportCard") {
+        expect(card.nonDuplicative).toBe(true);
+        for (const content of getCardContentDefinitions(card)) {
+          expect(content.usableOncePerLesson).toBe(true);
+        }
+      }
+    });
+    test("全ての強化段階で、「レッスン中1回」の有無は揃っている", () => {
+      const contents = getCardContentDefinitions(card);
+      for (const content of contents) {
+        expect(content.usableOncePerLesson).toBe(
+          contents[0].usableOncePerLesson,
+        );
+      }
+    });
+    test("全ての強化段階で、「レッスン開始時手札に入る」の有無は揃っている", () => {
+      const contents = getCardContentDefinitions(card);
+      for (const content of contents) {
+        expect(content.innate).toBe(contents[0].innate);
+      }
+    });
+    test("life コストの値は 0 にならない", () => {
+      for (const content of getCardContentDefinitions(card)) {
+        // life は値が 0 になると normal になる
+        if (content.cost.kind === "life") {
+          expect(content.cost.value).not.toBe(0);
+        }
+      }
+    });
+    test("全ての強化段階で、コストの種類は基本的に同じである", () => {
+      const contents = getCardContentDefinitions(card);
+      for (const content of contents) {
+        // life は値が 0 になると normal になる
+        if (contents[0].cost.kind === "life") {
+          expect(content.cost.kind).toMatch(/^(life|normal)$/);
+        } else {
+          expect(content.cost.kind).toBe(contents[0].cost.kind);
+        }
+      }
+    });
+    test("コストの値は、強化段階の上昇により、少なくとも上がることはない", () => {
+      let minCostValue: number | undefined = undefined;
+      for (const content of getCardContentDefinitions(card)) {
+        if (minCostValue !== undefined && content.cost.value > minCostValue) {
+          fail("強化段階が高いのにコストが上がっている");
+        }
+        minCostValue = content.cost.value;
+      }
+    });
+    test("アクティブスキルカードは、基本的にスコア/パラメータ増加効果を持つ、メンタルスキルカードはその逆である", () => {
+      // 遅延効果や持続効果で攻撃的な効果を持つカードは、下の条件に当てはまらないことがあるので除外する
+      //
+      // 「なに聴いてるの？」だけは、元気と体力回復だけだがアクティブになっていて、データ設定がおかしそう？
+      // 体力回復はアクティブではないのは、「距離感」や「陽だまりの生徒会室」がメンタルであることから。
+      if (
+        card.id !== "shikonoentame" &&
+        card.id !== "kagayakukimihe" &&
+        card.id !== "nanikiteruno"
+      ) {
+        for (const content of getCardContentDefinitions(card)) {
+          const hasScorePerformance = content.effects.some(
+            (effect) =>
+              (effect.kind === "perform" && effect.score) ||
+              effect.kind === "performLeveragingModifier" ||
+              effect.kind === "performLeveragingVitality" ||
+              (effect.kind === "getModifier" &&
+                effect.modifier.kind === "delayedEffect" &&
+                effect.modifier.effect.kind === "perform"),
+          );
+          if (card.cardSummaryKind === "active") {
+            expect(hasScorePerformance).toBe(true);
+          } else if (card.cardSummaryKind === "mental") {
+            expect(hasScorePerformance).toBe(false);
+          }
+        }
+      }
+    });
+    test("perform 種別の効果は、 score か vitality のどちらかもしくは両方のプロパティを持つ", () => {
+      for (const content of getCardContentDefinitions(card)) {
+        // TODO: delayedEffect 内の effect を検証できていない
+        for (const effect of content.effects.filter(
+          (effect) => effect.kind === "perform",
+        )) {
+          expect(effect.score || effect.vitality).toBeDefined();
+        }
       }
     });
   });
 }
-
 describe("compareDeckOrder", () => {
   const testParameters: Array<{
     compared: Array<CardDefinition["id"]>;
@@ -180,5 +205,85 @@ describe("compareDeckOrder", () => {
     expect(comparedList.sort(compareDeckOrder).map((e) => e.id)).toStrictEqual(
       expected,
     );
+  });
+});
+describe("getCardContentDefinitions", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getCardContentDefinitions>;
+    expected: ReturnType<typeof getCardContentDefinitions>;
+  }> = [
+    {
+      args: [getCardDataById("karuiashidori")],
+      expected: [
+        {
+          cost: { kind: "normal", value: 4 },
+          effects: [
+            { kind: "perform", score: { value: 6 } },
+            {
+              kind: "getModifier",
+              modifier: { kind: "goodCondition", duration: 2 },
+            },
+          ],
+        },
+        {
+          cost: { kind: "normal", value: 4 },
+          effects: [
+            { kind: "perform", score: { value: 9 } },
+            {
+              kind: "getModifier",
+              modifier: { kind: "goodCondition", duration: 3 },
+            },
+          ],
+        },
+        {
+          cost: { kind: "normal", value: 3 },
+          effects: [
+            { kind: "perform", score: { value: 9 } },
+            {
+              kind: "getModifier",
+              modifier: { kind: "goodCondition", duration: 3 },
+            },
+          ],
+        },
+        {
+          cost: { kind: "normal", value: 2 },
+          effects: [
+            { kind: "perform", score: { value: 9 } },
+            {
+              kind: "getModifier",
+              modifier: { kind: "goodCondition", duration: 3 },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      args: [getCardDataById("nemuke")],
+      expected: [
+        {
+          cost: { kind: "normal", value: 0 },
+          effects: [],
+          usableOncePerLesson: true,
+        },
+        {
+          cost: { kind: "normal", value: 0 },
+          effects: [],
+          usableOncePerLesson: true,
+        },
+        {
+          cost: { kind: "normal", value: 0 },
+          effects: [],
+          usableOncePerLesson: true,
+        },
+        {
+          cost: { kind: "normal", value: 0 },
+          effects: [],
+          usableOncePerLesson: true,
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$args.0.id", ({ args, expected }) => {
+    expect(getCardContentDefinitions(...args)).toStrictEqual(expected);
   });
 });

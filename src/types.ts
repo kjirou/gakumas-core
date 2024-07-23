@@ -169,7 +169,7 @@ export type ModifierDefinition =
        *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
        */
       kind: "effectActivationUponCardUsage";
-      cardKind: CardSummaryKind;
+      cardKind?: CardSummaryKind;
       effect: Effect;
     }
   | {
@@ -621,15 +621,31 @@ export type CardContentDefinition = {
  *     重複不可
  */
 export type CardDefinition = {
-  /** 未強化時の内容 */
-  base: CardContentDefinition;
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
   cardProviderKind: CardProviderKind;
   cardSummaryKind: CardSummaryKind;
-  /** 強化済み時の内容 */
-  enhanced?: CardContentDefinition;
+  /**
+   * スキルカードの内容
+   *
+   * - 要素番号が、強化段階に対応する
+   *   - 0 番目: 未強化
+   *   - 1 番目: +
+   *   - 2 番目: ++
+   *   - 3 番目: +++
+   * - 強化の値は、差分がある値のキーのみのオブジェクトで表現する
+   *   - `最終的な内容 = {...基礎, ...強化1, ...強化2, ...強化3}` のような結合を行う
+   * - トラブルカード以外は、3段階目まで強化が存在するよう
+   */
+  contents:
+    | [CardContentDefinition]
+    | [
+        CardContentDefinition,
+        Partial<CardContentDefinition>,
+        Partial<CardContentDefinition>,
+        Partial<CardContentDefinition>,
+      ];
   id: string;
   name: string;
   /** カード出現に必要なPLv、原文は「解放PLv」、デフォルトは 1 */
@@ -696,9 +712,11 @@ export type Card = {
    * - スキルカードは、以下の強化状態を持つ。
    *   - A) プロデュース中の所持手札上で反映されている強化、ここでは「通常強化」と呼ぶ
    *   - B) 「レッスン中強化」
-   *   - C) サポートカードによる、そのレッスン中のみの強化、ここでは「サポートカード強化」と呼ぶ
+   *   - C) レッスンサポートによる強化、なおゲーム内のヘルプに解説がある
    * - A と B は排他でどちらかだけ有効になる、それに C の数を加えたものが、そのカードの強化数になる
-   * - TODO: 強化数が2以上の場合の追加の強化が反映されていない
+   * - 強化数は最大で 3
+   *   - カード名末尾に強化数分の "+" が付与される
+   *     - レッスンサポートで付与された "+" は、青色になる
    */
   enhancements: CardEnhancement[];
   /**

@@ -1937,10 +1937,12 @@ export const useCard = (
     // 状態修正に起因する、スキルカード使用時の効果発動
     //
     if (!params.preview) {
+      // TODO: e.cardKind === undefined の条件、作業中に足したのでテストしてない
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
         (e) =>
           e.kind === "effectActivationUponCardUsage" &&
-          e.cardKind === card.original.definition.cardSummaryKind,
+          (e.cardKind === undefined ||
+            e.cardKind === card.original.definition.cardSummaryKind),
       ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
       for (const { effect } of effectsUponCardUsage) {
         const effectResult = activateEffect(

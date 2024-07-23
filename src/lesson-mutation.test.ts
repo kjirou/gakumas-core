@@ -4351,16 +4351,21 @@ describe("useCard preview:false", () => {
       test("it works", () => {
         // この効果を持つスキルカードがないので、モックを作る
         const cardDefinitionMock = {
-          base: {
-            cost: { kind: "normal", value: 0 },
-            effects: [
-              {
-                kind: "multiplyModifier",
-                modifierKind: "positiveImpression",
-                multiplier: 1.5,
-              },
-            ],
-          },
+          contents: [
+            {
+              cost: { kind: "normal", value: 0 },
+              effects: [
+                {
+                  kind: "multiplyModifier",
+                  modifierKind: "positiveImpression",
+                  multiplier: 1.5,
+                },
+              ],
+            },
+            {},
+            {},
+            {},
+          ],
         } as CardDefinition;
         const lesson = createLessonForTest({
           cards: [

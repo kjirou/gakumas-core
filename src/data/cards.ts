@@ -25,6 +25,37 @@ export const filterGeneratableCardsData = (
   );
 
 /**
+ * プロデュース中やレッスン中の山札の整列順のための比較をする
+ *
+ * - 調査中だが、一部の判明した仕様は以下へまとめた
+ *   - https://github.com/kjirou/gakumas-core/issues/55
+ * - P図鑑の整列順とは異なる
+ */
+export const compareDeckOrder = (a: CardDefinition, b: CardDefinition) => {
+  if (a.cardSummaryKind !== b.cardSummaryKind) {
+    const points = { active: 0, mental: 1, trouble: 2 };
+    return points[a.cardSummaryKind] - points[b.cardSummaryKind];
+  }
+  if (a.cardPossessionKind !== b.cardPossessionKind) {
+    // センスとロジックは同時に所有できないので、それらの間で比較されることはない
+    // つまり、実質的には、センス＞フリーとロジック＞フリーの比較のみをしている
+    const points = { sense: 0, logic: 1, free: 2 };
+    return points[a.cardPossessionKind] - points[b.cardPossessionKind];
+  }
+  if (a.rarity !== b.rarity) {
+    const points = { ssr: 0, sr: 1, r: 2, c: 3 };
+    return points[a.rarity] - points[b.rarity];
+  }
+  if (a.cardProviderKind !== b.cardProviderKind) {
+    const points = { idol: 0, others: 1, supportCard: 1 };
+    return points[a.cardProviderKind] - points[b.cardProviderKind];
+  }
+  // この整列順は、本家の仕様に基づいてない
+  // 少なくとも、同じ種別のカードを並べるために行なっている
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+};
+
+/**
  * スキルカードデータの定義
  *
  * - データ定義のルール
@@ -203,7 +234,7 @@ export const cards: CardDefinition[] = [
     id: "hyogennokihon",
     name: "表現の基本",
     basic: true,
-    cardPossessionKind: "logic",
+    cardPossessionKind: "free",
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     rarity: "c",
@@ -649,7 +680,7 @@ export const cards: CardDefinition[] = [
   {
     id: "kiaijubun",
     name: "気合十分！",
-    cardPossessionKind: "logic",
+    cardPossessionKind: "free",
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     necessaryProducerLevel: 16,
@@ -678,7 +709,7 @@ export const cards: CardDefinition[] = [
   {
     id: "fasutosuteppu",
     name: "ファーストステップ",
-    cardPossessionKind: "logic",
+    cardPossessionKind: "free",
     cardProviderKind: "others",
     cardSummaryKind: "mental",
     necessaryProducerLevel: 16,

@@ -1,4 +1,5 @@
-import { cards } from "./cards";
+import type { CardDefinition } from "../types";
+import { cards, compareDeckOrder, getCardDataById } from "./cards";
 
 test("any id is not duplicated", () => {
   let ids: string[] = [];
@@ -116,3 +117,68 @@ for (const card of cards) {
     });
   });
 }
+
+describe("compareDeckOrder", () => {
+  const testParameters: Array<{
+    compared: Array<CardDefinition["id"]>;
+    expected: Array<CardDefinition["id"]>;
+    name: string;
+  }> = [
+    // shinshinkiei   =  active, sense, r, キャラ固有
+    // karuiashidori  =  active, sense, r
+    // chosen         =  active, sense, c
+    // kyomoohayo     =  active, logic, r
+    // kawaiishigusa  =  active, logic, c
+    // apirunokihon   =  active,  free, c
+    // baransukankaku =  mental, sense, r
+    // furumainokihon =  mental, sense, c
+    // risutato       =  mental, logic, r
+    // mesennokihon   =  mental, logic, c
+    // kiaijubun      =  mental,  free, r
+    // hyogennokihon  =  mental,  free, c
+    // nemuke         = trouble,  free, c
+    {
+      name: "概ね優先順位が考慮されている",
+      compared: [
+        "nemuke",
+        "hyogennokihon",
+        "kiaijubun",
+        "mesennokihon",
+        "risutato",
+        "furumainokihon",
+        "baransukankaku",
+        "risutato",
+        "apirunokihon",
+        "kawaiishigusa",
+        "kyomoohayo",
+        "chosen",
+        "shinshinkiei",
+        "chosen",
+        "karuiashidori",
+      ],
+      expected: [
+        "shinshinkiei",
+        "karuiashidori",
+        "chosen",
+        "chosen",
+        "kyomoohayo",
+        "kawaiishigusa",
+        "apirunokihon",
+        "baransukankaku",
+        "furumainokihon",
+        "risutato",
+        "risutato",
+        "mesennokihon",
+        "kiaijubun",
+        "hyogennokihon",
+        "nemuke",
+      ],
+    },
+  ];
+  test.each(testParameters)("$name", ({ compared, expected }) => {
+    const comparedList = compared.map((id) => getCardDataById(id));
+    expect(comparedList.sort(compareDeckOrder).map((e) => e.id)).toStrictEqual(
+      expected,
+    );
+  });
+});

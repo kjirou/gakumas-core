@@ -27,7 +27,7 @@ export const getProducerItemDataById = (
  *     - rarity: "r" > "sr" > "ssr"
  *     - producerItemProviderKind: "others" > "idol" > "supportCard"
  *     - アイドル固有なら: さき > てまり > なお > りなみ > せいか > ことね > ひろ > リーリヤ > ちな > うめ > (新規アイドルはおそらくは追加順)
- *     - producerItemPossessionKind: "free" > "sence" > "logic"
+ *     - producerItemPossessionKind: "free" > "sense" > "logic"
  *   - プロパティの定義順
  *     - 第1階層
  *       - id, name は先頭
@@ -822,6 +822,25 @@ export const producerItems: ProducerItemDefinition[] = [
         kind: "beforeCardEffectActivation",
         cardDefinitionId: "adorenarinzenkai",
       },
+    },
+  },
+  {
+    id: "saigononatsunoomoide",
+    name: "最後の夏の思い出",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      effects: [{ kind: "perform", vitality: { value: 10 } }],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      effects: [{ kind: "perform", vitality: { value: 14 } }],
+      times: 1,
+      trigger: { kind: "turnStart" },
     },
   },
   {

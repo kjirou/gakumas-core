@@ -2,7 +2,8 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { getCardDataById } from "./data/cards";
+import { compareDeckOrder, getCardDataById } from "./data/cards";
+import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -11,10 +12,12 @@ import {
   Card,
   CardContentDefinition,
   CardInProduction,
+  CardSetDefinition,
   Effect,
   GetRandom,
   IdGenerator,
   Idol,
+  IdolDefinition,
   IdolInProduction,
   IdolParameterKind,
   Lesson,
@@ -22,6 +25,7 @@ import {
   LessonUpdateQuery,
   Modifier,
   ModifierDefinition,
+  ProducePlan,
   ProducerItem,
   ProducerItemContentDefinition,
   ProducerItemInProduction,
@@ -80,15 +84,42 @@ export const isRemainingProducerItemTimes = (
   );
 };
 
-// TODO: 初期カードセットをどこかに定義する
-//       - 集中型: 試行錯誤、アピールの基本x2, ポーズの基本, 表情の基本x2, 表現の基本x2
+/**
+ * 初期スキルカードセットを生成する
+ *
+ * - TODO: 引数から強化済みスキルカードを指定できるようにする、才能開花4用
+ */
+const createDefaultCardSet = (
+  producePlan: ProducePlan,
+  idGenerator: IdGenerator,
+): CardInProduction[] => {
+  const defaultCardSetDefinition = getDefaultCardSetData(producePlan);
+  return defaultCardSetDefinition.cardDefinitionIds.map((cardDefinitionId) => {
+    const cardDefinition = getCardDataById(cardDefinitionId);
+    return {
+      id: idGenerator(),
+      definition: cardDefinition,
+      enhanced: false,
+      enabled: true,
+    };
+  });
+};
+
+/**
+ * プロデュースアイドルを生成する
+ *
+ * @param param.deck 山札全体を明示的に指定し、キャラクター固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param param.producerItems Pアイテム全体を指定し、キャラクター固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param param.specialTrainingLevel 特訓段階
+ * @param param.talentAwakeningLevel 才能開花段階
+ */
 export const createIdolInProduction = (params: {
-  cards: CardInProduction[];
+  deck?: CardInProduction[];
   idGenerator: IdGenerator;
-  idolDefinitionId: string;
-  producerItems: ProducerItemInProduction[];
-  specificCardEnhanced: boolean;
-  specificProducerItemEnhanced: boolean;
+  idolDefinitionId: IdolDefinition["id"];
+  producerItems?: ProducerItemInProduction[];
+  specialTrainingLevel: number;
+  talentAwakeningLevel: number;
 }): IdolInProduction => {
   const idolDefinition = getIdolDataById(params.idolDefinitionId);
   const characterDefinition = getCharacterDataById(idolDefinition.characterId);
@@ -96,28 +127,31 @@ export const createIdolInProduction = (params: {
   const specificProducerItemDefinition = getProducerItemDataById(
     idolDefinition.specificProducerItemId,
   );
-  return {
-    // アイドル固有 ＞ メモリーカード供給 ＞ 初期カード、の順でデッキを構築する
-    deck: [
+  // TODO: 才能開花1段階目のランダムスキルカード強化
+  const deck =
+    params.deck ??
+    [
       {
         id: params.idGenerator(),
         definition: specificCardDefinition,
-        enhanced: params.specificCardEnhanced,
+        enhanced: params.specialTrainingLevel >= 3,
         enabled: true,
       },
-      ...params.cards,
-    ],
+      ...createDefaultCardSet(idolDefinition.producePlan, params.idGenerator),
+    ].sort((a, b) => compareDeckOrder(a.definition, b.definition));
+  const producerItems = params.producerItems ?? [
+    {
+      id: params.idGenerator(),
+      definition: specificProducerItemDefinition,
+      enhanced: params.talentAwakeningLevel >= 2,
+    },
+  ];
+  return {
+    deck,
     definition: idolDefinition,
     life: characterDefinition.maxLife,
     maxLife: characterDefinition.maxLife,
-    producerItems: [
-      {
-        id: params.idGenerator(),
-        definition: specificProducerItemDefinition,
-        enhanced: params.specificProducerItemEnhanced,
-      },
-      ...params.producerItems,
-    ],
+    producerItems,
   };
 };
 
@@ -161,34 +195,6 @@ export const prepareProducerItemsForLesson = (
   });
 };
 
-export const createLesson = (params: {
-  clearScoreThresholds: Lesson["clearScoreThresholds"];
-  getRandom: GetRandom;
-  idolInProduction: IdolInProduction;
-  turns: Lesson["turns"];
-}): Lesson => {
-  const cards = prepareCardsForLesson(params.idolInProduction.deck);
-  return {
-    cards,
-    clearScoreThresholds: params.clearScoreThresholds,
-    deck: shuffleArray(
-      cards.map((card) => card.id),
-      params.getRandom,
-    ),
-    discardPile: [],
-    hand: [],
-    idol: createIdol({
-      idolInProduction: params.idolInProduction,
-    }),
-    turns: params.turns,
-    removedCardPile: [],
-    playedCardsOnEmptyDeck: [],
-    score: 0,
-    turnNumber: 1,
-    remainingTurns: 0,
-  };
-};
-
 /**
  * レッスンのクリアに対するスコア進捗を計算する
  */
@@ -228,11 +234,18 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
     : false;
 };
 
+/**
+ * レッスンのゲームプレイを初期化する
+ *
+ * - ここの「レッスン」には、試験・コンテスト・アイドルの道なども含む
+ *
+ * @param params.idGenerator createIdolInProduction で使用した関数と同じものを渡す
+ */
 export const createLessonGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   idolInProduction: IdolInProduction;
   getRandom?: GetRandom;
-  idGenerator?: IdGenerator;
+  idGenerator: IdGenerator;
   turns: Lesson["turns"];
 }): LessonGamePlay => {
   const clearScoreThresholds =
@@ -240,18 +253,29 @@ export const createLessonGamePlay = (params: {
       ? params.clearScoreThresholds
       : undefined;
   const getRandom = params.getRandom ? params.getRandom : Math.random;
-  const idGenerator = params.idGenerator
-    ? params.idGenerator
-    : createIdGenerator();
+  const cards = prepareCardsForLesson(params.idolInProduction.deck);
   return {
     getRandom,
-    idGenerator,
-    initialLesson: createLesson({
+    idGenerator: params.idGenerator,
+    initialLesson: {
+      cards,
       clearScoreThresholds,
-      getRandom,
-      idolInProduction: params.idolInProduction,
+      deck: shuffleArray(
+        cards.map((card) => card.id),
+        getRandom,
+      ),
+      discardPile: [],
+      hand: [],
+      idol: createIdol({
+        idolInProduction: params.idolInProduction,
+      }),
       turns: params.turns,
-    }),
+      removedCardPile: [],
+      playedCardsOnEmptyDeck: [],
+      score: 0,
+      turnNumber: 0,
+      remainingTurns: 0,
+    },
     updates: [],
   };
 };

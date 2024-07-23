@@ -1,10 +1,12 @@
 import {
   Card,
   CardDefinition,
+  CardInProduction,
   Idol,
   Lesson,
   Modifier,
   ProducerItem,
+  ProducerItemInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
 import {
@@ -31,29 +33,37 @@ import {
   summarizeCardInHand,
   validateCostConsumution,
 } from "./lesson-mutation";
-import { createIdolInProduction, createLesson, patchUpdates } from "./models";
+import {
+  createIdolInProduction,
+  createLessonGamePlay,
+  patchUpdates,
+} from "./models";
 import { createIdGenerator } from "./utils";
 import { getProducerItemDataById } from "./data/producer-items";
 
 const createLessonForTest = (
-  overwrites: Partial<Parameters<typeof createIdolInProduction>[0]> = {},
+  options: {
+    cards?: CardInProduction[];
+    producerItems?: ProducerItemInProduction[];
+  } = {},
 ): Lesson => {
+  const idGenerator = createIdGenerator();
   const idolInProduction = createIdolInProduction({
     // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
     idolDefinitionId: "shinosawahiro-r-1",
-    cards: [],
-    producerItems: [],
-    specificCardEnhanced: false,
-    specificProducerItemEnhanced: false,
-    idGenerator: createIdGenerator(),
-    ...overwrites,
+    idGenerator,
+    specialTrainingLevel: 1,
+    talentAwakeningLevel: 1,
+    ...(options.cards ? { deck: options.cards } : {}),
+    ...(options.producerItems ? { producerItems: options.producerItems } : {}),
   });
-  return createLesson({
+  const lessonGamePlay = createLessonGamePlay({
     clearScoreThresholds: undefined,
-    getRandom: Math.random,
+    idGenerator,
     idolInProduction,
     turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
   });
+  return lessonGamePlay.initialLesson;
 };
 
 describe("drawCardsFromDeck", () => {
@@ -4156,14 +4166,19 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         const cardsUpdate = updates.find((e) => e.kind === "cards") as any;
-        // アイドル固有 + 上記で足している hanamoyukisetsu + 生成したカード
-        expect(cardsUpdate.cards).toHaveLength(3);
-        expect(cardsUpdate.cards[2].enhancements).toStrictEqual([
+        // 上記で足している hanamoyukisetsu + 生成したカード
+        expect(cardsUpdate.cards).toHaveLength(1 + 1);
+        expect(
+          cardsUpdate.cards[cardsUpdate.cards.length - 1].enhancements,
+        ).toStrictEqual([
           {
             kind: "original",
           },
         ]);
-        expect(cardsUpdate.cards[2].original.definition.rarity).toBe("ssr");
+        expect(
+          cardsUpdate.cards[cardsUpdate.cards.length - 1].original.definition
+            .rarity,
+        ).toBe("ssr");
         const cardPlacementUpdate = updates
           .slice()
           .reverse()
@@ -4882,7 +4897,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("aidorusengen"),
+            definition: getCardDataById("hidamarinoseitokaishitsu"),
             enabled: true,
             enhanced: false,
           },

@@ -17,22 +17,8 @@ describe("createIdolInProduction", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
       idolDefinitionId: "hanamisaki-r-1",
-      cards: [
-        {
-          id: idGenerator(),
-          definition: getCardDataById("haitatchi"),
-          enhanced: true,
-          enabled: true,
-        },
-      ],
-      producerItems: [
-        {
-          id: idGenerator(),
-          definition: getProducerItemDataById("hatsuboshitecho"),
-        },
-      ],
-      specificCardEnhanced: false,
-      specificProducerItemEnhanced: false,
+      specialTrainingLevel: 1,
+      talentAwakeningLevel: 1,
       idGenerator,
     });
     expect(idolInProduction).toStrictEqual({
@@ -52,12 +38,6 @@ describe("createIdolInProduction", () => {
         expect.any(Object),
         expect.any(Object),
         expect.any(Object),
-        {
-          id: expect.any(String),
-          definition: getCardDataById("haitatchi"),
-          enhanced: true,
-          enabled: true,
-        },
       ],
       definition: getIdolDataById("hanamisaki-r-1"),
       life: 32,
@@ -67,10 +47,6 @@ describe("createIdolInProduction", () => {
           id: expect.any(String),
           definition: getProducerItemDataById("bakuonraion"),
           enhanced: false,
-        },
-        {
-          id: expect.any(String),
-          definition: getProducerItemDataById("hatsuboshitecho"),
         },
       ],
     });
@@ -163,28 +139,14 @@ describe("createLessonGamePlay", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
       idolDefinitionId: "hanamisaki-r-1",
-      cards: [
-        {
-          id: idGenerator(),
-          definition: getCardDataById("apirunokihon"),
-          enhanced: false,
-          enabled: true,
-        },
-        {
-          id: idGenerator(),
-          definition: getCardDataById("pozunokihon"),
-          enhanced: false,
-          enabled: true,
-        },
-      ],
       producerItems: [
         {
           id: idGenerator(),
           definition: getProducerItemDataById("hatsuboshitecho"),
         },
       ],
-      specificCardEnhanced: false,
-      specificProducerItemEnhanced: false,
+      specialTrainingLevel: 1,
+      talentAwakeningLevel: 1,
       idGenerator,
     });
     const lessonGamePlay = createLessonGamePlay({

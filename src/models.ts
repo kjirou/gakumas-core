@@ -2,7 +2,7 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { getCardDataById } from "./data/cards";
+import { compareDeckOrder, getCardDataById } from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById } from "./data/idols";
@@ -17,6 +17,7 @@ import {
   GetRandom,
   IdGenerator,
   Idol,
+  IdolDefinition,
   IdolInProduction,
   IdolParameterKind,
   Lesson,
@@ -83,56 +84,74 @@ export const isRemainingProducerItemTimes = (
   );
 };
 
+/**
+ * 初期スキルカードセットを生成する
+ *
+ * - TODO: 引数から強化済みスキルカードを指定できるようにする、才能開花4用
+ */
+const createDefaultCardSet = (
+  producePlan: ProducePlan,
+  idGenerator: IdGenerator,
+): CardInProduction[] => {
+  const defaultCardSetDefinition = getDefaultCardSetData(producePlan);
+  return defaultCardSetDefinition.cardDefinitionIds.map((cardDefinitionId) => {
+    const cardDefinition = getCardDataById(cardDefinitionId);
+    return {
+      id: idGenerator(),
+      definition: cardDefinition,
+      enhanced: false,
+      enabled: true,
+    };
+  });
+};
+
+/**
+ * プロデュースアイドルを生成する
+ *
+ * @param param.deck 山札全体を明示的に指定し、キャラクター固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param param.producerItems Pアイテム全体を指定し、キャラクター固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param param.specialTrainingLevel 特訓段階
+ * @param param.talentAwakeningLevel 才能開花段階
+ */
 export const createIdolInProduction = (params: {
-  cards: CardInProduction[];
+  deck?: CardInProduction[];
   idGenerator: IdGenerator;
-  idolDefinitionId: string;
-  producerItems: ProducerItemInProduction[];
-  specificCardEnhanced: boolean;
-  specificProducerItemEnhanced: boolean;
+  idolDefinitionId: IdolDefinition["id"];
+  producerItems?: ProducerItemInProduction[];
+  specialTrainingLevel: number;
+  talentAwakeningLevel: number;
 }): IdolInProduction => {
   const idolDefinition = getIdolDataById(params.idolDefinitionId);
   const characterDefinition = getCharacterDataById(idolDefinition.characterId);
   const specificCardDefinition = getCardDataById(idolDefinition.specificCardId);
-  const defaultCardSetDefinition = getDefaultCardSetData(
-    idolDefinition.producePlan,
-  );
   const specificProducerItemDefinition = getProducerItemDataById(
     idolDefinition.specificProducerItemId,
   );
-  return {
-    // 本家仕様は、アイドル固有 ＞ メモリーから供給（現在考慮外） ＞ 初期セット、の順でデッキを構築しているよう
-    deck: [
+  // TODO: 才能開花1段階目のランダムスキルカード強化
+  const deck =
+    params.deck ??
+    [
       {
         id: params.idGenerator(),
         definition: specificCardDefinition,
-        enhanced: params.specificCardEnhanced,
+        enhanced: params.specialTrainingLevel >= 3,
         enabled: true,
       },
-      // TODO: 引数から強化済みスキルカードを指定できるようにする、主に特訓用
-      // TODO: デフォルトスキルカード内での整列順を本家に合わせる
-      ...defaultCardSetDefinition.cardDefinitionIds.map((cardDefinitionId) => {
-        const cardDefinition = getCardDataById(cardDefinitionId);
-        return {
-          id: params.idGenerator(),
-          definition: cardDefinition,
-          enhanced: false,
-          enabled: true,
-        };
-      }),
-      ...params.cards,
-    ],
+      ...createDefaultCardSet(idolDefinition.producePlan, params.idGenerator),
+    ].sort((a, b) => compareDeckOrder(a.definition, b.definition));
+  const producerItems = params.producerItems ?? [
+    {
+      id: params.idGenerator(),
+      definition: specificProducerItemDefinition,
+      enhanced: params.talentAwakeningLevel >= 2,
+    },
+  ];
+  return {
+    deck,
     definition: idolDefinition,
     life: characterDefinition.maxLife,
     maxLife: characterDefinition.maxLife,
-    producerItems: [
-      {
-        id: params.idGenerator(),
-        definition: specificProducerItemDefinition,
-        enhanced: params.specificProducerItemEnhanced,
-      },
-      ...params.producerItems,
-    ],
+    producerItems,
   };
 };
 

@@ -1,10 +1,12 @@
 import {
   Card,
   CardDefinition,
+  CardInProduction,
   Idol,
   Lesson,
   Modifier,
   ProducerItem,
+  ProducerItemInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
 import {
@@ -40,18 +42,20 @@ import { createIdGenerator } from "./utils";
 import { getProducerItemDataById } from "./data/producer-items";
 
 const createLessonForTest = (
-  overwrites: Partial<Parameters<typeof createIdolInProduction>[0]> = {},
+  options: {
+    cards?: CardInProduction[];
+    producerItems?: ProducerItemInProduction[];
+  } = {},
 ): Lesson => {
   const idGenerator = createIdGenerator();
   const idolInProduction = createIdolInProduction({
     // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
     idolDefinitionId: "shinosawahiro-r-1",
-    cards: [],
-    producerItems: [],
-    specificCardEnhanced: false,
-    specificProducerItemEnhanced: false,
     idGenerator,
-    ...overwrites,
+    specialTrainingLevel: 1,
+    talentAwakeningLevel: 1,
+    ...(options.cards ? { deck: options.cards } : {}),
+    ...(options.producerItems ? { producerItems: options.producerItems } : {}),
   });
   const lessonGamePlay = createLessonGamePlay({
     clearScoreThresholds: undefined,
@@ -4162,8 +4166,8 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         const cardsUpdate = updates.find((e) => e.kind === "cards") as any;
-        // アイドル固有 + 初期カードx8 + 上記で足している hanamoyukisetsu + 生成したカード
-        expect(cardsUpdate.cards).toHaveLength(1 + 8 + 1 + 1);
+        // 上記で足している hanamoyukisetsu + 生成したカード
+        expect(cardsUpdate.cards).toHaveLength(1 + 1);
         expect(
           cardsUpdate.cards[cardsUpdate.cards.length - 1].enhancements,
         ).toStrictEqual([
@@ -4893,7 +4897,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("aidorusengen"),
+            definition: getCardDataById("hidamarinoseitokaishitsu"),
             enabled: true,
             enhanced: false,
           },

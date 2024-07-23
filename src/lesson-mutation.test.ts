@@ -3792,6 +3792,75 @@ describe("useCard preview:false", () => {
       });
       expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
     });
+    test("「輝くキミへ」を発動できる", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("kagayakukimihe"),
+            enabled: true,
+            enhanced: false,
+          },
+          {
+            id: "b",
+            definition: getCardDataById("hyogennokihon"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a", "b"];
+      lesson.idol.modifiers = [
+        { kind: "motivation", amount: 4, id: "x" },
+        { kind: "positiveImpression", amount: 10, id: "y" },
+      ];
+      const idGenerator = createIdGenerator();
+      const { updates: updates1 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(
+        updates1.filter(
+          (e) =>
+            e.kind === "modifier" &&
+            e.actual.kind === "effectActivationUponCardUsage",
+        ),
+      ).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "effectActivationUponCardUsage",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          max: {
+            kind: "effectActivationUponCardUsage",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+
+      lesson = patchUpdates(lesson, updates1);
+
+      const { updates: updates2 } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(updates2.filter((e) => e.kind === "score")).toStrictEqual([
+        {
+          kind: "score",
+          actual: 3,
+          max: 3,
+          reason: expect.any(Object),
+        },
+      ]);
+    });
   });
   describe("主効果発動", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {

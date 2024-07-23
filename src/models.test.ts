@@ -633,6 +633,59 @@ describe("patchUpdates", () => {
         });
       }
     });
+    describe("永続の状態修正が誤って消えない", () => {
+      test("effectActivationAtEndOfTurn は、 focus を更新した操作により、誤って消えない", () => {
+        let lessonMock = {
+          idol: {
+            modifiers: [
+              {
+                kind: "effectActivationAtEndOfTurn",
+                effect: {
+                  kind: "perform",
+                  score: { value: 1 },
+                },
+                id: "a",
+              },
+              {
+                kind: "focus",
+                amount: 1,
+                id: "b",
+              },
+            ],
+          },
+        } as Lesson;
+        lessonMock = patchUpdates(lessonMock, [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "focus",
+              amount: -1,
+              id: "c",
+              updateTargetId: "b",
+            },
+            max: {
+              kind: "focus",
+              amount: -1,
+              id: "c",
+              updateTargetId: "b",
+            },
+            reason: {
+              kind: "lessonStartTrigger",
+              historyTurnNumber: 1,
+              historyResultIndex: 1,
+            },
+          },
+        ]);
+        expect(
+          lessonMock.idol.modifiers.filter((m) => m.kind === "focus"),
+        ).toHaveLength(0);
+        expect(
+          lessonMock.idol.modifiers.filter(
+            (m) => m.kind === "effectActivationAtEndOfTurn",
+          ),
+        ).toHaveLength(1);
+      });
+    });
     describe("doubleEffect", () => {
       test("既存の状態修正を指定した時、削除できる", () => {
         let lessonMock = {

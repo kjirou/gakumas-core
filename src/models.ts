@@ -526,13 +526,14 @@ export const patchUpdates = (
             .map((modifier) =>
               modifier.id === updateTargetId ? newTargetedModifier : modifier,
             )
+            // "effectActivationAtEndOfTurn" や "effectActivationUponCardUsage" など、数値を持たないものは永続なので、削除しない
             .filter(
               (modifier) =>
-                ("amount" in modifier && modifier.amount > 0) ||
-                ("delay" in modifier && modifier.delay > 0) ||
-                ("duration" in modifier && modifier.duration > 0) ||
-                ("times" in modifier && modifier.times > 0) ||
-                ("value" in modifier && modifier.value > 0),
+                !("amount" in modifier && modifier.amount === 0) &&
+                !("delay" in modifier && modifier.delay === 0) &&
+                !("duration" in modifier && modifier.duration === 0) &&
+                !("times" in modifier && modifier.times === 0) &&
+                !("value" in modifier && modifier.value === 0),
             );
         }
         newLesson = {

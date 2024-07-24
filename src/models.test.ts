@@ -317,7 +317,7 @@ describe("patchUpdates", () => {
       expect(lessonMock.idol.actionPoints).toBe(0);
     });
   });
-  describe("cardEnhancement", () => {
+  describe("cards.enhancement.effect", () => {
     test("it works", () => {
       const lessonMock = {
         cards: [
@@ -344,6 +344,58 @@ describe("patchUpdates", () => {
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([{ kind: "effect" }]);
       expect(lesson.cards[1].enhancements).toStrictEqual([]);
+    });
+  });
+  describe("cards.enhancement.lessonSupport", () => {
+    test("it works", () => {
+      const lessonMock = {
+        cards: [
+          {
+            id: "1",
+            enhancements: [] as Card["enhancements"],
+          },
+          {
+            id: "2",
+            enhancements: [{ kind: "original" }],
+          },
+          {
+            id: "3",
+            enhancements: [{ kind: "effect" }],
+          },
+          {
+            id: "4",
+            enhancements: [] as Card["enhancements"],
+          },
+        ],
+      } as Lesson;
+      const lesson = patchUpdates(lessonMock, [
+        {
+          kind: "cards.enhancement.lessonSupport",
+          targets: [
+            { cardId: "1", supportCardIds: [{}] },
+            { cardId: "2", supportCardIds: [{}] },
+            { cardId: "3", supportCardIds: [{}, {}] },
+          ],
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lesson.cards[0].enhancements).toStrictEqual([
+        { kind: "lessonSupport" },
+      ]);
+      expect(lesson.cards[1].enhancements).toStrictEqual([
+        { kind: "original" },
+        { kind: "lessonSupport" },
+      ]);
+      expect(lesson.cards[2].enhancements).toStrictEqual([
+        { kind: "effect" },
+        { kind: "lessonSupport" },
+        { kind: "lessonSupport" },
+      ]);
+      expect(lesson.cards[3].enhancements).toStrictEqual([]);
     });
   });
   describe("cardPlacement", () => {

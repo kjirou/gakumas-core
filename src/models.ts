@@ -15,6 +15,7 @@ import {
   ActionCost,
   Card,
   CardContentDefinition,
+  CardEnhancement,
   CardInProduction,
   CardSetDefinition,
   Effect,
@@ -409,6 +410,29 @@ export const patchUpdates = (
                 }
               : card,
           ),
+        };
+        break;
+      }
+      case "cards.enhancement.lessonSupport": {
+        newLesson = {
+          ...newLesson,
+          cards: newLesson.cards.map((card) => {
+            let newCard = card;
+            for (const target of update.targets) {
+              if (target.cardId === card.id) {
+                newCard = {
+                  ...newCard,
+                  enhancements: [
+                    ...newCard.enhancements,
+                    ...new Array<CardEnhancement>(
+                      target.supportCardIds.length,
+                    ).fill({ kind: "lessonSupport" }),
+                  ],
+                };
+              }
+            }
+            return newCard;
+          }),
         };
         break;
       }

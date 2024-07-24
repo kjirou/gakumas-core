@@ -158,24 +158,6 @@ export const startLessonTurn = (
   }
 
   //
-  // この時点で存在する状態修正IDリストを更新
-  //
-  const modifierIdsAtTurnStartUpdates: LessonUpdateQuery[] = [
-    {
-      kind: "modifierIdsAtTurnStart",
-      modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
-      reason: {
-        kind: "turnEndTrigger",
-        historyTurnNumber: lesson.turnNumber,
-        historyResultIndex,
-      },
-    },
-  ];
-  updates = [...updates, ...modifierIdsAtTurnStartUpdates];
-  historyResultIndex++;
-  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
-
-  //
   // アクションポイントを1にする
   //
   const actionPointsUpdates: LessonUpdateQuery[] = [
@@ -211,30 +193,45 @@ export const startLessonTurn = (
   //
   // ターン開始時の効果発動順序のまとめ
   //
-  // 1. Pアイテム起因の、「ターン開始時」の効果発動
+  // 1. 応援/トラブルの効果発動
+  // 2. Pアイテム起因の、「ターン開始時」の効果発動
   //    ProducerItemTrigger["kind"] === "turnStart"
-  // 2. Pアイテム起因の、「2ターンごと」の効果発動
+  // 3. Pアイテム起因の、「2ターンごと」の効果発動
   //    ProducerItemTrigger["kind"] === "turnStartEveryTwoTurns"
-  // 3. 手札を山札から引く
-  // 4. 状態修正起因の、「(次ターン|nターン後)、パラメータ+n」の効果発動
+  // 4. 手札を山札から引く
+  // 5. 状態修正起因の、「(次ターン|nターン後)、パラメータ+n」の効果発動
   //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "perform"
-  // 5. 状態修正起因の、「(次ターン|nターン後)、スキルカードを引く」の効果発動
+  // 6. 状態修正起因の、「(次ターン|nターン後)、スキルカードを引く」の効果発動
   //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "drawCards"
-  // 6. 状態修正起因の、「(次ターン|nターン後)、スキルカードを強化」の効果発動
+  // 7. 状態修正起因の、「(次ターン|nターン後)、スキルカードを強化」の効果発動
   //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "enhanceHand"
+  // 8. メモリーアビリティの効果発動
   //
   // 仕様確認済み情報のまとめ
   //
   // - 1 > 2
+  //   - 応援 -> 「最後の夏の思い出」の順序で発動していることを以下で確認
+  //     - 参考動画: https://youtu.be/l0kHH_iSDJw?si=jRG4zYp69AQL-JSh&t=1209
+  // - 2 > 3
   //   - 「はつぼしキーホルダー」->「柴犬ポシェット」の順序で発動していることを以下で確認
   //     - 参考動画: https://www.youtube.com/live/6LEmq_eZTE4?si=ZPlHH-4Nw0kb4aoC&t=16768
-  // - 1 > 3 > 4
+  //       - Pアイテムの順序は、「柴犬ポシェット」->「はつぼしキーホルダー」の順
+  // - 2 > 4 > 5
   //   - 「星のリトルプリンス」-> 手札を引く -> 「成就」の順序で発動していることを以下で確認
   //     - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=u1CdnIForY12KtF1&t=5256
+  // - 6 > 8
+  //   - 画面から明らかにわかる
+  //     - 参考動画: https://youtu.be/l0kHH_iSDJw?si=MLtGqNzDrG4B4wSp&t=21
+  // - 5,6,7 vs 8
+  //   - 7 は 1 ターン目のみなので、同時に発動することはないはず
   //
 
   //
-  // Pアイテム起因の、ターン開始時の効果発動
+  // TODO: 応援/トラブルの効果発動
+  //
+
+  //
+  // Pアイテム起因の、ターン開始時・2ターンごとの効果発動
   //
   const activateProducerItemEffectsOnTurnStartResult =
     activateProducerItemEffectsOnTurnStart(lesson, historyResultIndex, {
@@ -287,6 +284,32 @@ export const startLessonTurn = (
       activateModifierEffectsOnTurnStartResult.updates,
     );
   }
+
+  //
+  // TODO: メモリーアビリティの効果発動
+  //
+
+  //
+  // この時点で存在する状態修正IDリストを更新
+  //
+  // - 次ターン開始時の先頭で、効果時間の自然減少の対象にするもの
+  // - もし、「状態修正起因の、ターン開始時の効果発動」で効果時間を持つものが付与される場合、自然減少の対象になるかは不明
+  //   - 今の所、「状態修正起因の、ターン開始時の効果発動」の効果には、状態修正を付与するものがない
+  //
+  const modifierIdsAtTurnStartUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "modifierIdsAtTurnStart",
+      modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
+      reason: {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...modifierIdsAtTurnStartUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
 
   return {
     ...lessonGamePlay,

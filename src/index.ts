@@ -34,6 +34,7 @@ import {
 import {
   calculateRemainingTurns,
   getCardContentDefinition,
+  getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
   patchUpdates,
 } from "./models";
@@ -74,8 +75,8 @@ import { generateCardDescription } from "./text-generation";
 export const startLessonTurn = (
   lessonGamePlay: LessonGamePlay,
 ): LessonGamePlay => {
-  let updates = lessonGamePlay.updates;
-  let historyResultIndex = 1;
+  let { updates } = lessonGamePlay;
+  let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
@@ -396,8 +397,8 @@ export const playCard = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
 ): LessonGamePlay => {
-  let updates = lessonGamePlay.updates;
-  let historyResultIndex = 1;
+  let { updates } = lessonGamePlay;
+  let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
@@ -499,8 +500,8 @@ export const playCard = (
  * - プレビューはない
  */
 export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
-  let updates = lessonGamePlay.updates;
-  let historyResultIndex = 1;
+  let { updates } = lessonGamePlay;
+  let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
@@ -555,8 +556,8 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
 export const endLessonTurn = (
   lessonGamePlay: LessonGamePlay,
 ): LessonGamePlay => {
-  let updates = lessonGamePlay.updates;
-  let historyResultIndex = 1;
+  let { updates } = lessonGamePlay;
+  let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,

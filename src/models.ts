@@ -379,20 +379,6 @@ export const patchUpdates = (
         };
         break;
       }
-      case "cardEnhancement": {
-        newLesson = {
-          ...newLesson,
-          cards: newLesson.cards.map((card) =>
-            update.cardIds.includes(card.id)
-              ? {
-                  ...card,
-                  enhancements: [...card.enhancements, { kind: "effect" }],
-                }
-              : card,
-          ),
-        };
-        break;
-      }
       case "cardPlacement": {
         newLesson = {
           ...newLesson,
@@ -409,6 +395,20 @@ export const patchUpdates = (
         newLesson = {
           ...newLesson,
           cards: [...newLesson.cards, update.card],
+        };
+        break;
+      }
+      case "cards.enhancement.effect": {
+        newLesson = {
+          ...newLesson,
+          cards: newLesson.cards.map((card) =>
+            update.cardIds.includes(card.id)
+              ? {
+                  ...card,
+                  enhancements: [...card.enhancements, { kind: "effect" }],
+                }
+              : card,
+          ),
         };
         break;
       }

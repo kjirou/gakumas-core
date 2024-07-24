@@ -748,7 +748,7 @@ const activateEffect = (
     }
     case "enhanceHand": {
       diffs.push({
-        kind: "cardEnhancement",
+        kind: "cards.enhancement.effect",
         // 手札の中で強化されていないスキルカードのみを対象にする
         cardIds: lesson.hand.filter((id) => {
           const card = lesson.cards.find((card) => card.id === id);

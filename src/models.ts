@@ -405,13 +405,6 @@ export const patchUpdates = (
         };
         break;
       }
-      case "cards": {
-        newLesson = {
-          ...newLesson,
-          cards: update.cards,
-        };
-        break;
-      }
       case "cards.addition": {
         newLesson = {
           ...newLesson,

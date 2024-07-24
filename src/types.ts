@@ -1272,11 +1272,6 @@ export type LessonUpdateQueryDiff =
       removedCardPile?: Array<Card["id"]>;
     }
   | {
-      /** カードセットの上書き、ログの量が多すぎるので開発中以外は基本的に使わない */
-      kind: "cards";
-      cards: Card[];
-    }
-  | {
       /** スキルカード追加 */
       kind: "cards.addition";
       card: Card;

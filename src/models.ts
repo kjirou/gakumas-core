@@ -280,6 +280,7 @@ export const createLessonGamePlay = (params: {
       idol: createIdol({
         idolInProduction: params.idolInProduction,
       }),
+      memoryEffects: [],
       turns: params.turns,
       removedCardPile: [],
       playedCardsOnEmptyDeck: [],

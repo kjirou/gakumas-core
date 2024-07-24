@@ -1230,6 +1230,10 @@ export type LessonUpdateQueryReason = (
       /** ターン開始時トリガーにより発動した効果 */
       kind: "turnStartTrigger";
     }
+  | {
+      /** テストのダミー値としてや開発時に一時的に設定 */
+      kind: "unknown";
+    }
 ) & {
   /**
    * レッスン履歴上のターン数

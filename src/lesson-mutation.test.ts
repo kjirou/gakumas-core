@@ -4263,24 +4263,20 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const cardsUpdate = updates.find((e) => e.kind === "cards") as any;
-        // 上記で足している hanamoyukisetsu + 生成したカード
-        expect(cardsUpdate.cards).toHaveLength(1 + 1);
-        expect(
-          cardsUpdate.cards[cardsUpdate.cards.length - 1].enhancements,
-        ).toStrictEqual([
+        const cardAdditionUpdate = updates.find(
+          (e) => e.kind === "cards.addition",
+        ) as any;
+        const addedCard = cardAdditionUpdate.card;
+        expect(addedCard.enhancements).toStrictEqual([
           {
             kind: "original",
           },
         ]);
-        expect(
-          cardsUpdate.cards[cardsUpdate.cards.length - 1].original.definition
-            .rarity,
-        ).toBe("ssr");
+        expect(addedCard.original.definition.rarity).toBe("ssr");
         const cardPlacementUpdate = updates
           .slice()
           .reverse()
-          .find((e) => e.kind === "cardPlacement") as any;
+          .find((e) => e.kind === "cardPlacement");
         expect(cardPlacementUpdate).toStrictEqual({
           kind: "cardPlacement",
           hand: expect.any(Array),

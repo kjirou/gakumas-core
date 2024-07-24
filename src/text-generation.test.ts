@@ -1,4 +1,8 @@
-import { findCardDataById, getCardDataById } from "./data/cards";
+import {
+  findCardDataById,
+  getCardContentDefinitions,
+  getCardDataById,
+} from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   generateActionCostText,
@@ -738,13 +742,14 @@ describe("generateCardDescription", () => {
   ];
   test.each(testCases)('$cardId => "$expected"', ({ cardId, expected }) => {
     const card = getCardDataById(cardId);
+    const contents = getCardContentDefinitions(card);
     expect(
       generateCardDescription({
-        cost: card.base.cost,
-        condition: card.base.condition,
-        effects: card.base.effects,
-        innate: card.base.innate,
-        usableOncePerLesson: card.base.usableOncePerLesson,
+        cost: contents[0].cost,
+        condition: contents[0].condition,
+        effects: contents[0].effects,
+        innate: contents[0].innate,
+        usableOncePerLesson: contents[0].usableOncePerLesson,
         nonDuplicative: card.nonDuplicative,
       }),
     ).toBe(expected);

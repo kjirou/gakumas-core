@@ -2,7 +2,11 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { compareDeckOrder, getCardDataById } from "./data/cards";
+import {
+  compareDeckOrder,
+  getCardDataById,
+  getCardContentDefinitions,
+} from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById } from "./data/idols";
@@ -58,10 +62,16 @@ export const isPerformEffectType = (
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
 export const getCardContentDefinition = (card: Card): CardContentDefinition => {
-  return card.original.definition.enhanced !== undefined &&
-    card.enhancements.length > 0
-    ? card.original.definition.enhanced
-    : card.original.definition.base;
+  const contents = getCardContentDefinitions(card.original.definition);
+  if (card.enhancements.length === 0) {
+    return contents[0];
+  } else if (card.enhancements.length === 1) {
+    return contents[1];
+  } else if (card.enhancements.length === 2) {
+    return contents[2];
+  } else {
+    return contents[3];
+  }
 };
 
 export const getProducerItemContentDefinition = (
@@ -402,6 +412,23 @@ export const patchUpdates = (
         };
         break;
       }
+      case "cards.removingLessonSupports": {
+        newLesson = {
+          ...newLesson,
+          cards: newLesson.cards.map((card) => {
+            if (!update.cardIds.includes(card.id)) {
+              return card;
+            }
+            return {
+              ...card,
+              enhancements: card.enhancements.filter(
+                (enhancement) => enhancement.kind !== "lessonSupport",
+              ),
+            };
+          }),
+        };
+        break;
+      }
       case "life": {
         newLesson = {
           ...newLesson,
@@ -516,13 +543,14 @@ export const patchUpdates = (
             .map((modifier) =>
               modifier.id === updateTargetId ? newTargetedModifier : modifier,
             )
+            // "effectActivationAtEndOfTurn" や "effectActivationUponCardUsage" など、数値を持たないものは永続なので、削除しない
             .filter(
               (modifier) =>
-                ("amount" in modifier && modifier.amount > 0) ||
-                ("delay" in modifier && modifier.delay > 0) ||
-                ("duration" in modifier && modifier.duration > 0) ||
-                ("times" in modifier && modifier.times > 0) ||
-                ("value" in modifier && modifier.value > 0),
+                !("amount" in modifier && modifier.amount === 0) &&
+                !("delay" in modifier && modifier.delay === 0) &&
+                !("duration" in modifier && modifier.duration === 0) &&
+                !("times" in modifier && modifier.times === 0) &&
+                !("value" in modifier && modifier.value === 0),
             );
         }
         newLesson = {

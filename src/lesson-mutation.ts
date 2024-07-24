@@ -1571,7 +1571,38 @@ export const drawCardsOnTurnStart = (
   }
 
   //
+  // 全てのスキルカードのレッスンサポートを削除する
+  //
+  // - TODO: おそらくは、この時点ではなく、手札から手札以外に外れる時に削除するのではないかと思う。まずは仕様不明: https://github.com/kjirou/gakumas-core/issues/58
+  //         - この時点だと、ターン内に手札を引き直した時にレッスンサポートが付与されていることもありうる
+  //         - 影響が少ないし、手札から外れる場所は多くて手間がかかるし、仕様判明してからその処理に変える
+  //
+  const removeLessonSupportUpdates: LessonUpdateQuery[] = [
+    createLessonUpdateQueryFromDiff(
+      {
+        kind: "cards.removingLessonSupports",
+        cardIds: newLesson.cards
+          .filter((card) =>
+            card.enhancements.some(
+              (enhancement) => enhancement.kind === "lessonSupport",
+            ),
+          )
+          .map((e) => e.id),
+      },
+      {
+        kind: "turnStartTrigger",
+        historyTurnNumber: newLesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      },
+    ),
+  ];
+  newLesson = patchUpdates(newLesson, removeLessonSupportUpdates);
+  nextHistoryResultIndex++;
+
+  //
   // 手札を引く
+  //
+  // - TODO: レッスンサポートを発動する
   //
   let drawCardsEffectUpdates: LessonUpdateQuery[] = [];
   const drawCardsEffectDiffs = activateEffect(
@@ -1629,6 +1660,7 @@ export const drawCardsOnTurnStart = (
     updates: [
       ...moveInnateCardsUpdates,
       ...playedCardsOnEmptyDeckUpdates,
+      ...removeLessonSupportUpdates,
       ...drawCardsEffectUpdates,
       ...restoringPlayedCardsOnEmptyDeckUpdates,
     ],
@@ -1940,7 +1972,8 @@ export const useCard = (
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
         (e) =>
           e.kind === "effectActivationUponCardUsage" &&
-          e.cardKind === card.original.definition.cardSummaryKind,
+          (e.cardKind === undefined ||
+            e.cardKind === card.original.definition.cardSummaryKind),
       ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
       for (const { effect } of effectsUponCardUsage) {
         const effectResult = activateEffect(

@@ -2430,7 +2430,7 @@ describe("summarizeCardInHand", () => {
           if (aCard) {
             aCard.enhancements = [
               ...aCard.enhancements,
-              { kind: "supportCard", supportCardId: "x" },
+              { kind: "lessonSupport" },
             ];
           }
           return lesson;
@@ -2442,10 +2442,7 @@ describe("summarizeCardInHand", () => {
       expected: {
         cost: expect.any(Object),
         effects: expect.any(Array),
-        enhancements: [
-          { kind: "original" },
-          { kind: "supportCard", supportCardId: "x" },
-        ],
+        enhancements: [{ kind: "original" }, { kind: "lessonSupport" }],
         name: "アピールの基本++",
         playable: expect.any(Boolean),
         scores: expect.any(Array),
@@ -2759,6 +2756,38 @@ describe("drawCardsOnLessonStart", () => {
         kind: "cardPlacement",
         hand: ["a", "b", "c", "e", "f"],
         deck: ["g", "h", "d", "i"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("全てのスキルカードへ付与しているレッスンサポートを削除する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    const aCard = lesson.cards.find((e) => e.id === "a");
+    if (aCard) {
+      aCard.enhancements = [{ kind: "lessonSupport" }];
+    }
+    const cCard = lesson.cards.find((e) => e.id === "c");
+    if (cCard) {
+      cCard.enhancements = [{ kind: "lessonSupport" }];
+    }
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    expect(
+      updates.filter((e) => e.kind === "cards.removingLessonSupports"),
+    ).toStrictEqual([
+      {
+        kind: "cards.removingLessonSupports",
+        cardIds: ["a", "c"],
         reason: expect.any(Object),
       },
     ]);
@@ -3792,6 +3821,75 @@ describe("useCard preview:false", () => {
       });
       expect(updates2b.filter((e) => e.kind === "vitality")).toHaveLength(0);
     });
+    test("「輝くキミへ」を発動できる", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            definition: getCardDataById("kagayakukimihe"),
+            enabled: true,
+            enhanced: false,
+          },
+          {
+            id: "b",
+            definition: getCardDataById("hyogennokihon"),
+            enabled: true,
+            enhanced: false,
+          },
+        ],
+      });
+      lesson.hand = ["a", "b"];
+      lesson.idol.modifiers = [
+        { kind: "motivation", amount: 4, id: "x" },
+        { kind: "positiveImpression", amount: 10, id: "y" },
+      ];
+      const idGenerator = createIdGenerator();
+      const { updates: updates1 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(
+        updates1.filter(
+          (e) =>
+            e.kind === "modifier" &&
+            e.actual.kind === "effectActivationUponCardUsage",
+        ),
+      ).toStrictEqual([
+        {
+          kind: "modifier",
+          actual: {
+            kind: "effectActivationUponCardUsage",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          max: {
+            kind: "effectActivationUponCardUsage",
+            effect: expect.any(Object),
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+
+      lesson = patchUpdates(lesson, updates1);
+
+      const { updates: updates2 } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      expect(updates2.filter((e) => e.kind === "score")).toStrictEqual([
+        {
+          kind: "score",
+          actual: 3,
+          max: 3,
+          reason: expect.any(Object),
+        },
+      ]);
+    });
   });
   describe("主効果発動", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {
@@ -4351,16 +4449,21 @@ describe("useCard preview:false", () => {
       test("it works", () => {
         // この効果を持つスキルカードがないので、モックを作る
         const cardDefinitionMock = {
-          base: {
-            cost: { kind: "normal", value: 0 },
-            effects: [
-              {
-                kind: "multiplyModifier",
-                modifierKind: "positiveImpression",
-                multiplier: 1.5,
-              },
-            ],
-          },
+          contents: [
+            {
+              cost: { kind: "normal", value: 0 },
+              effects: [
+                {
+                  kind: "multiplyModifier",
+                  modifierKind: "positiveImpression",
+                  multiplier: 1.5,
+                },
+              ],
+            },
+            {},
+            {},
+            {},
+          ],
         } as CardDefinition;
         const lesson = createLessonForTest({
           cards: [

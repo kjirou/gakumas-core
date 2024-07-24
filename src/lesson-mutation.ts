@@ -1300,7 +1300,7 @@ export const activateEffectsOnLessonStart = (
 };
 
 /**
- * ターン開始時のPアイテムの効果を発動する
+ * ターン開始時・2ターンごとのPアイテムの効果を発動する
  */
 export const activateProducerItemEffectsOnTurnStart = (
   lesson: Lesson,
@@ -1318,10 +1318,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (
-      canTriggerProducerItem(newLesson, producerItem, "turnStart") ||
-      canTriggerProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
-    ) {
+    if (canTriggerProducerItem(newLesson, producerItem, "turnStart")) {
       const diff = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
@@ -1346,8 +1343,43 @@ export const activateProducerItemEffectsOnTurnStart = (
     }
   }
 
+  //
+  // 2ターンごとの効果発動
+  //
+  let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
+  for (const producerItem of newLesson.idol.producerItems) {
+    if (
+      canTriggerProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
+    ) {
+      const diff = activateEffectsOfProducerItem(
+        newLesson,
+        producerItem,
+        params.getRandom,
+        params.idGenerator,
+      );
+      const innerUpdates = diff.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      );
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        turnStartEveryTwoTurnsUpdates = [
+          ...turnStartEveryTwoTurnsUpdates,
+          ...innerUpdates,
+        ];
+        nextHistoryResultIndex++;
+        if (isScoreSatisfyingPerfect(newLesson)) {
+          break;
+        }
+      }
+    }
+  }
+
   return {
-    updates: [...turnStartUpdates],
+    updates: [...turnStartUpdates, ...turnStartEveryTwoTurnsUpdates],
     nextHistoryResultIndex,
   };
 };

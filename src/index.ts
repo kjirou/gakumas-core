@@ -228,13 +228,14 @@ export const startLessonTurn = (
   // - 1 > 2
   //   - 「はつぼしキーホルダー」->「柴犬ポシェット」の順序で発動していることを以下で確認
   //     - 参考動画: https://www.youtube.com/live/6LEmq_eZTE4?si=ZPlHH-4Nw0kb4aoC&t=16768
+  //       - Pアイテムの順序は、「柴犬ポシェット」->「はつぼしキーホルダー」の順
   // - 1 > 3 > 4
   //   - 「星のリトルプリンス」-> 手札を引く -> 「成就」の順序で発動していることを以下で確認
   //     - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=u1CdnIForY12KtF1&t=5256
   //
 
   //
-  // Pアイテム起因の、ターン開始時の効果発動
+  // Pアイテム起因の、ターン開始時・2ターンごとの効果発動
   //
   const activateProducerItemEffectsOnTurnStartResult =
     activateProducerItemEffectsOnTurnStart(lesson, historyResultIndex, {

@@ -684,7 +684,7 @@ export type CardInProduction = {
   id: string;
 };
 
-type CardEnhancement =
+export type CardEnhancement =
   | {
       /** レッスン中の強化により付与された強化、原文の「レッスン中強化」に相当、"original"や既に"effect"がある場合は付与されない */
       kind: "effect";
@@ -1276,6 +1276,18 @@ export type LessonUpdateQueryDiff =
       /** スキルカードの強化、「レッスン中強化」効果によるもの */
       kind: "cards.enhancement.effect";
       cardIds: Array<Card["id"]>;
+    }
+  | {
+      /**
+       * スキルカードの強化、レッスンサポートによるもの
+       *
+       * - supportCardIds は、要素数で強化数を表現している。サポートカードのID自体はまだ未実装
+       */
+      kind: "cards.enhancement.lessonSupport";
+      targets: Array<{
+        cardId: Card["id"];
+        supportCardIds: Array<{}>;
+      }>;
     }
   | {
       /** レッスンサポートの削除 */

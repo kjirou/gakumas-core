@@ -1266,10 +1266,10 @@ export type LessonUpdateQueryDiff =
        * - 変化のあった配置のみプロパティが存在する
        */
       kind: "cardPlacement";
-      deck?: Lesson["deck"];
-      discardPile?: Lesson["discardPile"];
-      hand?: Lesson["hand"];
-      removedCardPile?: Lesson["removedCardPile"];
+      deck?: Array<Card["id"]>;
+      discardPile?: Array<Card["id"]>;
+      hand?: Array<Card["id"]>;
+      removedCardPile?: Array<Card["id"]>;
     }
   | {
       /** カードセットの上書き、ログの量が多すぎるので開発中以外は基本的に使わない */

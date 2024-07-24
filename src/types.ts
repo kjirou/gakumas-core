@@ -1277,6 +1277,11 @@ export type LessonUpdateQueryDiff =
       cards: Card[];
     }
   | {
+      /** スキルカード追加 */
+      kind: "cards.addition";
+      card: Card;
+    }
+  | {
       /** レッスンサポートの削除 */
       kind: "cards.removingLessonSupports";
       cardIds: Array<Card["id"]>;

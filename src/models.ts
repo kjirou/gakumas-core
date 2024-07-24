@@ -412,6 +412,13 @@ export const patchUpdates = (
         };
         break;
       }
+      case "cards.addition": {
+        newLesson = {
+          ...newLesson,
+          cards: [...newLesson.cards, update.card],
+        };
+        break;
+      }
       case "cards.removingLessonSupports": {
         newLesson = {
           ...newLesson,

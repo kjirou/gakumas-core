@@ -448,6 +448,29 @@ describe("patchUpdates", () => {
       expect(lesson.cards).toStrictEqual([]);
     });
   });
+  describe("cards.addition", () => {
+    test("it works", () => {
+      const lessonMock = {
+        cards: [
+          {
+            id: "1",
+          },
+        ],
+      } as Lesson;
+      const lesson = patchUpdates(lessonMock, [
+        {
+          kind: "cards.addition",
+          card: { id: "2" } as Card,
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lesson.cards).toStrictEqual([{ id: "1" }, { id: "2" }]);
+    });
+  });
   describe("cards.removingLessonSupports", () => {
     test("it works", () => {
       const lessonMock = {

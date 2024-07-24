@@ -15,6 +15,7 @@ import type {
   LessonUpdateQuery,
   LessonUpdateQueryDiff,
   LessonUpdateQueryReason,
+  MemoryEffect,
   Modifier,
   ProducePlan,
   ProducerItem,
@@ -1040,6 +1041,72 @@ const activateDelayedEffectModifier = (
 };
 
 /**
+ * メモリーのアビリティの効果を発動する
+ */
+export const activateMemoryEffect = (
+  lesson: Lesson,
+  memoryEffect: MemoryEffect,
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+): LessonUpdateQueryDiff[] => {
+  if (memoryEffect.probability <= getRandom() * 100) {
+    return [];
+  }
+  const id = idGenerator();
+  const sameKindModifier = lesson.idol.modifiers.find(
+    (e) => e.kind === memoryEffect.kind,
+  );
+  switch (memoryEffect.kind) {
+    case "focus":
+    case "motivation":
+    case "positiveImpression": {
+      const modifier: Modifier = {
+        kind: "focus",
+        amount: memoryEffect.value,
+        id,
+        ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
+      };
+      return [
+        {
+          kind: "modifier",
+          actual: modifier,
+          max: modifier,
+        },
+      ];
+    }
+    case "goodCondition":
+    case "halfLifeConsumption": {
+      const modifier: Modifier = {
+        kind: "goodCondition",
+        duration: memoryEffect.value,
+        id,
+        ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
+      };
+      return [
+        {
+          kind: "modifier",
+          actual: modifier,
+          max: modifier,
+        },
+      ];
+    }
+    case "vitality": {
+      return [
+        {
+          kind: "vitality",
+          actual: memoryEffect.value,
+          max: memoryEffect.value,
+        },
+      ];
+    }
+    default: {
+      const unreachable: never = memoryEffect.kind;
+      throw new Error(`Unreachable statement`);
+    }
+  }
+};
+
+/**
  * 効果発動結果リスト
  *
  * - 配列のインデックスは、実行した効果リストのインデックスに対応する
@@ -1772,6 +1839,49 @@ export const decreaseEachModifierDurationOverTime = (
 
   return {
     updates: [...modifierUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
+ * メモリーのアビリティの効果を発動する
+ */
+export const activateMemoryEffectsOnLessonStart = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  let memoryEffectUpdates: LessonUpdateQuery[] = [];
+  for (const memoryEffect of newLesson.memoryEffects) {
+    memoryEffectUpdates = [
+      ...memoryEffectUpdates,
+      ...activateMemoryEffect(
+        newLesson,
+        memoryEffect,
+        params.getRandom,
+        params.idGenerator,
+      ).map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      ),
+    ];
+    newLesson = patchUpdates(newLesson, memoryEffectUpdates);
+  }
+  if (memoryEffectUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  return {
+    updates: [...memoryEffectUpdates],
     nextHistoryResultIndex,
   };
 };

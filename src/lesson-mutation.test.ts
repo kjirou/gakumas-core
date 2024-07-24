@@ -12,6 +12,8 @@ import { getCardDataById } from "./data/cards";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
+  activateMemoryEffect,
+  activateMemoryEffectsOnLessonStart,
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
@@ -1858,6 +1860,137 @@ describe("calculatePerformingVitalityEffect", () => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
   });
 });
+describe("activateMemoryEffect", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateMemoryEffect>;
+    expected: ReturnType<typeof activateMemoryEffect>;
+    name: string;
+  }> = [
+    {
+      name: "可能性が0の時、常に結果を返さない",
+      args: [
+        {} as Lesson,
+        { kind: "focus", value: 1, probability: 0 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [],
+    },
+    {
+      name: "値がamountプロパティな状態修正を新規で付与する",
+      args: [
+        { idol: { modifiers: [] as Modifier[] } } as Lesson,
+        { kind: "focus", value: 1, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: { kind: "focus", amount: 1, id: expect.any(String) },
+          max: { kind: "focus", amount: 1, id: expect.any(String) },
+        },
+      ],
+    },
+    {
+      name: "値がamountプロパティな状態修正を更新する",
+      args: [
+        {
+          idol: { modifiers: [{ kind: "focus", amount: 1, id: "a" }] },
+        } as Lesson,
+        { kind: "focus", value: 2, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "focus",
+            amount: 2,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+          max: {
+            kind: "focus",
+            amount: 2,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+        },
+      ],
+    },
+    {
+      name: "値がdurationプロパティな状態修正を新規で付与する",
+      args: [
+        { idol: { modifiers: [] as Modifier[] } } as Lesson,
+        { kind: "goodCondition", value: 1, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "goodCondition",
+            duration: 1,
+            id: expect.any(String),
+          },
+          max: { kind: "goodCondition", duration: 1, id: expect.any(String) },
+        },
+      ],
+    },
+    {
+      name: "値がdurationプロパティな状態修正を更新する",
+      args: [
+        {
+          idol: {
+            modifiers: [{ kind: "goodCondition", duration: 1, id: "a" }],
+          },
+        } as Lesson,
+        { kind: "goodCondition", value: 2, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "goodCondition",
+            duration: 2,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+          max: {
+            kind: "goodCondition",
+            duration: 2,
+            id: expect.any(String),
+            updateTargetId: "a",
+          },
+        },
+      ],
+    },
+    {
+      name: "元気を付与する",
+      args: [
+        { idol: { vitality: 1, modifiers: [] as Modifier[] } } as Lesson,
+        { kind: "vitality", value: 2, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "vitality",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateMemoryEffect(...args)).toStrictEqual(expected);
+  });
+});
 describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
   test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
     let lesson = createLessonForTest({
@@ -3362,6 +3495,55 @@ describe("decreaseEachModifierDurationOverTime", () => {
     expect(decreaseEachModifierDurationOverTime(...args)).toStrictEqual(
       expected,
     );
+  });
+});
+// 基本的には activateMemoryEffect 側でテストする
+describe("activateMemoryEffectsOnLessonStart", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateMemoryEffectsOnLessonStart>;
+    expected: ReturnType<typeof activateMemoryEffectsOnLessonStart>;
+    name: string;
+  }> = [
+    {
+      name: "設定がない時、発動しない",
+      args: [
+        createLessonForTest(),
+        1,
+        { getRandom: () => 0, idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [],
+        nextHistoryResultIndex: 1,
+      },
+    },
+    {
+      name: "100%発動する設定がある時、発動する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.memoryEffects = [
+            { kind: "focus", value: 1, probability: 100 },
+          ];
+          return lesson;
+        })(),
+        1,
+        { getRandom: () => 0, idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier",
+            actual: { kind: "focus", amount: 1, id: expect.any(String) },
+            max: { kind: "focus", amount: 1, id: expect.any(String) },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateMemoryEffectsOnLessonStart(...args)).toStrictEqual(expected);
   });
 });
 describe("consumeRemainingCardUsageCount", () => {

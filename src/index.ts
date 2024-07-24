@@ -24,6 +24,7 @@ import {
   activateEffectsOnTurnEnd,
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
+  activateMemoryEffectsOnLessonStart,
   consumeRemainingCardUsageCount,
   decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
@@ -205,7 +206,7 @@ export const startLessonTurn = (
   //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "drawCards"
   // 7. 状態修正起因の、「(次ターン|nターン後)、スキルカードを強化」の効果発動
   //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "enhanceHand"
-  // 8. メモリーアビリティの効果発動
+  // 8. メモリーのアビリティの効果発動
   //
   // 仕様確認済み情報のまとめ
   //
@@ -286,8 +287,22 @@ export const startLessonTurn = (
   }
 
   //
-  // TODO: メモリーアビリティの効果発動
+  // メモリーのアビリティの効果発動
   //
+  if (lesson.turnNumber === 1 && !isScoreSatisfyingPerfect(lesson)) {
+    const activateMemoryEffectsOnLessonStartResult =
+      activateMemoryEffectsOnLessonStart(lesson, historyResultIndex, {
+        getRandom: lessonGamePlay.getRandom,
+        idGenerator: lessonGamePlay.idGenerator,
+      });
+    updates = [...updates, ...activateMemoryEffectsOnLessonStartResult.updates];
+    historyResultIndex =
+      activateMemoryEffectsOnLessonStartResult.nextHistoryResultIndex;
+    lesson = patchUpdates(
+      lesson,
+      activateMemoryEffectsOnLessonStartResult.updates,
+    );
+  }
 
   //
   // この時点で存在する状態修正IDリストを更新

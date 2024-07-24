@@ -489,6 +489,26 @@ export type Effect = (
 };
 
 /**
+ * メモリーのアビリティの効果
+ *
+ * - 本家仕様を正確に表現はしない
+ *   - 本実装は主にレッスンシュミレーター用なので、第一に必要になるのは「100%で何かを発生すること」で、他の重要度は低い
+ */
+export type MemoryEffect = {
+  kind:
+    | "focus"
+    | "halfLifeConsumption"
+    | "goodCondition"
+    | "motivation"
+    | "positiveImpression"
+    | "vitality";
+  /** 発生確率、単位は%、0-100の範囲 */
+  probability: number;
+  /** 各効果の値、正の数のみ */
+  value: number;
+};
+
+/**
  * カードを使用する際の条件
  *
  * - 原文は、「{condition}」が効果欄の先頭へ記載される
@@ -1087,6 +1107,7 @@ export type Lesson = {
   /** 手札、原文でも「手札」、最大5枚 */
   hand: Array<Card["id"]>;
   idol: Idol;
+  memoryEffects: MemoryEffect[];
   /**
    * 山札が0枚の時にプレイされたスキルカードIDリスト
    *

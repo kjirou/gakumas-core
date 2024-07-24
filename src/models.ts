@@ -17,7 +17,6 @@ import {
   CardContentDefinition,
   CardEnhancement,
   CardInProduction,
-  CardSetDefinition,
   Effect,
   GetRandom,
   IdGenerator,
@@ -28,6 +27,7 @@ import {
   Lesson,
   LessonGamePlay,
   LessonUpdateQuery,
+  LessonUpdateQueryReason,
   Modifier,
   ModifierDefinition,
   ProducePlan,
@@ -655,4 +655,11 @@ export const patchUpdates = (
     }
   }
   return newLesson;
+};
+/** 次のレッスン履歴インデックスを返す */
+export const getNextHistoryResultIndex = (
+  updates: LessonUpdateQuery[],
+): LessonUpdateQueryReason["historyResultIndex"] => {
+  const lastUpdate = updates[updates.length - 1];
+  return lastUpdate ? lastUpdate.reason.historyResultIndex + 1 : 1;
 };

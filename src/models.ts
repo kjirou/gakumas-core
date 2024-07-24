@@ -405,10 +405,10 @@ export const patchUpdates = (
         };
         break;
       }
-      case "cards": {
+      case "cards.addition": {
         newLesson = {
           ...newLesson,
-          cards: update.cards,
+          cards: [...newLesson.cards, update.card],
         };
         break;
       }

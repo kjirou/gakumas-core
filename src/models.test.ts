@@ -422,22 +422,19 @@ describe("patchUpdates", () => {
       expect(lesson.removedCardPile).toStrictEqual(["44", "444"]);
     });
   });
-  describe("cards", () => {
+  describe("cards.addition", () => {
     test("it works", () => {
       const lessonMock = {
         cards: [
           {
             id: "1",
           },
-          {
-            id: "2",
-          },
         ],
       } as Lesson;
       const lesson = patchUpdates(lessonMock, [
         {
-          kind: "cards",
-          cards: [],
+          kind: "cards.addition",
+          card: { id: "2" } as Card,
           reason: {
             kind: "lessonStartTrigger",
             historyTurnNumber: 1,
@@ -445,7 +442,7 @@ describe("patchUpdates", () => {
           },
         },
       ]);
-      expect(lesson.cards).toStrictEqual([]);
+      expect(lesson.cards).toStrictEqual([{ id: "1" }, { id: "2" }]);
     });
   });
   describe("cards.removingLessonSupports", () => {

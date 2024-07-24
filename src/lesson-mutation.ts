@@ -817,15 +817,15 @@ const activateEffect = (
         enabled: true,
         enhanced: true,
       };
-      const card: Card = prepareCardsForLesson([cardInProduction])[0];
+      const addedCard: Card = prepareCardsForLesson([cardInProduction])[0];
       const { hand, discardPile } = addCardsToHandOrDiscardPile(
-        [card.id],
+        [addedCard.id],
         lesson.hand,
         lesson.discardPile,
       );
       diffs.push({
-        kind: "cards",
-        cards: [...lesson.cards, card],
+        kind: "cards.addition",
+        card: addedCard,
       });
       diffs.push(
         createCardPlacementDiff(

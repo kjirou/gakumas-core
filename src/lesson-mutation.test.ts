@@ -3164,9 +3164,11 @@ describe("activateModifierEffectsOnTurnStart", () => {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });
-    expect(updates.filter((e) => e.kind === "cardEnhancement")).toStrictEqual([
+    expect(
+      updates.filter((e) => e.kind === "cards.enhancement.effect"),
+    ).toStrictEqual([
       {
-        kind: "cardEnhancement",
+        kind: "cards.enhancement.effect",
         cardIds: ["a", "b"],
         reason: expect.any(Object),
       },
@@ -3228,9 +3230,11 @@ describe("activateModifierEffectsOnTurnStart", () => {
       getRandom: Math.random,
       idGenerator: createIdGenerator(),
     });
-    expect(updates.filter((e) => e.kind === "cardEnhancement")).toStrictEqual([
+    expect(
+      updates.filter((e) => e.kind === "cards.enhancement.effect"),
+    ).toStrictEqual([
       {
-        kind: "cardEnhancement",
+        kind: "cards.enhancement.effect",
         cardIds: ["a", "b"],
         reason: expect.any(Object),
       },
@@ -4128,7 +4132,7 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         const enhancedCardIds = (
-          updates.find((e) => e.kind === "cardEnhancement") as any
+          updates.find((e) => e.kind === "cards.enhancement.effect") as any
         ).cardIds;
         expect(enhancedCardIds).not.toContain("a");
         expect(enhancedCardIds).toContain("b");

@@ -333,7 +333,7 @@ describe("patchUpdates", () => {
       } as Lesson;
       const lesson = patchUpdates(lessonMock, [
         {
-          kind: "cardEnhancement",
+          kind: "cards.enhancement.effect",
           cardIds: ["1"],
           reason: {
             kind: "lessonStartTrigger",

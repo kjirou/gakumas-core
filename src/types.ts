@@ -1256,10 +1256,6 @@ export type LessonUpdateQueryDiff =
       amount: number;
     }
   | {
-      kind: "cardEnhancement";
-      cardIds: Array<Card["id"]>;
-    }
-  | {
       /**
        * カード配置の上書き
        *
@@ -1272,9 +1268,14 @@ export type LessonUpdateQueryDiff =
       removedCardPile?: Array<Card["id"]>;
     }
   | {
-      /** スキルカード追加 */
+      /** スキルカードの追加 */
       kind: "cards.addition";
       card: Card;
+    }
+  | {
+      /** スキルカードの強化、「レッスン中強化」効果によるもの */
+      kind: "cards.enhancement.effect";
+      cardIds: Array<Card["id"]>;
     }
   | {
       /** レッスンサポートの削除 */

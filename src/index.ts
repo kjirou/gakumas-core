@@ -158,24 +158,6 @@ export const startLessonTurn = (
   }
 
   //
-  // この時点で存在する状態修正IDリストを更新
-  //
-  const modifierIdsAtTurnStartUpdates: LessonUpdateQuery[] = [
-    {
-      kind: "modifierIdsAtTurnStart",
-      modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
-      reason: {
-        kind: "turnEndTrigger",
-        historyTurnNumber: lesson.turnNumber,
-        historyResultIndex,
-      },
-    },
-  ];
-  updates = [...updates, ...modifierIdsAtTurnStartUpdates];
-  historyResultIndex++;
-  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
-
-  //
   // アクションポイントを1にする
   //
   const actionPointsUpdates: LessonUpdateQuery[] = [
@@ -245,6 +227,10 @@ export const startLessonTurn = (
   //
 
   //
+  // TODO: 応援/トラブルの効果発動
+  //
+
+  //
   // Pアイテム起因の、ターン開始時・2ターンごとの効果発動
   //
   const activateProducerItemEffectsOnTurnStartResult =
@@ -298,6 +284,32 @@ export const startLessonTurn = (
       activateModifierEffectsOnTurnStartResult.updates,
     );
   }
+
+  //
+  // TODO: メモリーアビリティの効果発動
+  //
+
+  //
+  // この時点で存在する状態修正IDリストを更新
+  //
+  // - 次ターン開始時の先頭で、効果時間の自然減少の対象にするもの
+  // - もし、「状態修正起因の、ターン開始時の効果発動」で効果時間を持つものが付与される場合、自然減少の対象になるかは不明
+  //   - 今の所、「状態修正起因の、ターン開始時の効果発動」の効果には、状態修正を付与するものがない
+  //
+  const modifierIdsAtTurnStartUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "modifierIdsAtTurnStart",
+      modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
+      reason: {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...modifierIdsAtTurnStartUpdates];
+  historyResultIndex++;
+  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
 
   return {
     ...lessonGamePlay,

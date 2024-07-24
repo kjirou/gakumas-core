@@ -2430,7 +2430,7 @@ describe("summarizeCardInHand", () => {
           if (aCard) {
             aCard.enhancements = [
               ...aCard.enhancements,
-              { kind: "supportCard", supportCardId: "x" },
+              { kind: "lessonSupport" },
             ];
           }
           return lesson;
@@ -2442,10 +2442,7 @@ describe("summarizeCardInHand", () => {
       expected: {
         cost: expect.any(Object),
         effects: expect.any(Array),
-        enhancements: [
-          { kind: "original" },
-          { kind: "supportCard", supportCardId: "x" },
-        ],
+        enhancements: [{ kind: "original" }, { kind: "lessonSupport" }],
         name: "アピールの基本++",
         playable: expect.any(Boolean),
         scores: expect.any(Array),
@@ -2759,6 +2756,38 @@ describe("drawCardsOnLessonStart", () => {
         kind: "cardPlacement",
         hand: ["a", "b", "c", "e", "f"],
         deck: ["g", "h", "d", "i"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("全てのスキルカードへ付与しているレッスンサポートを削除する", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c"].map((id) => ({
+          id,
+          definition: getCardDataById("apirunokihon"),
+          enabled: true,
+          enhanced: false,
+        })),
+      ],
+    });
+    const aCard = lesson.cards.find((e) => e.id === "a");
+    if (aCard) {
+      aCard.enhancements = [{ kind: "lessonSupport" }];
+    }
+    const cCard = lesson.cards.find((e) => e.id === "c");
+    if (cCard) {
+      cCard.enhancements = [{ kind: "lessonSupport" }];
+    }
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    expect(
+      updates.filter((e) => e.kind === "cards.removingLessonSupports"),
+    ).toStrictEqual([
+      {
+        kind: "cards.removingLessonSupports",
+        cardIds: ["a", "c"],
         reason: expect.any(Object),
       },
     ]);

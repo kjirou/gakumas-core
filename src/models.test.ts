@@ -448,6 +448,54 @@ describe("patchUpdates", () => {
       expect(lesson.cards).toStrictEqual([]);
     });
   });
+  describe("cards.removingLessonSupports", () => {
+    test("it works", () => {
+      const lessonMock = {
+        cards: [
+          {
+            id: "1",
+            enhancements: [{ kind: "original" }, { kind: "lessonSupport" }],
+          },
+          {
+            id: "2",
+            enhancements: [
+              { kind: "effect" },
+              { kind: "lessonSupport" },
+              { kind: "lessonSupport" },
+              { kind: "lessonSupport" },
+            ],
+          },
+          {
+            id: "3",
+            enhancements: [{ kind: "lessonSupport" }],
+          },
+          {
+            id: "4",
+            enhancements: [],
+          },
+        ],
+      } as Lesson;
+      const lesson = patchUpdates(lessonMock, [
+        {
+          kind: "cards.removingLessonSupports",
+          cardIds: ["1", "2", "4"],
+          reason: {
+            kind: "lessonStartTrigger",
+            historyTurnNumber: 1,
+            historyResultIndex: 1,
+          },
+        },
+      ]);
+      expect(lesson.cards[0].enhancements).toStrictEqual([
+        { kind: "original" },
+      ]);
+      expect(lesson.cards[1].enhancements).toStrictEqual([{ kind: "effect" }]);
+      expect(lesson.cards[2].enhancements).toStrictEqual([
+        { kind: "lessonSupport" },
+      ]);
+      expect(lesson.cards[3].enhancements).toStrictEqual([]);
+    });
+  });
   describe("modifierIdsAtTurnStart", () => {
     test("it works", () => {
       const lessonMock = {

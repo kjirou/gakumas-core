@@ -684,20 +684,22 @@ export type CardInProduction = {
   id: string;
 };
 
-// TODO: supportCard は、アイコン表示のためにカードを特定できる必要がある
 type CardEnhancement =
   | {
       /** レッスン中の強化により付与された強化、原文の「レッスン中強化」に相当、"original"や既に"effect"がある場合は付与されない */
       kind: "effect";
     }
   | {
-      /** プロデュース中のスキルカードに付与されている強化 */
-      kind: "original";
+      /**
+       * レッスンサポート
+       *
+       * - TODO: サポカのアイコンを表示するために、それを指定できるIDが必要
+       */
+      kind: "lessonSupport";
     }
   | {
-      /** レッスン開始時に付与されるサポートカードによる強化、この強化のみ累積して効果がある */
-      kind: "supportCard";
-      supportCardId: string;
+      /** プロデュース中のスキルカードに付与されている強化 */
+      kind: "original";
     };
 
 /**
@@ -1270,9 +1272,14 @@ export type LessonUpdateQueryDiff =
       removedCardPile?: Lesson["removedCardPile"];
     }
   | {
-      /** カードセットの上書き */
+      /** カードセットの上書き、ログの量が多すぎるので開発中以外は基本的に使わない */
       kind: "cards";
       cards: Card[];
+    }
+  | {
+      /** レッスンサポートの削除 */
+      kind: "cards.removingLessonSupports";
+      cardIds: Array<Card["id"]>;
     }
   | {
       kind: "life";

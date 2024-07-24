@@ -412,6 +412,23 @@ export const patchUpdates = (
         };
         break;
       }
+      case "cards.removingLessonSupports": {
+        newLesson = {
+          ...newLesson,
+          cards: newLesson.cards.map((card) => {
+            if (!update.cardIds.includes(card.id)) {
+              return card;
+            }
+            return {
+              ...card,
+              enhancements: card.enhancements.filter(
+                (enhancement) => enhancement.kind !== "lessonSupport",
+              ),
+            };
+          }),
+        };
+        break;
+      }
       case "life": {
         newLesson = {
           ...newLesson,

@@ -28,6 +28,7 @@ import {
   LessonGamePlay,
   LessonUpdateQuery,
   LessonUpdateQueryReason,
+  MemoryEffect,
   Modifier,
   ModifierDefinition,
   ProducePlan,
@@ -254,9 +255,10 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  */
 export const createLessonGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
-  idolInProduction: IdolInProduction;
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
+  idolInProduction: IdolInProduction;
+  memoryEffects?: MemoryEffect[];
   turns: Lesson["turns"];
 }): LessonGamePlay => {
   const clearScoreThresholds =
@@ -265,6 +267,7 @@ export const createLessonGamePlay = (params: {
       : undefined;
   const getRandom = params.getRandom ? params.getRandom : Math.random;
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
+  const memoryEffects = params.memoryEffects ?? [];
   return {
     getRandom,
     idGenerator: params.idGenerator,
@@ -280,7 +283,7 @@ export const createLessonGamePlay = (params: {
       idol: createIdol({
         idolInProduction: params.idolInProduction,
       }),
-      memoryEffects: [],
+      memoryEffects,
       turns: params.turns,
       removedCardPile: [],
       playedCardsOnEmptyDeck: [],

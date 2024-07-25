@@ -1061,7 +1061,7 @@ export const activateMemoryEffect = (
     case "motivation":
     case "positiveImpression": {
       const modifier: Modifier = {
-        kind: "focus",
+        kind: memoryEffect.kind,
         amount: memoryEffect.value,
         id,
         ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
@@ -1077,7 +1077,7 @@ export const activateMemoryEffect = (
     case "goodCondition":
     case "halfLifeConsumption": {
       const modifier: Modifier = {
-        kind: "goodCondition",
+        kind: memoryEffect.kind,
         duration: memoryEffect.value,
         id,
         ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),

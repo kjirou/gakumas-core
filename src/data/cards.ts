@@ -1165,7 +1165,11 @@ export const cards: CardDefinition[] = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 3 },
+            },
             modifier: { kind: "goodCondition", duration: 3 },
           },
         ],
@@ -1178,7 +1182,11 @@ export const cards: CardDefinition[] = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 3 },
+            },
             modifier: { kind: "goodCondition", duration: 3 },
           },
         ],
@@ -1191,7 +1199,11 @@ export const cards: CardDefinition[] = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 3 },
+            },
             modifier: { kind: "goodCondition", duration: 3 },
           },
         ],
@@ -1377,7 +1389,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "positiveImpression",
-              min: 3,
+              range: { min: 3 },
             },
             modifier: { kind: "motivation", amount: 2 },
           },
@@ -1394,7 +1406,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "positiveImpression",
-              min: 3,
+              range: { min: 3 },
             },
             modifier: { kind: "motivation", amount: 3 },
           },
@@ -1411,7 +1423,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "positiveImpression",
-              min: 1,
+              range: { min: 1 },
             },
             modifier: { kind: "motivation", amount: 3 },
           },
@@ -1428,7 +1440,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "positiveImpression",
-              min: 1,
+              range: { min: 1 },
             },
             modifier: { kind: "motivation", amount: 4 },
           },
@@ -1454,7 +1466,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 3,
+              range: { min: 3 },
             },
             modifier: { kind: "positiveImpression", amount: 3 },
           },
@@ -1468,7 +1480,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 3,
+              range: { min: 3 },
             },
             modifier: { kind: "positiveImpression", amount: 4 },
           },
@@ -1500,7 +1512,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 6,
+              range: { min: 6 },
             },
             modifier: { kind: "positiveImpression", amount: 4 },
           },
@@ -1514,7 +1526,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 6,
+              range: { min: 6 },
             },
             modifier: { kind: "positiveImpression", amount: 5 },
           },
@@ -1716,7 +1728,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", score: { value: 10 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 6 },
+            },
             score: { value: 10 },
           },
         ],
@@ -1791,7 +1807,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 6,
+              range: { min: 6 },
             },
             vitality: { value: 2 },
           },
@@ -1806,7 +1822,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 6,
+              range: { min: 6 },
             },
             vitality: { value: 5 },
           },
@@ -2102,7 +2118,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", score: { value: 13 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 6 },
+            },
             score: { value: 15 },
           },
         ],
@@ -3961,7 +3981,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "positiveImpression",
-              min: 10,
+              range: { min: 10 },
             },
             modifier: { kind: "positiveImpression", amount: 2 },
           },
@@ -4024,7 +4044,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", score: { value: 12 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 3 },
+            },
             score: { value: 12 },
           },
         ],
@@ -4790,7 +4814,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", vitality: { value: 15 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 3 },
+            },
             score: { value: 15 },
           },
         ],
@@ -4801,7 +4829,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", vitality: { value: 15 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 3 },
+            },
             score: { value: 34 },
           },
         ],
@@ -5770,7 +5802,7 @@ export const cards: CardDefinition[] = [
                 condition: {
                   kind: "countModifier",
                   modifierKind: "focus",
-                  min: 3,
+                  range: { min: 3 },
                 },
                 modifier: { kind: "focus", amount: 2 },
               },
@@ -6091,7 +6123,7 @@ export const cards: CardDefinition[] = [
                 condition: {
                   kind: "countModifier",
                   modifierKind: "positiveImpression",
-                  min: 3,
+                  range: { min: 3 },
                 },
                 modifier: { kind: "positiveImpression", amount: 3 },
               },
@@ -6115,7 +6147,7 @@ export const cards: CardDefinition[] = [
                 condition: {
                   kind: "countModifier",
                   modifierKind: "positiveImpression",
-                  min: 3,
+                  range: { min: 3 },
                 },
                 modifier: { kind: "positiveImpression", amount: 3 },
               },
@@ -6139,7 +6171,7 @@ export const cards: CardDefinition[] = [
                 condition: {
                   kind: "countModifier",
                   modifierKind: "positiveImpression",
-                  min: 3,
+                  range: { min: 3 },
                 },
                 modifier: { kind: "positiveImpression", amount: 3 },
               },
@@ -6318,7 +6350,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", score: { times: 2, value: 7 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 6 },
+            },
             score: { value: 7 },
           },
         ],
@@ -6330,7 +6366,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", score: { times: 2, value: 9 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 6 },
+            },
             score: { value: 9 },
           },
         ],
@@ -6341,7 +6381,11 @@ export const cards: CardDefinition[] = [
           { kind: "perform", score: { times: 2, value: 10 } },
           {
             kind: "perform",
-            condition: { kind: "countModifier", modifierKind: "focus", min: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 6 },
+            },
             score: { value: 9 },
           },
         ],
@@ -6482,7 +6526,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 3,
+              range: { min: 3 },
             },
             vitality: { value: 4 },
           },
@@ -6497,7 +6541,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 3,
+              range: { min: 3 },
             },
             vitality: { value: 7 },
           },
@@ -6511,7 +6555,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 3,
+              range: { min: 3 },
             },
             vitality: { value: 8 },
           },
@@ -6525,7 +6569,7 @@ export const cards: CardDefinition[] = [
             condition: {
               kind: "countModifier",
               modifierKind: "motivation",
-              min: 3,
+              range: { min: 3 },
             },
             vitality: { value: 9 },
           },

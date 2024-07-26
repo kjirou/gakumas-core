@@ -65,7 +65,11 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "idol",
     rarity: "r",
     base: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 3 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
       ],
@@ -73,7 +77,11 @@ export const producerItems: ProducerItemDefinition[] = [
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 3 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 6 } },
       ],
@@ -164,7 +172,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 6,
+        range: { min: 6 },
       },
       effects: [
         {
@@ -179,7 +187,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 6,
+        range: { min: 6 },
       },
       effects: [
         {
@@ -271,7 +279,11 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "idol",
     rarity: "r",
     base: {
-      condition: { kind: "countModifier", modifierKind: "motivation", min: 3 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 3 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -282,7 +294,11 @@ export const producerItems: ProducerItemDefinition[] = [
       trigger: { kind: "afterCardEffectActivation" },
     },
     enhanced: {
-      condition: { kind: "countModifier", modifierKind: "motivation", min: 3 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 3 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -371,13 +387,21 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "idol",
     rarity: "sr",
     base: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 5 },
+      },
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 5 },
+      },
       effects: [{ kind: "recoverLife", value: 4 }],
       times: 3,
       trigger: { kind: "turnStart" },
@@ -545,7 +569,11 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "others",
     rarity: "ssr",
     base: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 5 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -595,7 +623,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 3,
+        range: { min: 3 },
       },
       effects: [
         {
@@ -621,7 +649,11 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "others",
     rarity: "ssr",
     base: {
-      condition: { kind: "countModifier", modifierKind: "motivation", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 5 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -694,7 +726,11 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "idol",
     rarity: "ssr",
     base: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 5 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -709,7 +745,11 @@ export const producerItems: ProducerItemDefinition[] = [
       trigger: { kind: "beforeCardEffectActivation" },
     },
     enhanced: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 5 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -831,13 +871,21 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "idol",
     rarity: "ssr",
     base: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 3 },
+      },
       effects: [{ kind: "perform", vitality: { value: 10 } }],
       times: 1,
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "countModifier", modifierKind: "focus", min: 3 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "focus",
+        range: { min: 3 },
+      },
       effects: [{ kind: "perform", vitality: { value: 14 } }],
       times: 1,
       trigger: { kind: "turnStart" },
@@ -853,7 +901,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 6,
+        range: { min: 6 },
       },
       effects: [
         {
@@ -875,7 +923,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 6,
+        range: { min: 6 },
       },
       effects: [
         {
@@ -989,7 +1037,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 10,
+        range: { min: 10 },
       },
       effects: [
         {
@@ -1006,7 +1054,7 @@ export const producerItems: ProducerItemDefinition[] = [
       condition: {
         kind: "countModifier",
         modifierKind: "positiveImpression",
-        min: 10,
+        range: { min: 10 },
       },
       effects: [
         {
@@ -1027,7 +1075,11 @@ export const producerItems: ProducerItemDefinition[] = [
     producerItemProviderKind: "idol",
     rarity: "ssr",
     base: {
-      condition: { kind: "countModifier", modifierKind: "motivation", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 5 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
         {
@@ -1045,7 +1097,11 @@ export const producerItems: ProducerItemDefinition[] = [
       },
     },
     enhanced: {
-      condition: { kind: "countModifier", modifierKind: "motivation", min: 5 },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 5 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "motivation", amount: 5 } },
         {

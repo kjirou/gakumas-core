@@ -225,8 +225,16 @@ export const generateActionCostText = (
 
 const generateEffectConditionText = (condition: EffectCondition): string => {
   switch (condition.kind) {
-    case "countModifier":
-      return `${generateModifierKindText(condition.modifierKind)}が${condition.min}以上の場合`;
+    case "countModifier": {
+      const terms: string[] = [];
+      if ("min" in condition.range) {
+        terms.push(`${condition.range.min}以上`);
+      }
+      if ("max" in condition.range) {
+        terms.push(`${condition.range.max}以下`);
+      }
+      return `${generateModifierKindText(condition.modifierKind)}が${terms.join("")}の場合`;
+    }
     case "countReminingTurns":
       return condition.max === 1
         ? "最終ターンの場合"

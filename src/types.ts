@@ -264,7 +264,8 @@ export type EffectCondition =
        */
       kind: "countModifier";
       modifierKind: "focus" | "motivation" | "positiveImpression";
-      min: number;
+      /** 本家には、「a以上」または「a以下」のどちらかのみで、「a以上b以下」の指定はない */
+      range: RangedNumber;
     }
   | {
       /**

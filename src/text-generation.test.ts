@@ -377,11 +377,45 @@ describe("generateEffectText", () => {
         {
           kind: "perform",
           score: { value: 10 },
-          condition: { kind: "countModifier", modifierKind: "focus", min: 1 },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "focus",
+            range: { min: 1 },
+          },
         },
       ],
       expected: "{{集中}}が1以上の場合、パラメータ+10",
-      name: "condition - countModifier",
+      name: "condition - countModifier - range - min",
+    },
+    {
+      args: [
+        {
+          kind: "perform",
+          score: { value: 10 },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "focus",
+            range: { max: 2 },
+          },
+        },
+      ],
+      expected: "{{集中}}が2以下の場合、パラメータ+10",
+      name: "condition - countModifier - range - max",
+    },
+    {
+      args: [
+        {
+          kind: "perform",
+          score: { value: 10 },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "focus",
+            range: { min: 1, max: 2 },
+          },
+        },
+      ],
+      expected: "{{集中}}が1以上2以下の場合、パラメータ+10",
+      name: "condition - countModifier - range - min & max",
     },
     {
       args: [

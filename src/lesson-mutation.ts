@@ -331,7 +331,7 @@ export const canApplyEffect = (
           throw new Error(`Unreachable statement`);
         }
       }
-      return targetValue >= condition.min;
+      return validateNumberInRange(targetValue, condition.range);
     }
     case "countReminingTurns": {
       return calculateRemainingTurns(lesson) <= condition.max;

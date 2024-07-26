@@ -1094,6 +1094,54 @@ describe("canTriggerProducerItem", () => {
       expected: false,
     },
     {
+      name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になる時、trueを返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          ignoreIdolParameterKindConditionAfterClearing: true,
+          clearScoreThresholds: { clear: 1 },
+          score: 1,
+        } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: true,
+    },
+    {
+      name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になるがまだクリア済みでない時、falseを返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          ignoreIdolParameterKindConditionAfterClearing: true,
+          clearScoreThresholds: { clear: 2 },
+          score: 1,
+        } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            definition: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: false,
+    },
+    {
       name: "発動回数条件があり、残り発動回数が足りている時、trueを返す",
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,

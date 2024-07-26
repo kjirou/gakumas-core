@@ -258,6 +258,7 @@ export const createLessonGamePlay = (params: {
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
   idolInProduction: IdolInProduction;
+  ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   memoryEffects?: MemoryEffect[];
   turns: Lesson["turns"];
 }): LessonGamePlay => {
@@ -267,6 +268,8 @@ export const createLessonGamePlay = (params: {
       : undefined;
   const getRandom = params.getRandom ? params.getRandom : Math.random;
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
+  const ignoreIdolParameterKindConditionAfterClearing =
+    params.ignoreIdolParameterKindConditionAfterClearing ?? false;
   const memoryEffects = params.memoryEffects ?? [];
   return {
     getRandom,
@@ -283,6 +286,7 @@ export const createLessonGamePlay = (params: {
       idol: createIdol({
         idolInProduction: params.idolInProduction,
       }),
+      ignoreIdolParameterKindConditionAfterClearing,
       memoryEffects,
       turns: params.turns,
       removedCardPile: [],

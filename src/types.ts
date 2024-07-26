@@ -858,6 +858,9 @@ export type ProducerItemTrigger = (
    *   - 「得体のしれないモノ」は、「【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
    *   - 「悔しさの象徴」は、「【ダンスレッスン・ダンスターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
    *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
+   * - 追い込みレッスンのクリア以降のパーフェクト狙い中（ボーナス中ともいう）は、この条件を常に満たすようになる
+   *   - Ref: https://x.com/ondeath_id/status/1792068212634669195
+   *   - Ref: https://gameo.jp/gkmas/1116
    */
   idolParameterKind?: IdolParameterKind;
 };
@@ -1107,6 +1110,13 @@ export type Lesson = {
   /** 手札、原文でも「手札」、最大5枚 */
   hand: Array<Card["id"]>;
   idol: Idol;
+  /**
+   * レッスンクリア以降はパラメータ属性が全属性になるか
+   *
+   * - クリア以降は、【ボイスレッスン・ボイスターンのみ】などのパラメータ属性条件を無視し、条件を常に満たすようになる設定
+   *   - 本家の「追い込みレッスン」の仕様
+   */
+  ignoreIdolParameterKindConditionAfterClearing: boolean;
   memoryEffects: MemoryEffect[];
   /**
    * 山札が0枚の時にプレイされたスキルカードIDリスト

@@ -180,6 +180,7 @@ describe("createLessonGamePlay", () => {
         turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
         remainingTurns: 0,
         memoryEffects: [],
+        ignoreIdolParameterKindConditionAfterClearing: false,
       },
       updates: [],
     });

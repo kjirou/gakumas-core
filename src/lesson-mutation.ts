@@ -381,6 +381,12 @@ export const canTriggerProducerItem = (
 ): boolean => {
   const producerItemContent = getProducerItemContentDefinition(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+  let isLessonClear = false;
+  if (lesson.clearScoreThresholds) {
+    isLessonClear =
+      calculateClearScoreProgress(lesson.score, lesson.clearScoreThresholds)
+        .remainingClearScore === 0;
+  }
   const everyTwoTurnsCondition =
     !(producerItemContent.trigger.kind === "turnStartEveryTwoTurns") ||
     (lesson.turnNumber >= 2 && lesson.turnNumber % 2 === 0);
@@ -400,14 +406,17 @@ export const canTriggerProducerItem = (
     (options.increasedModifierKinds || []).includes(
       producerItemContent.trigger.modifierKind,
     );
+  const idolParameterKindCondition =
+    (lesson.ignoreIdolParameterKindConditionAfterClearing && isLessonClear) ||
+    producerItemContent.trigger.idolParameterKind === undefined ||
+    producerItemContent.trigger.idolParameterKind === idolParameterKind;
   return (
     producerItemContent.trigger.kind === callFrom &&
     everyTwoTurnsCondition &&
     cardDefinitionIdCondition &&
     cardSummaryKindCondition &&
     modifierIncreaseCondition &&
-    (producerItemContent.trigger.idolParameterKind === undefined ||
-      producerItemContent.trigger.idolParameterKind === idolParameterKind) &&
+    idolParameterKindCondition &&
     (producerItemContent.condition === undefined ||
       canApplyEffect(lesson, producerItemContent.condition)) &&
     isRemainingProducerItemTimes(producerItem)

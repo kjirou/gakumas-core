@@ -161,7 +161,7 @@ describe("generateEffectText", () => {
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "active",
             effect: {
               kind: "perform",
@@ -171,14 +171,14 @@ describe("generateEffectText", () => {
         },
       ],
       expected: "以降、{{アクティブスキルカード}}使用時、{{固定元気}}+1",
-      name: "getModifier - effectActivationUponCardUsage - active",
+      name: "getModifier - effectActivationBeforeCardEffectActivation - active",
     },
     {
       args: [
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "mental",
             effect: {
               kind: "getModifier",
@@ -188,7 +188,7 @@ describe("generateEffectText", () => {
         },
       ],
       expected: "以降、{{メンタルスキルカード}}使用時、{{好印象}}+1",
-      name: "getModifier - effectActivationUponCardUsage - mental",
+      name: "getModifier - effectActivationBeforeCardEffectActivation - mental",
     },
     {
       args: [

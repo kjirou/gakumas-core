@@ -876,7 +876,7 @@ export const activateEffect = (
         effect.modifier.kind !== "delayedEffect" &&
         effect.modifier.kind !== "doubleEffect" &&
         effect.modifier.kind !== "effectActivationOnTurnEnd" &&
-        effect.modifier.kind !== "effectActivationUponCardUsage";
+        effect.modifier.kind !== "effectActivationBeforeCardEffectActivation";
       diffs.push({
         kind: "modifier",
         actual: {
@@ -2200,10 +2200,15 @@ export const useCard = (
     if (!params.preview) {
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
         (e) =>
-          e.kind === "effectActivationUponCardUsage" &&
+          e.kind === "effectActivationBeforeCardEffectActivation" &&
           (e.cardKind === undefined ||
             e.cardKind === card.original.definition.cardSummaryKind),
-      ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
+      ) as Array<
+        Extract<
+          Modifier,
+          { kind: "effectActivationBeforeCardEffectActivation" }
+        >
+      >;
       for (const { effect } of effectsUponCardUsage) {
         const effectResult = activateEffect(
           newLesson,

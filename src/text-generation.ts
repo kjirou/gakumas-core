@@ -57,7 +57,7 @@ export const modifierLabels = {
   // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
   effectActivationOnTurnEnd: "ターン終了時持続効果",
   // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
-  effectActivationUponCardUsage: "スキルカード発動前持続効果",
+  effectActivationBeforeCardEffectActivation: "スキルカード発動前持続効果",
   focus: "集中",
   goodCondition: "好調",
   halfLifeConsumption: "消費体力減少",
@@ -170,7 +170,7 @@ const generateModifierText = (modifier: ModifierDefinition): string => {
         modifier.effect.condition ? "" : "、",
         generateEffectText(modifier.effect),
       ].join("");
-    case "effectActivationUponCardUsage":
+    case "effectActivationBeforeCardEffectActivation":
       return (
         "以降、" +
         (modifier.cardKind === "active"

@@ -162,13 +162,13 @@ export type ModifierDefinition =
     }
   | {
       /**
-       * スキルカード使用時に効果発動
+       * スキルカード使用時の主効果発動前に効果発動
        *
        * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{effect}」
        *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
        *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
        */
-      kind: "effectActivationUponCardUsage";
+      kind: "effectActivationBeforeCardEffectActivation";
       cardKind?: CardSummaryKind;
       effect: Effect;
     }

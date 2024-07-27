@@ -17,7 +17,6 @@
 
 import { CardInHandSummary, LessonGamePlay, LessonUpdateQuery } from "./types";
 import {
-  activateEffect,
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
   activateEncouragementOnTurnStart,
@@ -39,6 +38,10 @@ import {
   patchUpdates,
 } from "./models";
 import { generateCardDescription } from "./text-generation";
+
+export type * from "./types";
+export * from "./models";
+export * from "./utils";
 
 //
 // UI側での想定の呼び出し方
@@ -341,9 +344,9 @@ export const startLessonTurn = (
 };
 
 /**
- * 手札をリストで取得する
+ * 手札を取得する
  */
-export const getCardsInHand = (
+export const getHand = (
   lessonGamePlay: LessonGamePlay,
 ): CardInHandSummary[] => {
   const lesson = patchUpdates(

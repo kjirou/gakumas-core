@@ -1452,7 +1452,7 @@ export type LessonGamePlay = {
  *
  * - 各値は、基本的には各種効果による変動を含めた値
  */
-export type CardInHandSummary = {
+export type CardInHandInformation = {
   cost: ActionCost;
   /**
    * 効果概要リスト

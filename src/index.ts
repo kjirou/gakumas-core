@@ -16,7 +16,7 @@
 // TODO: コンテスト
 
 import {
-  CardInHandSummary,
+  CardInHandInformation,
   LessonGamePlay,
   LessonUpdateQuery,
   ModifierInformation,
@@ -353,7 +353,7 @@ export const startLessonTurn = (
  */
 export const getHand = (
   lessonGamePlay: LessonGamePlay,
-): CardInHandSummary[] => {
+): CardInHandInformation[] => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,

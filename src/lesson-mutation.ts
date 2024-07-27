@@ -2,7 +2,7 @@ import type {
   ActionCost,
   Card,
   CardDefinition,
-  CardInHandSummary,
+  CardInHandInformation,
   CardInProduction,
   CardSummaryKind,
   CardUsageCondition,
@@ -1255,7 +1255,7 @@ export const summarizeCardInHand = (
   cardId: Card["id"],
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): CardInHandSummary => {
+): CardInHandInformation => {
   const card = lesson.cards.find((card) => card.id === cardId);
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
@@ -1272,7 +1272,7 @@ export const summarizeCardInHand = (
       effectActivation ? [...acc, ...effectActivation] : acc,
     [],
   );
-  let scores: CardInHandSummary["scores"] = [];
+  let scores: CardInHandInformation["scores"] = [];
   for (const effectActivation of effectActivations) {
     if (effectActivation) {
       if (effectActivation.length > 0 && effectActivation[0].kind === "score") {
@@ -1287,12 +1287,12 @@ export const summarizeCardInHand = (
       }
     }
   }
-  let vitality: CardInHandSummary["vitality"] = undefined;
+  let vitality: CardInHandInformation["vitality"] = undefined;
   const firstVitalityUpdate = effectDiffs.find((e) => e.kind === "vitality");
   if (firstVitalityUpdate) {
     vitality = firstVitalityUpdate.max;
   }
-  let effects: CardInHandSummary["effects"] = [];
+  let effects: CardInHandInformation["effects"] = [];
   for (const [effectIndex, effect] of cardContent.effects.entries()) {
     const applyable = effectActivations[effectIndex] !== undefined;
     if (effect.kind === "getModifier") {

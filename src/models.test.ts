@@ -734,12 +734,12 @@ describe("patchUpdates", () => {
       }
     });
     describe("永続の状態修正が誤って消えない", () => {
-      test("effectActivationAtEndOfTurn は、 focus を更新した操作により、誤って消えない", () => {
+      test("effectActivationOnTurnEnd は、 focus を更新した操作により、誤って消えない", () => {
         let lessonMock = {
           idol: {
             modifiers: [
               {
-                kind: "effectActivationAtEndOfTurn",
+                kind: "effectActivationOnTurnEnd",
                 effect: {
                   kind: "perform",
                   score: { value: 1 },
@@ -781,7 +781,7 @@ describe("patchUpdates", () => {
         ).toHaveLength(0);
         expect(
           lessonMock.idol.modifiers.filter(
-            (m) => m.kind === "effectActivationAtEndOfTurn",
+            (m) => m.kind === "effectActivationOnTurnEnd",
           ),
         ).toHaveLength(1);
       });

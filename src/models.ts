@@ -565,7 +565,7 @@ export const patchUpdates = (
               break;
             }
             // 常に新規追加で、かつ削除できないので、ここを通ることはない
-            case "effectActivationAtEndOfTurn":
+            case "effectActivationOnTurnEnd":
             case "effectActivationUponCardUsage": {
               throw new Error(
                 `Unexpected modifier kind: ${updateModifierKind}`,
@@ -579,7 +579,7 @@ export const patchUpdates = (
             .map((modifier) =>
               modifier.id === updateTargetId ? newTargetedModifier : modifier,
             )
-            // "effectActivationAtEndOfTurn" や "effectActivationUponCardUsage" など、数値を持たないものは永続なので、削除しない
+            // "effectActivationOnTurnEnd" や "effectActivationUponCardUsage" など、数値を持たないものは永続なので、削除しない
             .filter(
               (modifier) =>
                 !("amount" in modifier && modifier.amount === 0) &&

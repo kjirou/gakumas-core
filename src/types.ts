@@ -157,7 +157,7 @@ export type ModifierDefinition =
        *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
        *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
        */
-      kind: "effectActivationAtEndOfTurn";
+      kind: "effectActivationOnTurnEnd";
       effect: Effect;
     }
   | {

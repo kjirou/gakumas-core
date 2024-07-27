@@ -875,7 +875,7 @@ export const activateEffect = (
         sameKindModifier !== undefined &&
         effect.modifier.kind !== "delayedEffect" &&
         effect.modifier.kind !== "doubleEffect" &&
-        effect.modifier.kind !== "effectActivationAtEndOfTurn" &&
+        effect.modifier.kind !== "effectActivationOnTurnEnd" &&
         effect.modifier.kind !== "effectActivationUponCardUsage";
       diffs.push({
         kind: "modifier",
@@ -2427,7 +2427,7 @@ export const activateEffectsOnTurnEnd = (
   if (!isScoreSatisfyingPerfect(newLesson)) {
     for (const modifier of newLesson.idol.modifiers) {
       let innerUpdates: LessonUpdateQuery[] = [];
-      if (modifier.kind === "effectActivationAtEndOfTurn") {
+      if (modifier.kind === "effectActivationOnTurnEnd") {
         const diffs = activateEffect(
           newLesson,
           modifier.effect,

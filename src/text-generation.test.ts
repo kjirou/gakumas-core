@@ -145,7 +145,7 @@ describe("generateEffectText", () => {
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationAtEndOfTurn",
+            kind: "effectActivationOnTurnEnd",
             effect: {
               kind: "getModifier",
               modifier: { kind: "positiveImpression", amount: 1 },
@@ -154,7 +154,7 @@ describe("generateEffectText", () => {
         },
       ],
       expected: "以降、ターン終了時、{{好印象}}+1",
-      name: "getModifier - effectActivationAtEndOfTurn",
+      name: "getModifier - effectActivationOnTurnEnd",
     },
     {
       args: [

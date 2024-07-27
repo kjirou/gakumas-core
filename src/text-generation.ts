@@ -55,7 +55,7 @@ export const modifierLabels = {
   doubleLifeConsumption: "消費体力増加",
   excellentCondition: "絶好調",
   // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
-  effectActivationAtEndOfTurn: "ターン終了時持続効果",
+  effectActivationOnTurnEnd: "ターン終了時持続効果",
   // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
   effectActivationUponCardUsage: "スキルカード発動前持続効果",
   focus: "集中",
@@ -161,7 +161,7 @@ const generateModifierText = (modifier: ModifierDefinition): string => {
       return `次に使用するスキルカードの効果をもう1回発動（1回）`;
     case "doubleLifeConsumption":
       return `${kwd("doubleLifeConsumption")}${modifier.duration}ターン`;
-    case "effectActivationAtEndOfTurn":
+    case "effectActivationOnTurnEnd":
       return [
         "以降、ターン終了時",
         // 条件がない場合のみ「、」を挿入する

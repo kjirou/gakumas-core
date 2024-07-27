@@ -5725,11 +5725,11 @@ describe("activateEffectsOnTurnEnd", () => {
     });
   });
   describe("状態修正による効果発動", () => {
-    test("effectActivationAtEndOfTurn", () => {
+    test("effectActivationOnTurnEnd", () => {
       const lesson = createLessonForTest();
       lesson.idol.modifiers = [
         {
-          kind: "effectActivationAtEndOfTurn",
+          kind: "effectActivationOnTurnEnd",
           effect: {
             kind: "getModifier",
             modifier: { kind: "motivation", amount: 1 },

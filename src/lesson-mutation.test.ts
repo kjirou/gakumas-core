@@ -862,6 +862,42 @@ describe("canApplyEffect", () => {
       expected: false,
     },
     {
+      name: "countModifierのgoodConditionを満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "goodCondition", duration: 3 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "goodCondition",
+          range: { min: 3 },
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "countModifierのgoodConditionを満たさない時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "goodCondition", duration: 2 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "goodCondition",
+          range: { min: 3 },
+        },
+      ],
+      expected: false,
+    },
+    {
       name: "countModifierのmotivationを満たす時、trueを返す",
       args: [
         {

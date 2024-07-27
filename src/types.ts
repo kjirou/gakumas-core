@@ -248,6 +248,8 @@ export type Modifier = ModifierDefinition & {
  *
  * - スキルカードの効果に対して設定する場合は、効果それぞれの発動条件を意味する
  * - Pアイテムの効果に対して設定する場合は、Pアイテムの効果全体に対する発動条件を意味する
+ * - 応援/トラブルの効果に対して設定する場合は、効果の発動条件を意味する
+ *   - しかし、応援/トラブルは、1発動に対して1効果しか設定されていないので、発動条件であるとも言える
  */
 export type EffectCondition =
   | {
@@ -261,9 +263,16 @@ export type EffectCondition =
        *   - 「必携ステンレスボトル」は、「ターン開始時集中が3以上の場合、集中+4」
        *   - 「ちびども手作りメダル」は、「ターン終了時好印象が6以上の場合、好印象+2」
        *   - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
+       * - 「好調nターン{(以上|以下)}」は、応援/トラブルのみに存在する
+       * - "goodCondition" が min: 1 の時、実質は "hasGoodCondition" と同じ
+       *   - 生成されるテキストは異なる
        */
       kind: "countModifier";
-      modifierKind: "focus" | "motivation" | "positiveImpression";
+      modifierKind:
+        | "focus"
+        | "goodCondition"
+        | "motivation"
+        | "positiveImpression";
       /** 本家には、「a以上」または「a以下」のどちらかのみで、「a以上b以下」の指定はない */
       range: RangedNumber;
     }

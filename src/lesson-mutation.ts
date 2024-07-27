@@ -305,25 +305,28 @@ export const canApplyEffect = (
       switch (modifierKind) {
         case "focus": {
           const focus = lesson.idol.modifiers.find((e) => e.kind === "focus");
-          targetValue = focus && "amount" in focus ? focus.amount : 0;
+          targetValue = focus ? focus.amount : 0;
+          break;
+        }
+        case "goodCondition": {
+          const goodCondition = lesson.idol.modifiers.find(
+            (e) => e.kind === "goodCondition",
+          );
+          targetValue = goodCondition ? goodCondition.duration : 0;
           break;
         }
         case "motivation": {
           const motivation = lesson.idol.modifiers.find(
             (e) => e.kind === "motivation",
           );
-          targetValue =
-            motivation && "amount" in motivation ? motivation.amount : 0;
+          targetValue = motivation ? motivation.amount : 0;
           break;
         }
         case "positiveImpression": {
           const positiveImpression = lesson.idol.modifiers.find(
             (e) => e.kind === "positiveImpression",
           );
-          targetValue =
-            positiveImpression && "amount" in positiveImpression
-              ? positiveImpression.amount
-              : 0;
+          targetValue = positiveImpression ? positiveImpression.amount : 0;
           break;
         }
         default: {

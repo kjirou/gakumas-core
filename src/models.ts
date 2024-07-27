@@ -18,6 +18,7 @@ import {
   CardEnhancement,
   CardInProduction,
   Effect,
+  Encouragement,
   GetRandom,
   IdGenerator,
   Idol,
@@ -255,6 +256,7 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  */
 export const createLessonGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  encouragements?: Encouragement[];
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
   idolInProduction: IdolInProduction;
@@ -268,6 +270,7 @@ export const createLessonGamePlay = (params: {
       : undefined;
   const getRandom = params.getRandom ? params.getRandom : Math.random;
   const cards = prepareCardsForLesson(params.idolInProduction.deck);
+  const encouragements = params.encouragements ?? [];
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
   const memoryEffects = params.memoryEffects ?? [];
@@ -282,6 +285,7 @@ export const createLessonGamePlay = (params: {
         getRandom,
       ),
       discardPile: [],
+      encouragements,
       hand: [],
       idol: createIdol({
         idolInProduction: params.idolInProduction,

@@ -13,6 +13,7 @@ import {
   activateEffect,
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
+  activateEncouragementOnTurnStart,
   activateMemoryEffect,
   activateMemoryEffectsOnLessonStart,
   activateModifierEffectsOnTurnStart,
@@ -2960,6 +2961,91 @@ describe("activateEffectsOnLessonStart", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(activateEffectsOnLessonStart(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEncouragementOnTurnStart", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEncouragementOnTurnStart>;
+    expected: ReturnType<typeof activateEncouragementOnTurnStart>;
+    name: string;
+  }> = [
+    {
+      name: "ターン番号が一致し、効果発動条件を満たす時、発動する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.turnNumber = 1;
+          lesson.encouragements = [
+            {
+              turnNumber: 1,
+              effect: {
+                kind: "perform",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "motivation",
+                  range: { min: 1 },
+                },
+                score: { value: 1 },
+              },
+            },
+          ];
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 1, id: "m1" }];
+          return lesson;
+        })(),
+        1,
+        {
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "score",
+            actual: 1,
+            max: 1,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "ターン番号は一致するが、効果発動条件を満たさない時、発動しない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.turnNumber = 1;
+          lesson.encouragements = [
+            {
+              turnNumber: 1,
+              effect: {
+                kind: "perform",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "motivation",
+                  range: { min: 1 },
+                },
+                score: { value: 1 },
+              },
+            },
+          ];
+          return lesson;
+        })(),
+        1,
+        {
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [],
+        nextHistoryResultIndex: 1,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEncouragementOnTurnStart(...args)).toStrictEqual(expected);
   });
 });
 describe("drawCardsOnLessonStart", () => {

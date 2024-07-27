@@ -530,6 +530,16 @@ export type MemoryEffect = {
 };
 
 /**
+ * 応援/トラブル
+ *
+ * - TODO: 今はプロデュース時に登場するものだけを考慮している。コンテストやアイドルの道のより複雑なものは対象外。
+ */
+export type Encouragement = {
+  effect: Effect;
+  turnNumber: number;
+};
+
+/**
  * カードを使用する際の条件
  *
  * - 原文は、「{condition}」が効果欄の先頭へ記載される
@@ -1128,6 +1138,12 @@ export type Lesson = {
   deck: Array<Card["id"]>;
   /** 捨札、原文でも「捨札」、山札の再生成時に含まれるカード群 */
   discardPile: Array<Card["id"]>;
+  /**
+   * 応援/トラブルリスト
+   *
+   * - 1ターン番号に対しては、1つの設定のみ
+   */
+  encouragements: Encouragement[];
   /** 手札、原文でも「手札」、最大5枚 */
   hand: Array<Card["id"]>;
   idol: Idol;

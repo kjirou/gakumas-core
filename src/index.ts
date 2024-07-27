@@ -8,20 +8,19 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
+// TODO: スコアボーナスを渡せるようにする
+// TODO: 状態修正一覧、Pアイテム一覧、応援/トラブル一覧などを返すユーティリティを公開APIへ追加
 // TODO: Pドリンク
-// TODO: サポートアビリティ
-// TODO: レッスン内の応援/トラブル
 // TODO: レッスン履歴
 // TODO: データの永続化サポート
-// TODO: コンテスト、後のためのメモ
-//       - AIの挙動を解読する必要がある、多少眺めた限りだとわからなかった
-//       - レッスン中に放置するとカードがうっすら光っておすすめカードを教えてくれるが、それがコンテストと同じAIかもしれない
-//         - もしそうだとすると、AIはサーバ側ではなくてクライアント側が計算しているのかもしれない
+// TODO: コンテスト
 
 import { CardInHandSummary, LessonGamePlay, LessonUpdateQuery } from "./types";
 import {
+  activateEffect,
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
+  activateEncouragementOnTurnStart,
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
   activateMemoryEffectsOnLessonStart,
@@ -228,8 +227,17 @@ export const startLessonTurn = (
   //
 
   //
-  // TODO: 応援/トラブルの効果発動
+  // 応援/トラブルの効果発動
   //
+  const activateEncouragementOnTurnStartResult =
+    activateEncouragementOnTurnStart(lesson, historyResultIndex, {
+      getRandom: lessonGamePlay.getRandom,
+      idGenerator: lessonGamePlay.idGenerator,
+    });
+  updates = [...updates, ...activateEncouragementOnTurnStartResult.updates];
+  historyResultIndex =
+    activateEncouragementOnTurnStartResult.nextHistoryResultIndex;
+  lesson = patchUpdates(lesson, activateEncouragementOnTurnStartResult.updates);
 
   //
   // Pアイテム起因の、ターン開始時・2ターンごとの効果発動

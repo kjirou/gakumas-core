@@ -488,6 +488,18 @@ describe("generateEffectText", () => {
       expected: "体力が50%以上の場合、パラメータ+10",
       name: "condition - measureIfLifeIsEqualGreaterThanHalf",
     },
+    {
+      args: [
+        {
+          kind: "perform",
+          score: { value: 1 },
+          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+        },
+        { hasSeparator: false },
+      ],
+      expected: "体力が50%以上の場合パラメータ+1",
+      name: "condition - 読点を挿入しない",
+    },
   ];
   test.each(testCases)('$name => "$expected"', ({ args, expected }) => {
     expect(generateEffectText(...args)).toBe(expected);

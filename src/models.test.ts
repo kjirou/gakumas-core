@@ -179,6 +179,7 @@ describe("createLessonGamePlay", () => {
         turnNumber: 0,
         turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
         remainingTurns: 0,
+        encouragements: [],
         memoryEffects: [],
         ignoreIdolParameterKindConditionAfterClearing: false,
       },

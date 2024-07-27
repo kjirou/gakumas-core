@@ -309,11 +309,19 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
 
 /**
  * 一つの効果を表現したテキストを生成する
+ *
+ * @param options.hasSeparator 条件と効果の間に "、" を挿入するか。応援/トラブルの効果説明はそれが存在しない。
  */
-export const generateEffectText = (effect: Effect): string => {
+export const generateEffectText = (
+  effect: Effect,
+  options: { hasSeparator: boolean } = { hasSeparator: true },
+): string => {
   return [
     ...(effect.condition
-      ? [generateEffectConditionText(effect.condition) + "、"]
+      ? [
+          generateEffectConditionText(effect.condition) +
+            (options.hasSeparator ? "、" : ""),
+        ]
       : []),
     generateEffectWithoutConditionText(effect),
   ].join("");
@@ -364,7 +372,7 @@ export const generateCardDescription = (params: {
   if (params.condition) {
     lines = [...lines, generateCardUsageConditionText(params.condition)];
   }
-  lines = [...lines, ...params.effects.map(generateEffectText)];
+  lines = [...lines, ...params.effects.map((e) => generateEffectText(e))];
   const lastLine =
     (params.usableOncePerLesson === true ? kwd("usableOncePerLesson") : "") +
     (params.nonDuplicative === true ? kwd("nonDuplicative") : "");
@@ -494,7 +502,7 @@ export const generateProducerItemDescription = (params: {
     condition: params.condition,
     trigger: params.trigger,
   });
-  const effectTexts = params.effects.map(generateEffectText);
+  const effectTexts = params.effects.map((e) => generateEffectText(e));
   lines = [
     ...lines,
     triggerAndConditionText + effectTexts[0],

@@ -8,6 +8,7 @@ import type {
   CardUsageCondition,
   Effect,
   EffectCondition,
+  Encouragement,
   GetRandom,
   IdGenerator,
   Idol,
@@ -1393,6 +1394,53 @@ export const activateEffectsOnLessonStart = (
 
   return {
     updates: [...producerItemUpdates],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
+ * ターン開始時に応援/トラブルの効果を発動する
+ */
+export const activateEncouragementOnTurnStart = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  let encouragementUpdates: LessonUpdateQuery[] = [];
+  const encouragement = lesson.encouragements.find(
+    (e) => e.turnNumber === lesson.turnNumber,
+  );
+  if (encouragement) {
+    const diffs = activateEffect(
+      newLesson,
+      encouragement.effect,
+      params.getRandom,
+      params.idGenerator,
+    );
+    if (diffs) {
+      const innerUpdates = diffs.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnStartTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        }),
+      );
+      if (innerUpdates.length > 0) {
+        newLesson = patchUpdates(newLesson, innerUpdates);
+        encouragementUpdates = [...encouragementUpdates, ...innerUpdates];
+        nextHistoryResultIndex++;
+      }
+    }
+  }
+
+  return {
+    updates: [...encouragementUpdates],
     nextHistoryResultIndex,
   };
 };

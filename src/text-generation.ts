@@ -4,8 +4,7 @@
  * - スキルカードやPアイテムの効果説明欄のテキストなどを動的に生成する
  *   - 基本的には、P図鑑の表記を参考にしている
  * - データとして定義する手段もあると思うが、少なくとも以下の点で動的な生成処理が必要になる
- *   - スキルカード使用プレビューにおいて、「レッスン中1回」が「試験・ステージ中1回」へ変化する
- *   - 他は具体的にはわからないが、スキルカード使用プレビューとの差をあまり検証していない
+ *   - スキルカード使用プレビューでは、強化段階による効果の変化を反映する必要がある、また「レッスン中1回」が「試験・ステージ中1回」へ変化する
  * - もし、多言語対応をするなら、このモジュール全体を言語別に作る必要がありそう
  */
 
@@ -47,7 +46,7 @@ const generateRangedNumberText = (range: RangedNumber): string => {
  * ゲーム全体を通じてキーワード化されている名称
  *
  * - 本家の各種テキスト内で、タップ可能なキーワードになるもの
- *   - 大体はアイコン付きでもあるが、「レッスン中1回」「重複無効」はアイコンが無い
+ *   - 大体はアイコン付きでもあるが、「レッスン中1回」「重複無効」「眠気」などはアイコンが無い
  * - スキルカードの効果説明欄・レッスン中の状態修正一覧・レッスン中の履歴、で同じ表記になる
  * - キーワード化されていそうで無いものも多い
  *   - 例えば、「国民的アイドル」の「次に使用するスキルカードの効果をもう1回発動（1回）」など
@@ -87,6 +86,7 @@ const kwd = (key: keyof typeof globalKeywords) => {
 export const globalDataKeywords = {
   cards: {
     adorenarinzenkai: "アドレナリン全開",
+    nemuke: "眠気",
   },
 } as const satisfies Record<string, Record<string, string>>;
 
@@ -265,6 +265,8 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
       return "手札をすべて入れ替える";
     case "generateCard":
       return `ランダムな強化済みスキルカード（SSR）を、手札に${kwd("generateCard")}`;
+    case "generateTroubleCard":
+      return `${cardKwd("nemuke")}を山札のランダムな位置に${kwd("generateCard")}`;
     case "increaseRemainingTurns":
       return `${kwd("increaseRemainingTurns")}+${effect.amount}`;
     case "getModifier":

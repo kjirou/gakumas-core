@@ -10,6 +10,7 @@ import {
 } from "./types";
 import { getCardDataById } from "./data/cards";
 import {
+  activateEffect,
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
   activateMemoryEffect,
@@ -1958,6 +1959,178 @@ describe("calculatePerformingVitalityEffect", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffect", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffect>;
+    expected: ReturnType<typeof activateEffect>;
+    name: string;
+  }> = [
+    {
+      name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ cards: [] });
+          return lesson;
+        })(),
+        { kind: "generateCard" },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "cards.addition",
+          card: {
+            id: expect.any(String),
+            enhancements: [{ kind: "original" }],
+            original: {
+              id: expect.any(String),
+              definition: expect.objectContaining({
+                rarity: "ssr",
+              }),
+              enhanced: true,
+              enabled: true,
+            },
+          },
+        },
+        {
+          kind: "cardPlacement",
+          hand: [expect.any(String)],
+        },
+      ],
+    },
+    {
+      name: "generateTroubleCard - 山札0枚で実行した時、眠気スキルカードを追加して、山札はその1枚になる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ cards: [] });
+          return lesson;
+        })(),
+        { kind: "generateTroubleCard" },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "cards.addition",
+          card: {
+            id: expect.any(String),
+            enhancements: [],
+            original: {
+              id: expect.any(String),
+              definition: expect.objectContaining({
+                id: "nemuke",
+              }),
+              enhanced: false,
+              enabled: true,
+            },
+          },
+        },
+        {
+          kind: "cardPlacement",
+          deck: [expect.any(String)],
+        },
+      ],
+    },
+    {
+      name: "increaseRemainingTurns",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "increaseRemainingTurns", amount: 1 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "remainingTurns",
+          amount: 1,
+        },
+      ],
+    },
+    {
+      name: "recoverLife - 体力回復で最大体力以下まで回復した時、指定した数値分の体力を回復する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.life = 1;
+          return lesson;
+        })(),
+        { kind: "recoverLife", value: 2 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "life",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "recoverLife - 体力回復で最大体力を超過して回復した時、最大値に到達するまでの体力を回復する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.life = lesson.idol.original.maxLife - 1;
+          return lesson;
+        })(),
+        { kind: "recoverLife", value: 2 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "life",
+          actual: 1,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "multiplyModifier",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "focus", amount: 10, id: "m1" },
+            { kind: "positiveImpression", amount: 100, id: "m2" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "multiplyModifier",
+          modifierKind: "positiveImpression",
+          multiplier: 1.5,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: {
+            kind: "positiveImpression",
+            amount: 50,
+            id: expect.any(String),
+            updateTargetId: "m2",
+          },
+          max: {
+            kind: "positiveImpression",
+            amount: 50,
+            id: expect.any(String),
+            updateTargetId: "m2",
+          },
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffect(...args)).toStrictEqual(expected);
   });
 });
 describe("activateMemoryEffect", () => {
@@ -4177,6 +4350,7 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
+  // 個別の効果発動に関するテストは、 activeEffect のテストで検証する
   describe("主効果発動", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {
       test("「飛躍」は、集中が足りない時、パラメータ上昇は1回のみ適用する", () => {
@@ -4530,46 +4704,6 @@ describe("useCard preview:false", () => {
         ).toStrictEqual([]);
       });
     });
-    describe("generateCard", () => {
-      test("強化済みのSSRカードを生成して手札に入る", () => {
-        const lesson = createLessonForTest({
-          cards: [
-            {
-              id: "a",
-              definition: getCardDataById("hanamoyukisetsu"),
-              enabled: true,
-              enhanced: false,
-            },
-          ],
-        });
-        lesson.hand = ["a"];
-        const { updates } = useCard(lesson, 1, {
-          selectedCardInHandIndex: 0,
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
-          preview: false,
-        });
-        const cardAdditionUpdate = updates.find(
-          (e) => e.kind === "cards.addition",
-        ) as any;
-        const addedCard = cardAdditionUpdate.card;
-        expect(addedCard.enhancements).toStrictEqual([
-          {
-            kind: "original",
-          },
-        ]);
-        expect(addedCard.original.definition.rarity).toBe("ssr");
-        const cardPlacementUpdate = updates
-          .slice()
-          .reverse()
-          .find((e) => e.kind === "cardPlacement");
-        expect(cardPlacementUpdate).toStrictEqual({
-          kind: "cardPlacement",
-          hand: expect.any(Array),
-          reason: expect.any(Object),
-        });
-      });
-    });
     describe("getModifier", () => {
       test("新規追加の時", () => {
         const lesson = createLessonForTest({
@@ -4691,97 +4825,6 @@ describe("useCard preview:false", () => {
               cardKind: "active",
               effect: expect.any(Object),
               id: expect.any(String),
-            },
-            reason: expect.any(Object),
-          },
-        ]);
-      });
-    });
-    describe("increaseRemainingTurns", () => {
-      test("it works", () => {
-        const lesson = createLessonForTest({
-          cards: [
-            {
-              id: "a",
-              definition: getCardDataById("watashigasta"),
-              enabled: true,
-              enhanced: false,
-            },
-          ],
-        });
-        lesson.hand = ["a"];
-        lesson.idol.modifiers = [
-          { kind: "positiveImpression", amount: 2, id: "x" },
-        ];
-        const { updates } = useCard(lesson, 1, {
-          selectedCardInHandIndex: 0,
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
-          preview: false,
-        });
-        const update = updates.find((e) => e.kind === "remainingTurns") as any;
-        expect(update).toStrictEqual({
-          kind: "remainingTurns",
-          amount: 1,
-          reason: expect.any(Object),
-        });
-      });
-    });
-    describe("multiplyModifier", () => {
-      test("it works", () => {
-        // この効果を持つスキルカードがないので、モックを作る
-        const cardDefinitionMock = {
-          contents: [
-            {
-              cost: { kind: "normal", value: 0 },
-              effects: [
-                {
-                  kind: "multiplyModifier",
-                  modifierKind: "positiveImpression",
-                  multiplier: 1.5,
-                },
-              ],
-            },
-            {},
-            {},
-            {},
-          ],
-        } as CardDefinition;
-        const lesson = createLessonForTest({
-          cards: [
-            {
-              id: "a",
-              definition: cardDefinitionMock,
-              enabled: true,
-              enhanced: false,
-            },
-          ],
-        });
-        lesson.hand = ["a"];
-        lesson.idol.modifiers = [
-          { kind: "focus", amount: 20, id: "x" },
-          { kind: "positiveImpression", amount: 10, id: "y" },
-        ];
-        const { updates } = useCard(lesson, 1, {
-          selectedCardInHandIndex: 0,
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
-          preview: false,
-        });
-        expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
-          {
-            kind: "modifier",
-            actual: {
-              kind: "positiveImpression",
-              amount: 5,
-              id: expect.any(String),
-              updateTargetId: "y",
-            },
-            max: {
-              kind: "positiveImpression",
-              amount: 5,
-              id: expect.any(String),
-              updateTargetId: "y",
             },
             reason: expect.any(Object),
           },
@@ -5093,62 +5136,6 @@ describe("useCard preview:false", () => {
           kind: "vitality",
           actual: -10,
           max: -10,
-          reason: expect.any(Object),
-        });
-      });
-    });
-    describe("recoverLife", () => {
-      test("通常", () => {
-        const lesson = createLessonForTest({
-          cards: [
-            {
-              id: "a",
-              definition: getCardDataById("hoyoryoku"),
-              enabled: true,
-              enhanced: false,
-            },
-          ],
-        });
-        lesson.hand = ["a"];
-        lesson.idol.life = 10;
-        const { updates } = useCard(lesson, 1, {
-          selectedCardInHandIndex: 0,
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
-          preview: false,
-        });
-        const update = updates.find((e) => e.kind === "life") as any;
-        expect(update).toStrictEqual({
-          kind: "life",
-          actual: 2,
-          max: 2,
-          reason: expect.any(Object),
-        });
-      });
-      test("体力上限を超えて回復しない", () => {
-        const lesson = createLessonForTest({
-          cards: [
-            {
-              id: "a",
-              definition: getCardDataById("hoyoryoku"),
-              enabled: true,
-              enhanced: false,
-            },
-          ],
-        });
-        lesson.hand = ["a"];
-        lesson.idol.life = lesson.idol.original.maxLife;
-        const { updates } = useCard(lesson, 1, {
-          selectedCardInHandIndex: 0,
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
-          preview: false,
-        });
-        const update = updates.find((e) => e.kind === "life") as any;
-        expect(update).toStrictEqual({
-          kind: "life",
-          actual: 0,
-          max: 2,
           reason: expect.any(Object),
         });
       });

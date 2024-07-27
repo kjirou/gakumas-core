@@ -23,7 +23,7 @@ import type {
   ProducerItemTrigger,
   VitalityUpdateQuery,
 } from "./types";
-import { filterGeneratableCardsData } from "./data/cards";
+import { filterGeneratableCardsData, getCardDataById } from "./data/cards";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -686,7 +686,7 @@ export const calculatePerformingVitalityEffect = (
  *
  * @return 効果適用条件を満たさない場合は undefined を返す、結果的に効果がなかった場合は空配列を返す
  */
-const activateEffect = (
+export const activateEffect = (
   lesson: Lesson,
   effect: Effect,
   getRandom: GetRandom,
@@ -830,15 +830,15 @@ const activateEffect = (
         enabled: true,
         enhanced: true,
       };
-      const addedCard: Card = prepareCardsForLesson([cardInProduction])[0];
+      const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];
       const { hand, discardPile } = addCardsToHandOrDiscardPile(
-        [addedCard.id],
+        [additionalCard.id],
         lesson.hand,
         lesson.discardPile,
       );
       diffs.push({
         kind: "cards.addition",
-        card: addedCard,
+        card: additionalCard,
       });
       diffs.push(
         createCardPlacementDiff(
@@ -846,6 +846,25 @@ const activateEffect = (
           { hand, discardPile },
         ),
       );
+      break;
+    }
+    case "generateTroubleCard": {
+      const cardInProduction: CardInProduction = {
+        id: idGenerator(),
+        definition: getCardDataById("nemuke"),
+        enabled: true,
+        enhanced: false,
+      };
+      const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];
+      const deck = [...lesson.deck];
+      // 例: deck が ["a", "b", "c"] なら、0以上~4未満の端数切り捨てのインデックス、つまり 0,1,2,3 のいずれかに挿入する
+      const index = Math.floor(getRandom() * (deck.length + 1));
+      deck.splice(index, 0, additionalCard.id);
+      diffs.push({
+        kind: "cards.addition",
+        card: additionalCard,
+      });
+      diffs.push(createCardPlacementDiff({ deck: lesson.deck }, { deck }));
       break;
     }
     case "getModifier": {

@@ -63,6 +63,11 @@ describe("generateEffectText", () => {
       name: "generateCard",
     },
     {
+      args: [{ kind: "generateTroubleCard" }],
+      expected: "{{眠気}}を山札のランダムな位置に{{生成}}",
+      name: "generateTroubleCard",
+    },
+    {
       args: [{ kind: "increaseRemainingTurns", amount: 1 }],
       expected: "{{ターン追加}}+1",
       name: "increaseRemainingTurns",

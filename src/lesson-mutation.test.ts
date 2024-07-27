@@ -11,6 +11,7 @@ import {
 import { getCardDataById } from "./data/cards";
 import {
   activateEffect,
+  activateEffectsOfProducerItem,
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
   activateEncouragementOnTurnStart,
@@ -2134,6 +2135,49 @@ describe("activateEffect", () => {
     expect(activateEffect(...args)).toStrictEqual(expected);
   });
 });
+describe("activateEffectsOfProducerItem", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOfProducerItem>;
+    expected: ReturnType<typeof activateEffectsOfProducerItem>;
+    name: string;
+  }> = [
+    {
+      name: "activationCount を 1 増加する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ producerItems: [] });
+          return lesson;
+        })(),
+        {
+          id: "a",
+          original: {
+            id: "a",
+            definition: getProducerItemDataById("gesennosenrihin"),
+            enhanced: false,
+          },
+          activationCount: 0,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier",
+          actual: { kind: "focus", amount: 3, id: expect.any(String) },
+          max: { kind: "focus", amount: 3, id: expect.any(String) },
+        },
+        {
+          kind: "producerItem.activationCount",
+          producerItemId: "a",
+          value: 1,
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOfProducerItem(...args)).toStrictEqual(expected);
+  });
+});
 describe("activateMemoryEffect", () => {
   const testCases: Array<{
     args: Parameters<typeof activateMemoryEffect>;
@@ -2293,7 +2337,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
           cardSummaryKind: "active",
         },
       );
-    expect(updates1).toStrictEqual([
+    expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
         actual: {
@@ -2349,7 +2393,9 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
           cardDefinitionId: "adorenarinzenkai",
         },
       );
-    expect(updates1).toStrictEqual([
+    expect(
+      updates1.filter((e) => e.kind === "modifier" || e.kind === "vitality"),
+    ).toStrictEqual([
       {
         kind: "modifier",
         actual: {
@@ -2415,7 +2461,12 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
         cardSummaryKind: "active",
       },
     );
-    expect(updates).toStrictEqual([
+    expect(
+      updates.filter(
+        (e) =>
+          e.kind === "modifier" || e.kind === "vitality" || e.kind === "life",
+      ),
+    ).toStrictEqual([
       {
         kind: "modifier",
         actual: {
@@ -2471,7 +2522,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
         createIdGenerator(),
         dummyReason,
       );
-    expect(updates1).toStrictEqual([
+    expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
         actual: {
@@ -2543,7 +2594,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
           increasedModifierKinds: ["motivation"],
         },
       );
-    expect(updates1).toStrictEqual([
+    expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
         actual: {
@@ -2952,6 +3003,12 @@ describe("activateEffectsOnLessonStart", () => {
             kind: "modifier",
             actual: { kind: "focus", amount: 3, id: expect.any(String) },
             max: { kind: "focus", amount: 3, id: expect.any(String) },
+            reason: expect.any(Object),
+          },
+          {
+            kind: "producerItem.activationCount",
+            producerItemId: "a",
+            value: 1,
             reason: expect.any(Object),
           },
         ],

@@ -8,7 +8,6 @@ import type {
   CardUsageCondition,
   Effect,
   EffectCondition,
-  Encouragement,
   GetRandom,
   IdGenerator,
   Idol,
@@ -717,7 +716,6 @@ export const activateEffect = (
 
   const effectKind = effect.kind;
   switch (effectKind) {
-    // 現在は、Pアイテムの「私の「初」の楽譜」にのみ存在し、スキルカードには存在しない効果
     case "drainLife": {
       diffs.push({
         kind: "life",
@@ -1172,14 +1170,15 @@ const activateEffects = (
  *
  * - スキルカードとは異なり、プレビューがないので、EffectActivations の形式でなくても良い
  */
-const activateEffectsOfProducerItem = (
+export const activateEffectsOfProducerItem = (
   lesson: Lesson,
   producerItem: ProducerItem,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): LessonUpdateQueryDiff[] => {
+  let diffs: LessonUpdateQueryDiff[] = [];
   const producerItemContent = getProducerItemContentDefinition(producerItem);
-  return activateEffects(
+  diffs = activateEffects(
     lesson,
     producerItemContent.effects,
     getRandom,
@@ -1187,6 +1186,15 @@ const activateEffectsOfProducerItem = (
   )
     .filter((e) => e !== undefined)
     .reduce((acc, e) => [...acc, ...e], []);
+  diffs = [
+    ...diffs,
+    {
+      kind: "producerItem.activationCount",
+      producerItemId: producerItem.id,
+      value: producerItem.activationCount + 1,
+    },
+  ];
+  return diffs;
 };
 
 /**

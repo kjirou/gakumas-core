@@ -15,7 +15,12 @@
 // TODO: データの永続化サポート
 // TODO: コンテスト
 
-import { CardInHandSummary, LessonGamePlay, LessonUpdateQuery } from "./types";
+import {
+  CardInHandSummary,
+  LessonGamePlay,
+  LessonUpdateQuery,
+  ModifierInformation,
+} from "./types";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -37,7 +42,7 @@ import {
   isScoreSatisfyingPerfect,
   patchUpdates,
 } from "./models";
-import { generateCardDescription } from "./text-generation";
+import { generateCardDescription, modifierLabels } from "./text-generation";
 
 export type * from "./types";
 export * from "./models";
@@ -361,6 +366,25 @@ export const getHand = (
         lessonGamePlay.getRandom,
         lessonGamePlay.idGenerator,
       ),
+    };
+  });
+};
+
+/**
+ * 状態修正リストを取得する
+ */
+export const getModifiers = (
+  lessonGamePlay: LessonGamePlay,
+): ModifierInformation[] => {
+  const lesson = patchUpdates(
+    lessonGamePlay.initialLesson,
+    lessonGamePlay.updates,
+  );
+  return lesson.idol.modifiers.map((modifier) => {
+    return {
+      ...modifier,
+      label: modifierLabels[modifier.kind],
+      description: "",
     };
   });
 };

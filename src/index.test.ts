@@ -8,6 +8,7 @@ import type {
   Lesson,
   LessonGamePlay,
   LessonUpdateQuery,
+  Modifier,
 } from "./index";
 import {
   createIdGenerator,
@@ -15,8 +16,9 @@ import {
   createLessonGamePlay,
   endLessonTurn,
   getCardContentDefinition,
-  getNextHistoryResultIndex,
   getHand,
+  getModifiers,
+  getNextHistoryResultIndex,
   isLessonEnded,
   isTurnEnded,
   patchUpdates,
@@ -29,6 +31,54 @@ import {
   activateEffect as activateEffect_,
   calculateCostConsumption,
 } from "./lesson-mutation";
+
+describe("getModifiers", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getModifiers>;
+    expected: ReturnType<typeof getModifiers>;
+    name: string;
+  }> = [
+    {
+      name: "状態修正が存在する時、大体動く",
+      args: [
+        {
+          initialLesson: {
+            idol: {
+              modifiers: [{ kind: "focus", amount: 1, id: "m1" }],
+            },
+          },
+          updates: [] as LessonUpdateQuery[],
+        } as LessonGamePlay,
+      ],
+      expected: [
+        {
+          id: "m1",
+          kind: "focus",
+          amount: 1,
+          label: "集中",
+          description: expect.any(String),
+        },
+      ],
+    },
+    {
+      name: "状態修正が存在しない時、空配列を返す",
+      args: [
+        {
+          initialLesson: {
+            idol: {
+              modifiers: [] as Modifier[],
+            },
+          },
+          updates: [] as LessonUpdateQuery[],
+        } as LessonGamePlay,
+      ],
+      expected: [],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(getModifiers(...args)).toStrictEqual(expected);
+  });
+});
 
 /**
  * スキルカードへレッスンサポートの付与をする、本体は仕様不明瞭なのもあり未実装

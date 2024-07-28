@@ -424,14 +424,19 @@ export const createLessonDisplay = (
       description: "",
     };
   });
+  const encouragements = getEncouragements(lessonGamePlay);
   const turns: TurnDisplay[] = createActualTurns(lesson).map(
     (idolParameterKind, index) => {
       const turnNumber = index + 1;
+      const encouragement = encouragements.find(
+        (e) => e.turnNumber === turnNumber,
+      );
       return {
         turnNumber,
         turnNumberDiff: turnNumber - lesson.turnNumber,
         idolParameterKind,
         idolParameterLabel: idolParameterKindLabels[idolParameterKind],
+        ...(encouragement ? { encouragement } : {}),
       };
     },
   );

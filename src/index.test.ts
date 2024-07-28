@@ -233,6 +233,12 @@ describe("createLessonDisplay", () => {
         (() => {
           const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal", "visual", "dance"];
+          gamePlay.initialLesson.encouragements = [
+            {
+              turnNumber: 3,
+              effect: { kind: "perform", vitality: { value: 1 } },
+            },
+          ];
           gamePlay.initialLesson.turnNumber = 2;
           gamePlay.initialLesson.remainingTurns = 1;
           return gamePlay;
@@ -257,6 +263,11 @@ describe("createLessonDisplay", () => {
             turnNumberDiff: 1,
             idolParameterKind: "dance",
             idolParameterLabel: "ダンス",
+            encouragement: {
+              turnNumber: 3,
+              effect: expect.any(Object),
+              description: "{{元気}}+1",
+            },
           },
           {
             turnNumber: 4,

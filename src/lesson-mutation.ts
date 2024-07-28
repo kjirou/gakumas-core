@@ -17,13 +17,12 @@ import type {
   LessonUpdateQueryReason,
   MemoryEffect,
   Modifier,
-  ProducePlan,
   ProducerItem,
-  ProducerItemContentDefinition,
   ProducerItemTrigger,
   VitalityUpdateQuery,
 } from "./types";
 import { filterGeneratableCardsData, getCardDataById } from "./data/cards";
+import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -31,7 +30,6 @@ import {
   getCardContentDefinition,
   getIdolParameterKindOnTurn,
   getProducerItemContentDefinition,
-  handSizeOnLessonStart,
   isDelayedEffectModifierType,
   isDrawCardsEffectType,
   isEnhanceHandEffectType,
@@ -876,10 +874,7 @@ export const activateEffect = (
       );
       const isUpdate =
         sameKindModifier !== undefined &&
-        effect.modifier.kind !== "delayedEffect" &&
-        effect.modifier.kind !== "doubleEffect" &&
-        effect.modifier.kind !== "effectActivationOnTurnEnd" &&
-        effect.modifier.kind !== "effectActivationBeforeCardEffectActivation";
+        !metaModifierDictioanry[effect.modifier.kind].nonAggregation;
       diffs.push({
         kind: "modifier",
         actual: {

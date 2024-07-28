@@ -24,7 +24,7 @@ export const filterGeneratableCardsData = (
   );
 
 /** 全ての強化数の内容リストを返す */
-export const getCardContentDefinitions = (
+export const getCardContentDataList = (
   card: CardData,
 ): [CardContentData, CardContentData, CardContentData, CardContentData] => {
   const noEnhanced = card.contents[0];

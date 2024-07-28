@@ -3,7 +3,7 @@ import type { CardData } from "../types";
 import {
   cards,
   compareDeckOrder,
-  getCardContentDefinitions,
+  getCardContentDataList,
   getCardDataById,
 } from "./cards";
 
@@ -48,7 +48,7 @@ for (const card of cards) {
     test("アイドル固有スキルカードは、必ず「重複不可」「レッスン中1回」を持つ", () => {
       if (card.cardProviderKind === "idol") {
         expect(card.nonDuplicative).toBe(true);
-        for (const content of getCardContentDefinitions(card)) {
+        for (const content of getCardContentDataList(card)) {
           expect(content.usableOncePerLesson).toBe(true);
         }
       }
@@ -56,13 +56,13 @@ for (const card of cards) {
     test("サポートカード固有スキルカードは、必ず「重複不可」「レッスン中1回」を持つ", () => {
       if (card.cardProviderKind === "supportCard") {
         expect(card.nonDuplicative).toBe(true);
-        for (const content of getCardContentDefinitions(card)) {
+        for (const content of getCardContentDataList(card)) {
           expect(content.usableOncePerLesson).toBe(true);
         }
       }
     });
     test("全ての強化段階で、「レッスン中1回」の有無は揃っている", () => {
-      const contents = getCardContentDefinitions(card);
+      const contents = getCardContentDataList(card);
       for (const content of contents) {
         expect(content.usableOncePerLesson).toBe(
           contents[0].usableOncePerLesson,
@@ -70,13 +70,13 @@ for (const card of cards) {
       }
     });
     test("全ての強化段階で、「レッスン開始時手札に入る」の有無は揃っている", () => {
-      const contents = getCardContentDefinitions(card);
+      const contents = getCardContentDataList(card);
       for (const content of contents) {
         expect(content.innate).toBe(contents[0].innate);
       }
     });
     test("life コストの値は 0 にならない", () => {
-      for (const content of getCardContentDefinitions(card)) {
+      for (const content of getCardContentDataList(card)) {
         // life は値が 0 になると normal になる
         if (content.cost.kind === "life") {
           expect(content.cost.value).not.toBe(0);
@@ -84,7 +84,7 @@ for (const card of cards) {
       }
     });
     test("全ての強化段階で、コストの種類は基本的に同じである", () => {
-      const contents = getCardContentDefinitions(card);
+      const contents = getCardContentDataList(card);
       for (const content of contents) {
         // life は値が 0 になると normal になる
         if (contents[0].cost.kind === "life") {
@@ -96,7 +96,7 @@ for (const card of cards) {
     });
     test("コストの値は、強化段階の上昇により、少なくとも上がることはない", () => {
       let minCostValue: number | undefined = undefined;
-      for (const content of getCardContentDefinitions(card)) {
+      for (const content of getCardContentDataList(card)) {
         if (minCostValue !== undefined && content.cost.value > minCostValue) {
           fail("強化段階が高いのにコストが上がっている");
         }
@@ -113,7 +113,7 @@ for (const card of cards) {
         card.id !== "kagayakukimihe" &&
         card.id !== "nanikiteruno"
       ) {
-        for (const content of getCardContentDefinitions(card)) {
+        for (const content of getCardContentDataList(card)) {
           const hasScorePerformance = content.effects.some(
             (effect) =>
               (effect.kind === "perform" && effect.score) ||
@@ -132,7 +132,7 @@ for (const card of cards) {
       }
     });
     test("perform 種別の効果は、 score か vitality のどちらかもしくは両方のプロパティを持つ", () => {
-      for (const content of getCardContentDefinitions(card)) {
+      for (const content of getCardContentDataList(card)) {
         // TODO: delayedEffect 内の effect を検証できていない
         for (const effect of content.effects.filter(
           (effect) => effect.kind === "perform",
@@ -207,10 +207,10 @@ describe("compareDeckOrder", () => {
     );
   });
 });
-describe("getCardContentDefinitions", () => {
+describe("getCardContentDataList", () => {
   const testCases: Array<{
-    args: Parameters<typeof getCardContentDefinitions>;
-    expected: ReturnType<typeof getCardContentDefinitions>;
+    args: Parameters<typeof getCardContentDataList>;
+    expected: ReturnType<typeof getCardContentDataList>;
   }> = [
     {
       args: [getCardDataById("karuiashidori")],
@@ -284,6 +284,6 @@ describe("getCardContentDefinitions", () => {
     },
   ];
   test.each(testCases)("$args.0.id", ({ args, expected }) => {
-    expect(getCardContentDefinitions(...args)).toStrictEqual(expected);
+    expect(getCardContentDataList(...args)).toStrictEqual(expected);
   });
 });

@@ -5,7 +5,7 @@
 import {
   compareDeckOrder,
   getCardDataById,
-  getCardContentDefinitions,
+  getCardContentDataList,
 } from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
@@ -65,7 +65,7 @@ export const isPerformEffectType = (
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
 export const getCardContentData = (card: Card): CardContentData => {
-  const contents = getCardContentDefinitions(card.original.definition);
+  const contents = getCardContentDataList(card.original.definition);
   if (card.enhancements.length === 0) {
     return contents[0];
   } else if (card.enhancements.length === 1) {

@@ -1,6 +1,6 @@
 import {
   findCardDataById,
-  getCardContentDefinitions,
+  getCardContentDataList,
   getCardDataById,
 } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -793,7 +793,7 @@ describe("generateCardDescription", () => {
   ];
   test.each(testCases)('$cardId => "$expected"', ({ cardId, expected }) => {
     const card = getCardDataById(cardId);
-    const contents = getCardContentDefinitions(card);
+    const contents = getCardContentDataList(card);
     expect(
       generateCardDescription({
         cost: contents[0].cost,

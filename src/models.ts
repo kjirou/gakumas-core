@@ -144,7 +144,7 @@ export const createIdolInProduction = (params: {
   const idolDefinition = getIdolDataById(params.idolDefinitionId);
   const characterDefinition = getCharacterDataById(idolDefinition.characterId);
   const specificCardDefinition = getCardDataById(idolDefinition.specificCardId);
-  const specificProducerItemDefinition = getProducerItemDataById(
+  const specificProducerItemData = getProducerItemDataById(
     idolDefinition.specificProducerItemId,
   );
   // TODO: 才能開花1段階目のランダムスキルカード強化
@@ -162,7 +162,7 @@ export const createIdolInProduction = (params: {
   const producerItems = params.producerItems ?? [
     {
       id: params.idGenerator(),
-      definition: specificProducerItemDefinition,
+      definition: specificProducerItemData,
       enhanced: params.talentAwakeningLevel >= 2,
     },
   ];

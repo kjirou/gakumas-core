@@ -13,7 +13,7 @@ import {
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
-import type { CardData, ProducerItemDefinition } from "./types";
+import type { CardData, ProducerItemData } from "./types";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -1022,7 +1022,7 @@ describe("generateProducerItemTriggerAndConditionText", () => {
 describe("generateProducerItemDescription", () => {
   const testCases: Array<{
     expected: ReturnType<typeof generateProducerItemDescription>;
-    producerItemId: ProducerItemDefinition["id"];
+    producerItemId: ProducerItemData["id"];
   }> = [
     {
       producerItemId: "itsumonomeikupochi",

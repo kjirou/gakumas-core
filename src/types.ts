@@ -978,7 +978,7 @@ export type ProducerItemContentData = Readonly<{
  *     （レッスン内3回）
  * - レッスン中に効果を及ぼさないものは、一旦除外している
  */
-export type ProducerItemDefinition = Readonly<{
+export type ProducerItemData = Readonly<{
   /** 未強化時の内容 */
   base: ProducerItemContentData;
   /** 強化済み時の内容 */
@@ -1001,7 +1001,7 @@ export type ProducerItemDefinition = Readonly<{
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
 export type ProducerItemInProduction = Readonly<{
-  definition: ProducerItemDefinition;
+  definition: ProducerItemData;
   enhanced?: boolean;
   /**
    * IdolInProduction["producerItems"] 内で一意のID
@@ -1056,7 +1056,7 @@ export type IdolDefinition = Readonly<{
   producePlan: ProducePlan;
   rarity: "r" | "sr" | "ssr";
   specificCardId: CardData["id"];
-  specificProducerItemId: ProducerItemDefinition["id"];
+  specificProducerItemId: ProducerItemData["id"];
   /** プロデュースアイドルのタイトル。例えば、咲季SSRなら"Fighting My Way"。 */
   title: string;
 }>;

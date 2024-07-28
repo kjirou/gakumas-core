@@ -1,13 +1,13 @@
-import { ProducerItemDefinition } from "../types";
+import { ProducerItemData } from "../types";
 
 export const findProducerItemDataById = (
-  id: ProducerItemDefinition["id"],
-): ProducerItemDefinition | undefined =>
+  id: ProducerItemData["id"],
+): ProducerItemData | undefined =>
   producerItems.find((producerItem) => producerItem.id === id);
 
 export const getProducerItemDataById = (
-  id: ProducerItemDefinition["id"],
-): ProducerItemDefinition => {
+  id: ProducerItemData["id"],
+): ProducerItemData => {
   const producerItem = findProducerItemDataById(id);
   if (!producerItem) {
     throw new Error(`Producer item not found: ${id}`);
@@ -38,7 +38,7 @@ export const getProducerItemDataById = (
  * - Pアイテムは、スキルカードと異なり、未強化と強化済みが別レコードとして図鑑の一覧に並んでいる。今のところ影響はないが、本家のデータ構造はスキルカードと異なるのかもしれない。
  * - TODO: eslint
  */
-export const producerItems: ProducerItemDefinition[] = [
+export const producerItems: ProducerItemData[] = [
   {
     id: "bakuonraion",
     name: "ばくおんライオン",

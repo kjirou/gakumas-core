@@ -29,7 +29,7 @@ import {
   calculateRemainingTurns,
   getCardContentData,
   getIdolParameterKindOnTurn,
-  getProducerItemContentDefinition,
+  getProducerItemContentData,
   isDelayedEffectModifierType,
   isDrawCardsEffectType,
   isEnhanceHandEffectType,
@@ -380,7 +380,7 @@ export const canTriggerProducerItem = (
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
 ): boolean => {
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  const producerItemContent = getProducerItemContentData(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   let isLessonClear = false;
   if (lesson.clearScoreThresholds) {
@@ -1175,7 +1175,7 @@ export const activateEffectsOfProducerItem = (
   idGenerator: IdGenerator,
 ): LessonUpdateQueryDiff[] => {
   let diffs: LessonUpdateQueryDiff[] = [];
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  const producerItemContent = getProducerItemContentData(producerItem);
   diffs = activateEffects(
     lesson,
     producerItemContent.effects,

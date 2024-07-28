@@ -77,7 +77,7 @@ export const getCardContentData = (card: Card): CardContentData => {
   }
 };
 
-export const getProducerItemContentDefinition = (
+export const getProducerItemContentData = (
   producerItem: ProducerItem,
 ): ProducerItemContentData => {
   return producerItem.original.definition.enhanced !== undefined &&
@@ -90,7 +90,7 @@ export const getProducerItemContentDefinition = (
 export const getRemainingProducerItemTimes = (
   producerItem: ProducerItem,
 ): number | undefined => {
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  const producerItemContent = getProducerItemContentData(producerItem);
   return producerItemContent.times === undefined
     ? undefined
     : Math.max(producerItemContent.times - producerItem.activationCount, 0);

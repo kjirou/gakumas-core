@@ -44,7 +44,7 @@ import {
   createActualTurns,
   getCardContentData,
   getNextHistoryResultIndex,
-  getProducerItemContentDefinition,
+  getProducerItemContentData,
   getRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   patchUpdates,
@@ -383,7 +383,7 @@ export const startLessonTurn = (
  */
 const createProducerDisplays = (lesson: Lesson): ProducerItemDisplay[] => {
   return lesson.idol.producerItems.map((producerItem) => {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    const producerItemContent = getProducerItemContentData(producerItem);
     const name =
       producerItem.original.definition.name +
       (producerItem.original.enhanced ? "+" : "");

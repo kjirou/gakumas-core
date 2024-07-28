@@ -8,6 +8,8 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
+// TODO: 「体力減少」はnormalコストと同じだった
+// TODO: ModifierのMetaの定義をする、その上で重ならないようにするかはフラグで持つ、その上で「ファンシーチャーム」などはlabelにそれが入るようにする
 // TODO: スコアボーナスを渡せるようにする
 // TODO: 状態修正一覧、Pアイテム一覧、応援/トラブル一覧などを返すユーティリティを公開APIへ追加
 // TODO: Pドリンク
@@ -17,6 +19,7 @@
 
 import {
   CardInHandInformation,
+  EncouragementInformation,
   LessonGamePlay,
   LessonUpdateQuery,
   ModifierInformation,
@@ -42,7 +45,11 @@ import {
   isScoreSatisfyingPerfect,
   patchUpdates,
 } from "./models";
-import { generateCardDescription, modifierLabels } from "./text-generation";
+import {
+  generateCardDescription,
+  generateEffectText,
+  modifierLabels,
+} from "./text-generation";
 
 export type * from "./types";
 export * from "./models";
@@ -385,6 +392,22 @@ export const getModifiers = (
       ...modifier,
       label: modifierLabels[modifier.kind],
       description: "",
+    };
+  });
+};
+
+/**
+ * 応援/トラブルリストを取得する
+ */
+export const getEncouragements = (
+  lessonGamePlay: LessonGamePlay,
+): EncouragementInformation[] => {
+  return lessonGamePlay.initialLesson.encouragements.map((encouragement) => {
+    return {
+      ...encouragement,
+      description: generateEffectText(encouragement.effect, {
+        hasSeparator: false,
+      }),
     };
   });
 };

@@ -1503,3 +1503,12 @@ export type ModifierInformation = ModifierDefinition & {
   id: Modifier["id"];
   label: string;
 };
+
+/**
+ * 応援/トラブルの詳細情報
+ *
+ * - 主に表示用を想定している、本家のアイドルの道の各ステージ画面にある、右上の応援/トラブル詳細のリスト
+ */
+export type EncouragementInformation = Encouragement & {
+  description: string;
+};

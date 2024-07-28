@@ -16,6 +16,7 @@ import {
   createLessonGamePlay,
   endLessonTurn,
   getCardContentDefinition,
+  getEncouragements,
   getHand,
   getModifiers,
   getNextHistoryResultIndex,
@@ -77,6 +78,48 @@ describe("getModifiers", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(getModifiers(...args)).toStrictEqual(expected);
+  });
+});
+describe("getEncouragements", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getEncouragements>;
+    expected: ReturnType<typeof getEncouragements>;
+    name: string;
+  }> = [
+    {
+      name: "descriptionの条件と効果の間に読点がない",
+      args: [
+        {
+          initialLesson: {
+            encouragements: [
+              {
+                turnNumber: 1,
+                effect: {
+                  kind: "perform",
+                  vitality: { value: 1 },
+                  condition: {
+                    kind: "countModifier",
+                    modifierKind: "focus",
+                    range: { min: 3 },
+                  },
+                },
+              },
+            ],
+          },
+          updates: [] as LessonUpdateQuery[],
+        } as LessonGamePlay,
+      ],
+      expected: [
+        {
+          turnNumber: 1,
+          effect: expect.any(Object),
+          description: "{{集中}}が3以上の場合{{元気}}+1",
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(getEncouragements(...args)).toStrictEqual(expected);
   });
 });
 

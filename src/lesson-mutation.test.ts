@@ -1970,6 +1970,32 @@ describe("activateEffect", () => {
     name: string;
   }> = [
     {
+      name: "drainLife",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.life = 1;
+          lesson.idol.vitality = 3;
+          return lesson;
+        })(),
+        { kind: "drainLife", value: 5 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "vitality",
+          actual: -3,
+          max: -5,
+        },
+        {
+          kind: "life",
+          actual: -1,
+          max: -2,
+        },
+      ],
+    },
+    {
       name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
       args: [
         (() => {

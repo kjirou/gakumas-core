@@ -568,11 +568,14 @@ export const calculateCostConsumption = (
  *     - `(23 + 4 * 2.0) * (1.5 + 0.6) = 65.10`
  *   - 集中:4, 好調:6, 絶好調:有, 初星水（+10） => 30
  *     - `(10 + 4) * (1.5 + 0.6) = 29.40`
+ * - 元気や好印象などを含む全てのスコア増加効果について、この式を通している
+ *   - そのため、本実装上では、元気や好印象によるスコア増加へ好調の影響を与えることもできる
  *
  * @param remainingIncrementableScore 残りの増加可能スコア。undefined の場合は、無限大として扱う。
  */
 export const calculatePerformingScoreEffect = (
   idol: Idol,
+  scoreBonus: number | undefined,
   remainingIncrementableScore: number | undefined,
   query: NonNullable<Extract<Effect, { kind: "perform" }>["score"]>,
 ): Array<Extract<LessonUpdateQueryDiff, { kind: "score" }>> => {
@@ -587,7 +590,7 @@ export const calculatePerformingScoreEffect = (
     idol.modifiers.find((e) => e.kind === "mightyPerformance") !== undefined;
   const focusMultiplier =
     query.focusMultiplier !== undefined ? query.focusMultiplier : 1;
-  const score = Math.ceil(
+  const baseScore = Math.ceil(
     (query.value + focusAmount * focusMultiplier) *
       ((goodConditionDuration > 0 ? 1.5 : 1.0) +
         (goodConditionDuration > 0 && hasExcellentCondition
@@ -595,6 +598,10 @@ export const calculatePerformingScoreEffect = (
           : 0.0)) *
       (hasMightyPerformance ? 1.5 : 1.0),
   );
+  const score =
+    scoreBonus !== undefined
+      ? Math.ceil((baseScore * scoreBonus) / 100)
+      : baseScore;
   const diffs: Array<Extract<LessonUpdateQueryDiff, { kind: "score" }>> = [];
   let remainingIncrementableScore_ = remainingIncrementableScore;
   for (let i = 0; i < (query.times !== undefined ? query.times : 1); i++) {
@@ -612,35 +619,6 @@ export const calculatePerformingScoreEffect = (
     }
   }
   return diffs;
-};
-
-/**
- * 好印象によるスコア増加の計算をする
- */
-export const calculatePositiveImpressionScore = (
-  modifiers: Modifier[],
-  remainingIncrementableScore: number | undefined,
-): Extract<LessonUpdateQueryDiff, { kind: "score" }> => {
-  const positiveImpression = modifiers.find(
-    (e) => e.kind === "positiveImpression",
-  );
-  const positiveImpressionAmount =
-    positiveImpression && "amount" in positiveImpression
-      ? positiveImpression.amount
-      : 0;
-  const hasMightyPerformance =
-    modifiers.find((e) => e.kind === "mightyPerformance") !== undefined;
-  const score = Math.ceil(
-    positiveImpressionAmount * (hasMightyPerformance ? 1.5 : 1.0),
-  );
-  return {
-    kind: "score",
-    actual:
-      remainingIncrementableScore !== undefined
-        ? Math.min(score, remainingIncrementableScore)
-        : score,
-    max: score,
-  };
 };
 
 export const calculatePerformingVitalityEffect = (
@@ -690,6 +668,11 @@ export const activateEffect = (
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): LessonUpdateQueryDiff[] | undefined => {
+  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+  const scoreBonus =
+    lesson.idol.scoreBonus !== undefined
+      ? lesson.idol.scoreBonus[idolParameterKind]
+      : undefined;
   let remainingIncrementableScore: number | undefined;
   if (lesson.clearScoreThresholds !== undefined) {
     const progress = calculateClearScoreProgress(
@@ -930,6 +913,7 @@ export const activateEffect = (
           ...diffs,
           ...calculatePerformingScoreEffect(
             lesson.idol,
+            scoreBonus,
             remainingIncrementableScore,
             effect.score,
           ),
@@ -974,14 +958,15 @@ export const activateEffect = (
           throw new Error(`Unreachable statement`);
         }
       }
-      diffs.push({
-        kind: "score",
-        actual:
-          remainingIncrementableScore !== undefined
-            ? Math.min(score, remainingIncrementableScore)
-            : score,
-        max: score,
-      });
+      diffs = [
+        ...diffs,
+        ...calculatePerformingScoreEffect(
+          lesson.idol,
+          scoreBonus,
+          remainingIncrementableScore,
+          { value: score },
+        ),
+      ];
       break;
     }
     case "performLeveragingVitality": {
@@ -996,14 +981,15 @@ export const activateEffect = (
         });
       }
       const score = Math.ceil((lesson.idol.vitality * effect.percentage) / 100);
-      diffs.push({
-        kind: "score",
-        actual:
-          remainingIncrementableScore !== undefined
-            ? Math.min(score, remainingIncrementableScore)
-            : score,
-        max: score,
-      });
+      diffs = [
+        ...diffs,
+        ...calculatePerformingScoreEffect(
+          lesson.idol,
+          scoreBonus,
+          remainingIncrementableScore,
+          { value: score },
+        ),
+      ];
       break;
     }
     case "recoverLife": {
@@ -2473,10 +2459,15 @@ export const obtainPositiveImpressionScoreOnTurnEnd = (
 ): LessonMutationResult => {
   let updates: LessonUpdateQuery[] = [];
 
-  const hasPositiveImpression =
-    lesson.idol.modifiers.find((e) => e.kind === "positiveImpression") !==
-    undefined;
-  if (hasPositiveImpression) {
+  const positiveImpression = lesson.idol.modifiers.find(
+    (e) => e.kind === "positiveImpression",
+  );
+  if (positiveImpression) {
+    const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+    const scoreBonus =
+      lesson.idol.scoreBonus !== undefined
+        ? lesson.idol.scoreBonus[idolParameterKind]
+        : undefined;
     let remainingIncrementableScore: number | undefined = undefined;
     if (lesson.clearScoreThresholds !== undefined) {
       const progress = calculateClearScoreProgress(
@@ -2487,17 +2478,21 @@ export const obtainPositiveImpressionScoreOnTurnEnd = (
         remainingIncrementableScore = progress.remainingPerfectScore;
       }
     }
-    const diff = calculatePositiveImpressionScore(
-      lesson.idol.modifiers,
+    const diffs = calculatePerformingScoreEffect(
+      lesson.idol,
+      scoreBonus,
       remainingIncrementableScore,
+      { value: positiveImpression.amount },
     );
     updates = [
       ...updates,
-      createLessonUpdateQueryFromDiff(diff, {
-        kind: "turnEndTrigger",
-        historyTurnNumber: lesson.turnNumber,
-        historyResultIndex,
-      }),
+      ...diffs.map((diff) =>
+        createLessonUpdateQueryFromDiff(diff, {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        }),
+      ),
     ];
   }
 

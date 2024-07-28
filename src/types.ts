@@ -1066,7 +1066,7 @@ export type IdolData = Readonly<{
  *
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
-export type IdolInProduction = {
+export type IdolInProduction = Readonly<{
   data: IdolData;
   deck: CardInProduction[];
   // NOTE: まだ使わないので一旦コメントアウト
@@ -1081,7 +1081,7 @@ export type IdolInProduction = {
    *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
    */
   producerItems: ProducerItemInProduction[];
-};
+}>;
 
 /**
  * レッスン中のプロデュースアイドル
@@ -1118,6 +1118,17 @@ export type Idol = {
    *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
    */
   producerItems: ProducerItem[];
+  /**
+   * スコアボーナス
+   *
+   * - 値はパーセンテージ
+   * - 計算は、パラメータとしての値を一旦整数へ丸めた上で、その後にスコアボーナスで乗算し、端数を切り上げる
+   *   - 例えば、好調中にパラメータ追加+9をして、スコアボーナスが175%なら、以下のように2回切り上げが発生する
+   *     - `9 * 1.5 = 13.5 => 14`
+   *     - `14 * 1.75 = 24.5 => 25`
+   *   - 検証: https://github.com/kjirou/gakumas-core/issues/81
+   */
+  scoreBonus: Record<IdolParameterKind, number> | undefined;
   /** 本レッスン中にスキルカードを使用した回数、関連する原文は「レッスン中に使用したスキルカード{n}枚ごとに、」 */
   totalCardUsageCount: number;
   /**
@@ -1572,6 +1583,7 @@ export type LessonDisplay = {
   life: Idol["life"];
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
+  remainingTurns: Lesson["remainingTurns"];
   turnNumber: number;
   /** ターン追加を反映した長さのターンリスト */
   turns: TurnDisplay[];

@@ -8,8 +8,6 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
-// TODO: スコアボーナスを渡せるようにする
-// TODO: 状態修正一覧、Pアイテム一覧、応援/トラブル一覧などを返すユーティリティを公開APIへ追加
 // TODO: Pドリンク
 // TODO: レッスン履歴
 // TODO: データの永続化サポート
@@ -453,6 +451,7 @@ export const createLessonDisplay = (
     life: lesson.idol.life,
     modifiers,
     producerItems: createProducerDisplays(lesson),
+    remainingTurns: calculateRemainingTurns(lesson),
     turnNumber: lesson.turnNumber,
     turns,
     vitality: lesson.idol.vitality,

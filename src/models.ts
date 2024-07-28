@@ -175,7 +175,10 @@ export const createIdolInProduction = (params: {
   };
 };
 
-const createIdol = (params: { idolInProduction: IdolInProduction }): Idol => {
+const createIdol = (params: {
+  idolInProduction: IdolInProduction;
+  scoreBonus?: Idol["scoreBonus"];
+}): Idol => {
   return {
     actionPoints: 0,
     life: params.idolInProduction.life,
@@ -186,6 +189,7 @@ const createIdol = (params: { idolInProduction: IdolInProduction }): Idol => {
     producerItems: prepareProducerItemsForLesson(
       params.idolInProduction.producerItems,
     ),
+    scoreBonus: params.scoreBonus,
     totalCardUsageCount: 0,
     vitality: 0,
   };
@@ -269,6 +273,7 @@ export const createLessonGamePlay = (params: {
   idolInProduction: IdolInProduction;
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   memoryEffects?: MemoryEffect[];
+  scoreBonus?: Idol["scoreBonus"];
   turns: Lesson["turns"];
 }): LessonGamePlay => {
   const clearScoreThresholds =
@@ -296,6 +301,7 @@ export const createLessonGamePlay = (params: {
       hand: [],
       idol: createIdol({
         idolInProduction: params.idolInProduction,
+        scoreBonus: params.scoreBonus,
       }),
       ignoreIdolParameterKindConditionAfterClearing,
       memoryEffects,

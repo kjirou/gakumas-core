@@ -228,6 +228,20 @@ export type ModifierDefinition =
     };
 
 /**
+ * いち状態修正種別のメタデータ
+ */
+export type MetaModifierData = {
+  kind: ModifierDefinition["kind"];
+  label: string;
+  /**
+   * 同じ種別の状態修正を重複した時に合算するか
+   *
+   * - 「次に使用するスキルカードの効果をもう1回発動」や、いわゆる持続効果・発動予約は合算しない
+   */
+  nonAggregation: boolean;
+};
+
+/**
  * 状態修正
  *
  * - レッスン中に画面左上に表示されるアイコン群のことを、状態修正(modifier)と呼ぶ

@@ -54,8 +54,8 @@ import {
   generateEffectText,
   generateProducerItemDescription,
   idolParameterKindLabels,
-  modifierLabels,
 } from "./text-generation";
+import { metaModifierDictioanry } from "./data/modifiers";
 
 export type * from "./types";
 export * from "./models";
@@ -419,7 +419,7 @@ export const createLessonDisplay = (
   const modifiers = lesson.idol.modifiers.map((modifier) => {
     return {
       ...modifier,
-      label: modifierLabels[modifier.kind],
+      label: metaModifierDictioanry[modifier.kind].label,
       description: "",
     };
   });

@@ -1,13 +1,10 @@
-import type { CardSetDefinition, ProducePlan } from "../types";
+import type { CardSetData, ProducePlan } from "../types";
 
 export const findCardSetDataById = (
-  id: CardSetDefinition["id"],
-): CardSetDefinition | undefined =>
-  cardSets.find((cardSet) => cardSet.id === id);
+  id: CardSetData["id"],
+): CardSetData | undefined => cardSets.find((cardSet) => cardSet.id === id);
 
-export const getCardSetDataById = (
-  id: CardSetDefinition["id"],
-): CardSetDefinition => {
+export const getCardSetDataById = (id: CardSetData["id"]): CardSetData => {
   const cardSet = findCardSetDataById(id);
   if (!cardSet) {
     throw new Error(`Card set not found: ${id}`);
@@ -18,7 +15,7 @@ export const getCardSetDataById = (
 /** 初期スキルカードセットを返す */
 export const getDefaultCardSetData = (
   proeducePlan: ProducePlan,
-): CardSetDefinition => {
+): CardSetData => {
   if (proeducePlan.kind === "logic") {
     return proeducePlan.recommendedEffect === "motivation"
       ? getCardSetDataById("defaultLogicMotivation")
@@ -30,7 +27,7 @@ export const getDefaultCardSetData = (
   }
 };
 
-export const cardSets: CardSetDefinition[] = [
+export const cardSets: CardSetData[] = [
   {
     id: "defaultLogicMotivation",
     cardDataIds: [

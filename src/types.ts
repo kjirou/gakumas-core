@@ -812,7 +812,7 @@ export type Card = {
 /**
  * カードセット定義
  */
-export type CardSetDefinition = Readonly<{
+export type CardSetData = Readonly<{
   cardDataIds: Array<CardData["id"]>;
   id: string;
 }>;

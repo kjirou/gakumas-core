@@ -15,11 +15,13 @@ import type {
   CardUsageCondition,
   Effect,
   EffectCondition,
+  IdolParameterKind,
   ModifierDefinition,
   ProducerItemContentDefinition,
   ProducerItemTrigger,
   RangedNumber,
   VitalityUpdateQuery,
+  Idol,
 } from "./types";
 
 /**
@@ -43,6 +45,41 @@ const generateRangedNumberText = (range: RangedNumber): string => {
 };
 
 /**
+ * パラメータ種別の表示名
+ */
+export const idolParameterKindLabels = {
+  dance: "ダンス",
+  visual: "ビジュアル",
+  vocal: "ボーカル",
+} as const satisfies Record<IdolParameterKind, string>;
+
+/**
+ * 状態修正の表示名
+ *
+ * - 本家の状態修正リストに表示されている名称
+ */
+export const modifierLabels = {
+  additionalCardUsageCount: "スキルカード使用数追加",
+  debuffProtection: "低下状態無効",
+  delayedEffect: "発動予約",
+  doubleEffect: "スキルカード追加発動",
+  doubleLifeConsumption: "消費体力増加",
+  excellentCondition: "絶好調",
+  // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
+  effectActivationOnTurnEnd: "ターン終了時持続効果",
+  // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
+  effectActivationBeforeCardEffectActivation: "スキルカード発動前持続効果",
+  focus: "集中",
+  goodCondition: "好調",
+  halfLifeConsumption: "消費体力減少",
+  lifeConsumptionReduction: "消費体力削減",
+  mightyPerformance: "パラメータ上昇量増加",
+  motivation: "やる気",
+  noVitalityIncrease: "元気増加無効",
+  positiveImpression: "好印象",
+} as const satisfies Record<ModifierDefinition["kind"], string>;
+
+/**
  * ゲーム全体を通じてキーワード化されている名称
  *
  * - 本家の各種テキスト内で、タップ可能なキーワードになるもの
@@ -54,25 +91,14 @@ const generateRangedNumberText = (range: RangedNumber): string => {
  *   - 1状態修正や1効果の中に複数のキーワードが含まれることも有り得る、また逆に、1キーワードが複数の状態修正や効果に含まれることも有り得る
  */
 const globalKeywords = {
+  ...modifierLabels,
   activeSkillCard: "アクティブスキルカード",
-  additionalCardUsageCount: "スキルカード使用数追加",
-  debuffProtection: "低下状態無効",
-  doubleLifeConsumption: "消費体力増加",
   enhanceHand: "レッスン中強化",
-  excellentCondition: "絶好調",
   fixedValueVitality: "固定元気",
-  focus: "集中",
   generateCard: "生成",
-  goodCondition: "好調",
-  halfLifeConsumption: "消費体力減少",
   increaseRemainingTurns: "ターン追加",
-  lifeConsumptionReduction: "消費体力削減",
   mentalSkillCard: "メンタルスキルカード",
-  mightyPerformance: "パラメータ上昇量増加",
-  motivation: "やる気",
-  noVitalityIncrease: "元気増加無効",
   nonDuplicative: "重複不可",
-  positiveImpression: "好印象",
   // TODO: 状況により「試験・ステージ中1回」に変化する、少なくともアイドルの道だとそうだった
   usableOncePerLesson: "レッスン中1回",
   vitality: "元気",
@@ -146,7 +172,7 @@ const generateModifierText = (modifier: ModifierDefinition): string => {
       return `次に使用するスキルカードの効果をもう1回発動（1回）`;
     case "doubleLifeConsumption":
       return `${kwd("doubleLifeConsumption")}${modifier.duration}ターン`;
-    case "effectActivationAtEndOfTurn":
+    case "effectActivationOnTurnEnd":
       return [
         "以降、ターン終了時",
         // 条件がない場合のみ「、」を挿入する
@@ -155,7 +181,7 @@ const generateModifierText = (modifier: ModifierDefinition): string => {
         modifier.effect.condition ? "" : "、",
         generateEffectText(modifier.effect),
       ].join("");
-    case "effectActivationUponCardUsage":
+    case "effectActivationBeforeCardEffectActivation":
       return (
         "以降、" +
         (modifier.cardKind === "active"

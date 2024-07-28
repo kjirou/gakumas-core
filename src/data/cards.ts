@@ -1853,7 +1853,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 modifier: { kind: "positiveImpression", amount: 1 },
@@ -1873,7 +1873,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 modifier: { kind: "positiveImpression", amount: 1 },
@@ -2934,7 +2934,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "perform",
@@ -2955,7 +2955,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "perform",
@@ -2974,7 +2974,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "perform",
@@ -2993,7 +2993,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "perform",
@@ -3025,7 +3025,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "getModifier",
@@ -3046,7 +3046,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "getModifier",
@@ -3065,7 +3065,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: {
                 kind: "getModifier",
@@ -3498,7 +3498,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "mental",
               effect: {
                 kind: "getModifier",
@@ -3518,7 +3518,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "mental",
               effect: {
                 kind: "getModifier",
@@ -3555,7 +3555,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "mental",
               effect: {
                 kind: "getModifier",
@@ -3575,7 +3575,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "mental",
               effect: {
                 kind: "getModifier",
@@ -3595,7 +3595,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "mental",
               effect: {
                 kind: "getModifier",
@@ -5079,7 +5079,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: { kind: "perform", score: { value: 4 } },
             },
@@ -5101,7 +5101,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: { kind: "perform", score: { value: 5 } },
             },
@@ -5323,7 +5323,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               effect: {
                 kind: "performLeveragingModifier",
                 modifierKind: "positiveImpression",
@@ -5346,7 +5346,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               effect: {
                 kind: "performLeveragingModifier",
                 modifierKind: "positiveImpression",
@@ -5796,7 +5796,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 condition: {
@@ -6117,7 +6117,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 condition: {
@@ -6141,7 +6141,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 condition: {
@@ -6165,7 +6165,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 condition: {
@@ -6596,7 +6596,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 modifier: { kind: "positiveImpression", amount: 1 },
@@ -6616,7 +6616,7 @@ export const cards: CardDefinition[] = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationAtEndOfTurn",
+              kind: "effectActivationOnTurnEnd",
               effect: {
                 kind: "getModifier",
                 modifier: { kind: "positiveImpression", amount: 1 },

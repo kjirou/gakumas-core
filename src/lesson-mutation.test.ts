@@ -4286,19 +4286,19 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifier" &&
-            e.actual.kind === "effectActivationUponCardUsage",
+            e.actual.kind === "effectActivationBeforeCardEffectActivation",
         ),
       ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "mental",
             effect: expect.any(Object),
             id: expect.any(String),
           },
           max: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "mental",
             effect: expect.any(Object),
             id: expect.any(String),
@@ -4377,19 +4377,19 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifier" &&
-            e.actual.kind === "effectActivationUponCardUsage",
+            e.actual.kind === "effectActivationBeforeCardEffectActivation",
         ),
       ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "active",
             effect: expect.any(Object),
             id: expect.any(String),
           },
           max: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "active",
             effect: expect.any(Object),
             id: expect.any(String),
@@ -4456,18 +4456,18 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifier" &&
-            e.actual.kind === "effectActivationUponCardUsage",
+            e.actual.kind === "effectActivationBeforeCardEffectActivation",
         ),
       ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             effect: expect.any(Object),
             id: expect.any(String),
           },
           max: {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             effect: expect.any(Object),
             id: expect.any(String),
           },
@@ -4937,7 +4937,7 @@ describe("useCard preview:false", () => {
         lesson.hand = ["a"];
         lesson.idol.modifiers = [
           {
-            kind: "effectActivationUponCardUsage",
+            kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "active",
             id: "x",
           } as Modifier,
@@ -4952,19 +4952,19 @@ describe("useCard preview:false", () => {
           updates.filter(
             (e) =>
               e.kind === "modifier" &&
-              e.actual.kind === "effectActivationUponCardUsage",
+              e.actual.kind === "effectActivationBeforeCardEffectActivation",
           ),
         ).toStrictEqual([
           {
             kind: "modifier",
             actual: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: expect.any(Object),
               id: expect.any(String),
             },
             max: {
-              kind: "effectActivationUponCardUsage",
+              kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
               effect: expect.any(Object),
               id: expect.any(String),
@@ -5725,11 +5725,11 @@ describe("activateEffectsOnTurnEnd", () => {
     });
   });
   describe("状態修正による効果発動", () => {
-    test("effectActivationAtEndOfTurn", () => {
+    test("effectActivationOnTurnEnd", () => {
       const lesson = createLessonForTest();
       lesson.idol.modifiers = [
         {
-          kind: "effectActivationAtEndOfTurn",
+          kind: "effectActivationOnTurnEnd",
           effect: {
             kind: "getModifier",
             modifier: { kind: "motivation", amount: 1 },

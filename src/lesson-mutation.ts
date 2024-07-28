@@ -2,7 +2,7 @@ import type {
   ActionCost,
   Card,
   CardDefinition,
-  CardInHandSummary,
+  CardInHandDisplay,
   CardInProduction,
   CardSummaryKind,
   CardUsageCondition,
@@ -875,8 +875,8 @@ export const activateEffect = (
         sameKindModifier !== undefined &&
         effect.modifier.kind !== "delayedEffect" &&
         effect.modifier.kind !== "doubleEffect" &&
-        effect.modifier.kind !== "effectActivationAtEndOfTurn" &&
-        effect.modifier.kind !== "effectActivationUponCardUsage";
+        effect.modifier.kind !== "effectActivationOnTurnEnd" &&
+        effect.modifier.kind !== "effectActivationBeforeCardEffectActivation";
       diffs.push({
         kind: "modifier",
         actual: {
@@ -1255,7 +1255,7 @@ export const summarizeCardInHand = (
   cardId: Card["id"],
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): CardInHandSummary => {
+): CardInHandDisplay => {
   const card = lesson.cards.find((card) => card.id === cardId);
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
@@ -1272,7 +1272,7 @@ export const summarizeCardInHand = (
       effectActivation ? [...acc, ...effectActivation] : acc,
     [],
   );
-  let scores: CardInHandSummary["scores"] = [];
+  let scores: CardInHandDisplay["scores"] = [];
   for (const effectActivation of effectActivations) {
     if (effectActivation) {
       if (effectActivation.length > 0 && effectActivation[0].kind === "score") {
@@ -1287,12 +1287,12 @@ export const summarizeCardInHand = (
       }
     }
   }
-  let vitality: CardInHandSummary["vitality"] = undefined;
+  let vitality: CardInHandDisplay["vitality"] = undefined;
   const firstVitalityUpdate = effectDiffs.find((e) => e.kind === "vitality");
   if (firstVitalityUpdate) {
     vitality = firstVitalityUpdate.max;
   }
-  let effects: CardInHandSummary["effects"] = [];
+  let effects: CardInHandDisplay["effects"] = [];
   for (const [effectIndex, effect] of cardContent.effects.entries()) {
     const applyable = effectActivations[effectIndex] !== undefined;
     if (effect.kind === "getModifier") {
@@ -2200,10 +2200,15 @@ export const useCard = (
     if (!params.preview) {
       const effectsUponCardUsage = newLesson.idol.modifiers.filter(
         (e) =>
-          e.kind === "effectActivationUponCardUsage" &&
+          e.kind === "effectActivationBeforeCardEffectActivation" &&
           (e.cardKind === undefined ||
             e.cardKind === card.original.definition.cardSummaryKind),
-      ) as Array<Extract<Modifier, { kind: "effectActivationUponCardUsage" }>>;
+      ) as Array<
+        Extract<
+          Modifier,
+          { kind: "effectActivationBeforeCardEffectActivation" }
+        >
+      >;
       for (const { effect } of effectsUponCardUsage) {
         const effectResult = activateEffect(
           newLesson,
@@ -2427,7 +2432,7 @@ export const activateEffectsOnTurnEnd = (
   if (!isScoreSatisfyingPerfect(newLesson)) {
     for (const modifier of newLesson.idol.modifiers) {
       let innerUpdates: LessonUpdateQuery[] = [];
-      if (modifier.kind === "effectActivationAtEndOfTurn") {
+      if (modifier.kind === "effectActivationOnTurnEnd") {
         const diffs = activateEffect(
           newLesson,
           modifier.effect,

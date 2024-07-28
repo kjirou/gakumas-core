@@ -86,15 +86,22 @@ export const getProducerItemContentDefinition = (
     : producerItem.original.definition.base;
 };
 
-/** Pアイテムの使用回数が足りているか */
+/** Pアイテムの残り発動回数を返す */
+export const getRemainingProducerItemTimes = (
+  producerItem: ProducerItem,
+): number | undefined => {
+  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  return producerItemContent.times === undefined
+    ? undefined
+    : Math.max(producerItemContent.times - producerItem.activationCount, 0);
+};
+
+/** Pアイテムの発動回数が足りているか */
 export const isRemainingProducerItemTimes = (
   producerItem: ProducerItem,
 ): boolean => {
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
-  return (
-    producerItemContent.times === undefined ||
-    producerItem.activationCount < producerItemContent.times
-  );
+  const remainingTimes = getRemainingProducerItemTimes(producerItem);
+  return remainingTimes !== undefined ? remainingTimes > 0 : true;
 };
 
 /**
@@ -304,26 +311,30 @@ export const createLessonGamePlay = (params: {
 };
 
 /**
+ * ターン追加を考慮した、実際の最終ターンまでのリストを生成する
+ *
+ * - 「ターン追加」により追加したターンは、元の最終ターンのパラメータ種別をコピーする
+ */
+export const createActualTurns = (lesson: Lesson): IdolParameterKind[] => {
+  const lastTurn = lesson.turns[lesson.turns.length - 1];
+  return [...lesson.turns, ...new Array(lesson.remainingTurns).fill(lastTurn)];
+};
+
+/**
  * 現在のターンのアイドルパラメータ種別を返す
  *
  * - 0ターン目は1ターン目の値を返す
- * - 指定したターン番号が存在しない時は、最終ターンの内容を返す
- * - 「ターン追加」による最終ターンの延長時に、最終ターンの内容が継続する仕様を表現したものでもある
  */
 export const getIdolParameterKindOnTurn = (
   lesson: Lesson,
 ): IdolParameterKind => {
-  return lesson.turnNumber === 0
-    ? lesson.turns[0]
-    : lesson.turns[lesson.turnNumber - 1] ||
-        lesson.turns[lesson.turns.length - 1];
+  const turns = createActualTurns(lesson);
+  return lesson.turnNumber === 0 ? turns[0] : turns[lesson.turnNumber - 1];
 };
-export const calculateLastTurnNumber = (lesson: Lesson): number =>
-  lesson.turns.length + lesson.remainingTurns;
 
 /** 残りターン数を計算する、最終ターンは1 */
 export const calculateRemainingTurns = (lesson: Lesson): number =>
-  calculateLastTurnNumber(lesson) - lesson.turnNumber + 1;
+  createActualTurns(lesson).length - lesson.turnNumber + 1;
 
 /** 「消費体力減少」・「消費体力削減」・「消費体力増加」を反映したコストを返す */
 export const calculateActualActionCost = (
@@ -565,8 +576,8 @@ export const patchUpdates = (
               break;
             }
             // 常に新規追加で、かつ削除できないので、ここを通ることはない
-            case "effectActivationAtEndOfTurn":
-            case "effectActivationUponCardUsage": {
+            case "effectActivationOnTurnEnd":
+            case "effectActivationBeforeCardEffectActivation": {
               throw new Error(
                 `Unexpected modifier kind: ${updateModifierKind}`,
               );
@@ -579,7 +590,7 @@ export const patchUpdates = (
             .map((modifier) =>
               modifier.id === updateTargetId ? newTargetedModifier : modifier,
             )
-            // "effectActivationAtEndOfTurn" や "effectActivationUponCardUsage" など、数値を持たないものは永続なので、削除しない
+            // "effectActivationOnTurnEnd" や "effectActivationBeforeCardEffectActivation" など、数値を持たないものは永続なので、削除しない
             .filter(
               (modifier) =>
                 !("amount" in modifier && modifier.amount === 0) &&

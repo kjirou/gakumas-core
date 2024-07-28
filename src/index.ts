@@ -8,6 +8,8 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
+// TODO: 「体力減少」はnormalコストと同じだった
+// TODO: ModifierのMetaの定義をする、その上で重ならないようにするかはフラグで持つ、その上で「ファンシーチャーム」などはlabelにそれが入るようにする
 // TODO: スコアボーナスを渡せるようにする
 // TODO: 状態修正一覧、Pアイテム一覧、応援/トラブル一覧などを返すユーティリティを公開APIへ追加
 // TODO: Pドリンク
@@ -15,7 +17,15 @@
 // TODO: データの永続化サポート
 // TODO: コンテスト
 
-import { CardInHandSummary, LessonGamePlay, LessonUpdateQuery } from "./types";
+import {
+  EncouragementDisplay,
+  Lesson,
+  LessonGamePlay,
+  LessonDisplay,
+  LessonUpdateQuery,
+  ProducerItemDisplay,
+  TurnDisplay,
+} from "./types";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -32,12 +42,21 @@ import {
 } from "./lesson-mutation";
 import {
   calculateRemainingTurns,
+  createActualTurns,
   getCardContentDefinition,
   getNextHistoryResultIndex,
+  getProducerItemContentDefinition,
+  getRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   patchUpdates,
 } from "./models";
-import { generateCardDescription } from "./text-generation";
+import {
+  generateCardDescription,
+  generateEffectText,
+  generateProducerItemDescription,
+  idolParameterKindLabels,
+  modifierLabels,
+} from "./text-generation";
 
 export type * from "./types";
 export * from "./models";
@@ -69,6 +88,24 @@ export * from "./utils";
 // setLesson(最新のLessonの状態を返す(newLessonGamePlay));
 // ```
 //
+
+/**
+ * 応援/トラブル情報リストを取得する
+ *
+ * - 例えば、アイドルの道の各ステージ詳細の応援/トラブル詳細を表示する際に使う
+ */
+export const getEncouragements = (
+  lessonGamePlay: LessonGamePlay,
+): EncouragementDisplay[] => {
+  return lessonGamePlay.initialLesson.encouragements.map((encouragement) => {
+    return {
+      ...encouragement,
+      description: generateEffectText(encouragement.effect, {
+        hasSeparator: false,
+      }),
+    };
+  });
+};
 
 /**
  * レッスンのターンを開始する
@@ -344,16 +381,61 @@ export const startLessonTurn = (
 };
 
 /**
- * 手札を取得する
+ * レッスン中のPアイテム表示用情報リストを生成する
  */
-export const getHand = (
+const createProducerDisplays = (lesson: Lesson): ProducerItemDisplay[] => {
+  return lesson.idol.producerItems.map((producerItem) => {
+    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    const name =
+      producerItem.original.definition.name +
+      (producerItem.original.enhanced ? "+" : "");
+    return {
+      ...producerItem,
+      name,
+      description: generateProducerItemDescription({
+        condition: producerItemContent.condition,
+        cost: producerItemContent.cost,
+        effects: producerItemContent.effects,
+        times: producerItemContent.times,
+        trigger: producerItemContent.trigger,
+      }),
+      remainingTimes: getRemainingProducerItemTimes(producerItem),
+    };
+  });
+};
+
+/**
+ * レッスン表示用情報を生成する
+ *
+ * - TODO: ターン詳細の「3位以上で合格」が未実装
+ * - TODO: レッスン履歴が未実装
+ */
+export const createLessonDisplay = (
   lessonGamePlay: LessonGamePlay,
-): CardInHandSummary[] => {
+): LessonDisplay => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
-  return lesson.hand.map((cardId) => {
+  const modifiers = lesson.idol.modifiers.map((modifier) => {
+    return {
+      ...modifier,
+      label: modifierLabels[modifier.kind],
+      description: "",
+    };
+  });
+  const turns: TurnDisplay[] = createActualTurns(lesson).map(
+    (idolParameterKind, index) => {
+      const turnNumber = index + 1;
+      return {
+        turnNumber,
+        turnNumberDiff: turnNumber - lesson.turnNumber,
+        idolParameterKind,
+        idolParameterLabel: idolParameterKindLabels[idolParameterKind],
+      };
+    },
+  );
+  const hand = lesson.hand.map((cardId) => {
     return {
       ...summarizeCardInHand(
         lesson,
@@ -363,6 +445,15 @@ export const getHand = (
       ),
     };
   });
+  return {
+    hand,
+    life: lesson.idol.life,
+    modifiers,
+    producerItems: createProducerDisplays(lesson),
+    turnNumber: lesson.turnNumber,
+    turns,
+    vitality: lesson.idol.vitality,
+  };
 };
 
 /**
@@ -618,7 +709,7 @@ export const endLessonTurn = (
   // 1. Pアイテム起因の、「ターン終了時」の効果発動
   //    ProducerItemTrigger["kind"] === "turnEnd"
   // 2. 状態修正起因の、「ターン終了時」の効果発動
-  //    Modifier["kind"] === "effectActivationAtEndOfTurn"
+  //    Modifier["kind"] === "effectActivationOnTurnEnd"
   // 3. 未使用の手札を捨てる
   // 4. 好印象の評価によるスコア増加効果発動
   //

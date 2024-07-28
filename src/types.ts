@@ -100,7 +100,7 @@ export type ModifierDefinition =
        *
        * - 原文の例
        *   - 「アイドル魂」は、「低下状態無効（1回）」
-       * - TODO: 正確な効果が不明、何が対象なのか（消費体力増加を消してくれる説は見た）、また、付与を防ぐのか付与されているものを削除するのか
+       * - TODO: 未実装。正確な効果が不明、何が対象なのか（消費体力増加を消してくれる説は見た）、また、付与を防ぐのか付与されているものを削除するのか
        */
       kind: "debuffProtection";
       times: number;
@@ -157,18 +157,18 @@ export type ModifierDefinition =
        *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
        *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
        */
-      kind: "effectActivationAtEndOfTurn";
+      kind: "effectActivationOnTurnEnd";
       effect: Effect;
     }
   | {
       /**
-       * スキルカード使用時に効果発動
+       * スキルカード使用時の主効果発動前に効果発動
        *
        * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{effect}」
        *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
        *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
        */
-      kind: "effectActivationUponCardUsage";
+      kind: "effectActivationBeforeCardEffectActivation";
       cardKind?: CardSummaryKind;
       effect: Effect;
     }
@@ -1105,10 +1105,9 @@ export type Idol = {
 };
 
 /**
- * レッスン
+ * ある時点のレッスンの状態
  *
  * - 本家では、「レッスン」「試験」「コンテスト」として表現されているもの
- * - レッスン開始前に生成され、レッスン終了時に破棄される
  */
 export type Lesson = {
   /** レッスン内に存在するスキルカードリスト */
@@ -1430,29 +1429,35 @@ export type LessonUpdateQuery = LessonUpdateQueryDiff & {
 };
 
 /**
- * レッスン中の状態
+ * レッスンのプレイ記録
  */
 export type LessonGamePlay = {
   getRandom: GetRandom;
   idGenerator: IdGenerator;
   /**
-   * 開始時のレッスン
+   * 開始時点のレッスンの状態
    *
    * - 現在の状態や履歴は、 `updates` を適用して算出する
    */
   initialLesson: Lesson;
-  /**
-   * レッスン更新クエリリスト
-   */
   updates: LessonUpdateQuery[];
 };
 
 /**
- * 手札としてスキルカードを表示する場合の要約情報
+ * 応援/トラブルの表示用情報
+ *
+ * - 主に、本家アイドルの道の各ステージ画面にある、右上の応援/トラブル詳細のリストに使用することを想定している
+ */
+export type EncouragementDisplay = Encouragement & {
+  description: string;
+};
+
+/**
+ * レッスン中の手札の表示用情報
  *
  * - 各値は、基本的には各種効果による変動を含めた値
  */
-export type CardInHandSummary = {
+export type CardInHandDisplay = {
   cost: ActionCost;
   /**
    * 効果概要リスト
@@ -1484,4 +1489,61 @@ export type CardInHandSummary = {
    *   - おそらく本家仕様だと、1回目ではなく効果適用条件の無い元気が選ばれているが、現状のデータ上は1つ目に条件の無いものが定義されていて同じ結果なので、一旦気にしない
    */
   vitality: number | undefined;
+};
+
+/**
+ * レッスン中のPアイテムの表示用情報
+ *
+ * - 主に、本家レッスン画面の、右上のアイコンリストをタッチした時の詳細情報に使用することを想定している
+ */
+export type ProducerItemDisplay = ProducerItem & {
+  description: string;
+  name: string;
+  /** 残り発動回数 */
+  remainingTimes: number | undefined;
+};
+
+/**
+ * レッスン中の状態修正の表示用情報
+ *
+ * - 主に、本家レッスン画面の、左上のアイコンリストをタッチした時の詳細情報に使用することを想定している
+ * - TODO: 本家だと、1つ目に必ず「おすすめ効果」がある、おすすめ効果は状態修正を付与していなくても表示される
+ */
+export type ModifierDisplay = ModifierDefinition & {
+  /**
+   * 効果の1行説明
+   *
+   * - 例えば、「好調」なら「スコア上昇量を50%増加 nターン」など
+   * - TODO: 未実装
+   */
+  description: string;
+  id: Modifier["id"];
+  label: string;
+};
+
+/**
+ * レッスン中の各ターンの表示用情報
+ *
+ * - 主に、本家レッスン画面の、左上の現在ターンをタッチした時の詳細情報に使用することを想定している
+ */
+export type TurnDisplay = {
+  idolParameterKind: IdolParameterKind;
+  idolParameterLabel: string;
+  turnNumber: number;
+  /** 現在のターンとの差、1が1ターン後、-1が1ターン前 */
+  turnNumberDiff: number;
+};
+
+/**
+ * レッスンの表示用情報
+ */
+export type LessonDisplay = {
+  hand: CardInHandDisplay[];
+  life: Idol["life"];
+  modifiers: ModifierDisplay[];
+  producerItems: ProducerItemDisplay[];
+  turnNumber: number;
+  /** ターン追加を反映した長さのターンリスト */
+  turns: TurnDisplay[];
+  vitality: Idol["vitality"];
 };

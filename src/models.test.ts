@@ -5,6 +5,7 @@ import { getProducerItemDataById } from "./data/producer-items";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
+  createActualTurns,
   createIdolInProduction,
   createLessonGamePlay,
   getIdolParameterKindOnTurn,
@@ -102,6 +103,31 @@ describe("calculateClearScoreProgress", () => {
     "$args.0, $args.1 => $expected",
     ({ args, expected }) => {
       expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
+    },
+  );
+});
+describe("createActualTurns", () => {
+  const testCases: Array<{
+    args: Parameters<typeof createActualTurns>;
+    expected: ReturnType<typeof createActualTurns>;
+  }> = [
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurns: 0 } as Lesson],
+      expected: ["vocal", "dance"],
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurns: 1 } as Lesson],
+      expected: ["vocal", "dance", "dance"],
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurns: 2 } as Lesson],
+      expected: ["vocal", "dance", "dance", "dance"],
+    },
+  ];
+  test.each(testCases)(
+    "$args.0.turns, $args.0.remainingTurns => $expected",
+    ({ args, expected }) => {
+      expect(createActualTurns(...args)).toStrictEqual(expected);
     },
   );
 });
@@ -734,12 +760,12 @@ describe("patchUpdates", () => {
       }
     });
     describe("永続の状態修正が誤って消えない", () => {
-      test("effectActivationAtEndOfTurn は、 focus を更新した操作により、誤って消えない", () => {
+      test("effectActivationOnTurnEnd は、 focus を更新した操作により、誤って消えない", () => {
         let lessonMock = {
           idol: {
             modifiers: [
               {
-                kind: "effectActivationAtEndOfTurn",
+                kind: "effectActivationOnTurnEnd",
                 effect: {
                   kind: "perform",
                   score: { value: 1 },
@@ -781,7 +807,7 @@ describe("patchUpdates", () => {
         ).toHaveLength(0);
         expect(
           lessonMock.idol.modifiers.filter(
-            (m) => m.kind === "effectActivationAtEndOfTurn",
+            (m) => m.kind === "effectActivationOnTurnEnd",
           ),
         ).toHaveLength(1);
       });

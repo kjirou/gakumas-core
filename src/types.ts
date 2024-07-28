@@ -1527,6 +1527,7 @@ export type ModifierDisplay = ModifierDefinition & {
  * - 主に、本家レッスン画面の、左上の現在ターンをタッチした時の詳細情報に使用することを想定している
  */
 export type TurnDisplay = {
+  encouragement?: EncouragementDisplay;
   idolParameterKind: IdolParameterKind;
   idolParameterLabel: string;
   turnNumber: number;

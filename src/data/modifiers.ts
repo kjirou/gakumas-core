@@ -1,4 +1,4 @@
-import { MetaModifierData, ModifierDefinition } from "../types";
+import { MetaModifierData, ModifierData } from "../types";
 
 export const metaModifierDictioanry = {
   additionalCardUsageCount: {
@@ -83,4 +83,4 @@ export const metaModifierDictioanry = {
     label: "好印象",
     nonAggregation: false,
   },
-} as const satisfies Record<ModifierDefinition["kind"], MetaModifierData>;
+} as const satisfies Record<ModifierData["kind"], MetaModifierData>;

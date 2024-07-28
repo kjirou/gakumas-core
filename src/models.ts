@@ -31,7 +31,7 @@ import {
   LessonUpdateQueryReason,
   MemoryEffect,
   Modifier,
-  ModifierDefinition,
+  ModifierData,
   ProducePlan,
   ProducerItem,
   ProducerItemContentDefinition,
@@ -339,7 +339,7 @@ export const calculateRemainingTurns = (lesson: Lesson): number =>
 /** 「消費体力減少」・「消費体力削減」・「消費体力増加」を反映したコストを返す */
 export const calculateActualActionCost = (
   cost: ActionCost,
-  modifiers: ModifierDefinition[],
+  modifiers: ModifierData[],
 ): ActionCost => {
   switch (cost.kind) {
     case "focus":

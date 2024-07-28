@@ -75,11 +75,11 @@ export type VitalityUpdateQuery = {
 };
 
 /**
- * 状態修正定義
+ * 状態修正データ定義
  *
  * - Modifier をデータ定義で行う時の形式
  */
-export type ModifierDefinition =
+export type ModifierData =
   | {
       /**
        * 「スキルカード使用数追加+{amount}」
@@ -228,10 +228,12 @@ export type ModifierDefinition =
     };
 
 /**
- * いち状態修正種別のメタデータ
+ * メタ状態修正データ定義
+ *
+ * - 状態修正の種別に対する設定
  */
 export type MetaModifierData = {
-  kind: ModifierDefinition["kind"];
+  kind: ModifierData["kind"];
   label: string;
   /**
    * 同じ種別の状態修正を重複した時に合算するか
@@ -250,7 +252,7 @@ export type MetaModifierData = {
  *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
  * - 種類は名詞句で表現する、原文が名詞だから
  */
-export type Modifier = ModifierDefinition & {
+export type Modifier = ModifierData & {
   /** 全てのインスタンスで一意のID */
   id: string;
   /** 既存インスタンスの更新時にのみ存在する、対象のID */
@@ -425,7 +427,7 @@ export type Effect = (
        * - 1行の効果説明内で複数の状態変化を付与するスキルカードはなかった
        */
       kind: "getModifier";
-      modifier: ModifierDefinition;
+      modifier: ModifierData;
     }
   | {
       /**
@@ -1523,7 +1525,7 @@ export type ProducerItemDisplay = ProducerItem & {
  * - 主に、本家レッスン画面の、左上のアイコンリストをタッチした時の詳細情報に使用することを想定している
  * - TODO: 本家だと、1つ目に必ず「おすすめ効果」がある、おすすめ効果は状態修正を付与していなくても表示される
  */
-export type ModifierDisplay = ModifierDefinition & {
+export type ModifierDisplay = ModifierData & {
   /**
    * 効果の1行説明
    *

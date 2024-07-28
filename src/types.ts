@@ -1034,7 +1034,7 @@ export type ProducerItem = {
 /**
  * アイドル個性定義
  */
-export type CharacterDefinition = Readonly<{
+export type CharacterData = Readonly<{
   firstName: string;
   id: string;
   lastName: string;
@@ -1051,7 +1051,7 @@ export type CharacterDefinition = Readonly<{
  * プロデュースアイドル定義
  */
 export type IdolDefinition = Readonly<{
-  characterId: CharacterDefinition["id"];
+  characterId: CharacterData["id"];
   id: string;
   producePlan: ProducePlan;
   rarity: "r" | "sr" | "ssr";

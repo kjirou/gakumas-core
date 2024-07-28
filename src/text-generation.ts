@@ -109,14 +109,13 @@ export const globalDataKeywords = {
   },
 } as const satisfies Record<string, Record<string, string>>;
 
-type KeywordCardDefinitionId = keyof typeof globalDataKeywords.cards;
+type KeywordCardDataId = keyof typeof globalDataKeywords.cards;
 
-const isKeywordCardDefinitionIdType = (
-  idLike: string,
-): idLike is KeywordCardDefinitionId => idLike in globalDataKeywords.cards;
+const isKeywordCardDataIdType = (idLike: string): idLike is KeywordCardDataId =>
+  idLike in globalDataKeywords.cards;
 
 const cardKwd = (key: string): string => {
-  if (isKeywordCardDefinitionIdType(key)) {
+  if (isKeywordCardDataIdType(key)) {
     return `{{${globalDataKeywords.cards[key]}}}`;
   }
   throw new Error(`Global data keyword not found: ${key}`);

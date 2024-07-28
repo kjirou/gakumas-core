@@ -1,10 +1,9 @@
-import { IdolDefinition } from "../types";
+import { IdolData } from "../types";
 
-export const findIdolDataById = (
-  id: IdolDefinition["id"],
-): IdolDefinition | undefined => idols.find((idol) => idol.id === id);
+export const findIdolDataById = (id: IdolData["id"]): IdolData | undefined =>
+  idols.find((idol) => idol.id === id);
 
-export const getIdolDataById = (id: IdolDefinition["id"]): IdolDefinition => {
+export const getIdolDataById = (id: IdolData["id"]): IdolData => {
   const card = findIdolDataById(id);
   if (!card) {
     throw new Error(`Idol not found: ${id}`);
@@ -22,7 +21,7 @@ export const getIdolDataById = (id: IdolDefinition["id"]): IdolDefinition => {
  * - TODO: eslint
  * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
-export const idols: IdolDefinition[] = [
+export const idols: IdolData[] = [
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",

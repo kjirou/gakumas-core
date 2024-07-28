@@ -42,9 +42,9 @@ import {
 import {
   calculateRemainingTurns,
   createActualTurns,
-  getCardContentDefinition,
+  getCardContentData,
   getNextHistoryResultIndex,
-  getProducerItemContentDefinition,
+  getProducerItemContentData,
   getRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   patchUpdates,
@@ -383,9 +383,9 @@ export const startLessonTurn = (
  */
 const createProducerDisplays = (lesson: Lesson): ProducerItemDisplay[] => {
   return lesson.idol.producerItems.map((producerItem) => {
-    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    const producerItemContent = getProducerItemContentData(producerItem);
     const name =
-      producerItem.original.definition.name +
+      producerItem.original.data.name +
       (producerItem.original.enhanced ? "+" : "");
     return {
       ...producerItem,
@@ -510,7 +510,7 @@ export const previewCardPlay = (
   if (card === undefined) {
     throw new Error("Invalid card ID");
   }
-  const cardContent = getCardContentDefinition(card);
+  const cardContent = getCardContentData(card);
   const { updates } = useCard(lesson, 1, {
     getRandom: lessonGamePlay.getRandom,
     idGenerator: lessonGamePlay.idGenerator,
@@ -522,7 +522,7 @@ export const previewCardPlay = (
     condition: cardContent.condition,
     effects: cardContent.effects,
     innate: cardContent.innate,
-    nonDuplicative: card.original.definition.nonDuplicative,
+    nonDuplicative: card.original.data.nonDuplicative,
     usableOncePerLesson: cardContent.usableOncePerLesson,
   });
   return {

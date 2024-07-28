@@ -5,7 +5,7 @@
 import {
   compareDeckOrder,
   getCardDataById,
-  getCardContentDefinitions,
+  getCardContentDataList,
 } from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
@@ -14,7 +14,7 @@ import { getProducerItemDataById } from "./data/producer-items";
 import {
   ActionCost,
   Card,
-  CardContentDefinition,
+  CardContentData,
   CardEnhancement,
   CardInProduction,
   Effect,
@@ -22,7 +22,7 @@ import {
   GetRandom,
   IdGenerator,
   Idol,
-  IdolDefinition,
+  IdolData,
   IdolInProduction,
   IdolParameterKind,
   Lesson,
@@ -34,7 +34,7 @@ import {
   ModifierData,
   ProducePlan,
   ProducerItem,
-  ProducerItemContentDefinition,
+  ProducerItemContentData,
   ProducerItemInProduction,
 } from "./types";
 import { createIdGenerator, shuffleArray } from "./utils";
@@ -64,8 +64,8 @@ export const isPerformEffectType = (
   effect: Effect,
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
-export const getCardContentDefinition = (card: Card): CardContentDefinition => {
-  const contents = getCardContentDefinitions(card.original.definition);
+export const getCardContentData = (card: Card): CardContentData => {
+  const contents = getCardContentDataList(card.original.data);
   if (card.enhancements.length === 0) {
     return contents[0];
   } else if (card.enhancements.length === 1) {
@@ -77,20 +77,20 @@ export const getCardContentDefinition = (card: Card): CardContentDefinition => {
   }
 };
 
-export const getProducerItemContentDefinition = (
+export const getProducerItemContentData = (
   producerItem: ProducerItem,
-): ProducerItemContentDefinition => {
-  return producerItem.original.definition.enhanced !== undefined &&
+): ProducerItemContentData => {
+  return producerItem.original.data.enhanced !== undefined &&
     producerItem.original.enhanced
-    ? producerItem.original.definition.enhanced
-    : producerItem.original.definition.base;
+    ? producerItem.original.data.enhanced
+    : producerItem.original.data.base;
 };
 
 /** Pアイテムの残り発動回数を返す */
 export const getRemainingProducerItemTimes = (
   producerItem: ProducerItem,
 ): number | undefined => {
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  const producerItemContent = getProducerItemContentData(producerItem);
   return producerItemContent.times === undefined
     ? undefined
     : Math.max(producerItemContent.times - producerItem.activationCount, 0);
@@ -113,12 +113,12 @@ const createDefaultCardSet = (
   producePlan: ProducePlan,
   idGenerator: IdGenerator,
 ): CardInProduction[] => {
-  const defaultCardSetDefinition = getDefaultCardSetData(producePlan);
-  return defaultCardSetDefinition.cardDefinitionIds.map((cardDefinitionId) => {
-    const cardDefinition = getCardDataById(cardDefinitionId);
+  const defaultCardSetData = getDefaultCardSetData(producePlan);
+  return defaultCardSetData.cardDataIds.map((cardDataId) => {
+    const cardData = getCardDataById(cardDataId);
     return {
       id: idGenerator(),
-      definition: cardDefinition,
+      data: cardData,
       enhanced: false,
       enabled: true,
     };
@@ -136,16 +136,16 @@ const createDefaultCardSet = (
 export const createIdolInProduction = (params: {
   deck?: CardInProduction[];
   idGenerator: IdGenerator;
-  idolDefinitionId: IdolDefinition["id"];
+  idolDataId: IdolData["id"];
   producerItems?: ProducerItemInProduction[];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
 }): IdolInProduction => {
-  const idolDefinition = getIdolDataById(params.idolDefinitionId);
-  const characterDefinition = getCharacterDataById(idolDefinition.characterId);
-  const specificCardDefinition = getCardDataById(idolDefinition.specificCardId);
-  const specificProducerItemDefinition = getProducerItemDataById(
-    idolDefinition.specificProducerItemId,
+  const idolData = getIdolDataById(params.idolDataId);
+  const characterData = getCharacterDataById(idolData.characterId);
+  const specificCardData = getCardDataById(idolData.specificCardId);
+  const specificProducerItemData = getProducerItemDataById(
+    idolData.specificProducerItemId,
   );
   // TODO: 才能開花1段階目のランダムスキルカード強化
   const deck =
@@ -153,24 +153,24 @@ export const createIdolInProduction = (params: {
     [
       {
         id: params.idGenerator(),
-        definition: specificCardDefinition,
+        data: specificCardData,
         enhanced: params.specialTrainingLevel >= 3,
         enabled: true,
       },
-      ...createDefaultCardSet(idolDefinition.producePlan, params.idGenerator),
-    ].sort((a, b) => compareDeckOrder(a.definition, b.definition));
+      ...createDefaultCardSet(idolData.producePlan, params.idGenerator),
+    ].sort((a, b) => compareDeckOrder(a.data, b.data));
   const producerItems = params.producerItems ?? [
     {
       id: params.idGenerator(),
-      definition: specificProducerItemDefinition,
+      data: specificProducerItemData,
       enhanced: params.talentAwakeningLevel >= 2,
     },
   ];
   return {
     deck,
-    definition: idolDefinition,
-    life: characterDefinition.maxLife,
-    maxLife: characterDefinition.maxLife,
+    data: idolData,
+    life: characterData.maxLife,
+    maxLife: characterData.maxLife,
     producerItems,
   };
 };

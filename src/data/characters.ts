@@ -1,13 +1,13 @@
-import { CharacterDefinition } from "../types";
+import { CharacterData } from "../types";
 
 export const findCharacterDataById = (
-  id: CharacterDefinition["id"],
-): CharacterDefinition | undefined =>
+  id: CharacterData["id"],
+): CharacterData | undefined =>
   characters.find((character) => character.id === id);
 
 export const getCharacterDataById = (
-  id: CharacterDefinition["id"],
-): CharacterDefinition => {
+  id: CharacterData["id"],
+): CharacterData => {
   const character = findCharacterDataById(id);
   if (!character) {
     throw new Error(`Character not found: ${id}`);
@@ -27,7 +27,7 @@ export const getCharacterDataById = (
  *   - プロパティの定義順は、 id を先頭にして、他はアルファベット順
  * - TODO: eslint
  */
-export const characters: CharacterDefinition[] = [
+export const characters: CharacterData[] = [
   {
     id: "hanamisaki",
     firstName: "咲季",

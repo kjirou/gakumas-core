@@ -1,6 +1,6 @@
 import {
   findCardDataById,
-  getCardContentDefinitions,
+  getCardContentDataList,
   getCardDataById,
 } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -13,7 +13,7 @@ import {
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
-import type { CardDefinition, ProducerItemDefinition } from "./types";
+import type { CardData, ProducerItemData } from "./types";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -582,7 +582,7 @@ describe("generateActionCostText", () => {
 
 describe("generateCardDescription", () => {
   const testCases: Array<{
-    cardId: CardDefinition["id"];
+    cardId: CardData["id"];
     expected: ReturnType<typeof generateCardDescription>;
   }> = [
     {
@@ -793,7 +793,7 @@ describe("generateCardDescription", () => {
   ];
   test.each(testCases)('$cardId => "$expected"', ({ cardId, expected }) => {
     const card = getCardDataById(cardId);
-    const contents = getCardContentDefinitions(card);
+    const contents = getCardContentDataList(card);
     expect(
       generateCardDescription({
         cost: contents[0].cost,
@@ -851,12 +851,12 @@ describe("generateProducerItemTriggerAndConditionText", () => {
         {
           trigger: {
             kind: "beforeCardEffectActivation",
-            cardDefinitionId: "adorenarinzenkai",
+            cardDataId: "adorenarinzenkai",
           },
         },
       ],
       expected: "{{アドレナリン全開}}使用時、",
-      name: "beforeCardEffectActivation - cardDefinitionId",
+      name: "beforeCardEffectActivation - cardDataId",
     },
     {
       args: [
@@ -1022,7 +1022,7 @@ describe("generateProducerItemTriggerAndConditionText", () => {
 describe("generateProducerItemDescription", () => {
   const testCases: Array<{
     expected: ReturnType<typeof generateProducerItemDescription>;
-    producerItemId: ProducerItemDefinition["id"];
+    producerItemId: ProducerItemData["id"];
   }> = [
     {
       producerItemId: "itsumonomeikupochi",

@@ -1,11 +1,9 @@
 import type {
-  ActionCost,
   Card,
   CardEnhancement,
   CardInProduction,
   Effect,
-  Idol,
-  IdolDefinition,
+  IdolData,
   Lesson,
   LessonDisplay,
   LessonGamePlay,
@@ -18,7 +16,6 @@ import {
   createIdolInProduction,
   createLessonGamePlay,
   endLessonTurn,
-  getCardContentDefinition,
   getEncouragements,
   createLessonDisplay,
   getNextHistoryResultIndex,
@@ -26,7 +23,6 @@ import {
   isTurnEnded,
   patchUpdates,
   playCard,
-  previewCardPlay,
   startLessonTurn,
 } from "./index";
 import { getCardDataById } from "./data/cards";
@@ -37,19 +33,19 @@ const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     deck?: CardInProduction[];
-    idolDefinitionId?: IdolDefinition["id"];
+    idolDataId?: IdolData["id"];
     producerItems?: ProducerItemInProduction[];
     turns?: Lesson["turns"];
   } = {},
 ): LessonGamePlay => {
   const clearScoreThresholds = options.clearScoreThresholds;
   // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
-  const idolDefinitionId = options.idolDefinitionId ?? "shinosawahiro-r-1";
+  const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
   const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
   const idGenerator = createIdGenerator();
   const idolInProduction = createIdolInProduction({
     idGenerator,
-    idolDefinitionId,
+    idolDataId,
     specialTrainingLevel: 1,
     talentAwakeningLevel: 1,
     ...(options.deck ? { deck: options.deck } : {}),
@@ -119,13 +115,13 @@ describe("createLessonDisplay", () => {
             deck: [
               {
                 id: "c1",
-                definition: getCardDataById("apirunokihon"),
+                data: getCardDataById("apirunokihon"),
                 enhanced: false,
                 enabled: true,
               },
               {
                 id: "c2",
-                definition: getCardDataById("hyogennokihon"),
+                data: getCardDataById("hyogennokihon"),
                 enhanced: true,
                 enabled: true,
               },
@@ -169,7 +165,7 @@ describe("createLessonDisplay", () => {
             producerItems: [
               {
                 id: "p1",
-                definition: getProducerItemDataById("saigononatsunoomoide"),
+                data: getProducerItemDataById("saigononatsunoomoide"),
                 enhanced: true,
               },
             ],
@@ -351,61 +347,61 @@ describe("水着麻央のプレイ再現", () => {
   const initialDeck = [
     {
       id: "hinyarihitoyasumi",
-      definition: getCardDataById("hinyarihitoyasumi"),
+      data: getCardDataById("hinyarihitoyasumi"),
       enhanced: true,
       enabled: true,
     },
     {
       id: "haitatchi",
-      definition: getCardDataById("haitatchi"),
+      data: getCardDataById("haitatchi"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "shikosakugo",
-      definition: getCardDataById("shikosakugo"),
+      data: getCardDataById("shikosakugo"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "apirunokihon",
-      definition: getCardDataById("apirunokihon"),
+      data: getCardDataById("apirunokihon"),
       enhanced: true,
       enabled: true,
     },
     {
       id: "apirunokihon2",
-      definition: getCardDataById("apirunokihon"),
+      data: getCardDataById("apirunokihon"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "pozunokihon",
-      definition: getCardDataById("pozunokihon"),
+      data: getCardDataById("pozunokihon"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "hyojonokihon",
-      definition: getCardDataById("hyojonokihon"),
+      data: getCardDataById("hyojonokihon"),
       enhanced: true,
       enabled: true,
     },
     {
       id: "hyojonokihon2",
-      definition: getCardDataById("hyojonokihon"),
+      data: getCardDataById("hyojonokihon"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "hyogennokihon",
-      definition: getCardDataById("hyogennokihon"),
+      data: getCardDataById("hyogennokihon"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "hyogennokihon2",
-      definition: getCardDataById("hyogennokihon"),
+      data: getCardDataById("hyogennokihon"),
       enhanced: false,
       enabled: true,
     },
@@ -415,25 +411,25 @@ describe("水着麻央のプレイ再現", () => {
     ...initialDeck,
     {
       id: "nemuke",
-      definition: getCardDataById("nemuke"),
+      data: getCardDataById("nemuke"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "shinkokyu",
-      definition: getCardDataById("shinkokyu"),
+      data: getCardDataById("shinkokyu"),
       enhanced: true,
       enabled: true,
     },
     {
       id: "haitatchi2",
-      definition: getCardDataById("haitatchi"),
+      data: getCardDataById("haitatchi"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "shinkokyu2",
-      definition: getCardDataById("shinkokyu"),
+      data: getCardDataById("shinkokyu"),
       enhanced: false,
       enabled: true,
     },
@@ -448,13 +444,13 @@ describe("水着麻央のプレイ再現", () => {
     }),
     {
       id: "iji",
-      definition: getCardDataById("iji"),
+      data: getCardDataById("iji"),
       enhanced: false,
       enabled: true,
     },
     {
       id: "usureyukukabe",
-      definition: getCardDataById("usureyukukabe"),
+      data: getCardDataById("usureyukukabe"),
       enhanced: false,
       enabled: true,
     },
@@ -468,7 +464,7 @@ describe("水着麻央のプレイ再現", () => {
     const idolInProduction = createIdolInProduction({
       deck: params.deck,
       idGenerator,
-      idolDefinitionId: "arimuramao-ssr-2",
+      idolDataId: "arimuramao-ssr-2",
       specialTrainingLevel: 4,
       talentAwakeningLevel: 2,
     });

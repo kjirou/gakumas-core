@@ -3,16 +3,15 @@ export type GetRandom = () => number;
 
 export type IdGenerator = () => string;
 
-export type RangedNumber =
-  | { min: number }
-  | { max: number }
-  | { max: number; min: number };
+export type RangedNumber = Readonly<
+  { min: number } | { max: number } | { max: number; min: number }
+>;
 
-type IdolParameters = {
+type IdolParameters = Readonly<{
   dance: number;
   visual: number;
   vocal: number;
-};
+}>;
 
 export type IdolParameterKind = keyof IdolParameters;
 
@@ -22,7 +21,7 @@ export type IdolParameterKind = keyof IdolParameters;
  * - ゲーム上は、出現するカードの種類・レッスンの小目標のパターン・コンテストのAIなど、広範に影響していそう
  * - 関連する原文は、「プロデュースの方向性を示すもので、〜」「〜を活用して育成するプラン」
  */
-export type ProducePlan =
+export type ProducePlan = Readonly<
   | {
       /** 「ロジック」 */
       kind: "logic";
@@ -33,7 +32,8 @@ export type ProducePlan =
       /** 「センス」 */
       kind: "sense";
       recommendedEffect: "goodCondition" | "focus";
-    };
+    }
+>;
 
 /** スキルカードの提供元種別、"others" は現状はキャラ固有でもサポカ固有でも無いもの全て */
 type CardProviderKind = "idol" | "others" | "supportCard";
@@ -66,13 +66,13 @@ export type CardSummaryKind = "active" | "mental" | "trouble";
  *   - 「おっきなおにぎり」は、「元気+2（レッスン中に使用したスキルカード1枚ごとに、元気増加量+5）」
  *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
  */
-export type VitalityUpdateQuery = {
+export type VitalityUpdateQuery = Readonly<{
   /** 使用したスキルカード1枚毎の効果量増加 */
   boostPerCardUsed?: number;
   /** 効果に記載した値をそのまま適用するか、原文は「固定元気」 */
   fixedValue?: boolean;
   value: number;
-};
+}>;
 
 /**
  * 状態修正データ定義
@@ -233,7 +233,7 @@ export type ModifierData = Readonly<
  *
  * - 状態修正の種別に対する設定
  */
-export type MetaModifierData = {
+export type MetaModifierData = Readonly<{
   kind: ModifierData["kind"];
   label: string;
   /**
@@ -242,7 +242,7 @@ export type MetaModifierData = {
    * - 「次に使用するスキルカードの効果をもう1回発動」や、いわゆる持続効果・発動予約は合算しない
    */
   nonAggregation: boolean;
-};
+}>;
 
 /**
  * 状態修正
@@ -253,12 +253,14 @@ export type MetaModifierData = {
  *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
  * - 種類は名詞句で表現する、原文が名詞だから
  */
-export type Modifier = ModifierData & {
-  /** 全てのインスタンスで一意のID */
-  id: string;
-  /** 既存インスタンスの更新時にのみ存在する、対象のID */
-  updateTargetId?: string;
-};
+export type Modifier = Readonly<
+  ModifierData & {
+    /** 全てのインスタンスで一意のID */
+    id: string;
+    /** 既存インスタンスの更新時にのみ存在する、対象のID */
+    updateTargetId?: string;
+  }
+>;
 
 /**
  * 効果発動条件
@@ -268,7 +270,7 @@ export type Modifier = ModifierData & {
  * - 応援/トラブルの効果に対して設定する場合は、効果の発動条件を意味する
  *   - しかし、応援/トラブルは、1発動に対して1効果しか設定されていないので、発動条件であるとも言える
  */
-export type EffectCondition =
+export type EffectCondition = Readonly<
   | {
       /**
        * 状態変化の数が指定数以上か
@@ -336,7 +338,8 @@ export type EffectCondition =
        *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
        */
       kind: "measureIfLifeIsEqualGreaterThanHalf";
-    };
+    }
+>;
 
 /**
  * レッスン中の効果
@@ -345,187 +348,189 @@ export type EffectCondition =
  * - おおよそ、本家の効果説明欄の1行に対応する
  *   - ただし、Pアイテムの1行目は条件も含まれるなど、この限りではない。詳細はそれぞれの型定義を参照。
  */
-export type Effect = (
-  | {
-      /**
-       * 体力を減少する
-       *
-       * - 原文の構文は、「体力減少{value}」
-       *   - 「私の「初」の楽譜」は、「ターン開始時元気が0の場合、体力減少1」
-       * - 現状はスキルカードには存在しない効果、上記のPアイテムとトラブルにのみ存在する
-       * - TODO: 体力を直接減少するのではなくて、normalコスト相当かもしれない
-       */
-      kind: "drainLife";
-      value: number;
-    }
-  | {
-      /**
-       * スキルカードを引く
-       *
-       * - 原文の構文は、「スキルカードを[{amount}枚]引く」
-       *   - 「アイドル宣言」は、「スキルカードを2枚引く」
-       *   - 「心のアルバム」は、「次のターン、スキルカードを引く」「2ターン後、スキルカードを引く」
-       */
-      kind: "drawCards";
-      amount: number;
-    }
-  | {
-      /**
-       * 手札を強化する
-       *
-       * - 原文の構文は、「手札を全てレッスン中強化」
-       *   - 「ティーパーティー」は、「手札を全てレッスン中強化」
-       *   - 「薄れゆく壁」は、「次のターン、手札を全てレッスン中強化」「2ターン後、手札を全てレッスン中強化」
-       */
-      kind: "enhanceHand";
-    }
-  | {
-      /**
-       * 手札を交換する
-       *
-       * - 原文は、「手札をすべて入れ替える」
-       * - 手札の枚数分しか引き直せない
-       */
-      kind: "exchangeHand";
-    }
-  | {
-      /**
-       * 手札を生成する
-       *
-       * - 原文は、「ランダムな強化済みスキルカード（SSR）を、手札に生成」
-       * - 「重複不可」は無視して対象を選択する
-       */
-      kind: "generateCard";
-    }
-  | {
-      /**
-       * トラブルスキルカードを生成して山札へ入れる
-       *
-       * - 原文は、「眠気を山札のランダムな位置に生成」
-       * - 現状は、原文通り「眠気」のみ
-       * - 「山札のランダムな位置」がどこかは実際は不明
-       *   - 普通に考えて、例えば、山札が2枚なら、1枚目の前・1枚目の後・2枚目の後、だと推測している
-       */
-      kind: "generateTroubleCard";
-    }
-  | {
-      /**
-       * レッスン終了までのターン数を追加する
-       *
-       * - 原文の構文は、「ターン追加+{amount}」
-       * - この効果は、状態修正ではなさそう
-       *   - 左アイコンリストにもそれをタップしたリストにもない
-       */
-      kind: "increaseRemainingTurns";
-      amount: number;
-    }
-  | {
-      /**
-       * 状態修正を取得する
-       *
-       * - 原文の構文は、「{modifier}」
-       *   - 「勢い任せ」は、「好調状態の場合、集中+3」
-       * - 1行の効果説明内で複数の状態変化を付与するスキルカードはなかった
-       */
-      kind: "getModifier";
-      modifier: ModifierData;
-    }
-  | {
-      /**
-       * 状態修正を乗算する
-       *
-       * - 原文の構文は、「{modifierKind}{multiplier}倍」
-       *   - 「夢へのライフログ」は、「好印象1.5倍」
-       * - 少なくとも、1.5倍の時の端数は切り上げ
-       *   - 「夢へのライフログ」の参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=Ig8yc0Q9MK4bLdj_&t=3474
-       *     - 好印象が 5 -> 8 になっている
-       *   - 現状は「夢へのライフログ」の1.5倍しかないので、本実装では切り上げる
-       */
-      kind: "multiplyModifier";
-      modifierKind: "positiveImpression";
-      multiplier: number;
-    }
-  | {
-      /**
-       * スコアまたは元気またはその両方を増加する
-       *
-       * - 原文の構文は、「[パラメータ+{value}][（集中効果を{focusMultiplier}倍適用）][（{times}回）][{vitality}]」
-       *   - 「ポーズの基本」は、「パラメータ+2元気+2」
-       *   - 「盛装の華形」は、「好調状態の場合、パラメータ+14」
-       *   - 「ワンモアステップ」は、「パラメータ+7（2回）」「集中が6以上の場合、パラメータ+7」
-       *   - 「ハイタッチ」（未強化）は、「パラメータ+17（集中効果を1.5倍適用）」
-       *   - 「ハイタッチ」（強化済み）は、「パラメータ+23（集中効果を2倍適用）」
-       *   - 「試行錯誤」は、「パラメータ+8（2回）」
-       *   - 「本気の趣味」は、「やる気が3以上の場合、元気+4」
-       * - 「スコア」という表記は、原文では「パラメータ」に相当するもの
-       * - 1行の効果説明内で複数の元気を付与するスキルカードはなかった
-       */
-      kind: "perform";
-      score?: {
+export type Effect = Readonly<
+  (
+    | {
         /**
-         * 集中適用倍率
+         * 体力を減少する
          *
-         * - 端数計算は切り上げ、現状は0.5倍単位でしか値が存在しないので四捨五入かもしれない
-         *   - 計算例
-         *     - 「ハイタッチ」（パラメータ+17、集中適用倍率1.5倍）を、集中+11、好調中に使った時に、スコアが51だった
-         *       - `集中11 * 1.5 = 16.5 => 17 ; (パラメータ17 + 集中分17) * 好調1.5 = 51`
+         * - 原文の構文は、「体力減少{value}」
+         *   - 「私の「初」の楽譜」は、「ターン開始時元気が0の場合、体力減少1」
+         * - 現状はスキルカードには存在しない効果、上記のPアイテムとトラブルにのみ存在する
+         * - TODO: 体力を直接減少するのではなくて、normalコスト相当かもしれない
          */
-        focusMultiplier?: number;
-        /** 複数回攻撃 */
-        times?: number;
+        kind: "drainLife";
         value: number;
-      };
-      vitality?: VitalityUpdateQuery;
-    }
-  | {
-      /**
-       * 状態修正値を基底としてパラメータを増加する
-       *
-       * - 原文の構文は、「{modifierKind}の{percentage}%分パラメータ上昇」
-       *   - 「200%スマイル」は、「好印象の100%分パラメータ上昇」
-       *   - 「開花」は、「やる気の200%分パラメータ上昇」
-       * - 割合計算上生じるスコアの端数は切り上げ
-       */
-      kind: "performLeveragingModifier";
-      modifierKind: "motivation" | "positiveImpression";
-      /** 状態修正値に対するパーセント表記の乗数 */
-      percentage: number;
-    }
-  | {
-      /** 元気を基底としたパラメータ増加 */
-      kind: "performLeveragingVitality";
-      /**
-       * 実行後に参照した状態修正値を減少するか
-       *
-       * - 原文は「元気を{modifierReductionKind}にして、減少前の元気の{percentage}%分パラメータ上昇」
-       *   - 「ハートの合図」は「元気を半分にして、減少前の元気の130%分パラメータ上昇」
-       *   - 「届いて！」は「元気を0にして、減少前の元気の160%分パラメータ上昇」
-       * - 割合計算上生じるスコアの端数は切り上げ
-       */
-      reductionKind?: "halve" | "zero";
-      /** 状態修正値に対するパーセント表記の乗数、原文は「元気の{percentage}%分パラメータ上昇」 */
-      percentage: number;
-    }
-  | {
-      /**
-       * 体力を回復する
-       *
-       * - 原文の構文は、「体力回復{value}」
-       */
-      kind: "recoverLife";
-      value: number;
-    }
-) & {
-  /**
-   * 効果発動条件
-   *
-   * - この効果のみの発動条件
-   * - 行動前の状態と条件を比較する。例えば、複数効果があり2つ目に条件が設定されている時、1つ目の効果は条件の判定には反映されない。
-   * - 原作の構文は、「{condition}{effect}」
-   *   - 「思い出し笑い」は、「好印象が3以上の場合、やる気+2」
-   */
-  condition?: EffectCondition;
-};
+      }
+    | {
+        /**
+         * スキルカードを引く
+         *
+         * - 原文の構文は、「スキルカードを[{amount}枚]引く」
+         *   - 「アイドル宣言」は、「スキルカードを2枚引く」
+         *   - 「心のアルバム」は、「次のターン、スキルカードを引く」「2ターン後、スキルカードを引く」
+         */
+        kind: "drawCards";
+        amount: number;
+      }
+    | {
+        /**
+         * 手札を強化する
+         *
+         * - 原文の構文は、「手札を全てレッスン中強化」
+         *   - 「ティーパーティー」は、「手札を全てレッスン中強化」
+         *   - 「薄れゆく壁」は、「次のターン、手札を全てレッスン中強化」「2ターン後、手札を全てレッスン中強化」
+         */
+        kind: "enhanceHand";
+      }
+    | {
+        /**
+         * 手札を交換する
+         *
+         * - 原文は、「手札をすべて入れ替える」
+         * - 手札の枚数分しか引き直せない
+         */
+        kind: "exchangeHand";
+      }
+    | {
+        /**
+         * 手札を生成する
+         *
+         * - 原文は、「ランダムな強化済みスキルカード（SSR）を、手札に生成」
+         * - 「重複不可」は無視して対象を選択する
+         */
+        kind: "generateCard";
+      }
+    | {
+        /**
+         * トラブルスキルカードを生成して山札へ入れる
+         *
+         * - 原文は、「眠気を山札のランダムな位置に生成」
+         * - 現状は、原文通り「眠気」のみ
+         * - 「山札のランダムな位置」がどこかは実際は不明
+         *   - 普通に考えて、例えば、山札が2枚なら、1枚目の前・1枚目の後・2枚目の後、だと推測している
+         */
+        kind: "generateTroubleCard";
+      }
+    | {
+        /**
+         * レッスン終了までのターン数を追加する
+         *
+         * - 原文の構文は、「ターン追加+{amount}」
+         * - この効果は、状態修正ではなさそう
+         *   - 左アイコンリストにもそれをタップしたリストにもない
+         */
+        kind: "increaseRemainingTurns";
+        amount: number;
+      }
+    | {
+        /**
+         * 状態修正を取得する
+         *
+         * - 原文の構文は、「{modifier}」
+         *   - 「勢い任せ」は、「好調状態の場合、集中+3」
+         * - 1行の効果説明内で複数の状態変化を付与するスキルカードはなかった
+         */
+        kind: "getModifier";
+        modifier: ModifierData;
+      }
+    | {
+        /**
+         * 状態修正を乗算する
+         *
+         * - 原文の構文は、「{modifierKind}{multiplier}倍」
+         *   - 「夢へのライフログ」は、「好印象1.5倍」
+         * - 少なくとも、1.5倍の時の端数は切り上げ
+         *   - 「夢へのライフログ」の参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=Ig8yc0Q9MK4bLdj_&t=3474
+         *     - 好印象が 5 -> 8 になっている
+         *   - 現状は「夢へのライフログ」の1.5倍しかないので、本実装では切り上げる
+         */
+        kind: "multiplyModifier";
+        modifierKind: "positiveImpression";
+        multiplier: number;
+      }
+    | {
+        /**
+         * スコアまたは元気またはその両方を増加する
+         *
+         * - 原文の構文は、「[パラメータ+{value}][（集中効果を{focusMultiplier}倍適用）][（{times}回）][{vitality}]」
+         *   - 「ポーズの基本」は、「パラメータ+2元気+2」
+         *   - 「盛装の華形」は、「好調状態の場合、パラメータ+14」
+         *   - 「ワンモアステップ」は、「パラメータ+7（2回）」「集中が6以上の場合、パラメータ+7」
+         *   - 「ハイタッチ」（未強化）は、「パラメータ+17（集中効果を1.5倍適用）」
+         *   - 「ハイタッチ」（強化済み）は、「パラメータ+23（集中効果を2倍適用）」
+         *   - 「試行錯誤」は、「パラメータ+8（2回）」
+         *   - 「本気の趣味」は、「やる気が3以上の場合、元気+4」
+         * - 「スコア」という表記は、原文では「パラメータ」に相当するもの
+         * - 1行の効果説明内で複数の元気を付与するスキルカードはなかった
+         */
+        kind: "perform";
+        score?: {
+          /**
+           * 集中適用倍率
+           *
+           * - 端数計算は切り上げ、現状は0.5倍単位でしか値が存在しないので四捨五入かもしれない
+           *   - 計算例
+           *     - 「ハイタッチ」（パラメータ+17、集中適用倍率1.5倍）を、集中+11、好調中に使った時に、スコアが51だった
+           *       - `集中11 * 1.5 = 16.5 => 17 ; (パラメータ17 + 集中分17) * 好調1.5 = 51`
+           */
+          focusMultiplier?: number;
+          /** 複数回攻撃 */
+          times?: number;
+          value: number;
+        };
+        vitality?: VitalityUpdateQuery;
+      }
+    | {
+        /**
+         * 状態修正値を基底としてパラメータを増加する
+         *
+         * - 原文の構文は、「{modifierKind}の{percentage}%分パラメータ上昇」
+         *   - 「200%スマイル」は、「好印象の100%分パラメータ上昇」
+         *   - 「開花」は、「やる気の200%分パラメータ上昇」
+         * - 割合計算上生じるスコアの端数は切り上げ
+         */
+        kind: "performLeveragingModifier";
+        modifierKind: "motivation" | "positiveImpression";
+        /** 状態修正値に対するパーセント表記の乗数 */
+        percentage: number;
+      }
+    | {
+        /** 元気を基底としたパラメータ増加 */
+        kind: "performLeveragingVitality";
+        /**
+         * 実行後に参照した状態修正値を減少するか
+         *
+         * - 原文は「元気を{modifierReductionKind}にして、減少前の元気の{percentage}%分パラメータ上昇」
+         *   - 「ハートの合図」は「元気を半分にして、減少前の元気の130%分パラメータ上昇」
+         *   - 「届いて！」は「元気を0にして、減少前の元気の160%分パラメータ上昇」
+         * - 割合計算上生じるスコアの端数は切り上げ
+         */
+        reductionKind?: "halve" | "zero";
+        /** 状態修正値に対するパーセント表記の乗数、原文は「元気の{percentage}%分パラメータ上昇」 */
+        percentage: number;
+      }
+    | {
+        /**
+         * 体力を回復する
+         *
+         * - 原文の構文は、「体力回復{value}」
+         */
+        kind: "recoverLife";
+        value: number;
+      }
+  ) & {
+    /**
+     * 効果発動条件
+     *
+     * - この効果のみの発動条件
+     * - 行動前の状態と条件を比較する。例えば、複数効果があり2つ目に条件が設定されている時、1つ目の効果は条件の判定には反映されない。
+     * - 原作の構文は、「{condition}{effect}」
+     *   - 「思い出し笑い」は、「好印象が3以上の場合、やる気+2」
+     */
+    condition?: EffectCondition;
+  }
+>;
 
 /**
  * メモリーのアビリティの効果
@@ -533,7 +538,7 @@ export type Effect = (
  * - 本家仕様を正確に表現はしない
  *   - 本実装は主にレッスンシュミレーター用なので、第一に必要になるのは「100%で何かを発生すること」で、他の重要度は低い
  */
-export type MemoryEffect = {
+export type MemoryEffect = Readonly<{
   kind:
     | "focus"
     | "halfLifeConsumption"
@@ -545,17 +550,17 @@ export type MemoryEffect = {
   probability: number;
   /** 各効果の値、正の数のみ */
   value: number;
-};
+}>;
 
 /**
  * 応援/トラブル
  *
  * - TODO: 今はプロデュース時に登場するものだけを考慮している。コンテストやアイドルの道のより複雑なものは対象外。
  */
-export type Encouragement = {
+export type Encouragement = Readonly<{
   effect: Effect;
   turnNumber: number;
-};
+}>;
 
 /**
  * カードを使用する際の条件
@@ -564,7 +569,7 @@ export type Encouragement = {
  *   - コスト表記との前後は不明、現状は同時に記載されているスキルカードは無い
  * - 本条件とコストを満たす状態であるかで、カード使用の可否が決まる
  */
-export type CardUsageCondition =
+export type CardUsageCondition = Readonly<
   | {
       /**
        * ターン数が指定数以降か
@@ -609,7 +614,8 @@ export type CardUsageCondition =
       valueKind: "life" | "score";
       criterionKind: "greaterEqual" | "lessEqual";
       percentage: number;
-    };
+    }
+>;
 
 /**
  * コストとして消費されることがある状態修正の種類
@@ -629,7 +635,7 @@ export type ActionCostModifierKind =
  *   - スキルカードの場合は、スキルカード右下のアイコンと、効果欄の1行目に記載される
  *   - Pアイテムで通常コストを消費する場合に表記はどうなるのか？という疑問はあるが、現状そのようなPアイテムはない
  */
-export type ActionCost = {
+export type ActionCost = Readonly<{
   /**
    * コストの種類
    *
@@ -637,9 +643,9 @@ export type ActionCost = {
    */
   kind: "life" | "normal" | ActionCostModifierKind;
   value: number;
-};
+}>;
 
-export type CardContentDefinition = {
+export type CardContentData = Readonly<{
   condition?: CardUsageCondition;
   cost: ActionCost;
   effects: Effect[];
@@ -659,10 +665,10 @@ export type CardContentDefinition = {
   innate?: boolean;
   /** 使用後に除外するか、原文は「レッスン中1回」、デフォルトは false */
   usableOncePerLesson?: boolean;
-};
+}>;
 
 /**
- * スキルカード定義
+ * スキルカードデータ定義
  *
  * - 原文の「スキルカード」の定義を構造化したもの
  * - 効果説明欄の原文の構文は、以下の通り
@@ -689,7 +695,7 @@ export type CardContentDefinition = {
  *     消費体力増加2ターン
  *     重複不可
  */
-export type CardDefinition = {
+export type CardData = Readonly<{
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
@@ -708,12 +714,12 @@ export type CardDefinition = {
    * - トラブルカード以外は、3段階目まで強化が存在するよう
    */
   contents:
-    | [CardContentDefinition]
+    | [CardContentData]
     | [
-        CardContentDefinition,
-        Partial<CardContentDefinition>,
-        Partial<CardContentDefinition>,
-        Partial<CardContentDefinition>,
+        CardContentData,
+        Partial<CardContentData>,
+        Partial<CardContentData>,
+        Partial<CardContentData>,
       ];
   id: string;
   name: string;
@@ -727,7 +733,7 @@ export type CardDefinition = {
    * - 本家だと、アイコンの色のみで表現されていて、「レアリティ」の表記がなさそう
    */
   rarity: "c" | "r" | "sr" | "ssr";
-};
+}>;
 
 /**
  * プロデュース中のスキルカード
@@ -735,8 +741,8 @@ export type CardDefinition = {
  * - 所持している、または所持の選択肢として表示するカード
  * - 所持中のスキルカードは、プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
-export type CardInProduction = {
-  definition: CardDefinition;
+export type CardInProduction = Readonly<{
+  data: CardData;
   /**
    * 有効か
    *
@@ -751,9 +757,9 @@ export type CardInProduction = {
    * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
    */
   id: string;
-};
+}>;
 
-export type CardEnhancement =
+export type CardEnhancement = Readonly<
   | {
       /** レッスン中の強化により付与された強化、原文の「レッスン中強化」に相当、"original"や既に"effect"がある場合は付与されない */
       kind: "effect";
@@ -769,7 +775,8 @@ export type CardEnhancement =
   | {
       /** プロデュース中のスキルカードに付与されている強化 */
       kind: "original";
-    };
+    }
+>;
 
 /**
  * レッスン中のスキルカード
@@ -805,116 +812,118 @@ export type Card = {
 /**
  * カードセット定義
  */
-export type CardSetDefinition = {
-  cardDefinitionIds: Array<CardDefinition["id"]>;
+export type CardSetData = Readonly<{
+  cardDataIds: Array<CardData["id"]>;
   id: string;
-};
+}>;
 
-export type ProducerItemTrigger = (
-  | {
-      /**
-       * スキルカード使用時の主効果発動後
-       *
-       * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用後」
-       *   - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
-       *   - 「ビッグドリーム貯金箱」は、「スキルカード使用後好印象が6以上の場合、好印象+3」
-       *   - 「転がり続ける元気の源」は、「メンタルスキルカード使用後やる気が5以上の場合、やる気+3」
-       * - 現状の本家では、状態修正値の条件を必ず伴っているが、本実装では任意にしている
-       */
-      kind: "afterCardEffectActivation";
-      cardSummaryKind?: CardSummaryKind;
-    }
-  | {
-      /**
-       * スキルカード使用時の主効果発動前
-       *
-       * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用時」
-       *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
-       *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
-       *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
-       */
-      kind: "beforeCardEffectActivation";
-      cardDefinitionId?: CardDefinition["id"];
-      cardSummaryKind?: CardSummaryKind;
-    }
-  | {
-      /**
-       * レッスンを開始した時
-       *
-       * - 原文の構文は、「レッスン開始時」
-       *   - 「ゲーセンの戦利品」は、「レッスン開始時、集中+3」
-       */
-      kind: "lessonStart";
-    }
-  | {
-      /**
-       * スキルカードの主効果により状態修正が増加した時
-       *
-       * - 原文の構文は、「{modifierKind}が増加後」
-       *   - 「緑のお揃いブレス」は、「好印象が増加後、好印象+3」
-       *   - 「願いを叶えるお守り」は、「やる気が増加後、やる気+2」
-       *   - 「Dearリトルプリンス」は、「好調の効果ターンが増加後、好調3ターン」
-       *   - 「放課後のらくがき」は、「集中が増加後体力が50%以上の場合、集中+2」
-       *   - 「ひみつ特訓カーデ」は、「やる気が増加後、やる気+3」
-       * - おそらくは、スキルカードの主効果による状態修正の増加のみを対象としている
-       *   - 状態修正の継続効果による増加では発動しない
-       *     - 例えば、「ひみつ特訓カーデ」は、「ワクワクが止まらない」の効果によるやる気増加では発動しない
-       *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=5v6jyo5BoXUkwCC5&t=5916
-       *       - 「厳選初星ブレンド」の継続効果も同じだった
-       *   - Pドリンクの効果による増加では発動しない
-       *     - 例えば、「ひみつ特訓カーデ」は、「ホットコーヒー」の効果によるやる気増加では発動しない
-       *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=ioUWJCIpHTBUYk7W&t=6052
-       */
-      kind: "modifierIncrease";
-      modifierKind:
-        | "focus"
-        | "goodCondition"
-        | "motivation"
-        | "positiveImpression";
-    }
-  | {
-      /**
-       * ターンが終了した時
-       *
-       * - 原文の構文は、「ターン終了時」
-       *   - 「ちびども手作りメダル」は、「ターン終了時好印象が6以上の場合、好印象+2」
-       */
-      kind: "turnEnd";
-    }
-  | {
-      /**
-       * ターンが開始した時
-       *
-       * - 原文の構文は、「ターン開始時」
-       *   - 「ばくおんライオン」は、「ターン開始時好調状態の場合、パラメータ+6」
-       */
-      kind: "turnStart";
-    }
-  | {
-      /**
-       * 2ターン毎のターン開始時
-       *
-       * - 原文の構文は、「2ターンごと」
-       *   - 「柴犬ポシェット」は、「2ターンごと、元気+5」
-       */
-      kind: "turnStartEveryTwoTurns";
-    }
-) & {
-  /**
-   * 一部のアイドルパラメータ種別のみで有効か
-   *
-   * - 原文の構文は、「【(ボイス|ダンス|ビジュアル)レッスン・(ボイス|ダンス|ビジュアル)ターンのみ】」
-   *   - 「得体のしれないモノ」は、「【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
-   *   - 「悔しさの象徴」は、「【ダンスレッスン・ダンスターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
-   *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
-   * - 追い込みレッスンのクリア以降のパーフェクト狙い中（ボーナス中ともいう）は、この条件を常に満たすようになる
-   *   - Ref: https://x.com/ondeath_id/status/1792068212634669195
-   *   - Ref: https://gameo.jp/gkmas/1116
-   */
-  idolParameterKind?: IdolParameterKind;
-};
+export type ProducerItemTrigger = Readonly<
+  (
+    | {
+        /**
+         * スキルカード使用時の主効果発動後
+         *
+         * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用後」
+         *   - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
+         *   - 「ビッグドリーム貯金箱」は、「スキルカード使用後好印象が6以上の場合、好印象+3」
+         *   - 「転がり続ける元気の源」は、「メンタルスキルカード使用後やる気が5以上の場合、やる気+3」
+         * - 現状の本家では、状態修正値の条件を必ず伴っているが、本実装では任意にしている
+         */
+        kind: "afterCardEffectActivation";
+        cardSummaryKind?: CardSummaryKind;
+      }
+    | {
+        /**
+         * スキルカード使用時の主効果発動前
+         *
+         * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用時」
+         *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
+         *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
+         *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
+         */
+        kind: "beforeCardEffectActivation";
+        cardDataId?: CardData["id"];
+        cardSummaryKind?: CardSummaryKind;
+      }
+    | {
+        /**
+         * レッスンを開始した時
+         *
+         * - 原文の構文は、「レッスン開始時」
+         *   - 「ゲーセンの戦利品」は、「レッスン開始時、集中+3」
+         */
+        kind: "lessonStart";
+      }
+    | {
+        /**
+         * スキルカードの主効果により状態修正が増加した時
+         *
+         * - 原文の構文は、「{modifierKind}が増加後」
+         *   - 「緑のお揃いブレス」は、「好印象が増加後、好印象+3」
+         *   - 「願いを叶えるお守り」は、「やる気が増加後、やる気+2」
+         *   - 「Dearリトルプリンス」は、「好調の効果ターンが増加後、好調3ターン」
+         *   - 「放課後のらくがき」は、「集中が増加後体力が50%以上の場合、集中+2」
+         *   - 「ひみつ特訓カーデ」は、「やる気が増加後、やる気+3」
+         * - おそらくは、スキルカードの主効果による状態修正の増加のみを対象としている
+         *   - 状態修正の継続効果による増加では発動しない
+         *     - 例えば、「ひみつ特訓カーデ」は、「ワクワクが止まらない」の効果によるやる気増加では発動しない
+         *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=5v6jyo5BoXUkwCC5&t=5916
+         *       - 「厳選初星ブレンド」の継続効果も同じだった
+         *   - Pドリンクの効果による増加では発動しない
+         *     - 例えば、「ひみつ特訓カーデ」は、「ホットコーヒー」の効果によるやる気増加では発動しない
+         *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=ioUWJCIpHTBUYk7W&t=6052
+         */
+        kind: "modifierIncrease";
+        modifierKind:
+          | "focus"
+          | "goodCondition"
+          | "motivation"
+          | "positiveImpression";
+      }
+    | {
+        /**
+         * ターンが終了した時
+         *
+         * - 原文の構文は、「ターン終了時」
+         *   - 「ちびども手作りメダル」は、「ターン終了時好印象が6以上の場合、好印象+2」
+         */
+        kind: "turnEnd";
+      }
+    | {
+        /**
+         * ターンが開始した時
+         *
+         * - 原文の構文は、「ターン開始時」
+         *   - 「ばくおんライオン」は、「ターン開始時好調状態の場合、パラメータ+6」
+         */
+        kind: "turnStart";
+      }
+    | {
+        /**
+         * 2ターン毎のターン開始時
+         *
+         * - 原文の構文は、「2ターンごと」
+         *   - 「柴犬ポシェット」は、「2ターンごと、元気+5」
+         */
+        kind: "turnStartEveryTwoTurns";
+      }
+  ) & {
+    /**
+     * 一部のアイドルパラメータ種別のみで有効か
+     *
+     * - 原文の構文は、「【(ボイス|ダンス|ビジュアル)レッスン・(ボイス|ダンス|ビジュアル)ターンのみ】」
+     *   - 「得体のしれないモノ」は、「【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
+     *   - 「悔しさの象徴」は、「【ダンスレッスン・ダンスターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
+     *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
+     * - 追い込みレッスンのクリア以降のパーフェクト狙い中（ボーナス中ともいう）は、この条件を常に満たすようになる
+     *   - Ref: https://x.com/ondeath_id/status/1792068212634669195
+     *   - Ref: https://gameo.jp/gkmas/1116
+     */
+    idolParameterKind?: IdolParameterKind;
+  }
+>;
 
-export type ProducerItemContentDefinition = {
+export type ProducerItemContentData = Readonly<{
   /**
    * 効果発動条件
    *
@@ -939,7 +948,7 @@ export type ProducerItemContentDefinition = {
    */
   times?: number;
   trigger: ProducerItemTrigger;
-};
+}>;
 
 /**
  * Pアイテム定義
@@ -969,11 +978,11 @@ export type ProducerItemContentDefinition = {
  *     （レッスン内3回）
  * - レッスン中に効果を及ぼさないものは、一旦除外している
  */
-export type ProducerItemDefinition = {
+export type ProducerItemData = Readonly<{
   /** 未強化時の内容 */
-  base: ProducerItemContentDefinition;
+  base: ProducerItemContentData;
   /** 強化済み時の内容 */
-  enhanced?: ProducerItemContentDefinition;
+  enhanced?: ProducerItemContentData;
   id: string;
   name: string;
   producerItemPossessionKind: ProducerItemPossessionKind;
@@ -984,15 +993,15 @@ export type ProducerItemDefinition = {
    * - 本家だと、アイコンの色のみで表現されていて、「レアリティ」の表記がなさそう
    */
   rarity: "r" | "sr" | "ssr";
-};
+}>;
 
 /**
  * プロデュース中のPアイテム
  *
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
-export type ProducerItemInProduction = {
-  definition: ProducerItemDefinition;
+export type ProducerItemInProduction = Readonly<{
+  data: ProducerItemData;
   enhanced?: boolean;
   /**
    * IdolInProduction["producerItems"] 内で一意のID
@@ -1001,7 +1010,7 @@ export type ProducerItemInProduction = {
    * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
    */
   id: string;
-};
+}>;
 
 /**
  * レッスン中のPアイテム
@@ -1025,7 +1034,7 @@ export type ProducerItem = {
 /**
  * アイドル個性定義
  */
-export type CharacterDefinition = {
+export type CharacterData = Readonly<{
   firstName: string;
   id: string;
   lastName: string;
@@ -1036,21 +1045,21 @@ export type CharacterDefinition = {
    * - サポートカードでも変動するので、レッスンシミュレーター上ではあくまで参考値になりそう
    */
   maxLife: number;
-};
+}>;
 
 /**
  * プロデュースアイドル定義
  */
-export type IdolDefinition = {
-  characterId: CharacterDefinition["id"];
+export type IdolData = Readonly<{
+  characterId: CharacterData["id"];
   id: string;
   producePlan: ProducePlan;
   rarity: "r" | "sr" | "ssr";
-  specificCardId: CardDefinition["id"];
-  specificProducerItemId: ProducerItemDefinition["id"];
+  specificCardId: CardData["id"];
+  specificProducerItemId: ProducerItemData["id"];
   /** プロデュースアイドルのタイトル。例えば、咲季SSRなら"Fighting My Way"。 */
   title: string;
-};
+}>;
 
 /**
  * プロデュース中のプロデュースアイドル
@@ -1058,8 +1067,8 @@ export type IdolDefinition = {
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
 export type IdolInProduction = {
+  data: IdolData;
   deck: CardInProduction[];
-  definition: IdolDefinition;
   // NOTE: まだ使わないので一旦コメントアウト
   // idolParameters: IdolParameters;
   life: number;
@@ -1258,88 +1267,90 @@ type LessonHistoryRecord =
       kind: "trouble";
     };
 
-export type LessonUpdateQueryReason = (
-  | {
-      /** スキルカード使用 */
-      kind: "cardUsage";
-      cardId: Card["id"];
-    }
-  | {
-      /** スキルカード使用.残りスキルカード使用数消費 */
-      kind: "cardUsage.remainingCardUsageCountConsumption";
-    }
-  | {
-      /** スキルカード使用.効果発動 */
-      kind: "cardUsage.mainEffectActivation";
-      cardId: Card["id"];
-      effectIndex: number;
-    }
-  | {
-      /** スキルカード使用プレビュー */
-      kind: "cardUsagePreview";
-    }
-  | {
-      /** スキルカード使用時トリガーにより発動した効果 */
-      kind: "cardUsageTrigger";
-      cardId: Card["id"];
-    }
-  | {
-      /** レッスン終了 */
-      kind: "lessonEnd";
-    }
-  | {
-      /** レッスン生成直後 */
-      kind: "lessonInitialization";
-    }
-  | {
-      /** レッスン開始時トリガーにより発動した効果 */
-      kind: "lessonStartTrigger";
-    }
-  | {
-      /** 状態修正増加トリガーにより発動した効果 */
-      kind: "modifierIncreaseTrigger";
-    }
-  | {
-      /**
-       * ターン終了時トリガーにより発動した効果
-       *
-       * - 好調や好印象などのターン経過毎の減少もこれで表現する
-       */
-      kind: "turnEndTrigger";
-    }
-  | {
-      /** ターンのスキップ */
-      kind: "turnSkip";
-    }
-  | {
-      /** ターン開始時トリガーにより発動した効果 */
-      kind: "turnStartTrigger";
-    }
-  | {
-      /** テストのダミー値としてや開発時に一時的に設定 */
-      kind: "unknown";
-    }
-) & {
-  /**
-   * レッスン履歴上のターン数
-   *
-   * - historyResultIndex 含めて、ゲーム内のレッスン履歴のどこに含まれるかを表現したもの
-   * - レッスン履歴を生成する時だけではく、タイムトラベル機能を作るときの程よい区切りにも使う予定
-   * - ターン数なので、1から始まる連番
-   *   - 0 から始まり、必ず漏れがない。ターン数増加も1レコードになっているため。
-   */
-  historyTurnNumber: number;
-  /**
-   * レッスン履歴の1ターン内の結果インデックス
-   *
-   * - ゲーム内のレッスン履歴内の1ターン内の結果レコードリストの何番目に含まれるかを表現したもの
-   * - 1から始まる連番
-   * - 本家のレッスン履歴へ表示されないものも、データ上は1レコードとして含める。例えば、手札の配布・好調や好印象のターン毎の自然減少、など。
-   */
-  historyResultIndex: number;
-};
+export type LessonUpdateQueryReason = Readonly<
+  (
+    | {
+        /** スキルカード使用 */
+        kind: "cardUsage";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.残りスキルカード使用数消費 */
+        kind: "cardUsage.remainingCardUsageCountConsumption";
+      }
+    | {
+        /** スキルカード使用.効果発動 */
+        kind: "cardUsage.mainEffectActivation";
+        cardId: Card["id"];
+        effectIndex: number;
+      }
+    | {
+        /** スキルカード使用プレビュー */
+        kind: "cardUsagePreview";
+      }
+    | {
+        /** スキルカード使用時トリガーにより発動した効果 */
+        kind: "cardUsageTrigger";
+        cardId: Card["id"];
+      }
+    | {
+        /** レッスン終了 */
+        kind: "lessonEnd";
+      }
+    | {
+        /** レッスン生成直後 */
+        kind: "lessonInitialization";
+      }
+    | {
+        /** レッスン開始時トリガーにより発動した効果 */
+        kind: "lessonStartTrigger";
+      }
+    | {
+        /** 状態修正増加トリガーにより発動した効果 */
+        kind: "modifierIncreaseTrigger";
+      }
+    | {
+        /**
+         * ターン終了時トリガーにより発動した効果
+         *
+         * - 好調や好印象などのターン経過毎の減少もこれで表現する
+         */
+        kind: "turnEndTrigger";
+      }
+    | {
+        /** ターンのスキップ */
+        kind: "turnSkip";
+      }
+    | {
+        /** ターン開始時トリガーにより発動した効果 */
+        kind: "turnStartTrigger";
+      }
+    | {
+        /** テストのダミー値としてや開発時に一時的に設定 */
+        kind: "unknown";
+      }
+  ) & {
+    /**
+     * レッスン履歴上のターン数
+     *
+     * - historyResultIndex 含めて、ゲーム内のレッスン履歴のどこに含まれるかを表現したもの
+     * - レッスン履歴を生成する時だけではく、タイムトラベル機能を作るときの程よい区切りにも使う予定
+     * - ターン数なので、1から始まる連番
+     *   - 0 から始まり、必ず漏れがない。ターン数増加も1レコードになっているため。
+     */
+    historyTurnNumber: number;
+    /**
+     * レッスン履歴の1ターン内の結果インデックス
+     *
+     * - ゲーム内のレッスン履歴内の1ターン内の結果レコードリストの何番目に含まれるかを表現したもの
+     * - 1から始まる連番
+     * - 本家のレッスン履歴へ表示されないものも、データ上は1レコードとして含める。例えば、手札の配布・好調や好印象のターン毎の自然減少、など。
+     */
+    historyResultIndex: number;
+  }
+>;
 
-export type LessonUpdateQueryDiff =
+export type LessonUpdateQueryDiff = Readonly<
   | {
       kind: "actionPoints";
       amount: number;
@@ -1429,7 +1440,8 @@ export type LessonUpdateQueryDiff =
       kind: "vitality";
       actual: number;
       max: number;
-    };
+    }
+>;
 
 /**
  * レッスン更新クエリ

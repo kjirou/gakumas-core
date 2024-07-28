@@ -1,7 +1,7 @@
 import type {
   ActionCost,
   Card,
-  CardDefinition,
+  CardData,
   CardInHandDisplay,
   CardInProduction,
   CardSummaryKind,
@@ -27,9 +27,9 @@ import {
   calculateActualActionCost,
   calculateClearScoreProgress,
   calculateRemainingTurns,
-  getCardContentDefinition,
+  getCardContentData,
   getIdolParameterKindOnTurn,
-  getProducerItemContentDefinition,
+  getProducerItemContentData,
   isDelayedEffectModifierType,
   isDrawCardsEffectType,
   isEnhanceHandEffectType,
@@ -366,7 +366,7 @@ export const canApplyEffect = (
  *   - というよりは、スキルカード側では「効果発動するが反映されない」という状況があるが、Pアイテム側では「効果反映までできるか」が作動条件に含まれているので、結果としてそうなる
  *   - なお、体力消費や体力減少があるPアイテムもあるが、条件として機能するのかは不明。本実装では一旦は条件として考慮せず、リソースが足りなくても実行している。
  *
- * @param options.cardDefinitionId 一部のトリガーでのみ有効、直前で使用したスキルカード定義IDを指定する
+ * @param options.cardDataId 一部のトリガーでのみ有効、直前で使用したスキルカード定義IDを指定する
  * @param options.cardSummaryKind 一部のトリガーでのみ有効、直前で使用したスキルカード概要種別を指定する
  * @param options.increasedModifierKinds 一部のトリガーでのみ有効、直前で使用したスキルカードにより上昇した状態修正の種別リストを指定する
  */
@@ -375,12 +375,12 @@ export const canTriggerProducerItem = (
   producerItem: ProducerItem,
   callFrom: ProducerItemTrigger["kind"],
   options: {
-    cardDefinitionId?: CardDefinition["id"];
+    cardDataId?: CardData["id"];
     cardSummaryKind?: CardSummaryKind;
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
 ): boolean => {
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  const producerItemContent = getProducerItemContentData(producerItem);
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   let isLessonClear = false;
   if (lesson.clearScoreThresholds) {
@@ -391,10 +391,10 @@ export const canTriggerProducerItem = (
   const everyTwoTurnsCondition =
     !(producerItemContent.trigger.kind === "turnStartEveryTwoTurns") ||
     (lesson.turnNumber >= 2 && lesson.turnNumber % 2 === 0);
-  const cardDefinitionIdCondition =
+  const cardDataIdCondition =
     !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-    producerItemContent.trigger.cardDefinitionId === undefined ||
-    producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
+    producerItemContent.trigger.cardDataId === undefined ||
+    producerItemContent.trigger.cardDataId === options.cardDataId;
   const cardSummaryKindCondition =
     !(
       producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
@@ -414,7 +414,7 @@ export const canTriggerProducerItem = (
   return (
     producerItemContent.trigger.kind === callFrom &&
     everyTwoTurnsCondition &&
-    cardDefinitionIdCondition &&
+    cardDataIdCondition &&
     cardSummaryKindCondition &&
     modifierIncreaseCondition &&
     idolParameterKindCondition &&
@@ -821,12 +821,12 @@ export const activateEffect = (
     // TODO: 手札5枚で生成した場合、現在は捨札に入れているが、本家は山札の先頭へスタックされる、Ref: https://youtu.be/40E2XOr0q2w
     case "generateCard": {
       const candidates = filterGeneratableCardsData(
-        lesson.idol.original.definition.producePlan.kind,
+        lesson.idol.original.data.producePlan.kind,
       );
-      const cardDefinition = candidates[getRandom() * candidates.length];
+      const cardData = candidates[getRandom() * candidates.length];
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
-        definition: cardDefinition,
+        data: cardData,
         enabled: true,
         enhanced: true,
       };
@@ -851,7 +851,7 @@ export const activateEffect = (
     case "generateTroubleCard": {
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
-        definition: getCardDataById("nemuke"),
+        data: getCardDataById("nemuke"),
         enabled: true,
         enhanced: false,
       };
@@ -1175,7 +1175,7 @@ export const activateEffectsOfProducerItem = (
   idGenerator: IdGenerator,
 ): LessonUpdateQueryDiff[] => {
   let diffs: LessonUpdateQueryDiff[] = [];
-  const producerItemContent = getProducerItemContentDefinition(producerItem);
+  const producerItemContent = getProducerItemContentData(producerItem);
   diffs = activateEffects(
     lesson,
     producerItemContent.effects,
@@ -1208,7 +1208,7 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
   idGenerator: IdGenerator,
   reason: LessonUpdateQueryReason,
   options: {
-    cardDefinitionId?: CardDefinition["id"];
+    cardDataId?: CardData["id"];
     cardSummaryKind?: CardSummaryKind;
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
@@ -1258,7 +1258,7 @@ export const summarizeCardInHand = (
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentDefinition(card);
+  const cardContent = getCardContentData(card);
   const effectActivations = activateEffects(
     lesson,
     cardContent.effects,
@@ -1335,7 +1335,7 @@ export const summarizeCardInHand = (
     cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),
     effects,
     enhancements: card.enhancements,
-    name: card.original.definition.name + "+".repeat(card.enhancements.length),
+    name: card.original.data.name + "+".repeat(card.enhancements.length),
     playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
     scores,
     vitality,
@@ -1698,7 +1698,7 @@ export const drawCardsOnTurnStart = (
       if (!card) {
         throw new Error(`Card not found in cards: cardId=${deckCardId}`);
       }
-      if (getCardContentDefinition(card).innate) {
+      if (getCardContentData(card).innate) {
         innateCardIds = [...innateCardIds, deckCardId];
       } else {
         restCardids = [...restCardids, deckCardId];
@@ -2049,7 +2049,7 @@ export const useCard = (
   if (card === undefined) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentDefinition(card);
+  const cardContent = getCardContentData(card);
   const doubleEffect = lesson.idol.modifiers.find(
     (e) => e.kind === "doubleEffect",
   );
@@ -2065,7 +2065,7 @@ export const useCard = (
     !params.preview &&
     !canUseCard(lesson, cardContent.cost, cardContent.condition)
   ) {
-    throw new Error(`Can not use the card: ${card.original.definition.name}`);
+    throw new Error(`Can not use the card: ${card.original.data.name}`);
   }
 
   //
@@ -2184,8 +2184,8 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDefinitionId: card.original.definition.id,
-            cardSummaryKind: card.original.definition.cardSummaryKind,
+            cardDataId: card.original.data.id,
+            cardSummaryKind: card.original.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;
@@ -2200,7 +2200,7 @@ export const useCard = (
         (e) =>
           e.kind === "effectActivationBeforeCardEffectActivation" &&
           (e.cardKind === undefined ||
-            e.cardKind === card.original.definition.cardSummaryKind),
+            e.cardKind === card.original.data.cardSummaryKind),
       ) as Array<
         Extract<
           Modifier,
@@ -2287,8 +2287,8 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDefinitionId: card.original.definition.id,
-            cardSummaryKind: card.original.definition.cardSummaryKind,
+            cardDataId: card.original.data.id,
+            cardSummaryKind: card.original.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;

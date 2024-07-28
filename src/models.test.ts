@@ -17,7 +17,7 @@ describe("createIdolInProduction", () => {
   test("it creates an idol in production", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
-      idolDefinitionId: "hanamisaki-r-1",
+      idolDataId: "hanamisaki-r-1",
       specialTrainingLevel: 1,
       talentAwakeningLevel: 1,
       idGenerator,
@@ -26,7 +26,7 @@ describe("createIdolInProduction", () => {
       deck: [
         {
           id: expect.any(String),
-          definition: getCardDataById("shinshinkiei"),
+          data: getCardDataById("shinshinkiei"),
           enhanced: false,
           enabled: true,
         },
@@ -40,13 +40,13 @@ describe("createIdolInProduction", () => {
         expect.any(Object),
         expect.any(Object),
       ],
-      definition: getIdolDataById("hanamisaki-r-1"),
+      data: getIdolDataById("hanamisaki-r-1"),
       life: 32,
       maxLife: 32,
       producerItems: [
         {
           id: expect.any(String),
-          definition: getProducerItemDataById("bakuonraion"),
+          data: getProducerItemDataById("bakuonraion"),
           enhanced: false,
         },
       ],
@@ -164,11 +164,11 @@ describe("createLessonGamePlay", () => {
   test("it creates a lesson game play", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
-      idolDefinitionId: "hanamisaki-r-1",
+      idolDataId: "hanamisaki-r-1",
       producerItems: [
         {
           id: idGenerator(),
-          definition: getProducerItemDataById("hatsuboshitecho"),
+          data: getProducerItemDataById("hatsuboshitecho"),
         },
       ],
       specialTrainingLevel: 1,

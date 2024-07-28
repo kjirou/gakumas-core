@@ -194,6 +194,7 @@ describe("createLessonGamePlay", () => {
           modifierIdsAtTurnStart: [],
           totalCardUsageCount: 0,
           actionPoints: 0,
+          scoreBonus: undefined,
         },
         cards: expect.any(Array),
         hand: [],

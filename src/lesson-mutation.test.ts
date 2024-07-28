@@ -23,7 +23,6 @@ import {
   calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
-  calculatePositiveImpressionScore,
   canApplyEffect,
   canUseCard,
   canTriggerProducerItem,
@@ -1676,6 +1675,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [] as Idol["modifiers"],
         } as Idol,
         undefined,
+        undefined,
         { value: 9 },
       ],
       expected: [{ kind: "score", actual: 9, max: 9 }],
@@ -1686,6 +1686,7 @@ describe("calculatePerformingScoreEffect", () => {
         {
           modifiers: [{ kind: "goodCondition", duration: 1 }],
         } as Idol,
+        undefined,
         undefined,
         { value: 9 },
       ],
@@ -1698,6 +1699,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [{ kind: "focus", amount: 1 }],
         } as Idol,
         undefined,
+        undefined,
         { value: 9 },
       ],
       expected: [{ kind: "score", actual: 10, max: 10 }],
@@ -1708,6 +1710,7 @@ describe("calculatePerformingScoreEffect", () => {
         {
           modifiers: [{ kind: "mightyPerformance", duration: 1 }],
         } as Idol,
+        undefined,
         undefined,
         { value: 9 },
       ],
@@ -1723,6 +1726,7 @@ describe("calculatePerformingScoreEffect", () => {
           ],
         } as Idol,
         undefined,
+        undefined,
         { value: 1 },
       ],
       expected: [{ kind: "score", actual: 6, max: 6 }],
@@ -1737,6 +1741,7 @@ describe("calculatePerformingScoreEffect", () => {
           ],
         } as Idol,
         undefined,
+        undefined,
         { value: 10 },
       ],
       expected: [{ kind: "score", actual: 20, max: 20 }],
@@ -1747,6 +1752,7 @@ describe("calculatePerformingScoreEffect", () => {
         {
           modifiers: [{ kind: "excellentCondition", duration: 1 }],
         } as Idol,
+        undefined,
         undefined,
         { value: 10 },
       ],
@@ -1762,6 +1768,7 @@ describe("calculatePerformingScoreEffect", () => {
           ],
         } as Idol,
         undefined,
+        undefined,
         { value: 10 },
       ],
       expected: [{ kind: "score", actual: 23, max: 23 }],
@@ -1772,6 +1779,7 @@ describe("calculatePerformingScoreEffect", () => {
         {
           modifiers: [{ kind: "focus", amount: 1 }],
         } as Idol,
+        undefined,
         undefined,
         { value: 1, focusMultiplier: 2.0 },
       ],
@@ -1784,6 +1792,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [{ kind: "focus", amount: 1 }],
         } as Idol,
         undefined,
+        undefined,
         { value: 1, focusMultiplier: 2.0, times: 2 },
       ],
       expected: [
@@ -1792,11 +1801,24 @@ describe("calculatePerformingScoreEffect", () => {
       ],
     },
     {
+      name: "スコアボーナスが指定されている時、それをパーセンテージとして乗算する",
+      args: [
+        {
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        201,
+        undefined,
+        { value: 10 },
+      ],
+      expected: [{ kind: "score", actual: 21, max: 21 }],
+    },
+    {
       name: "スコア増加値の上限が設定されている時、actualはその値を超えない",
       args: [
         {
           modifiers: [] as Idol["modifiers"],
         } as Idol,
+        undefined,
         6,
         { value: 10 },
       ],
@@ -1808,6 +1830,7 @@ describe("calculatePerformingScoreEffect", () => {
         {
           modifiers: [] as Idol["modifiers"],
         } as Idol,
+        undefined,
         16,
         { value: 10, times: 3 },
       ],
@@ -1828,49 +1851,30 @@ describe("calculatePerformingScoreEffect", () => {
           ] as Idol["modifiers"],
         } as Idol,
         undefined,
+        undefined,
         { value: 17, focusMultiplier: 1.5 },
       ],
       expected: [{ kind: "score", actual: 49, max: 49 }],
+    },
+    // https://github.com/kjirou/gakumas-core/issues/81 の実例
+    {
+      name: "好調状態でパラメータ追加+23をスコアボーナス 1668% で使うと 584 を返す",
+      args: [
+        {
+          modifiers: [
+            { kind: "goodCondition", duration: 1 },
+          ] as Idol["modifiers"],
+        } as Idol,
+        1668,
+        undefined,
+        { value: 23 },
+      ],
+      expected: [{ kind: "score", actual: 584, max: 584 }],
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(calculatePerformingScoreEffect(...args)).toStrictEqual(expected);
   });
-});
-describe("calculatePositiveImpressionScore", () => {
-  const testCases: Array<{
-    args: Parameters<typeof calculatePositiveImpressionScore>;
-    expected: ReturnType<typeof calculatePositiveImpressionScore>;
-  }> = [
-    {
-      args: [[], undefined],
-      expected: { kind: "score", actual: 0, max: 0 },
-    },
-    {
-      args: [[{ kind: "positiveImpression", amount: 1, id: "a" }], undefined],
-      expected: { kind: "score", actual: 1, max: 1 },
-    },
-    {
-      args: [
-        [
-          { kind: "positiveImpression", amount: 2, id: "a" },
-          { kind: "mightyPerformance", duration: 1, id: "b" },
-        ],
-        undefined,
-      ],
-      expected: { kind: "score", actual: 3, max: 3 },
-    },
-    {
-      args: [[{ kind: "positiveImpression", amount: 3, id: "a" }], 2],
-      expected: { kind: "score", actual: 2, max: 3 },
-    },
-  ];
-  test.each(testCases)(
-    "$args.0.0, $args.0.1 (Limit: $args.1) => $expected",
-    ({ args, expected }) => {
-      expect(calculatePositiveImpressionScore(...args)).toStrictEqual(expected);
-    },
-  );
 });
 describe("calculatePerformingVitalityEffect", () => {
   const testCases: {
@@ -5785,7 +5789,7 @@ describe("activateEffectsOnTurnEnd", () => {
     });
   });
 });
-// 計算内容は calculatePositiveImpressionScore のテストで検証する
+// 計算内容は calculatePerformingScoreEffect のテストで検証する
 describe("obtainPositiveImpressionScoreOnTurnEnd", () => {
   const testCases: Array<{
     args: Parameters<typeof obtainPositiveImpressionScoreOnTurnEnd>;

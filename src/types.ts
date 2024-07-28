@@ -1066,7 +1066,7 @@ export type IdolData = Readonly<{
  *
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
-export type IdolInProduction = {
+export type IdolInProduction = Readonly<{
   data: IdolData;
   deck: CardInProduction[];
   // NOTE: まだ使わないので一旦コメントアウト
@@ -1081,7 +1081,7 @@ export type IdolInProduction = {
    *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
    */
   producerItems: ProducerItemInProduction[];
-};
+}>;
 
 /**
  * レッスン中のプロデュースアイドル

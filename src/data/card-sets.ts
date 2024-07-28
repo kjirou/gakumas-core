@@ -33,7 +33,7 @@ export const getDefaultCardSetData = (
 export const cardSets: CardSetDefinition[] = [
   {
     id: "defaultLogicMotivation",
-    cardDefinitionIds: [
+    cardDataIds: [
       "apirunokihon",
       "apirunokihon",
       "hyogennokihon",
@@ -46,7 +46,7 @@ export const cardSets: CardSetDefinition[] = [
   },
   {
     id: "defaultLogicPositiveImpression",
-    cardDefinitionIds: [
+    cardDataIds: [
       "apirunokihon",
       "apirunokihon",
       "hyogennokihon",
@@ -59,7 +59,7 @@ export const cardSets: CardSetDefinition[] = [
   },
   {
     id: "defaultSenseFocus",
-    cardDefinitionIds: [
+    cardDataIds: [
       "apirunokihon",
       "apirunokihon",
       "hyogennokihon",
@@ -72,7 +72,7 @@ export const cardSets: CardSetDefinition[] = [
   },
   {
     id: "defaultSenseGoodCondition",
-    cardDefinitionIds: [
+    cardDataIds: [
       "apirunokihon",
       "apirunokihon",
       "chosen",

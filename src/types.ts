@@ -813,7 +813,7 @@ export type Card = {
  * カードセット定義
  */
 export type CardSetDefinition = Readonly<{
-  cardDefinitionIds: Array<CardData["id"]>;
+  cardDataIds: Array<CardData["id"]>;
   id: string;
 }>;
 

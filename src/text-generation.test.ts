@@ -851,12 +851,12 @@ describe("generateProducerItemTriggerAndConditionText", () => {
         {
           trigger: {
             kind: "beforeCardEffectActivation",
-            cardDefinitionId: "adorenarinzenkai",
+            cardDataId: "adorenarinzenkai",
           },
         },
       ],
       expected: "{{アドレナリン全開}}使用時、",
-      name: "beforeCardEffectActivation - cardDefinitionId",
+      name: "beforeCardEffectActivation - cardDataId",
     },
     {
       args: [

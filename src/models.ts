@@ -114,8 +114,8 @@ const createDefaultCardSet = (
   idGenerator: IdGenerator,
 ): CardInProduction[] => {
   const defaultCardSetDefinition = getDefaultCardSetData(producePlan);
-  return defaultCardSetDefinition.cardDataIds.map((cardDefinitionId) => {
-    const cardDefinition = getCardDataById(cardDefinitionId);
+  return defaultCardSetDefinition.cardDataIds.map((cardDataId) => {
+    const cardDefinition = getCardDataById(cardDataId);
     return {
       id: idGenerator(),
       definition: cardDefinition,

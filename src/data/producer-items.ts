@@ -846,7 +846,7 @@ export const producerItems: ProducerItemDefinition[] = [
       times: 1,
       trigger: {
         kind: "beforeCardEffectActivation",
-        cardDefinitionId: "adorenarinzenkai",
+        cardDataId: "adorenarinzenkai",
       },
     },
     enhanced: {
@@ -860,7 +860,7 @@ export const producerItems: ProducerItemDefinition[] = [
       times: 1,
       trigger: {
         kind: "beforeCardEffectActivation",
-        cardDefinitionId: "adorenarinzenkai",
+        cardDataId: "adorenarinzenkai",
       },
     },
   },

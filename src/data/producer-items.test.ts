@@ -63,22 +63,22 @@ for (const producerItem of producerItems) {
         );
       }
     });
-    test("`trigger`が`cardDefinitionId`設定の`beforeCardEffectActivation`の時、対象のidがスキルカード定義に存在する", () => {
+    test("`trigger`が`cardDataId`設定の`beforeCardEffectActivation`の時、対象のidがスキルカード定義に存在する", () => {
       if (
         producerItem.base.trigger.kind === "beforeCardEffectActivation" &&
-        producerItem.base.trigger.cardDefinitionId !== undefined
+        producerItem.base.trigger.cardDataId !== undefined
       ) {
         expect(
-          findCardDataById(producerItem.base.trigger.cardDefinitionId),
+          findCardDataById(producerItem.base.trigger.cardDataId),
         ).not.toBeUndefined();
       }
       if (
         producerItem.enhanced &&
         producerItem.enhanced.trigger.kind === "beforeCardEffectActivation" &&
-        producerItem.enhanced.trigger.cardDefinitionId !== undefined
+        producerItem.enhanced.trigger.cardDataId !== undefined
       ) {
         expect(
-          findCardDataById(producerItem.enhanced.trigger.cardDefinitionId),
+          findCardDataById(producerItem.enhanced.trigger.cardDataId),
         ).not.toBeUndefined();
       }
     });

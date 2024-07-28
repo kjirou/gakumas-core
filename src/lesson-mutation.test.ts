@@ -1279,7 +1279,7 @@ describe("canTriggerProducerItem", () => {
               base: {
                 trigger: {
                   kind: "beforeCardEffectActivation",
-                  cardDefinitionId: "a",
+                  cardDataId: "a",
                   cardSummaryKind: "active",
                 },
               },
@@ -1288,7 +1288,7 @@ describe("canTriggerProducerItem", () => {
         } as ProducerItem,
         "beforeCardEffectActivation",
         {
-          cardDefinitionId: "a",
+          cardDataId: "a",
           cardSummaryKind: "active",
         },
       ],
@@ -1304,7 +1304,7 @@ describe("canTriggerProducerItem", () => {
               base: {
                 trigger: {
                   kind: "beforeCardEffectActivation",
-                  cardDefinitionId: "a",
+                  cardDataId: "a",
                   cardSummaryKind: "active",
                 },
               },
@@ -1313,7 +1313,7 @@ describe("canTriggerProducerItem", () => {
         } as ProducerItem,
         "beforeCardEffectActivation",
         {
-          cardDefinitionId: "b",
+          cardDataId: "b",
           cardSummaryKind: "active",
         },
       ],
@@ -1329,7 +1329,7 @@ describe("canTriggerProducerItem", () => {
               base: {
                 trigger: {
                   kind: "beforeCardEffectActivation",
-                  cardDefinitionId: "a",
+                  cardDataId: "a",
                   cardSummaryKind: "active",
                 },
               },
@@ -1338,7 +1338,7 @@ describe("canTriggerProducerItem", () => {
         } as ProducerItem,
         "beforeCardEffectActivation",
         {
-          cardDefinitionId: "a",
+          cardDataId: "a",
           cardSummaryKind: "mental",
         },
       ],
@@ -2416,7 +2416,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
         createIdGenerator(),
         dummyReason,
         {
-          cardDefinitionId: "adorenarinzenkai",
+          cardDataId: "adorenarinzenkai",
         },
       );
     expect(
@@ -2451,7 +2451,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
         createIdGenerator(),
         dummyReason,
         {
-          cardDefinitionId: "apirunokihon",
+          cardDataId: "apirunokihon",
         },
       );
     expect(updates2).toStrictEqual([]);
@@ -2483,7 +2483,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       createIdGenerator(),
       dummyReason,
       {
-        cardDefinitionId: "adorenarinzenkai",
+        cardDataId: "adorenarinzenkai",
         cardSummaryKind: "active",
       },
     );

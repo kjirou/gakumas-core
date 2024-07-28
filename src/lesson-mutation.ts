@@ -366,7 +366,7 @@ export const canApplyEffect = (
  *   - というよりは、スキルカード側では「効果発動するが反映されない」という状況があるが、Pアイテム側では「効果反映までできるか」が作動条件に含まれているので、結果としてそうなる
  *   - なお、体力消費や体力減少があるPアイテムもあるが、条件として機能するのかは不明。本実装では一旦は条件として考慮せず、リソースが足りなくても実行している。
  *
- * @param options.cardDefinitionId 一部のトリガーでのみ有効、直前で使用したスキルカード定義IDを指定する
+ * @param options.cardDataId 一部のトリガーでのみ有効、直前で使用したスキルカード定義IDを指定する
  * @param options.cardSummaryKind 一部のトリガーでのみ有効、直前で使用したスキルカード概要種別を指定する
  * @param options.increasedModifierKinds 一部のトリガーでのみ有効、直前で使用したスキルカードにより上昇した状態修正の種別リストを指定する
  */
@@ -375,7 +375,7 @@ export const canTriggerProducerItem = (
   producerItem: ProducerItem,
   callFrom: ProducerItemTrigger["kind"],
   options: {
-    cardDefinitionId?: CardData["id"];
+    cardDataId?: CardData["id"];
     cardSummaryKind?: CardSummaryKind;
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
@@ -391,10 +391,10 @@ export const canTriggerProducerItem = (
   const everyTwoTurnsCondition =
     !(producerItemContent.trigger.kind === "turnStartEveryTwoTurns") ||
     (lesson.turnNumber >= 2 && lesson.turnNumber % 2 === 0);
-  const cardDefinitionIdCondition =
+  const cardDataIdCondition =
     !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-    producerItemContent.trigger.cardDefinitionId === undefined ||
-    producerItemContent.trigger.cardDefinitionId === options.cardDefinitionId;
+    producerItemContent.trigger.cardDataId === undefined ||
+    producerItemContent.trigger.cardDataId === options.cardDataId;
   const cardSummaryKindCondition =
     !(
       producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
@@ -414,7 +414,7 @@ export const canTriggerProducerItem = (
   return (
     producerItemContent.trigger.kind === callFrom &&
     everyTwoTurnsCondition &&
-    cardDefinitionIdCondition &&
+    cardDataIdCondition &&
     cardSummaryKindCondition &&
     modifierIncreaseCondition &&
     idolParameterKindCondition &&
@@ -1208,7 +1208,7 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
   idGenerator: IdGenerator,
   reason: LessonUpdateQueryReason,
   options: {
-    cardDefinitionId?: CardData["id"];
+    cardDataId?: CardData["id"];
     cardSummaryKind?: CardSummaryKind;
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
@@ -2184,7 +2184,7 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDefinitionId: card.original.definition.id,
+            cardDataId: card.original.definition.id,
             cardSummaryKind: card.original.definition.cardSummaryKind,
           },
         );
@@ -2287,7 +2287,7 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDefinitionId: card.original.definition.id,
+            cardDataId: card.original.definition.id,
             cardSummaryKind: card.original.definition.cardSummaryKind,
           },
         );

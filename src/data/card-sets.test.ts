@@ -15,8 +15,8 @@ for (const cardSet of cardSets) {
   describe(cardSet.id, () => {
     test("`cardDataIds` should exist in cards", () => {
       expect(
-        cardSet.cardDataIds.every((cardDefinitionId) =>
-          cards.some((card) => card.id === cardDefinitionId),
+        cardSet.cardDataIds.every((cardDataId) =>
+          cards.some((card) => card.id === cardDataId),
         ),
       ).toBe(true);
     });

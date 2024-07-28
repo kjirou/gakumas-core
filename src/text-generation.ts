@@ -439,8 +439,8 @@ export const generateProducerItemTriggerAndConditionText = (params: {
     case "beforeCardEffectActivation":
       text += [
         (() => {
-          if (trigger.cardDefinitionId !== undefined) {
-            return cardKwd(trigger.cardDefinitionId);
+          if (trigger.cardDataId !== undefined) {
+            return cardKwd(trigger.cardDataId);
           }
           switch (trigger.cardSummaryKind) {
             case "active":

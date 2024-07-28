@@ -842,7 +842,7 @@ export type ProducerItemTrigger = Readonly<
          *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
          */
         kind: "beforeCardEffectActivation";
-        cardDefinitionId?: CardData["id"];
+        cardDataId?: CardData["id"];
         cardSummaryKind?: CardSummaryKind;
       }
     | {

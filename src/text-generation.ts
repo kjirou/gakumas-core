@@ -15,11 +15,13 @@ import type {
   CardUsageCondition,
   Effect,
   EffectCondition,
+  IdolParameterKind,
   ModifierDefinition,
   ProducerItemContentDefinition,
   ProducerItemTrigger,
   RangedNumber,
   VitalityUpdateQuery,
+  Idol,
 } from "./types";
 
 /**
@@ -41,6 +43,15 @@ const generateRangedNumberText = (range: RangedNumber): string => {
   }
   throw new Error("Unreachable statement");
 };
+
+/**
+ * パラメータ種別の表示名
+ */
+export const idolParameterKindLabels = {
+  dance: "ダンス",
+  visual: "ビジュアル",
+  vocal: "ボーカル",
+} as const satisfies Record<IdolParameterKind, string>;
 
 /**
  * 状態修正の表示名

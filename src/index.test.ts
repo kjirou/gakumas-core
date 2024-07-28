@@ -5,10 +5,13 @@ import type {
   CardInProduction,
   Effect,
   Idol,
+  IdolDefinition,
   Lesson,
+  LessonDisplay,
   LessonGamePlay,
   LessonUpdateQuery,
   Modifier,
+  ProducerItemInProduction,
 } from "./index";
 import {
   createIdGenerator,
@@ -17,8 +20,7 @@ import {
   endLessonTurn,
   getCardContentDefinition,
   getEncouragements,
-  getHand,
-  getModifiers,
+  createLessonDisplay,
   getNextHistoryResultIndex,
   isLessonEnded,
   isTurnEnded,
@@ -28,58 +30,39 @@ import {
   startLessonTurn,
 } from "./index";
 import { getCardDataById } from "./data/cards";
-import {
-  activateEffect as activateEffect_,
-  calculateCostConsumption,
-} from "./lesson-mutation";
+import { getProducerItemDataById } from "./data/producer-items";
+import { activateEffect as activateEffect_ } from "./lesson-mutation";
 
-describe("getModifiers", () => {
-  const testCases: Array<{
-    args: Parameters<typeof getModifiers>;
-    expected: ReturnType<typeof getModifiers>;
-    name: string;
-  }> = [
-    {
-      name: "状態修正が存在する時、大体動く",
-      args: [
-        {
-          initialLesson: {
-            idol: {
-              modifiers: [{ kind: "focus", amount: 1, id: "m1" }],
-            },
-          },
-          updates: [] as LessonUpdateQuery[],
-        } as LessonGamePlay,
-      ],
-      expected: [
-        {
-          id: "m1",
-          kind: "focus",
-          amount: 1,
-          label: "集中",
-          description: expect.any(String),
-        },
-      ],
-    },
-    {
-      name: "状態修正が存在しない時、空配列を返す",
-      args: [
-        {
-          initialLesson: {
-            idol: {
-              modifiers: [] as Modifier[],
-            },
-          },
-          updates: [] as LessonUpdateQuery[],
-        } as LessonGamePlay,
-      ],
-      expected: [],
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(getModifiers(...args)).toStrictEqual(expected);
+const createGamePlayForTest = (
+  options: {
+    clearScoreThresholds?: Lesson["clearScoreThresholds"];
+    deck?: CardInProduction[];
+    idolDefinitionId?: IdolDefinition["id"];
+    producerItems?: ProducerItemInProduction[];
+    turns?: Lesson["turns"];
+  } = {},
+): LessonGamePlay => {
+  const clearScoreThresholds = options.clearScoreThresholds;
+  // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
+  const idolDefinitionId = options.idolDefinitionId ?? "shinosawahiro-r-1";
+  const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
+  const idGenerator = createIdGenerator();
+  const idolInProduction = createIdolInProduction({
+    idGenerator,
+    idolDefinitionId,
+    specialTrainingLevel: 1,
+    talentAwakeningLevel: 1,
+    ...(options.deck ? { deck: options.deck } : {}),
+    ...(options.producerItems ? { producerItems: options.producerItems } : {}),
   });
-});
+  return createLessonGamePlay({
+    clearScoreThresholds,
+    idGenerator,
+    idolInProduction,
+    turns,
+  });
+};
+
 describe("getEncouragements", () => {
   const testCases: Array<{
     args: Parameters<typeof getEncouragements>;
@@ -120,6 +103,173 @@ describe("getEncouragements", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(getEncouragements(...args)).toStrictEqual(expected);
+  });
+});
+describe("createLessonDisplay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof createLessonDisplay>;
+    expected: ReturnType<typeof createLessonDisplay>;
+    name: string;
+  }> = [
+    {
+      name: "hand - 概ね動作する",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                definition: getCardDataById("apirunokihon"),
+                enhanced: false,
+                enabled: true,
+              },
+              {
+                id: "c2",
+                definition: getCardDataById("hyogennokihon"),
+                enhanced: true,
+                enabled: true,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1", "c2"];
+          gamePlay.initialLesson.cards = gamePlay.initialLesson.cards.map(
+            (card) => {
+              return card.id === "c2"
+                ? {
+                    ...card,
+                    enhancements: [
+                      ...card.enhancements,
+                      { kind: "lessonSupport" },
+                    ],
+                  }
+                : card;
+            },
+          );
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        hand: [
+          {
+            name: "アピールの基本",
+            enhancements: [] as CardEnhancement[],
+          },
+          {
+            name: "表現の基本++",
+            enhancements: [{ kind: "original" }, { kind: "lessonSupport" }],
+          },
+        ],
+      } as LessonDisplay,
+    },
+    {
+      name: 'producerItems - 概ね動作する | 強化済みの名称には、"+"を末尾へ付与する',
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            producerItems: [
+              {
+                id: "p1",
+                definition: getProducerItemDataById("saigononatsunoomoide"),
+                enhanced: true,
+              },
+            ],
+          });
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        producerItems: [
+          {
+            id: "p1",
+            name: "最後の夏の思い出+",
+            description: [
+              "ターン開始時{{集中}}が3以上の場合、{{元気}}+14",
+              "（レッスン内1回）",
+            ].join("\n"),
+            activationCount: 0,
+            remainingTimes: 1,
+          },
+        ],
+      } as LessonDisplay,
+    },
+    {
+      name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "focus", amount: 1, id: "m1" },
+          ];
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        modifiers: [
+          {
+            id: "m1",
+            kind: "focus",
+            amount: 1,
+            label: "集中",
+            description: expect.any(String),
+          },
+        ],
+      } as LessonDisplay,
+    },
+    {
+      name: "modifiers - 状態修正が存在しない時、空配列を返す",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        modifiers: [] as Modifier[],
+      } as LessonDisplay,
+    },
+    {
+      name: "turns - 概ね動作する",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          gamePlay.initialLesson.turns = ["vocal", "visual", "dance"];
+          gamePlay.initialLesson.turnNumber = 2;
+          gamePlay.initialLesson.remainingTurns = 1;
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        turns: [
+          {
+            turnNumber: 1,
+            turnNumberDiff: -1,
+            idolParameterKind: "vocal",
+            idolParameterLabel: "ボーカル",
+          },
+          {
+            turnNumber: 2,
+            turnNumberDiff: 0,
+            idolParameterKind: "visual",
+            idolParameterLabel: "ビジュアル",
+          },
+          {
+            turnNumber: 3,
+            turnNumberDiff: 1,
+            idolParameterKind: "dance",
+            idolParameterLabel: "ダンス",
+          },
+          {
+            turnNumber: 4,
+            turnNumberDiff: 2,
+            idolParameterKind: "dance",
+            idolParameterLabel: "ダンス",
+          },
+        ],
+      } as LessonDisplay,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(createLessonDisplay(...args)).toMatchObject(expected);
   });
 });
 

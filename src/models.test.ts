@@ -5,6 +5,7 @@ import { getProducerItemDataById } from "./data/producer-items";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
+  createActualTurns,
   createIdolInProduction,
   createLessonGamePlay,
   getIdolParameterKindOnTurn,
@@ -102,6 +103,31 @@ describe("calculateClearScoreProgress", () => {
     "$args.0, $args.1 => $expected",
     ({ args, expected }) => {
       expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
+    },
+  );
+});
+describe("createActualTurns", () => {
+  const testCases: Array<{
+    args: Parameters<typeof createActualTurns>;
+    expected: ReturnType<typeof createActualTurns>;
+  }> = [
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurns: 0 } as Lesson],
+      expected: ["vocal", "dance"],
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurns: 1 } as Lesson],
+      expected: ["vocal", "dance", "dance"],
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurns: 2 } as Lesson],
+      expected: ["vocal", "dance", "dance", "dance"],
+    },
+  ];
+  test.each(testCases)(
+    "$args.0.turns, $args.0.remainingTurns => $expected",
+    ({ args, expected }) => {
+      expect(createActualTurns(...args)).toStrictEqual(expected);
     },
   );
 });

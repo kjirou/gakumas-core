@@ -1105,10 +1105,9 @@ export type Idol = {
 };
 
 /**
- * レッスン
+ * ある時点のレッスンの状態
  *
  * - 本家では、「レッスン」「試験」「コンテスト」として表現されているもの
- * - レッスン開始前に生成され、レッスン終了時に破棄される
  */
 export type Lesson = {
   /** レッスン内に存在するスキルカードリスト */
@@ -1430,29 +1429,35 @@ export type LessonUpdateQuery = LessonUpdateQueryDiff & {
 };
 
 /**
- * レッスン中の状態
+ * レッスンのプレイ記録
  */
 export type LessonGamePlay = {
   getRandom: GetRandom;
   idGenerator: IdGenerator;
   /**
-   * 開始時のレッスン
+   * 開始時点のレッスンの状態
    *
    * - 現在の状態や履歴は、 `updates` を適用して算出する
    */
   initialLesson: Lesson;
-  /**
-   * レッスン更新クエリリスト
-   */
   updates: LessonUpdateQuery[];
 };
 
 /**
- * 手札としてスキルカードを表示する場合の要約情報
+ * 応援/トラブルの表示用情報
+ *
+ * - 主に、本家アイドルの道の各ステージ画面にある、右上の応援/トラブル詳細のリストに使用することを想定している
+ */
+export type EncouragementDisplay = Encouragement & {
+  description: string;
+};
+
+/**
+ * レッスン中の手札の表示用情報
  *
  * - 各値は、基本的には各種効果による変動を含めた値
  */
-export type CardInHandInformation = {
+export type CardInHandDisplay = {
   cost: ActionCost;
   /**
    * 効果概要リスト
@@ -1487,12 +1492,24 @@ export type CardInHandInformation = {
 };
 
 /**
- * 状態修正の詳細情報
+ * レッスン中のPアイテムの表示用情報
  *
- * - 主に表示用を想定している、本家の左上のアイコンリストをタッチした時の詳細情報に相当
+ * - 主に、本家レッスン画面の、右上のアイコンリストをタッチした時の詳細情報に使用することを想定している
+ */
+export type ProducerItemDisplay = ProducerItem & {
+  description: string;
+  name: string;
+  /** 残り発動回数 */
+  remainingTimes: number | undefined;
+};
+
+/**
+ * レッスン中の状態修正の表示用情報
+ *
+ * - 主に、本家レッスン画面の、左上のアイコンリストをタッチした時の詳細情報に使用することを想定している
  * - TODO: 本家だと、1つ目に必ず「おすすめ効果」がある、おすすめ効果は状態修正を付与していなくても表示される
  */
-export type ModifierInformation = ModifierDefinition & {
+export type ModifierDisplay = ModifierDefinition & {
   /**
    * 効果の1行説明
    *
@@ -1505,10 +1522,28 @@ export type ModifierInformation = ModifierDefinition & {
 };
 
 /**
- * 応援/トラブルの詳細情報
+ * レッスン中の各ターンの表示用情報
  *
- * - 主に表示用を想定している、本家のアイドルの道の各ステージ画面にある、右上の応援/トラブル詳細のリスト
+ * - 主に、本家レッスン画面の、左上の現在ターンをタッチした時の詳細情報に使用することを想定している
  */
-export type EncouragementInformation = Encouragement & {
-  description: string;
+export type TurnDisplay = {
+  idolParameterKind: IdolParameterKind;
+  idolParameterLabel: string;
+  turnNumber: number;
+  /** 現在のターンとの差、1が1ターン後、-1が1ターン前 */
+  turnNumberDiff: number;
+};
+
+/**
+ * レッスンの表示用情報
+ */
+export type LessonDisplay = {
+  hand: CardInHandDisplay[];
+  life: Idol["life"];
+  modifiers: ModifierDisplay[];
+  producerItems: ProducerItemDisplay[];
+  turnNumber: number;
+  /** ターン追加を反映した長さのターンリスト */
+  turns: TurnDisplay[];
+  vitality: Idol["vitality"];
 };

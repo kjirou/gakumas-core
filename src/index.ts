@@ -18,11 +18,13 @@
 // TODO: コンテスト
 
 import {
-  CardInHandInformation,
-  EncouragementInformation,
+  EncouragementDisplay,
+  Lesson,
   LessonGamePlay,
+  LessonDisplay,
   LessonUpdateQuery,
-  ModifierInformation,
+  ProducerItemDisplay,
+  TurnDisplay,
 } from "./types";
 import {
   activateEffectsOnLessonStart,
@@ -40,14 +42,19 @@ import {
 } from "./lesson-mutation";
 import {
   calculateRemainingTurns,
+  createActualTurns,
   getCardContentDefinition,
   getNextHistoryResultIndex,
+  getProducerItemContentDefinition,
+  getRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   patchUpdates,
 } from "./models";
 import {
   generateCardDescription,
   generateEffectText,
+  generateProducerItemDescription,
+  idolParameterKindLabels,
   modifierLabels,
 } from "./text-generation";
 
@@ -81,6 +88,24 @@ export * from "./utils";
 // setLesson(最新のLessonの状態を返す(newLessonGamePlay));
 // ```
 //
+
+/**
+ * 応援/トラブル情報リストを取得する
+ *
+ * - 例えば、アイドルの道の各ステージ詳細の応援/トラブル詳細を表示する際に使う
+ */
+export const getEncouragements = (
+  lessonGamePlay: LessonGamePlay,
+): EncouragementDisplay[] => {
+  return lessonGamePlay.initialLesson.encouragements.map((encouragement) => {
+    return {
+      ...encouragement,
+      description: generateEffectText(encouragement.effect, {
+        hasSeparator: false,
+      }),
+    };
+  });
+};
 
 /**
  * レッスンのターンを開始する
@@ -356,16 +381,61 @@ export const startLessonTurn = (
 };
 
 /**
- * 手札を取得する
+ * レッスン中のPアイテム表示用情報リストを生成する
  */
-export const getHand = (
+const createProducerDisplays = (lesson: Lesson): ProducerItemDisplay[] => {
+  return lesson.idol.producerItems.map((producerItem) => {
+    const producerItemContent = getProducerItemContentDefinition(producerItem);
+    const name =
+      producerItem.original.definition.name +
+      (producerItem.original.enhanced ? "+" : "");
+    return {
+      ...producerItem,
+      name,
+      description: generateProducerItemDescription({
+        condition: producerItemContent.condition,
+        cost: producerItemContent.cost,
+        effects: producerItemContent.effects,
+        times: producerItemContent.times,
+        trigger: producerItemContent.trigger,
+      }),
+      remainingTimes: getRemainingProducerItemTimes(producerItem),
+    };
+  });
+};
+
+/**
+ * レッスン表示用情報を生成する
+ *
+ * - TODO: ターン詳細の「3位以上で合格」が未実装
+ * - TODO: レッスン履歴が未実装
+ */
+export const createLessonDisplay = (
   lessonGamePlay: LessonGamePlay,
-): CardInHandInformation[] => {
+): LessonDisplay => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
-  return lesson.hand.map((cardId) => {
+  const modifiers = lesson.idol.modifiers.map((modifier) => {
+    return {
+      ...modifier,
+      label: modifierLabels[modifier.kind],
+      description: "",
+    };
+  });
+  const turns: TurnDisplay[] = createActualTurns(lesson).map(
+    (idolParameterKind, index) => {
+      const turnNumber = index + 1;
+      return {
+        turnNumber,
+        turnNumberDiff: turnNumber - lesson.turnNumber,
+        idolParameterKind,
+        idolParameterLabel: idolParameterKindLabels[idolParameterKind],
+      };
+    },
+  );
+  const hand = lesson.hand.map((cardId) => {
     return {
       ...summarizeCardInHand(
         lesson,
@@ -375,41 +445,15 @@ export const getHand = (
       ),
     };
   });
-};
-
-/**
- * 状態修正リストを取得する
- */
-export const getModifiers = (
-  lessonGamePlay: LessonGamePlay,
-): ModifierInformation[] => {
-  const lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
-  return lesson.idol.modifiers.map((modifier) => {
-    return {
-      ...modifier,
-      label: modifierLabels[modifier.kind],
-      description: "",
-    };
-  });
-};
-
-/**
- * 応援/トラブルリストを取得する
- */
-export const getEncouragements = (
-  lessonGamePlay: LessonGamePlay,
-): EncouragementInformation[] => {
-  return lessonGamePlay.initialLesson.encouragements.map((encouragement) => {
-    return {
-      ...encouragement,
-      description: generateEffectText(encouragement.effect, {
-        hasSeparator: false,
-      }),
-    };
-  });
+  return {
+    hand,
+    life: lesson.idol.life,
+    modifiers,
+    producerItems: createProducerDisplays(lesson),
+    turnNumber: lesson.turnNumber,
+    turns,
+    vitality: lesson.idol.vitality,
+  };
 };
 
 /**

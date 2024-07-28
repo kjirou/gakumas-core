@@ -717,11 +717,14 @@ export const activateEffect = (
   const effectKind = effect.kind;
   switch (effectKind) {
     case "drainLife": {
-      diffs.push({
-        kind: "life",
-        actual: Math.max(-effect.value, -lesson.idol.life),
-        max: -effect.value,
-      });
+      diffs = [
+        ...diffs,
+        ...calculateCostConsumption(
+          lesson.idol,
+          { kind: "normal", value: effect.value },
+          idGenerator,
+        ),
+      ];
       break;
     }
     case "drawCards": {

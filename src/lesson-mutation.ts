@@ -27,7 +27,7 @@ import {
   calculateActualActionCost,
   calculateClearScoreProgress,
   calculateRemainingTurns,
-  getCardContentDefinition,
+  getCardContentData,
   getIdolParameterKindOnTurn,
   getProducerItemContentDefinition,
   isDelayedEffectModifierType,
@@ -1258,7 +1258,7 @@ export const summarizeCardInHand = (
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentDefinition(card);
+  const cardContent = getCardContentData(card);
   const effectActivations = activateEffects(
     lesson,
     cardContent.effects,
@@ -1698,7 +1698,7 @@ export const drawCardsOnTurnStart = (
       if (!card) {
         throw new Error(`Card not found in cards: cardId=${deckCardId}`);
       }
-      if (getCardContentDefinition(card).innate) {
+      if (getCardContentData(card).innate) {
         innateCardIds = [...innateCardIds, deckCardId];
       } else {
         restCardids = [...restCardids, deckCardId];
@@ -2049,7 +2049,7 @@ export const useCard = (
   if (card === undefined) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentDefinition(card);
+  const cardContent = getCardContentData(card);
   const doubleEffect = lesson.idol.modifiers.find(
     (e) => e.kind === "doubleEffect",
   );

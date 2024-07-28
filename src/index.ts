@@ -42,7 +42,7 @@ import {
 import {
   calculateRemainingTurns,
   createActualTurns,
-  getCardContentDefinition,
+  getCardContentData,
   getNextHistoryResultIndex,
   getProducerItemContentDefinition,
   getRemainingProducerItemTimes,
@@ -510,7 +510,7 @@ export const previewCardPlay = (
   if (card === undefined) {
     throw new Error("Invalid card ID");
   }
-  const cardContent = getCardContentDefinition(card);
+  const cardContent = getCardContentData(card);
   const { updates } = useCard(lesson, 1, {
     getRandom: lessonGamePlay.getRandom,
     idGenerator: lessonGamePlay.idGenerator,

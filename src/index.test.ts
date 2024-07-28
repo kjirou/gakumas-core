@@ -18,7 +18,7 @@ import {
   createIdolInProduction,
   createLessonGamePlay,
   endLessonTurn,
-  getCardContentDefinition,
+  getCardContentData,
   getEncouragements,
   createLessonDisplay,
   getNextHistoryResultIndex,

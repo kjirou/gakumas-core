@@ -64,7 +64,7 @@ export const isPerformEffectType = (
   effect: Effect,
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
-export const getCardContentDefinition = (card: Card): CardContentData => {
+export const getCardContentData = (card: Card): CardContentData => {
   const contents = getCardContentDefinitions(card.original.definition);
   if (card.enhancements.length === 0) {
     return contents[0];

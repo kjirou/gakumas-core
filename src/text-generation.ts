@@ -11,7 +11,7 @@
 import type {
   ActionCost,
   CardDefinition,
-  CardContentDefinition,
+  CardContentData,
   CardUsageCondition,
   Effect,
   EffectCondition,
@@ -373,12 +373,12 @@ export const generateCardUsageConditionText = (
  * スキルカードの効果説明欄のテキストを生成する
  */
 export const generateCardDescription = (params: {
-  cost: CardContentDefinition["cost"];
-  condition: CardContentDefinition["condition"];
-  effects: CardContentDefinition["effects"];
-  innate?: CardContentDefinition["innate"];
+  cost: CardContentData["cost"];
+  condition: CardContentData["condition"];
+  effects: CardContentData["effects"];
+  innate?: CardContentData["innate"];
   nonDuplicative?: CardDefinition["nonDuplicative"];
-  usableOncePerLesson?: CardContentDefinition["usableOncePerLesson"];
+  usableOncePerLesson?: CardContentData["usableOncePerLesson"];
 }): string => {
   let lines: string[] = [];
   const costText = generateActionCostText(params.cost);

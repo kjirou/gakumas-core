@@ -1,4 +1,4 @@
-import { CardContentDefinition, CardDefinition, ProducePlan } from "../types";
+import { CardContentData, CardDefinition, ProducePlan } from "../types";
 
 export const findCardDataById = (
   id: CardDefinition["id"],
@@ -27,25 +27,20 @@ export const filterGeneratableCardsData = (
 /** 全ての強化数の内容リストを返す */
 export const getCardContentDefinitions = (
   card: CardDefinition,
-): [
-  CardContentDefinition,
-  CardContentDefinition,
-  CardContentDefinition,
-  CardContentDefinition,
-] => {
+): [CardContentData, CardContentData, CardContentData, CardContentData] => {
   const noEnhanced = card.contents[0];
   if (card.contents[1] === undefined) {
     return [noEnhanced, noEnhanced, noEnhanced, noEnhanced];
   }
-  const enhanced1: CardContentDefinition = {
+  const enhanced1: CardContentData = {
     ...noEnhanced,
     ...card.contents[1],
   };
-  const enhanced2: CardContentDefinition = {
+  const enhanced2: CardContentData = {
     ...enhanced1,
     ...card.contents[2],
   };
-  const enhanced3: CardContentDefinition = {
+  const enhanced3: CardContentData = {
     ...enhanced2,
     ...card.contents[3],
   };

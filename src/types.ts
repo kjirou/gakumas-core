@@ -639,7 +639,7 @@ export type ActionCost = {
   value: number;
 };
 
-export type CardContentDefinition = {
+export type CardContentData = {
   condition?: CardUsageCondition;
   cost: ActionCost;
   effects: Effect[];
@@ -708,12 +708,12 @@ export type CardDefinition = {
    * - トラブルカード以外は、3段階目まで強化が存在するよう
    */
   contents:
-    | [CardContentDefinition]
+    | [CardContentData]
     | [
-        CardContentDefinition,
-        Partial<CardContentDefinition>,
-        Partial<CardContentDefinition>,
-        Partial<CardContentDefinition>,
+        CardContentData,
+        Partial<CardContentData>,
+        Partial<CardContentData>,
+        Partial<CardContentData>,
       ];
   id: string;
   name: string;

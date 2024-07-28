@@ -79,7 +79,7 @@ export type VitalityUpdateQuery = {
  *
  * - Modifier をデータ定義で行う時の形式
  */
-export type ModifierData =
+export type ModifierData = Readonly<
   | {
       /**
        * 「スキルカード使用数追加+{amount}」
@@ -225,7 +225,8 @@ export type ModifierData =
        */
       kind: "positiveImpression";
       amount: number;
-    };
+    }
+>;
 
 /**
  * メタ状態修正データ定義

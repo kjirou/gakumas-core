@@ -1,6 +1,5 @@
 import {
   Card,
-  CardData,
   CardInProduction,
   Idol,
   Lesson,
@@ -1091,7 +1090,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 0,
           original: {
-            definition: { base: { trigger: { kind: "turnStart" } } },
+            data: { base: { trigger: { kind: "turnStart" } } },
           },
         } as ProducerItem,
         "turnStart",
@@ -1105,7 +1104,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 0,
           original: {
-            definition: { base: { trigger: { kind: "turnStart" } } },
+            data: { base: { trigger: { kind: "turnStart" } } },
           },
         } as ProducerItem,
         "turnEnd",
@@ -1119,7 +1118,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 0,
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: { kind: "turnStart", idolParameterKind: "vocal" },
               },
@@ -1137,7 +1136,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 0,
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: { kind: "turnStart", idolParameterKind: "dance" },
               },
@@ -1161,7 +1160,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 0,
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: { kind: "turnStart", idolParameterKind: "dance" },
               },
@@ -1185,7 +1184,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 0,
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: { kind: "turnStart", idolParameterKind: "dance" },
               },
@@ -1203,7 +1202,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 1,
           original: {
-            definition: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
           },
         } as ProducerItem,
         "turnStart",
@@ -1217,7 +1216,7 @@ describe("canTriggerProducerItem", () => {
         {
           activationCount: 2,
           original: {
-            definition: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
           },
         } as ProducerItem,
         "turnStart",
@@ -1230,7 +1229,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 2 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: { trigger: { kind: "turnStartEveryTwoTurns" } },
             },
           },
@@ -1245,7 +1244,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: { trigger: { kind: "turnStartEveryTwoTurns" } },
             },
           },
@@ -1260,7 +1259,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 0 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: { trigger: { kind: "turnStartEveryTwoTurns" } },
             },
           },
@@ -1275,7 +1274,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "beforeCardEffectActivation",
@@ -1300,7 +1299,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "beforeCardEffectActivation",
@@ -1325,7 +1324,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "beforeCardEffectActivation",
@@ -1350,7 +1349,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "afterCardEffectActivation",
@@ -1373,7 +1372,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "afterCardEffectActivation",
@@ -1396,7 +1395,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "modifierIncrease",
@@ -1419,7 +1418,7 @@ describe("canTriggerProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           original: {
-            definition: {
+            data: {
               base: {
                 trigger: {
                   kind: "modifierIncrease",
@@ -2014,7 +2013,7 @@ describe("activateEffect", () => {
             enhancements: [{ kind: "original" }],
             original: {
               id: expect.any(String),
-              definition: expect.objectContaining({
+              data: expect.objectContaining({
                 rarity: "ssr",
               }),
               enhanced: true,
@@ -2047,7 +2046,7 @@ describe("activateEffect", () => {
             enhancements: [],
             original: {
               id: expect.any(String),
-              definition: expect.objectContaining({
+              data: expect.objectContaining({
                 id: "nemuke",
               }),
               enhanced: false,
@@ -2178,7 +2177,7 @@ describe("activateEffectsOfProducerItem", () => {
           id: "a",
           original: {
             id: "a",
-            definition: getProducerItemDataById("gesennosenrihin"),
+            data: getProducerItemDataById("gesennosenrihin"),
             enhanced: false,
           },
           activationCount: 0,
@@ -2341,7 +2340,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("itsumonomeikupochi"),
+          data: getProducerItemDataById("itsumonomeikupochi"),
           enhanced: false,
         },
       ],
@@ -2397,7 +2396,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("saikonihappinominamoto"),
+          data: getProducerItemDataById("saikonihappinominamoto"),
           enhanced: false,
         },
       ],
@@ -2461,12 +2460,12 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("saikonihappinominamoto"),
+          data: getProducerItemDataById("saikonihappinominamoto"),
           enhanced: false,
         },
         {
           id: "b",
-          definition: getProducerItemDataById("kumoriwonuguttataoru"),
+          data: getProducerItemDataById("kumoriwonuguttataoru"),
         },
       ],
     });
@@ -2526,7 +2525,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("biggudorimuchokimbako"),
+          data: getProducerItemDataById("biggudorimuchokimbako"),
           enhanced: false,
         },
       ],
@@ -2598,7 +2597,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("himitsutokkunkade"),
+          data: getProducerItemDataById("himitsutokkunkade"),
           enhanced: false,
         },
       ],
@@ -2663,7 +2662,7 @@ describe("summarizeCardInHand", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             },
@@ -2691,7 +2690,7 @@ describe("summarizeCardInHand", () => {
             cards: [
               {
                 id: "a",
-                definition: getCardDataById("apirunokihon"),
+                data: getCardDataById("apirunokihon"),
                 enabled: true,
                 enhanced: false,
               },
@@ -2724,7 +2723,7 @@ describe("summarizeCardInHand", () => {
             cards: [
               {
                 id: "a",
-                definition: getCardDataById("apirunokihon"),
+                data: getCardDataById("apirunokihon"),
                 enabled: true,
                 enhanced: false,
               },
@@ -2754,7 +2753,7 @@ describe("summarizeCardInHand", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("rakkanteki"),
+              data: getCardDataById("rakkanteki"),
               enabled: true,
               enhanced: false,
             },
@@ -2784,7 +2783,7 @@ describe("summarizeCardInHand", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("hiyaku"),
+              data: getCardDataById("hiyaku"),
               enabled: true,
               enhanced: false,
             },
@@ -2812,7 +2811,7 @@ describe("summarizeCardInHand", () => {
             cards: [
               {
                 id: "a",
-                definition: getCardDataById("hiyaku"),
+                data: getCardDataById("hiyaku"),
                 enabled: false,
                 enhanced: true,
               },
@@ -2845,7 +2844,7 @@ describe("summarizeCardInHand", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("honkinoshumi"),
+              data: getCardDataById("honkinoshumi"),
               enabled: true,
               enhanced: false,
             },
@@ -2873,7 +2872,7 @@ describe("summarizeCardInHand", () => {
             cards: [
               {
                 id: "a",
-                definition: getCardDataById("honkinoshumi"),
+                data: getCardDataById("honkinoshumi"),
                 enabled: false,
                 enhanced: true,
               },
@@ -2904,7 +2903,7 @@ describe("summarizeCardInHand", () => {
             cards: [
               {
                 id: "a",
-                definition: getCardDataById("apirunokihon"),
+                data: getCardDataById("apirunokihon"),
                 enabled: true,
                 enhanced: true,
               },
@@ -2940,7 +2939,7 @@ describe("summarizeCardInHand", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("chosen"),
+              data: getCardDataById("chosen"),
               enabled: true,
               enhanced: false,
             },
@@ -2968,7 +2967,7 @@ describe("summarizeCardInHand", () => {
             cards: [
               {
                 id: "a",
-                definition: getCardDataById("wammoasuteppu"),
+                data: getCardDataById("wammoasuteppu"),
                 enabled: true,
                 enhanced: false,
               },
@@ -3012,7 +3011,7 @@ describe("activateEffectsOnLessonStart", () => {
           producerItems: [
             {
               id: "a",
-              definition: getProducerItemDataById("gesennosenrihin"),
+              data: getProducerItemDataById("gesennosenrihin"),
               enhanced: false,
             },
           ],
@@ -3137,7 +3136,7 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3163,7 +3162,7 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3186,7 +3185,7 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c", "d", "e"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3220,13 +3219,13 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          definition: getCardDataById("shizukanaishi"),
+          data: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
@@ -3256,19 +3255,19 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          definition: getCardDataById("shizukanaishi"),
+          data: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
         ...["e", "f"].map((id) => ({
           id,
-          definition: getCardDataById("shizukanaishi"),
+          data: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
@@ -3295,25 +3294,25 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          definition: getCardDataById("shizukanaishi"),
+          data: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
         ...["e", "f", "g", "h"].map((id) => ({
           id,
-          definition: getCardDataById("shizukanaishi"),
+          data: getCardDataById("shizukanaishi"),
           enabled: true,
           enhanced: false,
         })),
         ...["i"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3340,7 +3339,7 @@ describe("drawCardsOnLessonStart", () => {
       cards: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3375,7 +3374,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("bakuonraion"),
+          data: getProducerItemDataById("bakuonraion"),
           enhanced: false,
         },
       ],
@@ -3400,7 +3399,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("bakuonraion"),
+          data: getProducerItemDataById("bakuonraion"),
           enhanced: false,
         },
       ],
@@ -3416,7 +3415,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("shibainuposhetto"),
+          data: getProducerItemDataById("shibainuposhetto"),
           enhanced: false,
         },
       ],
@@ -3440,7 +3439,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          definition: getProducerItemDataById("shibainuposhetto"),
+          data: getProducerItemDataById("shibainuposhetto"),
           enhanced: false,
         },
       ],
@@ -3460,7 +3459,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       cards: [
         {
           id: "a",
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         },
@@ -3546,7 +3545,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       cards: [
         {
           id: "a",
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         },
@@ -3602,7 +3601,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       cards: [
         ...["a", "b"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3718,7 +3717,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       cards: [
         ...["a", "b"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -3774,7 +3773,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       cards: [
         ...["a", "b"].map((id) => ({
           id,
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         })),
@@ -4090,7 +4089,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -4114,7 +4113,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("hyogennokihon"),
+            data: getCardDataById("hyogennokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -4141,7 +4140,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -4177,7 +4176,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("genkinaaisatsu"),
+            data: getCardDataById("genkinaaisatsu"),
             enabled: true,
             enhanced: false,
           },
@@ -4208,7 +4207,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("adorenarinzenkai"),
+            data: getCardDataById("adorenarinzenkai"),
             enabled: true,
             enhanced: false,
           },
@@ -4216,7 +4215,7 @@ describe("useCard preview:false", () => {
         producerItems: [
           {
             id: "p",
-            definition: getProducerItemDataById("saikonihappinominamoto"),
+            data: getProducerItemDataById("saikonihappinominamoto"),
             enhanced: false,
           },
         ],
@@ -4282,19 +4281,19 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("fanshichamu"),
+            data: getCardDataById("fanshichamu"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "b",
-            definition: getCardDataById("hyogennokihon"),
+            data: getCardDataById("hyogennokihon"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "c",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -4373,19 +4372,19 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("enshutsukeikaku"),
+            data: getCardDataById("enshutsukeikaku"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "b",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "c",
-            definition: getCardDataById("shinkokyu"),
+            data: getCardDataById("shinkokyu"),
             enabled: true,
             enhanced: false,
           },
@@ -4454,13 +4453,13 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("kagayakukimihe"),
+            data: getCardDataById("kagayakukimihe"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "b",
-            definition: getCardDataById("hyogennokihon"),
+            data: getCardDataById("hyogennokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -4527,7 +4526,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("hiyaku"),
+              data: getCardDataById("hiyaku"),
               enabled: true,
               enhanced: false,
             },
@@ -4549,7 +4548,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("jumbiundo"),
+              data: getCardDataById("jumbiundo"),
               enabled: true,
               enhanced: false,
             },
@@ -4612,13 +4611,13 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("aidorusengen"),
+              data: getCardDataById("aidorusengen"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
@@ -4649,13 +4648,13 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("aidorusengen"),
+              data: getCardDataById("aidorusengen"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c", "d"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
@@ -4693,13 +4692,13 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("aidorusengen"),
+              data: getCardDataById("aidorusengen"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c", "d", "e", "f", "g"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
@@ -4729,19 +4728,19 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("teipatei"),
+              data: getCardDataById("teipatei"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c", "d"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
             ...["e"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: true,
             })),
@@ -4772,13 +4771,13 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("shikirinaoshi"),
+              data: getCardDataById("shikirinaoshi"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c", "d", "e", "f"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
@@ -4812,13 +4811,13 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("shikirinaoshi"),
+              data: getCardDataById("shikirinaoshi"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
@@ -4848,13 +4847,13 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("shikirinaoshi"),
+              data: getCardDataById("shikirinaoshi"),
               enabled: true,
               enhanced: false,
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             })),
@@ -4879,7 +4878,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("furumainokihon"),
+              data: getCardDataById("furumainokihon"),
               enabled: true,
               enhanced: false,
             },
@@ -4914,7 +4913,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("furumainokihon"),
+              data: getCardDataById("furumainokihon"),
               enabled: true,
               enhanced: false,
             },
@@ -4954,7 +4953,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("enshutsukeikaku"),
+              data: getCardDataById("enshutsukeikaku"),
               enabled: true,
               enhanced: false,
             },
@@ -5007,7 +5006,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             },
@@ -5040,7 +5039,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("apirunokihon"),
+              data: getCardDataById("apirunokihon"),
               enabled: true,
               enhanced: false,
             },
@@ -5071,7 +5070,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("shikosakugo"),
+              data: getCardDataById("shikosakugo"),
               enabled: true,
               enhanced: false,
             },
@@ -5105,7 +5104,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("pozunokihon"),
+              data: getCardDataById("pozunokihon"),
               enabled: true,
               enhanced: false,
             },
@@ -5143,7 +5142,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("kaika"),
+              data: getCardDataById("kaika"),
               enabled: true,
               enhanced: false,
             },
@@ -5170,7 +5169,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("200sumairu"),
+              data: getCardDataById("200sumairu"),
               enabled: true,
               enhanced: false,
             },
@@ -5199,7 +5198,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("kaika"),
+              data: getCardDataById("kaika"),
               enabled: true,
               enhanced: false,
             },
@@ -5232,7 +5231,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("genkinaaisatsu"),
+              data: getCardDataById("genkinaaisatsu"),
               enabled: true,
               enhanced: false,
             },
@@ -5259,7 +5258,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("hatonoaizu"),
+              data: getCardDataById("hatonoaizu"),
               enabled: true,
               enhanced: false,
             },
@@ -5286,7 +5285,7 @@ describe("useCard preview:false", () => {
           cards: [
             {
               id: "a",
-              definition: getCardDataById("todoite"),
+              data: getCardDataById("todoite"),
               enabled: true,
               enhanced: false,
             },
@@ -5317,7 +5316,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("eieio"),
+            data: getCardDataById("eieio"),
             enabled: true,
             enhanced: false,
           },
@@ -5325,7 +5324,7 @@ describe("useCard preview:false", () => {
         producerItems: [
           {
             id: "p1",
-            definition: getProducerItemDataById("tekunodoggu"),
+            data: getProducerItemDataById("tekunodoggu"),
             enhanced: false,
           },
         ],
@@ -5378,7 +5377,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("ishikinokihon"),
+            data: getCardDataById("ishikinokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -5386,7 +5385,7 @@ describe("useCard preview:false", () => {
         producerItems: [
           {
             id: "p1",
-            definition: getProducerItemDataById("himitsutokkunkade"),
+            data: getProducerItemDataById("himitsutokkunkade"),
             enhanced: false,
           },
         ],
@@ -5438,7 +5437,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("hidamarinoseitokaishitsu"),
+            data: getCardDataById("hidamarinoseitokaishitsu"),
             enabled: true,
             enhanced: false,
           },
@@ -5498,13 +5497,13 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "b",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -5550,13 +5549,13 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
           {
             id: "b",
-            definition: getCardDataById("apirunokihon"),
+            data: getCardDataById("apirunokihon"),
             enabled: true,
             enhanced: false,
           },
@@ -5579,7 +5578,7 @@ describe("useCard preview:false", () => {
         cards: [
           {
             id: "a",
-            definition: getCardDataById("iji"),
+            data: getCardDataById("iji"),
             enabled: true,
             enhanced: false,
           },
@@ -5605,7 +5604,7 @@ describe("useCard preview:true", () => {
       cards: [
         {
           id: "a",
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         },
@@ -5641,7 +5640,7 @@ describe("useCard preview:true", () => {
       cards: [
         {
           id: "a",
-          definition: getCardDataById("chosen"),
+          data: getCardDataById("chosen"),
           enabled: true,
           enhanced: false,
         },
@@ -5668,7 +5667,7 @@ describe("useCard preview:true", () => {
       cards: [
         {
           id: "a",
-          definition: getCardDataById("apirunokihon"),
+          data: getCardDataById("apirunokihon"),
           enabled: true,
           enhanced: false,
         },
@@ -5723,7 +5722,7 @@ describe("activateEffectsOnTurnEnd", () => {
         producerItems: [
           {
             id: "a",
-            definition: getProducerItemDataById("okininosunika"),
+            data: getProducerItemDataById("okininosunika"),
           },
         ],
       });

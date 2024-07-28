@@ -385,7 +385,7 @@ const createProducerDisplays = (lesson: Lesson): ProducerItemDisplay[] => {
   return lesson.idol.producerItems.map((producerItem) => {
     const producerItemContent = getProducerItemContentData(producerItem);
     const name =
-      producerItem.original.definition.name +
+      producerItem.original.data.name +
       (producerItem.original.enhanced ? "+" : "");
     return {
       ...producerItem,
@@ -522,7 +522,7 @@ export const previewCardPlay = (
     condition: cardContent.condition,
     effects: cardContent.effects,
     innate: cardContent.innate,
-    nonDuplicative: card.original.definition.nonDuplicative,
+    nonDuplicative: card.original.data.nonDuplicative,
     usableOncePerLesson: cardContent.usableOncePerLesson,
   });
   return {

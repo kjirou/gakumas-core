@@ -742,7 +742,7 @@ export type CardData = Readonly<{
  * - 所持中のスキルカードは、プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
 export type CardInProduction = Readonly<{
-  definition: CardData;
+  data: CardData;
   /**
    * 有効か
    *
@@ -1001,7 +1001,7 @@ export type ProducerItemData = Readonly<{
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
 export type ProducerItemInProduction = Readonly<{
-  definition: ProducerItemData;
+  data: ProducerItemData;
   enhanced?: boolean;
   /**
    * IdolInProduction["producerItems"] 内で一意のID
@@ -1067,8 +1067,8 @@ export type IdolData = Readonly<{
  * - プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
 export type IdolInProduction = {
+  data: IdolData;
   deck: CardInProduction[];
-  definition: IdolData;
   // NOTE: まだ使わないので一旦コメントアウト
   // idolParameters: IdolParameters;
   life: number;

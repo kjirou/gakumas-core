@@ -65,7 +65,7 @@ export const isPerformEffectType = (
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
 export const getCardContentData = (card: Card): CardContentData => {
-  const contents = getCardContentDataList(card.original.definition);
+  const contents = getCardContentDataList(card.original.data);
   if (card.enhancements.length === 0) {
     return contents[0];
   } else if (card.enhancements.length === 1) {
@@ -80,10 +80,10 @@ export const getCardContentData = (card: Card): CardContentData => {
 export const getProducerItemContentData = (
   producerItem: ProducerItem,
 ): ProducerItemContentData => {
-  return producerItem.original.definition.enhanced !== undefined &&
+  return producerItem.original.data.enhanced !== undefined &&
     producerItem.original.enhanced
-    ? producerItem.original.definition.enhanced
-    : producerItem.original.definition.base;
+    ? producerItem.original.data.enhanced
+    : producerItem.original.data.base;
 };
 
 /** Pアイテムの残り発動回数を返す */
@@ -118,7 +118,7 @@ const createDefaultCardSet = (
     const cardData = getCardDataById(cardDataId);
     return {
       id: idGenerator(),
-      definition: cardData,
+      data: cardData,
       enhanced: false,
       enabled: true,
     };
@@ -153,22 +153,22 @@ export const createIdolInProduction = (params: {
     [
       {
         id: params.idGenerator(),
-        definition: specificCardData,
+        data: specificCardData,
         enhanced: params.specialTrainingLevel >= 3,
         enabled: true,
       },
       ...createDefaultCardSet(idolData.producePlan, params.idGenerator),
-    ].sort((a, b) => compareDeckOrder(a.definition, b.definition));
+    ].sort((a, b) => compareDeckOrder(a.data, b.data));
   const producerItems = params.producerItems ?? [
     {
       id: params.idGenerator(),
-      definition: specificProducerItemData,
+      data: specificProducerItemData,
       enhanced: params.talentAwakeningLevel >= 2,
     },
   ];
   return {
     deck,
-    definition: idolData,
+    data: idolData,
     life: characterData.maxLife,
     maxLife: characterData.maxLife,
     producerItems,

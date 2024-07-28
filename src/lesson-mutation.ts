@@ -821,12 +821,12 @@ export const activateEffect = (
     // TODO: 手札5枚で生成した場合、現在は捨札に入れているが、本家は山札の先頭へスタックされる、Ref: https://youtu.be/40E2XOr0q2w
     case "generateCard": {
       const candidates = filterGeneratableCardsData(
-        lesson.idol.original.definition.producePlan.kind,
+        lesson.idol.original.data.producePlan.kind,
       );
       const cardData = candidates[getRandom() * candidates.length];
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
-        definition: cardData,
+        data: cardData,
         enabled: true,
         enhanced: true,
       };
@@ -851,7 +851,7 @@ export const activateEffect = (
     case "generateTroubleCard": {
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
-        definition: getCardDataById("nemuke"),
+        data: getCardDataById("nemuke"),
         enabled: true,
         enhanced: false,
       };
@@ -1335,7 +1335,7 @@ export const summarizeCardInHand = (
     cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),
     effects,
     enhancements: card.enhancements,
-    name: card.original.definition.name + "+".repeat(card.enhancements.length),
+    name: card.original.data.name + "+".repeat(card.enhancements.length),
     playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
     scores,
     vitality,
@@ -2065,7 +2065,7 @@ export const useCard = (
     !params.preview &&
     !canUseCard(lesson, cardContent.cost, cardContent.condition)
   ) {
-    throw new Error(`Can not use the card: ${card.original.definition.name}`);
+    throw new Error(`Can not use the card: ${card.original.data.name}`);
   }
 
   //
@@ -2184,8 +2184,8 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDataId: card.original.definition.id,
-            cardSummaryKind: card.original.definition.cardSummaryKind,
+            cardDataId: card.original.data.id,
+            cardSummaryKind: card.original.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;
@@ -2200,7 +2200,7 @@ export const useCard = (
         (e) =>
           e.kind === "effectActivationBeforeCardEffectActivation" &&
           (e.cardKind === undefined ||
-            e.cardKind === card.original.definition.cardSummaryKind),
+            e.cardKind === card.original.data.cardSummaryKind),
       ) as Array<
         Extract<
           Modifier,
@@ -2287,8 +2287,8 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDataId: card.original.definition.id,
-            cardSummaryKind: card.original.definition.cardSummaryKind,
+            cardDataId: card.original.data.id,
+            cardSummaryKind: card.original.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;

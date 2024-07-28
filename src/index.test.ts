@@ -37,19 +37,19 @@ const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     deck?: CardInProduction[];
-    idolDefinitionId?: IdolData["id"];
+    idolDataId?: IdolData["id"];
     producerItems?: ProducerItemInProduction[];
     turns?: Lesson["turns"];
   } = {},
 ): LessonGamePlay => {
   const clearScoreThresholds = options.clearScoreThresholds;
   // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
-  const idolDefinitionId = options.idolDefinitionId ?? "shinosawahiro-r-1";
+  const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
   const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
   const idGenerator = createIdGenerator();
   const idolInProduction = createIdolInProduction({
     idGenerator,
-    idolDefinitionId,
+    idolDataId,
     specialTrainingLevel: 1,
     talentAwakeningLevel: 1,
     ...(options.deck ? { deck: options.deck } : {}),
@@ -468,7 +468,7 @@ describe("水着麻央のプレイ再現", () => {
     const idolInProduction = createIdolInProduction({
       deck: params.deck,
       idGenerator,
-      idolDefinitionId: "arimuramao-ssr-2",
+      idolDataId: "arimuramao-ssr-2",
       specialTrainingLevel: 4,
       talentAwakeningLevel: 2,
     });

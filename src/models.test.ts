@@ -17,7 +17,7 @@ describe("createIdolInProduction", () => {
   test("it creates an idol in production", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
-      idolDefinitionId: "hanamisaki-r-1",
+      idolDataId: "hanamisaki-r-1",
       specialTrainingLevel: 1,
       talentAwakeningLevel: 1,
       idGenerator,
@@ -164,7 +164,7 @@ describe("createLessonGamePlay", () => {
   test("it creates a lesson game play", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
-      idolDefinitionId: "hanamisaki-r-1",
+      idolDataId: "hanamisaki-r-1",
       producerItems: [
         {
           id: idGenerator(),

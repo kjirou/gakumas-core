@@ -136,12 +136,12 @@ const createDefaultCardSet = (
 export const createIdolInProduction = (params: {
   deck?: CardInProduction[];
   idGenerator: IdGenerator;
-  idolDefinitionId: IdolData["id"];
+  idolDataId: IdolData["id"];
   producerItems?: ProducerItemInProduction[];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
 }): IdolInProduction => {
-  const idolDefinition = getIdolDataById(params.idolDefinitionId);
+  const idolDefinition = getIdolDataById(params.idolDataId);
   const characterDefinition = getCharacterDataById(idolDefinition.characterId);
   const specificCardDefinition = getCardDataById(idolDefinition.specificCardId);
   const specificProducerItemData = getProducerItemDataById(

@@ -55,7 +55,7 @@ const createLessonForTest = (
   const idGenerator = createIdGenerator();
   const idolInProduction = createIdolInProduction({
     // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
-    idolDefinitionId: "shinosawahiro-r-1",
+    idolDataId: "shinosawahiro-r-1",
     idGenerator,
     specialTrainingLevel: 1,
     talentAwakeningLevel: 1,

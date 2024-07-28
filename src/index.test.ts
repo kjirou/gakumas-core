@@ -5,7 +5,7 @@ import type {
   CardInProduction,
   Effect,
   Idol,
-  IdolDefinition,
+  IdolData,
   Lesson,
   LessonDisplay,
   LessonGamePlay,
@@ -37,7 +37,7 @@ const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     deck?: CardInProduction[];
-    idolDefinitionId?: IdolDefinition["id"];
+    idolDefinitionId?: IdolData["id"];
     producerItems?: ProducerItemInProduction[];
     turns?: Lesson["turns"];
   } = {},

@@ -22,7 +22,7 @@ import {
   GetRandom,
   IdGenerator,
   Idol,
-  IdolDefinition,
+  IdolData,
   IdolInProduction,
   IdolParameterKind,
   Lesson,
@@ -136,7 +136,7 @@ const createDefaultCardSet = (
 export const createIdolInProduction = (params: {
   deck?: CardInProduction[];
   idGenerator: IdGenerator;
-  idolDefinitionId: IdolDefinition["id"];
+  idolDefinitionId: IdolData["id"];
   producerItems?: ProducerItemInProduction[];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;

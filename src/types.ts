@@ -1050,7 +1050,7 @@ export type CharacterData = Readonly<{
 /**
  * プロデュースアイドル定義
  */
-export type IdolDefinition = Readonly<{
+export type IdolData = Readonly<{
   characterId: CharacterData["id"];
   id: string;
   producePlan: ProducePlan;
@@ -1068,7 +1068,7 @@ export type IdolDefinition = Readonly<{
  */
 export type IdolInProduction = {
   deck: CardInProduction[];
-  definition: IdolDefinition;
+  definition: IdolData;
   // NOTE: まだ使わないので一旦コメントアウト
   // idolParameters: IdolParameters;
   life: number;

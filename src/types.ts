@@ -923,7 +923,7 @@ export type ProducerItemTrigger = Readonly<
   }
 >;
 
-export type ProducerItemContentDefinition = Readonly<{
+export type ProducerItemContentData = Readonly<{
   /**
    * 効果発動条件
    *
@@ -980,9 +980,9 @@ export type ProducerItemContentDefinition = Readonly<{
  */
 export type ProducerItemDefinition = Readonly<{
   /** 未強化時の内容 */
-  base: ProducerItemContentDefinition;
+  base: ProducerItemContentData;
   /** 強化済み時の内容 */
-  enhanced?: ProducerItemContentDefinition;
+  enhanced?: ProducerItemContentData;
   id: string;
   name: string;
   producerItemPossessionKind: ProducerItemPossessionKind;

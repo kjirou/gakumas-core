@@ -17,7 +17,7 @@ import type {
   EffectCondition,
   IdolParameterKind,
   ModifierData,
-  ProducerItemContentDefinition,
+  ProducerItemContentData,
   ProducerItemTrigger,
   RangedNumber,
   VitalityUpdateQuery,
@@ -501,7 +501,7 @@ export const generateProducerItemTriggerAndConditionText = (params: {
 };
 
 const generateProducerItemTimesText = (
-  times: ProducerItemContentDefinition["times"],
+  times: ProducerItemContentData["times"],
 ): string => {
   return `（レッスン内${times}回）`;
 };
@@ -510,11 +510,11 @@ const generateProducerItemTimesText = (
  * Pアイテムの効果説明欄のテキストを生成する
  */
 export const generateProducerItemDescription = (params: {
-  condition?: ProducerItemContentDefinition["condition"];
-  cost?: ProducerItemContentDefinition["cost"];
-  effects: ProducerItemContentDefinition["effects"];
-  times?: ProducerItemContentDefinition["times"];
-  trigger: ProducerItemContentDefinition["trigger"];
+  condition?: ProducerItemContentData["condition"];
+  cost?: ProducerItemContentData["cost"];
+  effects: ProducerItemContentData["effects"];
+  times?: ProducerItemContentData["times"];
+  trigger: ProducerItemContentData["trigger"];
 }): string => {
   let lines: string[] = [];
   const triggerAndConditionText = generateProducerItemTriggerAndConditionText({

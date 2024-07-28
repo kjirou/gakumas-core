@@ -34,7 +34,7 @@ import {
   ModifierData,
   ProducePlan,
   ProducerItem,
-  ProducerItemContentDefinition,
+  ProducerItemContentData,
   ProducerItemInProduction,
 } from "./types";
 import { createIdGenerator, shuffleArray } from "./utils";
@@ -79,7 +79,7 @@ export const getCardContentData = (card: Card): CardContentData => {
 
 export const getProducerItemContentDefinition = (
   producerItem: ProducerItem,
-): ProducerItemContentDefinition => {
+): ProducerItemContentData => {
   return producerItem.original.definition.enhanced !== undefined &&
     producerItem.original.enhanced
     ? producerItem.original.definition.enhanced

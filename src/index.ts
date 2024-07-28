@@ -8,7 +8,6 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
-// TODO: ModifierのMetaの定義をする、その上で重ならないようにするかはフラグで持つ、その上で「ファンシーチャーム」などはlabelにそれが入るようにする
 // TODO: スコアボーナスを渡せるようにする
 // TODO: 状態修正一覧、Pアイテム一覧、応援/トラブル一覧などを返すユーティリティを公開APIへ追加
 // TODO: Pドリンク
@@ -25,6 +24,7 @@ import {
   ProducerItemDisplay,
   TurnDisplay,
 } from "./types";
+import { metaModifierDictioanry } from "./data/modifiers";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -54,7 +54,6 @@ import {
   generateEffectText,
   generateProducerItemDescription,
   idolParameterKindLabels,
-  modifierLabels,
 } from "./text-generation";
 
 export type * from "./types";
@@ -419,7 +418,7 @@ export const createLessonDisplay = (
   const modifiers = lesson.idol.modifiers.map((modifier) => {
     return {
       ...modifier,
-      label: modifierLabels[modifier.kind],
+      label: metaModifierDictioanry[modifier.kind].label,
       description: "",
     };
   });

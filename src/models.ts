@@ -115,10 +115,10 @@ const createDefaultCardSet = (
 ): CardInProduction[] => {
   const defaultCardSetData = getDefaultCardSetData(producePlan);
   return defaultCardSetData.cardDataIds.map((cardDataId) => {
-    const cardDefinition = getCardDataById(cardDataId);
+    const cardData = getCardDataById(cardDataId);
     return {
       id: idGenerator(),
-      definition: cardDefinition,
+      definition: cardData,
       enhanced: false,
       enabled: true,
     };
@@ -141,11 +141,11 @@ export const createIdolInProduction = (params: {
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
 }): IdolInProduction => {
-  const idolDefinition = getIdolDataById(params.idolDataId);
-  const characterDefinition = getCharacterDataById(idolDefinition.characterId);
-  const specificCardDefinition = getCardDataById(idolDefinition.specificCardId);
+  const idolData = getIdolDataById(params.idolDataId);
+  const characterData = getCharacterDataById(idolData.characterId);
+  const specificCardData = getCardDataById(idolData.specificCardId);
   const specificProducerItemData = getProducerItemDataById(
-    idolDefinition.specificProducerItemId,
+    idolData.specificProducerItemId,
   );
   // TODO: 才能開花1段階目のランダムスキルカード強化
   const deck =
@@ -153,11 +153,11 @@ export const createIdolInProduction = (params: {
     [
       {
         id: params.idGenerator(),
-        definition: specificCardDefinition,
+        definition: specificCardData,
         enhanced: params.specialTrainingLevel >= 3,
         enabled: true,
       },
-      ...createDefaultCardSet(idolDefinition.producePlan, params.idGenerator),
+      ...createDefaultCardSet(idolData.producePlan, params.idGenerator),
     ].sort((a, b) => compareDeckOrder(a.definition, b.definition));
   const producerItems = params.producerItems ?? [
     {
@@ -168,9 +168,9 @@ export const createIdolInProduction = (params: {
   ];
   return {
     deck,
-    definition: idolDefinition,
-    life: characterDefinition.maxLife,
-    maxLife: characterDefinition.maxLife,
+    definition: idolData,
+    life: characterData.maxLife,
+    maxLife: characterData.maxLife,
     producerItems,
   };
 };

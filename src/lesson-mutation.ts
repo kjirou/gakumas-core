@@ -823,10 +823,10 @@ export const activateEffect = (
       const candidates = filterGeneratableCardsData(
         lesson.idol.original.definition.producePlan.kind,
       );
-      const cardDefinition = candidates[getRandom() * candidates.length];
+      const cardData = candidates[getRandom() * candidates.length];
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
-        definition: cardDefinition,
+        definition: cardData,
         enabled: true,
         enhanced: true,
       };

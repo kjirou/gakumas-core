@@ -1,5 +1,5 @@
 import { get } from "http";
-import type { CardDefinition } from "../types";
+import type { CardData } from "../types";
 import {
   cards,
   compareDeckOrder,
@@ -145,8 +145,8 @@ for (const card of cards) {
 }
 describe("compareDeckOrder", () => {
   const testParameters: Array<{
-    compared: Array<CardDefinition["id"]>;
-    expected: Array<CardDefinition["id"]>;
+    compared: Array<CardData["id"]>;
+    expected: Array<CardData["id"]>;
     name: string;
   }> = [
     // shinshinkiei   =  active, sense, r, キャラ固有

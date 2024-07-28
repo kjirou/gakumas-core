@@ -662,7 +662,7 @@ export type CardContentData = {
 };
 
 /**
- * スキルカード定義
+ * スキルカードデータ定義
  *
  * - 原文の「スキルカード」の定義を構造化したもの
  * - 効果説明欄の原文の構文は、以下の通り
@@ -689,7 +689,7 @@ export type CardContentData = {
  *     消費体力増加2ターン
  *     重複不可
  */
-export type CardDefinition = {
+export type CardData = {
   /** 基本的なカードか、原文は「〜の基本」、デフォルトは false */
   basic?: boolean;
   cardPossessionKind: CardPossessionKind;
@@ -736,7 +736,7 @@ export type CardDefinition = {
  * - 所持中のスキルカードは、プロデュース開始時に生成され、プロデュース終了時に破棄される
  */
 export type CardInProduction = {
-  definition: CardDefinition;
+  definition: CardData;
   /**
    * 有効か
    *
@@ -806,7 +806,7 @@ export type Card = {
  * カードセット定義
  */
 export type CardSetDefinition = {
-  cardDefinitionIds: Array<CardDefinition["id"]>;
+  cardDefinitionIds: Array<CardData["id"]>;
   id: string;
 };
 
@@ -834,7 +834,7 @@ export type ProducerItemTrigger = (
        *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
        */
       kind: "beforeCardEffectActivation";
-      cardDefinitionId?: CardDefinition["id"];
+      cardDefinitionId?: CardData["id"];
       cardSummaryKind?: CardSummaryKind;
     }
   | {
@@ -1046,7 +1046,7 @@ export type IdolDefinition = {
   id: string;
   producePlan: ProducePlan;
   rarity: "r" | "sr" | "ssr";
-  specificCardId: CardDefinition["id"];
+  specificCardId: CardData["id"];
   specificProducerItemId: ProducerItemDefinition["id"];
   /** プロデュースアイドルのタイトル。例えば、咲季SSRなら"Fighting My Way"。 */
   title: string;

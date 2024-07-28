@@ -1,7 +1,7 @@
 import type {
   ActionCost,
   Card,
-  CardDefinition,
+  CardData,
   CardInHandDisplay,
   CardInProduction,
   CardSummaryKind,
@@ -375,7 +375,7 @@ export const canTriggerProducerItem = (
   producerItem: ProducerItem,
   callFrom: ProducerItemTrigger["kind"],
   options: {
-    cardDefinitionId?: CardDefinition["id"];
+    cardDefinitionId?: CardData["id"];
     cardSummaryKind?: CardSummaryKind;
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
@@ -1208,7 +1208,7 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
   idGenerator: IdGenerator,
   reason: LessonUpdateQueryReason,
   options: {
-    cardDefinitionId?: CardDefinition["id"];
+    cardDefinitionId?: CardData["id"];
     cardSummaryKind?: CardSummaryKind;
     increasedModifierKinds?: Modifier["kind"][];
   } = {},

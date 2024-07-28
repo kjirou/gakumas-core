@@ -13,7 +13,7 @@ import {
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
-import type { CardDefinition, ProducerItemDefinition } from "./types";
+import type { CardData, ProducerItemDefinition } from "./types";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -582,7 +582,7 @@ describe("generateActionCostText", () => {
 
 describe("generateCardDescription", () => {
   const testCases: Array<{
-    cardId: CardDefinition["id"];
+    cardId: CardData["id"];
     expected: ReturnType<typeof generateCardDescription>;
   }> = [
     {

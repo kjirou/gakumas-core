@@ -1,6 +1,6 @@
 import {
   Card,
-  CardDefinition,
+  CardData,
   CardInProduction,
   Idol,
   Lesson,

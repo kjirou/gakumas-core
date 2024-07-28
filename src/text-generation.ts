@@ -10,7 +10,7 @@
 
 import type {
   ActionCost,
-  CardDefinition,
+  CardData,
   CardContentData,
   CardUsageCondition,
   Effect,
@@ -377,7 +377,7 @@ export const generateCardDescription = (params: {
   condition: CardContentData["condition"];
   effects: CardContentData["effects"];
   innate?: CardContentData["innate"];
-  nonDuplicative?: CardDefinition["nonDuplicative"];
+  nonDuplicative?: CardData["nonDuplicative"];
   usableOncePerLesson?: CardContentData["usableOncePerLesson"];
 }): string => {
   let lines: string[] = [];

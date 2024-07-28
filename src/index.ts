@@ -452,6 +452,7 @@ export const createLessonDisplay = (
     life: lesson.idol.life,
     modifiers,
     producerItems: createProducerDisplays(lesson),
+    remainingTurns: calculateRemainingTurns(lesson),
     turnNumber: lesson.turnNumber,
     turns,
     vitality: lesson.idol.vitality,

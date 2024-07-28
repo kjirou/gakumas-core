@@ -1572,6 +1572,7 @@ export type LessonDisplay = {
   life: Idol["life"];
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
+  remainingTurns: Lesson["remainingTurns"];
   turnNumber: number;
   /** ターン追加を反映した長さのターンリスト */
   turns: TurnDisplay[];

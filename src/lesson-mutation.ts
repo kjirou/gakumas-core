@@ -811,7 +811,6 @@ export const activateEffect = (
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
         data: cardData,
-        enabled: true,
         enhanced: true,
       };
       const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];
@@ -836,7 +835,6 @@ export const activateEffect = (
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
         data: getCardDataById("nemuke"),
-        enabled: true,
         enhanced: false,
       };
       const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];

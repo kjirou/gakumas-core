@@ -743,12 +743,6 @@ export type CardData = Readonly<{
  */
 export type CardInProduction = Readonly<{
   data: CardData;
-  /**
-   * 有効か
-   *
-   * - 削除・変換・強化した場合、対象は false になる。強化は、新しいスキルカードとして追加する。
-   */
-  enabled: boolean;
   enhanced: boolean;
   /**
    * IdolInProduction["cards"] 内で一意のID

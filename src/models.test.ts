@@ -28,7 +28,6 @@ describe("createIdolInProduction", () => {
           id: expect.any(String),
           data: getCardDataById("shinshinkiei"),
           enhanced: false,
-          enabled: true,
         },
         // 初期分
         expect.any(Object),

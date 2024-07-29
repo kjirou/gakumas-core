@@ -85,13 +85,11 @@ describe("createLessonDisplay", () => {
                 id: "c1",
                 data: getCardDataById("apirunokihon"),
                 enhanced: false,
-                enabled: true,
               },
               {
                 id: "c2",
                 data: getCardDataById("hyogennokihon"),
                 enhanced: true,
-                enabled: true,
               },
             ],
           });
@@ -282,7 +280,6 @@ describe("previewCardPlay", () => {
                 id: "c1",
                 data: getCardDataById("jonetsutan"),
                 enhanced: true,
-                enabled: true,
               },
             ],
             producerItems: [
@@ -413,61 +410,51 @@ describe("水着麻央のプレイ再現", () => {
       id: "hinyarihitoyasumi",
       data: getCardDataById("hinyarihitoyasumi"),
       enhanced: true,
-      enabled: true,
     },
     {
       id: "haitatchi",
       data: getCardDataById("haitatchi"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "shikosakugo",
       data: getCardDataById("shikosakugo"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "apirunokihon",
       data: getCardDataById("apirunokihon"),
       enhanced: true,
-      enabled: true,
     },
     {
       id: "apirunokihon2",
       data: getCardDataById("apirunokihon"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "pozunokihon",
       data: getCardDataById("pozunokihon"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "hyojonokihon",
       data: getCardDataById("hyojonokihon"),
       enhanced: true,
-      enabled: true,
     },
     {
       id: "hyojonokihon2",
       data: getCardDataById("hyojonokihon"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "hyogennokihon",
       data: getCardDataById("hyogennokihon"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "hyogennokihon2",
       data: getCardDataById("hyogennokihon"),
       enhanced: false,
-      enabled: true,
     },
   ];
   /** 中間試験まで3週時点の山札 */
@@ -477,25 +464,21 @@ describe("水着麻央のプレイ再現", () => {
       id: "nemuke",
       data: getCardDataById("nemuke"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "shinkokyu",
       data: getCardDataById("shinkokyu"),
       enhanced: true,
-      enabled: true,
     },
     {
       id: "haitatchi2",
       data: getCardDataById("haitatchi"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "shinkokyu2",
       data: getCardDataById("shinkokyu"),
       enhanced: false,
-      enabled: true,
     },
   ];
   /** 中間試験まで1週時点(=追い込みレッスン時点)の山札 */
@@ -510,13 +493,11 @@ describe("水着麻央のプレイ再現", () => {
       id: "iji",
       data: getCardDataById("iji"),
       enhanced: false,
-      enabled: true,
     },
     {
       id: "usureyukukabe",
       data: getCardDataById("usureyukukabe"),
       enhanced: false,
-      enabled: true,
     },
   ];
   const createMaoForTest = (params: {

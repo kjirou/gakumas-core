@@ -120,7 +120,6 @@ const createDefaultCardSet = (
       id: idGenerator(),
       data: cardData,
       enhanced: false,
-      enabled: true,
     };
   });
 };
@@ -155,7 +154,6 @@ export const createIdolInProduction = (params: {
         id: params.idGenerator(),
         data: specificCardData,
         enhanced: params.specialTrainingLevel >= 3,
-        enabled: true,
       },
       ...createDefaultCardSet(idolData.producePlan, params.idGenerator),
     ].sort((a, b) => compareDeckOrder(a.data, b.data));

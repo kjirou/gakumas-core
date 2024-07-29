@@ -3,14 +3,14 @@ import type {
   CardEnhancement,
   CardInProduction,
   Effect,
-  IdolData,
   Lesson,
   LessonDisplay,
   LessonGamePlay,
   LessonUpdateQuery,
   Modifier,
-  ProducerItemInProduction,
 } from "./index";
+import { getCardDataById } from "./data/cards";
+import { getProducerItemDataById } from "./data/producer-items";
 import {
   createIdGenerator,
   createIdolInProduction,
@@ -25,39 +25,8 @@ import {
   playCard,
   startLessonTurn,
 } from "./index";
-import { getCardDataById } from "./data/cards";
-import { getProducerItemDataById } from "./data/producer-items";
 import { activateEffect as activateEffect_ } from "./lesson-mutation";
-
-const createGamePlayForTest = (
-  options: {
-    clearScoreThresholds?: Lesson["clearScoreThresholds"];
-    deck?: CardInProduction[];
-    idolDataId?: IdolData["id"];
-    producerItems?: ProducerItemInProduction[];
-    turns?: Lesson["turns"];
-  } = {},
-): LessonGamePlay => {
-  const clearScoreThresholds = options.clearScoreThresholds;
-  // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
-  const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
-  const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
-  const idGenerator = createIdGenerator();
-  const idolInProduction = createIdolInProduction({
-    idGenerator,
-    idolDataId,
-    specialTrainingLevel: 1,
-    talentAwakeningLevel: 1,
-    ...(options.deck ? { deck: options.deck } : {}),
-    ...(options.producerItems ? { producerItems: options.producerItems } : {}),
-  });
-  return createLessonGamePlay({
-    clearScoreThresholds,
-    idGenerator,
-    idolInProduction,
-    turns,
-  });
-};
+import { createLessonGamePlayForTest } from "./test-utils";
 
 describe("getEncouragements", () => {
   const testCases: Array<{
@@ -111,7 +80,7 @@ describe("createLessonDisplay", () => {
       name: "hand - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createGamePlayForTest({
+          const gamePlay = createLessonGamePlayForTest({
             deck: [
               {
                 id: "c1",
@@ -161,7 +130,7 @@ describe("createLessonDisplay", () => {
       name: 'producerItems - 概ね動作する | 強化済みの名称には、"+"を末尾へ付与する',
       args: [
         (() => {
-          const gamePlay = createGamePlayForTest({
+          const gamePlay = createLessonGamePlayForTest({
             producerItems: [
               {
                 id: "p1",
@@ -192,7 +161,7 @@ describe("createLessonDisplay", () => {
       name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
       args: [
         (() => {
-          const gamePlay = createGamePlayForTest();
+          const gamePlay = createLessonGamePlayForTest();
           gamePlay.initialLesson.idol.modifiers = [
             { kind: "focus", amount: 1, id: "m1" },
           ];
@@ -215,7 +184,7 @@ describe("createLessonDisplay", () => {
       name: "modifiers - 状態修正が存在しない時、空配列を返す",
       args: [
         (() => {
-          const gamePlay = createGamePlayForTest();
+          const gamePlay = createLessonGamePlayForTest();
           return gamePlay;
         })(),
       ],
@@ -227,7 +196,7 @@ describe("createLessonDisplay", () => {
       name: "turns - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createGamePlayForTest();
+          const gamePlay = createLessonGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal", "visual", "dance"];
           gamePlay.initialLesson.encouragements = [
             {
@@ -278,7 +247,7 @@ describe("createLessonDisplay", () => {
       name: "scoreBonus - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createGamePlayForTest();
+          const gamePlay = createLessonGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal"];
           gamePlay.initialLesson.turnNumber = 1;
           gamePlay.initialLesson.idol.scoreBonus = {
@@ -474,28 +443,22 @@ describe("水着麻央のプレイ再現", () => {
       enabled: true,
     },
   ];
-  const createLessonGamePlayForTest = (params: {
+  const createMaoForTest = (params: {
     clearScoreThresholds: Lesson["clearScoreThresholds"];
     deck: CardInProduction[];
     turns: Lesson["turns"];
   }) => {
-    const idGenerator = createIdGenerator();
-    const idolInProduction = createIdolInProduction({
+    return createLessonGamePlayForTest({
+      clearScoreThresholds: params.clearScoreThresholds,
       deck: params.deck,
-      idGenerator,
       idolDataId: "arimuramao-ssr-2",
       specialTrainingLevel: 4,
       talentAwakeningLevel: 2,
-    });
-    return createLessonGamePlay({
-      clearScoreThresholds: params.clearScoreThresholds,
-      idGenerator,
-      idolInProduction,
       turns: params.turns,
     });
   };
   test("中間試験まで6週のレッスンを再現できる", () => {
-    let gamePlay = createLessonGamePlayForTest({
+    let gamePlay = createMaoForTest({
       clearScoreThresholds: { clear: 30, perfect: 30 },
       deck: initialDeck,
       turns: ["visual", "visual", "visual", "visual", "visual"],
@@ -601,7 +564,7 @@ describe("水着麻央のプレイ再現", () => {
     expect(isLessonEnded(gamePlay)).toBe(true);
   });
   test("中間試験まで3週のレッスンを再現できる", () => {
-    let gamePlay = createLessonGamePlayForTest({
+    let gamePlay = createMaoForTest({
       clearScoreThresholds: { clear: 45, perfect: 45 },
       deck: deckUntil3WeeksMidtermExam,
       turns: ["visual", "visual", "visual", "visual", "visual"],
@@ -776,7 +739,7 @@ describe("水着麻央のプレイ再現", () => {
     expect(isLessonEnded(gamePlay)).toBe(true);
   });
   test("中間試験まで1週のレッスン(=追い込みレッスン)を再現できる", () => {
-    let gamePlay = createLessonGamePlayForTest({
+    let gamePlay = createMaoForTest({
       clearScoreThresholds: { clear: 90, perfect: 270 },
       deck: deckUntil1WeekMidtermExam,
       turns: new Array(9).fill("visual"),

@@ -12,9 +12,6 @@ import type {
 import { getCardDataById } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
-  createIdGenerator,
-  createIdolInProduction,
-  createLessonGamePlay,
   endLessonTurn,
   getEncouragements,
   createLessonDisplay,
@@ -23,10 +20,12 @@ import {
   isTurnEnded,
   patchUpdates,
   playCard,
+  previewCardPlay,
   startLessonTurn,
 } from "./index";
 import { activateEffect as activateEffect_ } from "./lesson-mutation";
 import { createLessonGamePlayForTest } from "./test-utils";
+import { getActiveResourcesInfo } from "process";
 
 describe("getEncouragements", () => {
   const testCases: Array<{
@@ -265,6 +264,83 @@ describe("createLessonDisplay", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(createLessonDisplay(...args)).toMatchObject(expected);
+  });
+});
+describe("previewCardPlay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof previewCardPlay>;
+    expected: ReturnType<typeof previewCardPlay>;
+    name: string;
+  }> = [
+    {
+      name: "概ね動作する",
+      args: [
+        (() => {
+          const gamePlay = createLessonGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataById("jonetsutan"),
+                enhanced: true,
+                enabled: true,
+              },
+            ],
+            producerItems: [
+              {
+                id: "p1",
+                data: getProducerItemDataById("itsumonomeikupochi"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+          ];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        cardName: "情熱ターン+",
+        cardDescription: ["パラメータ+18", "{{集中}}+4"].join("\n"),
+        // スキルカードのプレビューには、消費体力減少効果は反映されていない
+        cardCost: { kind: "normal", value: 6 },
+        // 「いつものメイクポーチ」は、本来発動するはずだが、プレビューなので発動していない
+        updates: [
+          // 差分には、消費体力減少効果が反映されている
+          {
+            kind: "life",
+            actual: -3,
+            max: -3,
+            reason: expect.any(Object),
+          },
+          {
+            kind: "score",
+            actual: 18,
+            max: 18,
+            reason: expect.any(Object),
+          },
+          {
+            kind: "modifier",
+            actual: {
+              kind: "focus",
+              amount: 4,
+              id: expect.any(String),
+            },
+            max: {
+              kind: "focus",
+              amount: 4,
+              id: expect.any(String),
+            },
+            reason: expect.any(Object),
+          },
+        ],
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(previewCardPlay(...args)).toStrictEqual(expected);
   });
 });
 

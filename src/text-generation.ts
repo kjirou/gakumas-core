@@ -4,12 +4,14 @@
  * - スキルカードやPアイテムの効果説明欄のテキストなどを動的に生成する
  *   - 基本的には、P図鑑の表記を参考にしている
  * - データとして定義する手段もあると思うが、少なくとも以下の点で動的な生成処理が必要になる
- *   - スキルカード使用プレビューでは、強化段階による効果の変化を反映する必要がある、また「レッスン中1回」が「試験・ステージ中1回」へ変化する
+ *   - スキルカード使用プレビューでは、強化段階による効果の変化を反映する必要がある、また「レッスン中」という文言が「試験・ステージ中」へ変化する
  * - もし、多言語対応をするなら、このモジュール全体を言語別に作る必要がありそう
+ * - TODO: 「レッスン中」を「試験・ステージ中」へ変化できるようにする
  */
 
 import type {
   ActionCost,
+  Card,
   CardData,
   CardContentData,
   CardUsageCondition,
@@ -92,7 +94,6 @@ const globalKeywords = {
   noVitalityIncrease: metaModifierDictioanry.noVitalityIncrease.label,
   nonDuplicative: "重複不可",
   positiveImpression: metaModifierDictioanry.positiveImpression.label,
-  // TODO: 状況により「試験・ステージ中1回」に変化する、少なくともアイドルの道だとそうだった
   usableOncePerLesson: "レッスン中1回",
   vitality: "元気",
 } as const satisfies Record<string, string>;
@@ -120,6 +121,12 @@ const cardKwd = (key: string): string => {
   }
   throw new Error(`Global data keyword not found: ${key}`);
 };
+
+/**
+ * スキルカード名を生成する
+ */
+export const generateCardName = (card: Card): string =>
+  card.original.data.name + "+".repeat(card.enhancements.length);
 
 /**
  * 状態修正種別のみからキーワードを生成する

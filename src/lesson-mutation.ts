@@ -40,6 +40,7 @@ import {
   patchUpdates,
   prepareCardsForLesson,
 } from "./models";
+import { generateCardName } from "./text-generation";
 import { shuffleArray, validateNumberInRange } from "./utils";
 
 /** 主に型都合のユーティリティ処理 */
@@ -1321,7 +1322,7 @@ export const summarizeCardInHand = (
     cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),
     effects,
     enhancements: card.enhancements,
-    name: card.original.data.name + "+".repeat(card.enhancements.length),
+    name: generateCardName(card),
     playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
     scores,
     vitality,

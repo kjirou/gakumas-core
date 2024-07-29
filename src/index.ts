@@ -14,6 +14,7 @@
 // TODO: コンテスト
 
 import {
+  CardPlayPreviewDisplay,
   EncouragementDisplay,
   Lesson,
   LessonGamePlay,
@@ -50,6 +51,7 @@ import {
 } from "./models";
 import {
   generateCardDescription,
+  generateCardName,
   generateEffectText,
   generateProducerItemDescription,
   idolParameterKindLabels,
@@ -480,15 +482,16 @@ export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
  * スキルカード使用のプレビューを表示するための情報を返す
  *
  * - 本家のプレビュー仕様
- *   - 体力・元気
+ *   - 体力・元気の差分
  *     - 効果反映後の値に変わり、その近くに差分アイコンが +n/-n で表示される
  *     - 差分は実際に変化した値を表示する、例えば、結果的に値の変更がない場合は何も表示されない
- *   - 状態修正差分
+ *   - 状態修正の差分
  *     - 新規: スキルカード追加使用など一部のものを除いて、左側の状態修正リストの末尾へ追加
  *     - 既存: 差分がある状態修正アイコンに差分適用後の値を表示し、その右に差分アイコンを表示する
  *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
  *   - スキルカード詳細ポップアップ
- *     - 全ての項目が、各効果による変化前のデータ定義時の値
+ *     - 全ての項目が、各効果による変化前のデータ定義時の値、強化段階のみ反映される
+ *       - 例えば、「消費体力減少」が付与されていても、コストは半分にならない
  *   - プレビュー時には、選択したスキルカードの効果のみ反映される
  *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
  *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
@@ -503,7 +506,7 @@ export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
 export const previewCardPlay = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
-): { cardDescription: string; updates: LessonUpdateQuery[] } => {
+): CardPlayPreviewDisplay => {
   const lesson = patchUpdates(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
@@ -533,6 +536,8 @@ export const previewCardPlay = (
   });
   return {
     cardDescription,
+    cardName: generateCardName(card),
+    cardCost: cardContent.cost,
     updates,
   };
 };

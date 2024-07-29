@@ -1591,3 +1591,13 @@ export type LessonDisplay = {
   turns: TurnDisplay[];
   vitality: Idol["vitality"];
 };
+
+/**
+ * スキルカード使用プレビューの表示用情報
+ */
+export type CardPlayPreviewDisplay = {
+  cardCost: ActionCost;
+  cardDescription: string;
+  cardName: string;
+  updates: LessonUpdateQuery[];
+};

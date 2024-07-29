@@ -42,6 +42,7 @@ import {
   createActualTurns,
   getCardContentData,
   getNextHistoryResultIndex,
+  getIdolParameterKindOnTurn,
   getProducerItemContentData,
   getRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
@@ -436,6 +437,10 @@ export const createLessonDisplay = (
       };
     },
   );
+  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+  const scoreBonus = lesson.idol.scoreBonus
+    ? lesson.idol.scoreBonus[idolParameterKind]
+    : undefined;
   const hand = lesson.hand.map((cardId) => {
     return {
       ...summarizeCardInHand(
@@ -452,6 +457,8 @@ export const createLessonDisplay = (
     modifiers,
     producerItems: createProducerDisplays(lesson),
     remainingTurns: calculateRemainingTurns(lesson),
+    score: lesson.score,
+    scoreBonus,
     turnNumber: lesson.turnNumber,
     turns,
     vitality: lesson.idol.vitality,

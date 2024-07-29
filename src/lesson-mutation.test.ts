@@ -8,6 +8,7 @@ import {
   ProducerItemInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
+import { getProducerItemDataById } from "./data/producer-items";
 import {
   activateEffect,
   activateEffectsOfProducerItem,
@@ -36,35 +37,19 @@ import {
   summarizeCardInHand,
   validateCostConsumution,
 } from "./lesson-mutation";
-import {
-  createIdolInProduction,
-  createLessonGamePlay,
-  patchUpdates,
-} from "./models";
+import { patchUpdates } from "./models";
+import { createLessonGamePlayForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
-import { getProducerItemDataById } from "./data/producer-items";
 
 const createLessonForTest = (
   options: {
-    cards?: CardInProduction[];
+    deck?: CardInProduction[];
     producerItems?: ProducerItemInProduction[];
   } = {},
 ): Lesson => {
-  const idGenerator = createIdGenerator();
-  const idolInProduction = createIdolInProduction({
-    // Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
-    idolDataId: "shinosawahiro-r-1",
-    idGenerator,
-    specialTrainingLevel: 1,
-    talentAwakeningLevel: 1,
-    ...(options.cards ? { deck: options.cards } : {}),
-    ...(options.producerItems ? { producerItems: options.producerItems } : {}),
-  });
-  const lessonGamePlay = createLessonGamePlay({
-    clearScoreThresholds: undefined,
-    idGenerator,
-    idolInProduction,
-    turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
+  const lessonGamePlay = createLessonGamePlayForTest({
+    deck: options.deck,
+    producerItems: options.producerItems,
   });
   return lessonGamePlay.initialLesson;
 };
@@ -2002,7 +1987,7 @@ describe("activateEffect", () => {
       name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
       args: [
         (() => {
-          const lesson = createLessonForTest({ cards: [] });
+          const lesson = createLessonForTest({ deck: [] });
           return lesson;
         })(),
         { kind: "generateCard" },
@@ -2035,7 +2020,7 @@ describe("activateEffect", () => {
       name: "generateTroubleCard - 山札0枚で実行した時、眠気スキルカードを追加して、山札はその1枚になる",
       args: [
         (() => {
-          const lesson = createLessonForTest({ cards: [] });
+          const lesson = createLessonForTest({ deck: [] });
           return lesson;
         })(),
         { kind: "generateTroubleCard" },
@@ -2663,7 +2648,7 @@ describe("summarizeCardInHand", () => {
       name: "基本的なスキルカードを要約できる",
       args: [
         createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("apirunokihon"),
@@ -2691,7 +2676,7 @@ describe("summarizeCardInHand", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            cards: [
+            deck: [
               {
                 id: "a",
                 data: getCardDataById("apirunokihon"),
@@ -2724,7 +2709,7 @@ describe("summarizeCardInHand", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            cards: [
+            deck: [
               {
                 id: "a",
                 data: getCardDataById("apirunokihon"),
@@ -2754,7 +2739,7 @@ describe("summarizeCardInHand", () => {
       name: "無条件の状態修正と条件付きの状態修正を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たした旨と満たさない旨の2レコードが入る",
       args: [
         createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("rakkanteki"),
@@ -2784,7 +2769,7 @@ describe("summarizeCardInHand", () => {
       name: "無条件のスコアと条件付きのスコアを持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たさない旨の内容が入り、scoresには無条件のスコアのみ入る",
       args: [
         createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("hiyaku"),
@@ -2812,7 +2797,7 @@ describe("summarizeCardInHand", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            cards: [
+            deck: [
               {
                 id: "a",
                 data: getCardDataById("hiyaku"),
@@ -2845,7 +2830,7 @@ describe("summarizeCardInHand", () => {
       name: "無条件の元気と条件付きの元気を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たさない旨の内容が入り、vitalityには無条件の値のみ入る",
       args: [
         createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("honkinoshumi"),
@@ -2873,7 +2858,7 @@ describe("summarizeCardInHand", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            cards: [
+            deck: [
               {
                 id: "a",
                 data: getCardDataById("honkinoshumi"),
@@ -2904,7 +2889,7 @@ describe("summarizeCardInHand", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            cards: [
+            deck: [
               {
                 id: "a",
                 data: getCardDataById("apirunokihon"),
@@ -2940,7 +2925,7 @@ describe("summarizeCardInHand", () => {
       name: "スキルカード使用条件を満たさない時も、スコアの算出を行う",
       args: [
         createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("chosen"),
@@ -2968,7 +2953,7 @@ describe("summarizeCardInHand", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            cards: [
+            deck: [
               {
                 id: "a",
                 data: getCardDataById("wammoasuteppu"),
@@ -3137,7 +3122,7 @@ describe("activateEncouragementOnTurnStart", () => {
 describe("drawCardsOnLessonStart", () => {
   test("山札に引く数が残っている時、山札はその分減り、捨札に変化はない / 1ターン目でレッスン開始時手札がない時、その更新は発行されない", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3163,7 +3148,7 @@ describe("drawCardsOnLessonStart", () => {
   });
   test("山札に引く数が残っていない時、山札は再構築された上で残りの引く数分減り、捨札は空になる", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3186,7 +3171,7 @@ describe("drawCardsOnLessonStart", () => {
   });
   test("山札が0枚で、前ターンに1枚捨札へ移動した時、山札は再構築され、捨札はその1枚のみになり、前ターンに1枚捨札へ移動したフラグは消える", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c", "d", "e"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3220,7 +3205,7 @@ describe("drawCardsOnLessonStart", () => {
   });
   test("1ターン目でレッスン開始時手札が1枚ある時、更新は2回発行され、手札は最終的にその札を含む3枚になる", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3256,7 +3241,7 @@ describe("drawCardsOnLessonStart", () => {
   });
   test("1ターン目でレッスン開始時手札が5枚ある時、手札は最終的にレッスン開始時手札のみの5枚になる", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataById("shizukanaishi"),
@@ -3295,7 +3280,7 @@ describe("drawCardsOnLessonStart", () => {
   });
   test("1ターン目でレッスン開始時手札が8枚ある時、手札は最終的にレッスン開始時手札のみの5枚になり、山札の先頭3枚はレッスン開始時手札である", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataById("shizukanaishi"),
@@ -3340,7 +3325,7 @@ describe("drawCardsOnLessonStart", () => {
   });
   test("全てのスキルカードへ付与しているレッスンサポートを削除する", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3460,7 +3445,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
 describe("activateModifierEffectsOnTurnStart", () => {
   test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         {
           id: "a",
           data: getCardDataById("apirunokihon"),
@@ -3546,7 +3531,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
   });
   test("次ターンにスキルカードを1枚引く状態修正がある時、手札が1枚増え、その状態修正を減少する", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         {
           id: "a",
           data: getCardDataById("apirunokihon"),
@@ -3602,7 +3587,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
   });
   test("次ターン・2ターン後・次ターンにスキルカードを1枚引く状態修正がある時、手札1枚増加を2回行い、全ての状態修正を減少する", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3718,7 +3703,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
   });
   test("次ターンに手札を強化するを状態修正がある時、手札が全て強化され、その状態修正を減少する", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -3774,7 +3759,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
   });
   test("次ターンにスキルカードを引く状態修正と手札を強化する状態修正がある時、手札が引かれた状態で、手札が全て強化される", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         ...["a", "b"].map((id) => ({
           id,
           data: getCardDataById("apirunokihon"),
@@ -4090,7 +4075,7 @@ describe("useCard preview:false", () => {
   describe("手札の消費", () => {
     test("「レッスン中1回」ではない手札を使った時は、捨札へ移動", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("apirunokihon"),
@@ -4114,7 +4099,7 @@ describe("useCard preview:false", () => {
     });
     test("「レッスン中1回」の手札を使った時は、除外へ移動", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("hyogennokihon"),
@@ -4141,7 +4126,7 @@ describe("useCard preview:false", () => {
   describe("コストの消費", () => {
     test("it works", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("apirunokihon"),
@@ -4177,7 +4162,7 @@ describe("useCard preview:false", () => {
     });
     test("状態修正により消費体力が変動", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("genkinaaisatsu"),
@@ -4208,7 +4193,7 @@ describe("useCard preview:false", () => {
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動", () => {
     test("「アドレナリン全開」の使用により「最高にハッピーの源」が発動する", () => {
       let lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("adorenarinzenkai"),
@@ -4282,7 +4267,7 @@ describe("useCard preview:false", () => {
   describe("状態修正に起因する、スキルカード使用時の効果発動", () => {
     test("「ファンシーチャーム」は、メンタルスキルカード使用時、好印象を付与する。アクティブスキルカード使用時は付与しない", () => {
       let lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("fanshichamu"),
@@ -4373,7 +4358,7 @@ describe("useCard preview:false", () => {
     });
     test("「演出計画」は、アクティブスキルカード使用時、固定元気を付与する。メンタルスキルカード使用時は付与しない", () => {
       let lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("enshutsukeikaku"),
@@ -4454,7 +4439,7 @@ describe("useCard preview:false", () => {
     });
     test("「輝くキミへ」を発動できる", () => {
       let lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("kagayakukimihe"),
@@ -4527,7 +4512,7 @@ describe("useCard preview:false", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {
       test("「飛躍」は、集中が足りない時、パラメータ上昇は1回のみ適用する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("hiyaku"),
@@ -4549,7 +4534,7 @@ describe("useCard preview:false", () => {
     describe("「次に使用するスキルカードの効果をもう1回発動」が付与されている時", () => {
       test("コスト消費は1回のみだが、選択したスキルカードの効果を2回発動し、2回目の効果には1回目の状態修正が反映されていて、追加でdoubleEffectを消費する更新を生成する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("jumbiundo"),
@@ -4612,7 +4597,7 @@ describe("useCard preview:false", () => {
     describe("drawCards", () => {
       test("「アイドル宣言」を、山札が足りる・手札最大枚数を超えない状況で使った時、手札が2枚増え、捨札は不変で、除外が1枚増える / playedCardsOnEmptyDeck の更新を発行しない", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("aidorusengen"),
@@ -4649,7 +4634,7 @@ describe("useCard preview:false", () => {
       });
       test("「アイドル宣言」を、山札が足りない状況で使った時、山札と捨札は再構築される / playedCardsOnEmptyDeck を空にする更新を発行する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("aidorusengen"),
@@ -4693,7 +4678,7 @@ describe("useCard preview:false", () => {
       });
       test("「アイドル宣言」を、手札最大枚数が超える状況で使った時、手札は最大枚数で、捨札が増える", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("aidorusengen"),
@@ -4729,7 +4714,7 @@ describe("useCard preview:false", () => {
     describe("enhanceHand", () => {
       test("「ティーパーティ」は、自分以外の、プロデュース中またはレッスン中に強化していない手札のみを強化する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("teipatei"),
@@ -4772,7 +4757,7 @@ describe("useCard preview:false", () => {
     describe("exchangeHand", () => {
       test("「仕切り直し」を、手札3枚の状況で使った時、残りの手札は捨札へ入り、手札は山札から引いた新しい2枚になる", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("shikirinaoshi"),
@@ -4812,7 +4797,7 @@ describe("useCard preview:false", () => {
       });
       test("「仕切り直し」で山札の再構築が発生した時、playedCardsOnEmptyDeckを空にする更新を発行する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("shikirinaoshi"),
@@ -4848,7 +4833,7 @@ describe("useCard preview:false", () => {
       });
       test("「仕切り直し」で山札の再構築が発生しない時、playedCardsOnEmptyDeckの更新を発行しない", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("shikirinaoshi"),
@@ -4879,7 +4864,7 @@ describe("useCard preview:false", () => {
     describe("getModifier", () => {
       test("新規追加の時", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("furumainokihon"),
@@ -4914,7 +4899,7 @@ describe("useCard preview:false", () => {
       });
       test("既存の状態修正と合算の時", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("furumainokihon"),
@@ -4954,7 +4939,7 @@ describe("useCard preview:false", () => {
       });
       test("既存の状態修正が存在しても新規追加になる状態修正の時", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("enshutsukeikaku"),
@@ -5007,7 +4992,7 @@ describe("useCard preview:false", () => {
     describe("perform", () => {
       test("レッスンにスコア上限がある時、スコアはそれを超えない増加値を返す", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("apirunokihon"),
@@ -5040,7 +5025,7 @@ describe("useCard preview:false", () => {
       });
       test("クリアスコアの設定だけありパーフェクトの設定がない時、レッスンにスコア上限はないと判断する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("apirunokihon"),
@@ -5071,7 +5056,7 @@ describe("useCard preview:false", () => {
       });
       test("スコアボーナスの設定を反映する", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("apirunokihon"),
@@ -5101,7 +5086,7 @@ describe("useCard preview:false", () => {
       });
       test("複数の更新を生成するスコア増加を返す", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("shikosakugo"),
@@ -5135,7 +5120,7 @@ describe("useCard preview:false", () => {
       });
       test("スコアと元気の更新を同時に返す", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("pozunokihon"),
@@ -5173,7 +5158,7 @@ describe("useCard preview:false", () => {
     describe("performLeveragingModifier", () => {
       test("motivation", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("kaika"),
@@ -5200,7 +5185,7 @@ describe("useCard preview:false", () => {
       });
       test("positiveImpression", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("200sumairu"),
@@ -5229,7 +5214,7 @@ describe("useCard preview:false", () => {
       });
       test("スコア上限の設定がある時は、actualはその値を超えない", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("kaika"),
@@ -5262,7 +5247,7 @@ describe("useCard preview:false", () => {
     describe("performLeveragingVitality", () => {
       test("通常", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("genkinaaisatsu"),
@@ -5289,7 +5274,7 @@ describe("useCard preview:false", () => {
       });
       test("50%の元気を消費、端数は切り捨て", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("hatonoaizu"),
@@ -5316,7 +5301,7 @@ describe("useCard preview:false", () => {
       });
       test("100%の元気を消費", () => {
         const lesson = createLessonForTest({
-          cards: [
+          deck: [
             {
               id: "a",
               data: getCardDataById("todoite"),
@@ -5347,7 +5332,7 @@ describe("useCard preview:false", () => {
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動", () => {
     test("「えいえいおー」の使用により「テクノドッグ」が発動する", () => {
       let lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("eieio"),
@@ -5408,7 +5393,7 @@ describe("useCard preview:false", () => {
   describe("Pアイテムに起因する、スキルカードの主効果による状態修正増加後の効果発動", () => {
     test("「意識の基本」の使用により「ひみつ特訓カーデ」が発動する", () => {
       let lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("ishikinokihon"),
@@ -5468,7 +5453,7 @@ describe("useCard preview:false", () => {
   describe("スキルカード使用数追加によるアクションポイントの回復", () => {
     test("it works", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("hidamarinoseitokaishitsu"),
@@ -5528,7 +5513,7 @@ describe("useCard preview:false", () => {
   describe("playedCardsOnEmptyDeckへの影響", () => {
     test("山札が0枚で、捨札になるスキルカードを使う時、playedCardsOnEmptyDeckへそれを追加する", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("apirunokihon"),
@@ -5580,7 +5565,7 @@ describe("useCard preview:false", () => {
     });
     test("山札が0枚ではなく、捨札になるスキルカードを使う時、playedCardsOnEmptyDeckへそれを追加しない", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("apirunokihon"),
@@ -5609,7 +5594,7 @@ describe("useCard preview:false", () => {
     });
     test("山札が0枚で、除外になるスキルカードを使う時、playedCardsOnEmptyDeckへそれを追加しない", () => {
       const lesson = createLessonForTest({
-        cards: [
+        deck: [
           {
             id: "a",
             data: getCardDataById("iji"),
@@ -5635,7 +5620,7 @@ describe("useCard preview:false", () => {
 describe("useCard preview:true", () => {
   test("コストに対してリソースが不足している時も、プレビューできる", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         {
           id: "a",
           data: getCardDataById("apirunokihon"),
@@ -5671,7 +5656,7 @@ describe("useCard preview:true", () => {
   });
   test("コスト以外のスキルカード使用条件を満たさない時も、プレビューできる", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         {
           id: "a",
           data: getCardDataById("chosen"),
@@ -5698,7 +5683,7 @@ describe("useCard preview:true", () => {
   });
   test("doubleEffectの効果を反映する", () => {
     const lesson = createLessonForTest({
-      cards: [
+      deck: [
         {
           id: "a",
           data: getCardDataById("apirunokihon"),

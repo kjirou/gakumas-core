@@ -14,16 +14,26 @@
 // TODO: コンテスト
 
 import {
+  CardData,
   CardPlayPreviewDisplay,
   EncouragementDisplay,
+  Idol,
+  IdolData,
   Lesson,
   LessonGamePlay,
   LessonDisplay,
   LessonUpdateQuery,
+  ProducerItemData,
   ProducerItemDisplay,
   TurnDisplay,
+  CardInProduction,
+  Card,
+  ProducerItemInProduction,
+  IdolInProduction,
 } from "./types";
+import { getCardDataById } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
+import { getProducerItemDataById } from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -41,6 +51,8 @@ import {
 import {
   calculateRemainingTurns,
   createActualTurns,
+  createIdolInProduction,
+  createLessonGamePlay,
   getCardContentData,
   getNextHistoryResultIndex,
   getIdolParameterKindOnTurn,
@@ -56,6 +68,7 @@ import {
   generateProducerItemDescription,
   idolParameterKindLabels,
 } from "./text-generation";
+import { createIdGenerator } from "./utils";
 
 export type * from "./types";
 export * from "./models";
@@ -103,6 +116,114 @@ export const getEncouragements = (
         hasSeparator: false,
       }),
     };
+  });
+};
+
+/**
+ * ゲームを初期化する
+ *
+ * - プロデュースアイドル・スキルカード・PアイテムなどのIDは、dataディレクトリ内のファイルを参照
+ *
+ * @param params.cards アイドル固有に加えて、追加するスキルカードリスト
+ * @param params.clearScoreThresholds クリアスコアとパーフェクトスコア設定、任意でデフォルトは上限なしを意味する undefined
+ * @param params.idolDataId プロデュースアイドルのID
+ * @param params.ignoreIdolParameterKindConditionAfterClearing クリア後に、Pアイテムがパラメータ属性を無視して効果を発動するか。追い込みレッスンの設定。
+ *                                                             任意でデフォルトは false
+ * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値。なお、体力最大値は、True Endの効果を含む。
+ * @param params.producerItems アイドル固有に加えて、追加するPアイテムリスト
+ * @param params.scoreBonus スコアボーナス設定、任意でデフォルトは設定なしを意味する undefined
+ * @param params.specialTrainingLevel 特訓段階、アイドル固有スキルカードの強化に影響を与えるのみ。任意でデフォルトは1。
+ * @param params.talentAwakeningLevel 才能開花段階、アイドル固有Pアイテムの強化に影響を与えるのみ。任意でデフォルトは1。
+ * @param params.turns ターン別のパラメータ属性の配列
+ * @example
+ *   ```ts
+ *   // 通常・SPレッスンの例
+ *   const gamePlay = initializeGamePlay({
+ *     idolDataId: "kuramotochina-ssr-1",
+ *     specialTrainingLevel: 3,
+ *     talentAwakeningLevel: 2,
+ *     cards: [
+ *       { id: "apirunokihon" },
+ *       { id: "genkinaaisatsu", enhanced: true },
+ *     ],
+ *     producerItems: [
+ *       { id: "masukottohikonin" },
+ *     ],
+ *     turns: ["dance", "dance", "dance", "dance", "dance", "dance", "dance"],
+ *     clearScoreThresholds: { clear: 100, perfect: 100 },
+ *   });
+ *   // 追い込みレッスンの例
+ *   const gamePlay = initializeGamePlay({
+ *     // ...略...
+ *     turns: ["dance", "dance", "dance", "dance", "dance", "dance", "dance", "dance", "dance", "dance", "dance", "dance"],
+ *     clearScoreThresholds: { clear: 165, perfect: 600 },
+ *     ignoreIdolParameterKindConditionAfterClearing: true,
+ *   });
+ *   // 中間試験・最終試験の例
+ *   const gamePlay = initializeGamePlay({
+ *     // ...略...
+ *     turns: ["dance", "dance", "visual", "dance", "visual", "dance", "vocal", "visual", "vocal", "visual", "dance"],
+ *     clearScoreThresholds: { clear: 1700 },
+ *     scoreBonus: { vocal: 400, dance: 1400, visual: 1200 },
+ *   });
+ *   ```
+ */
+export const initializeGamePlay = (params: {
+  cards: Array<{
+    enhanced?: CardInProduction["enhanced"];
+    id: CardData["id"];
+  }>;
+  clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  idolDataId: IdolData["id"];
+  ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
+  life?: IdolInProduction["life"];
+  producerItems: Array<{
+    enhanced?: ProducerItemInProduction["enhanced"];
+    id: ProducerItemData["id"];
+  }>;
+  scoreBonus?: Idol["scoreBonus"];
+  specialTrainingLevel?: number | undefined;
+  talentAwakeningLevel?: number | undefined;
+  turns: Lesson["turns"];
+}): LessonGamePlay => {
+  const idGenerator = createIdGenerator();
+  const specialTrainingLevel = params.specialTrainingLevel ?? 1;
+  const talentAwakeningLevel = params.talentAwakeningLevel ?? 1;
+  const ignoreIdolParameterKindConditionAfterClearing =
+    params.ignoreIdolParameterKindConditionAfterClearing ?? false;
+  const additionalCards: CardInProduction[] = params.cards.map(
+    (cardSetting) => {
+      return {
+        id: idGenerator(),
+        data: getCardDataById(cardSetting.id),
+        enhanced: cardSetting.enhanced ?? false,
+      };
+    },
+  );
+  const additionalProducerItems: ProducerItemInProduction[] =
+    params.producerItems.map((producerItemSetting) => {
+      return {
+        id: idGenerator(),
+        data: getProducerItemDataById(producerItemSetting.id),
+        enhanced: producerItemSetting.enhanced ?? false,
+      };
+    });
+  const idolInProduction = createIdolInProduction({
+    additionalCards,
+    additionalProducerItems,
+    idGenerator,
+    idolDataId: params.idolDataId,
+    life: params.life,
+    specialTrainingLevel,
+    talentAwakeningLevel,
+  });
+  return createLessonGamePlay({
+    clearScoreThresholds: params.clearScoreThresholds,
+    idGenerator,
+    idolInProduction,
+    ignoreIdolParameterKindConditionAfterClearing,
+    scoreBonus: params.scoreBonus,
+    turns: params.turns,
   });
 };
 

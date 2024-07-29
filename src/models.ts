@@ -106,10 +106,8 @@ export const isRemainingProducerItemTimes = (
 
 /**
  * 初期スキルカードセットを生成する
- *
- * - TODO: 引数から強化済みスキルカードを指定できるようにする、才能開花4用
  */
-const createDefaultCardSet = (
+export const createDefaultCardSet = (
   producePlan: ProducePlan,
   idGenerator: IdGenerator,
 ): CardInProduction[] => {
@@ -127,15 +125,20 @@ const createDefaultCardSet = (
 /**
  * プロデュースアイドルを生成する
  *
- * @param param.deck 山札全体を明示的に指定し、キャラクター固有を生成しないなど本来の処理を通さない。テスト用。
- * @param param.producerItems Pアイテム全体を指定し、キャラクター固有を生成しないなど本来の処理を通さない。テスト用。
- * @param param.specialTrainingLevel 特訓段階
- * @param param.talentAwakeningLevel 才能開花段階
+ * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
+ * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
+ * @param params.deck 山札全体を明示的に指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param params.producerItems Pアイテム全体を指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param params.specialTrainingLevel 特訓段階
+ * @param params.talentAwakeningLevel 才能開花段階
  */
 export const createIdolInProduction = (params: {
+  additionalCards?: CardInProduction[];
+  additionalProducerItems?: ProducerItemInProduction[];
   deck?: CardInProduction[];
   idGenerator: IdGenerator;
   idolDataId: IdolData["id"];
+  life?: IdolInProduction["life"];
   producerItems?: ProducerItemInProduction[];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
@@ -146,7 +149,6 @@ export const createIdolInProduction = (params: {
   const specificProducerItemData = getProducerItemDataById(
     idolData.specificProducerItemId,
   );
-  // TODO: 才能開花1段階目のランダムスキルカード強化
   const deck =
     params.deck ??
     [
@@ -155,7 +157,7 @@ export const createIdolInProduction = (params: {
         data: specificCardData,
         enhanced: params.specialTrainingLevel >= 3,
       },
-      ...createDefaultCardSet(idolData.producePlan, params.idGenerator),
+      ...(params.additionalCards ?? []),
     ].sort((a, b) => compareDeckOrder(a.data, b.data));
   const producerItems = params.producerItems ?? [
     {
@@ -163,11 +165,14 @@ export const createIdolInProduction = (params: {
       data: specificProducerItemData,
       enhanced: params.talentAwakeningLevel >= 2,
     },
+    ...(params.additionalProducerItems ?? []),
   ];
   return {
     deck,
     data: idolData,
-    life: characterData.maxLife,
+    life: params.life
+      ? Math.min(params.life, characterData.maxLife)
+      : characterData.maxLife,
     maxLife: characterData.maxLife,
     producerItems,
   };

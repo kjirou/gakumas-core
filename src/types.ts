@@ -1584,6 +1584,7 @@ export type LessonDisplay = {
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
   remainingTurns: Lesson["remainingTurns"];
+  score: Lesson["score"];
   scoreBonus: number | undefined;
   turnNumber: number;
   /** ターン追加を反映した長さのターンリスト */

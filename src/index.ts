@@ -457,6 +457,7 @@ export const createLessonDisplay = (
     modifiers,
     producerItems: createProducerDisplays(lesson),
     remainingTurns: calculateRemainingTurns(lesson),
+    score: lesson.score,
     scoreBonus,
     turnNumber: lesson.turnNumber,
     turns,

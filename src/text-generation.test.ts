@@ -1,3 +1,4 @@
+import type { Card, CardData, ProducerItemData } from "./types";
 import {
   findCardDataById,
   getCardContentDataList,
@@ -7,13 +8,13 @@ import { getProducerItemDataById } from "./data/producer-items";
 import {
   generateActionCostText,
   generateCardDescription,
+  generateCardName,
   generateCardUsageConditionText,
   generateEffectText,
   generateProducerItemDescription,
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
-import type { CardData, ProducerItemData } from "./types";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -25,7 +26,67 @@ describe("globalDataKeywords", () => {
     });
   });
 });
-
+describe("generateCardName", () => {
+  const testCases: Array<{
+    args: Parameters<typeof generateCardName>;
+    expected: ReturnType<typeof generateCardName>;
+  }> = [
+    {
+      args: [
+        {
+          original: {
+            data: getCardDataById("apirunokihon"),
+          },
+          enhancements: [] as any,
+        } as Card,
+      ],
+      expected: "アピールの基本",
+    },
+    {
+      args: [
+        {
+          original: {
+            data: getCardDataById("apirunokihon"),
+          },
+          enhancements: [{ kind: "original" }],
+        } as Card,
+      ],
+      expected: "アピールの基本+",
+    },
+    {
+      args: [
+        {
+          original: {
+            data: getCardDataById("apirunokihon"),
+          },
+          enhancements: [{ kind: "effect" }, { kind: "lessonSupport" }],
+        } as Card,
+      ],
+      expected: "アピールの基本++",
+    },
+    {
+      args: [
+        {
+          original: {
+            data: getCardDataById("apirunokihon"),
+          },
+          enhancements: [
+            { kind: "effect" },
+            { kind: "lessonSupport" },
+            { kind: "lessonSupport" },
+          ],
+        } as Card,
+      ],
+      expected: "アピールの基本+++",
+    },
+  ];
+  test.each(testCases)(
+    '$args.0.enhancements => "$expected"',
+    ({ args, expected }) => {
+      expect(generateCardName(...args)).toBe(expected);
+    },
+  );
+});
 describe("generateEffectText", () => {
   const testCases: Array<{
     args: Parameters<typeof generateEffectText>;
@@ -505,7 +566,6 @@ describe("generateEffectText", () => {
     expect(generateEffectText(...args)).toBe(expected);
   });
 });
-
 describe("generateCardUsageConditionText", () => {
   const testCases: Array<{
     args: Parameters<typeof generateCardUsageConditionText>;
@@ -556,7 +616,6 @@ describe("generateCardUsageConditionText", () => {
     expect(generateCardUsageConditionText(...args)).toBe(expected);
   });
 });
-
 describe("generateActionCostText", () => {
   const testCases: Array<{
     args: Parameters<typeof generateActionCostText>;
@@ -579,7 +638,6 @@ describe("generateActionCostText", () => {
     expect(generateActionCostText(...args)).toBe(expected);
   });
 });
-
 describe("generateCardDescription", () => {
   const testCases: Array<{
     cardId: CardData["id"];
@@ -806,7 +864,6 @@ describe("generateCardDescription", () => {
     ).toBe(expected);
   });
 });
-
 describe("generateProducerItemTriggerAndConditionText", () => {
   const testCases: Array<{
     args: Parameters<typeof generateProducerItemTriggerAndConditionText>;
@@ -1018,7 +1075,6 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     expect(generateProducerItemTriggerAndConditionText(...args)).toBe(expected);
   });
 });
-
 describe("generateProducerItemDescription", () => {
   const testCases: Array<{
     expected: ReturnType<typeof generateProducerItemDescription>;

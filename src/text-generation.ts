@@ -11,6 +11,7 @@
 
 import type {
   ActionCost,
+  Card,
   CardData,
   CardContentData,
   CardUsageCondition,
@@ -120,6 +121,12 @@ const cardKwd = (key: string): string => {
   }
   throw new Error(`Global data keyword not found: ${key}`);
 };
+
+/**
+ * スキルカード名を生成する
+ */
+export const generateCardName = (card: Card): string =>
+  card.original.data.name + "+".repeat(card.enhancements.length);
 
 /**
  * 状態修正種別のみからキーワードを生成する

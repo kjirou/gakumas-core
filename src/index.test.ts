@@ -274,6 +274,25 @@ describe("createLessonDisplay", () => {
         ],
       } as LessonDisplay,
     },
+    {
+      name: "scoreBonus - 概ね動作する",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          gamePlay.initialLesson.turns = ["vocal"];
+          gamePlay.initialLesson.turnNumber = 1;
+          gamePlay.initialLesson.idol.scoreBonus = {
+            vocal: 300,
+            visual: 200,
+            dance: 100,
+          };
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        scoreBonus: 300,
+      } as LessonDisplay,
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(createLessonDisplay(...args)).toMatchObject(expected);

@@ -12,10 +12,11 @@ import type {
 import { getCardDataById } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
+  createLessonDisplay,
   endLessonTurn,
   getEncouragements,
-  createLessonDisplay,
   getNextHistoryResultIndex,
+  initializeGamePlay,
   isLessonEnded,
   isTurnEnded,
   patchUpdates,
@@ -25,7 +26,7 @@ import {
 } from "./index";
 import { activateEffect as activateEffect_ } from "./lesson-mutation";
 import { createLessonGamePlayForTest } from "./test-utils";
-import { getActiveResourcesInfo } from "process";
+import { getIdolDataById } from "./data/idols";
 
 describe("getEncouragements", () => {
   const testCases: Array<{
@@ -67,6 +68,130 @@ describe("getEncouragements", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(getEncouragements(...args)).toStrictEqual(expected);
+  });
+});
+describe("initializeGamePlay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof initializeGamePlay>;
+    expected: ReturnType<typeof initializeGamePlay>;
+    name: string;
+  }> = [
+    {
+      name: "必須設定群が動作する",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [
+            { id: "apirunokihon" },
+            { id: "hyogennokihon", enhanced: true },
+          ],
+          producerItems: [{ id: "masukottohikonin" }],
+          turns: ["vocal"],
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            original: {
+              data: getIdolDataById("kuramotochina-ssr-1"),
+            },
+            producerItems: [
+              {
+                original: {
+                  data: getProducerItemDataById("himitsutokkunkade"),
+                  enhanced: false,
+                },
+              },
+              {
+                original: {
+                  data: getProducerItemDataById("masukottohikonin"),
+                },
+              },
+            ],
+          },
+          cards: [
+            {
+              original: {
+                data: getCardDataById("ojosamanoharebutai"),
+                enhanced: false,
+              },
+            },
+            {
+              original: {
+                data: getCardDataById("apirunokihon"),
+                enhanced: false,
+              },
+            },
+            {
+              original: {
+                data: getCardDataById("hyogennokihon"),
+                enhanced: true,
+              },
+              enhancements: [{ kind: "original" }],
+            },
+          ],
+          turns: ["vocal"],
+        },
+      } as LessonGamePlay,
+    },
+    {
+      name: "特訓段階と才能開花段階により、アイドル固有が強化される",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          specialTrainingLevel: 3,
+          talentAwakeningLevel: 2,
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            producerItems: [
+              {
+                original: {
+                  data: getProducerItemDataById("himitsutokkunkade"),
+                  enhanced: true,
+                },
+              },
+            ],
+          },
+          cards: [
+            {
+              original: {
+                data: getCardDataById("ojosamanoharebutai"),
+                enhanced: true,
+              },
+              enhancements: [{ kind: "original" }],
+            },
+          ],
+        },
+      } as LessonGamePlay,
+    },
+    {
+      name: "体力が最大値を超えない",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          life: 100,
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            life: 28,
+          },
+        },
+      } as LessonGamePlay,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(initializeGamePlay(...args)).toMatchObject(expected);
   });
 });
 describe("createLessonDisplay", () => {

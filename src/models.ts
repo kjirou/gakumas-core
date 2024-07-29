@@ -125,12 +125,12 @@ export const createDefaultCardSet = (
 /**
  * プロデュースアイドルを生成する
  *
- * @param param.additionalCards アイドル固有に加えて、追加するスキルカードリスト
- * @param param.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
- * @param param.deck 山札全体を明示的に指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
- * @param param.producerItems Pアイテム全体を指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
- * @param param.specialTrainingLevel 特訓段階
- * @param param.talentAwakeningLevel 才能開花段階
+ * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
+ * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
+ * @param params.deck 山札全体を明示的に指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param params.producerItems Pアイテム全体を指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param params.specialTrainingLevel 特訓段階
+ * @param params.talentAwakeningLevel 才能開花段階
  */
 export const createIdolInProduction = (params: {
   additionalCards?: CardInProduction[];
@@ -138,6 +138,7 @@ export const createIdolInProduction = (params: {
   deck?: CardInProduction[];
   idGenerator: IdGenerator;
   idolDataId: IdolData["id"];
+  life?: IdolInProduction["life"];
   producerItems?: ProducerItemInProduction[];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
@@ -169,7 +170,9 @@ export const createIdolInProduction = (params: {
   return {
     deck,
     data: idolData,
-    life: characterData.maxLife,
+    life: params.life
+      ? Math.min(params.life, characterData.maxLife)
+      : characterData.maxLife,
     maxLife: characterData.maxLife,
     producerItems,
   };

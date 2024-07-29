@@ -5069,6 +5069,36 @@ describe("useCard preview:false", () => {
           },
         ]);
       });
+      test("スコアボーナスの設定を反映する", () => {
+        const lesson = createLessonForTest({
+          cards: [
+            {
+              id: "a",
+              data: getCardDataById("apirunokihon"),
+              enabled: true,
+              enhanced: false,
+            },
+          ],
+        });
+        lesson.turns = ["vocal"];
+        lesson.idol.scoreBonus = { vocal: 300, visual: 200, dance: 100 };
+        lesson.hand = ["a"];
+        const { updates } = useCard(lesson, 1, {
+          selectedCardInHandIndex: 0,
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+          preview: false,
+        });
+        const filtered = updates.filter((e) => e.kind === "score") as any[];
+        expect(filtered).toStrictEqual([
+          {
+            kind: "score",
+            actual: 27,
+            max: 27,
+            reason: expect.any(Object),
+          },
+        ]);
+      });
       test("複数の更新を生成するスコア増加を返す", () => {
         const lesson = createLessonForTest({
           cards: [
@@ -5819,6 +5849,27 @@ describe("obtainPositiveImpressionScoreOnTurnEnd", () => {
       expected: {
         updates: [
           { kind: "score", actual: 1, max: 1, reason: expect.any(Object) },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "スコアボーナスの設定を反映する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "positiveImpression", amount: 1, id: "x" },
+          ];
+          lesson.turns = ["vocal"];
+          lesson.idol.scoreBonus = { vocal: 300, visual: 200, dance: 100 };
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          { kind: "score", actual: 3, max: 3, reason: expect.any(Object) },
         ],
         nextHistoryResultIndex: 2,
       },

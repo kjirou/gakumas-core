@@ -7,9 +7,10 @@ import {
   calculateClearScoreProgress,
   createActualTurns,
   createIdolInProduction,
-  createLessonGamePlay,
+  createGamePlay,
+  diffUpdates,
   getIdolParameterKindOnTurn,
-  patchUpdates,
+  patchDiffs,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
@@ -150,7 +151,7 @@ describe("getIdolParameterKindOnTurn", () => {
     },
   );
 });
-describe("createLessonGamePlay", () => {
+describe("createGamePlay", () => {
   test("it creates a lesson game play", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
@@ -165,12 +166,12 @@ describe("createLessonGamePlay", () => {
       talentAwakeningLevel: 1,
       idGenerator,
     });
-    const lessonGamePlay = createLessonGamePlay({
+    const gamePlay = createGamePlay({
       idGenerator,
       idolInProduction,
       turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });
-    expect(lessonGamePlay).toStrictEqual({
+    expect(gamePlay).toStrictEqual({
       getRandom: expect.any(Function),
       idGenerator: expect.any(Function),
       initialLesson: {
@@ -315,7 +316,7 @@ describe("calculateActualActionCost", () => {
     },
   );
 });
-describe("patchUpdates", () => {
+describe("patchDiffs", () => {
   describe("actionPoints", () => {
     test("it works", () => {
       let lessonMock = {
@@ -323,15 +324,10 @@ describe("patchUpdates", () => {
           actionPoints: 1,
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "actionPoints",
           amount: -1,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.actionPoints).toBe(0);
@@ -351,15 +347,10 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.enhancement.effect",
           cardIds: ["1"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([{ kind: "effect" }]);
@@ -388,7 +379,7 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.enhancement.lessonSupport",
           targets: [
@@ -396,11 +387,6 @@ describe("patchUpdates", () => {
             { cardId: "2", supportCardIds: [{}] },
             { cardId: "3", supportCardIds: [{}, {}] },
           ],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([
@@ -426,18 +412,13 @@ describe("patchUpdates", () => {
         hand: ["3"],
         removedCardPile: ["4"],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cardPlacement",
           deck: ["11", "111"],
           discardPile: ["22", "222"],
           hand: ["33", "333"],
           removedCardPile: ["44", "444"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.deck).toStrictEqual(["11", "111"]);
@@ -452,16 +433,11 @@ describe("patchUpdates", () => {
         hand: ["3"],
         removedCardPile: ["4"],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cardPlacement",
           deck: ["11", "111"],
           discardPile: ["22", "222"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.deck).toStrictEqual(["11", "111"]);
@@ -476,16 +452,11 @@ describe("patchUpdates", () => {
         hand: ["3"],
         removedCardPile: ["4"],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cardPlacement",
           hand: ["33", "333"],
           removedCardPile: ["44", "444"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.deck).toStrictEqual(["1"]);
@@ -503,15 +474,10 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.addition",
           card: { id: "2" } as Card,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards).toStrictEqual([{ id: "1" }, { id: "2" }]);
@@ -544,15 +510,10 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.removingLessonSupports",
           cardIds: ["1", "2", "4"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([
@@ -572,15 +533,10 @@ describe("patchUpdates", () => {
           modifierIdsAtTurnStart: ["1", "2"],
         },
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "modifierIdsAtTurnStart",
           modifierIdsAtTurnStart: ["3", "4"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.idol.modifierIdsAtTurnStart).toStrictEqual(["3", "4"]);
@@ -600,7 +556,7 @@ describe("patchUpdates", () => {
             ],
           },
         } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
+        lessonMock = patchDiffs(lessonMock, [
           {
             kind: "modifier",
             actual: {
@@ -612,11 +568,6 @@ describe("patchUpdates", () => {
               kind: "goodCondition",
               duration: 2,
               id: "b",
-            },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
             },
           },
         ]);
@@ -679,7 +630,7 @@ describe("patchUpdates", () => {
                     ],
                   },
                 } as Lesson;
-                lessonMock = patchUpdates(lessonMock, [
+                lessonMock = patchDiffs(lessonMock, [
                   {
                     kind: "modifier",
                     actual: {
@@ -693,11 +644,6 @@ describe("patchUpdates", () => {
                       [propertyName]: 2,
                       id: "b",
                       updateTargetId: "a",
-                    },
-                    reason: {
-                      kind: "lessonStartTrigger",
-                      historyTurnNumber: 1,
-                      historyResultIndex: 1,
                     },
                   } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
                 ]);
@@ -721,7 +667,7 @@ describe("patchUpdates", () => {
                     ],
                   },
                 } as Lesson;
-                lessonMock = patchUpdates(lessonMock, [
+                lessonMock = patchDiffs(lessonMock, [
                   {
                     kind: "modifier",
                     actual: {
@@ -735,11 +681,6 @@ describe("patchUpdates", () => {
                       [propertyName]: -5,
                       id: "b",
                       updateTargetId: "a",
-                    },
-                    reason: {
-                      kind: "lessonStartTrigger",
-                      historyTurnNumber: 1,
-                      historyResultIndex: 1,
                     },
                   } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
                 ]);
@@ -771,7 +712,7 @@ describe("patchUpdates", () => {
             ],
           },
         } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
+        lessonMock = patchDiffs(lessonMock, [
           {
             kind: "modifier",
             actual: {
@@ -785,11 +726,6 @@ describe("patchUpdates", () => {
               amount: -1,
               id: "c",
               updateTargetId: "b",
-            },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
             },
           },
         ]);
@@ -816,7 +752,7 @@ describe("patchUpdates", () => {
             ],
           },
         } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
+        lessonMock = patchDiffs(lessonMock, [
           {
             kind: "modifier",
             actual: {
@@ -831,11 +767,6 @@ describe("patchUpdates", () => {
               id: "b",
               updateTargetId: "a",
             },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
           },
         ]);
         expect(lessonMock.idol.modifiers).toStrictEqual([]);
@@ -849,16 +780,11 @@ describe("patchUpdates", () => {
           life: 5,
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "life",
           actual: -2,
           max: -3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.life).toBe(3);
@@ -869,15 +795,10 @@ describe("patchUpdates", () => {
       let lessonMock = {
         playedCardsOnEmptyDeck: ["1"],
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "playedCardsOnEmptyDeck",
           cardIds: ["2"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.playedCardsOnEmptyDeck).toStrictEqual(["2"]);
@@ -893,16 +814,11 @@ describe("patchUpdates", () => {
           ],
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "producerItem.activationCount",
           producerItemId: "2",
           value: 3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.producerItems).toStrictEqual([
@@ -922,15 +838,10 @@ describe("patchUpdates", () => {
       let lessonMock = {
         remainingTurns: 0,
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "remainingTurns",
           amount: 1,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.remainingTurns).toBe(1);
@@ -941,16 +852,11 @@ describe("patchUpdates", () => {
       let lessonMock = {
         score: 1,
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "score",
           actual: 2,
           max: 3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.score).toBe(3);
@@ -961,16 +867,7 @@ describe("patchUpdates", () => {
       let lessonMock = {
         turnNumber: 0,
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
-        {
-          kind: "turnNumberIncrease",
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
-        },
-      ]);
+      lessonMock = patchDiffs(lessonMock, [{ kind: "turnNumberIncrease" }]);
       expect(lessonMock.turnNumber).toBe(1);
     });
   });
@@ -981,19 +878,45 @@ describe("patchUpdates", () => {
           vitality: 5,
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "vitality",
           actual: -2,
           max: -3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.vitality).toBe(3);
     });
+  });
+});
+describe("diffUpdates", () => {
+  const testCases: Array<{
+    args: Parameters<typeof diffUpdates>;
+    expected: ReturnType<typeof diffUpdates>;
+  }> = [
+    {
+      args: [
+        [{ kind: "life" }] as LessonUpdateQuery[],
+        [{ kind: "life" }] as LessonUpdateQuery[],
+      ],
+      expected: [],
+    },
+    {
+      args: [
+        [{ kind: "life" }] as LessonUpdateQuery[],
+        [
+          { kind: "life" },
+          { kind: "score" },
+          { kind: "vitality" },
+        ] as LessonUpdateQuery[],
+      ],
+      expected: [
+        { kind: "score" },
+        { kind: "vitality" },
+      ] as LessonUpdateQuery[],
+    },
+  ];
+  test.each(testCases)("$args => $expected", ({ args, expected }) => {
+    expect(diffUpdates(...args)).toStrictEqual(expected);
   });
 });

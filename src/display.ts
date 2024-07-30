@@ -15,8 +15,8 @@ import type {
   IdGenerator,
   Lesson,
   LessonDisplay,
-  LessonGamePlay,
-  LessonUpdateQueryDiff,
+  GamePlay,
+  LessonUpdateDiff,
   ProducerItemDisplay,
   TurnDisplay,
 } from "./types";
@@ -31,14 +31,14 @@ import {
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
   getRemainingProducerItemTimes,
-  patchUpdates,
+  patchDiffs,
 } from "./models";
 import {
   generateCardName,
   generateCardDescription,
   generateEffectText,
   generateProducerItemDescription,
-  idolParameterKindLabels,
+  idolParameterKindNames,
 } from "./text-generation";
 
 const generateEffectDisplay = (
@@ -93,7 +93,7 @@ export const generateCardInHandDisplay = (
     getRandom,
     idGenerator,
   );
-  const effectDiffs = effectActivations.reduce<LessonUpdateQueryDiff[]>(
+  const effectDiffs = effectActivations.reduce<LessonUpdateDiff[]>(
     (acc, effectActivation) =>
       effectActivation ? [...acc, ...effectActivation] : acc,
     [],
@@ -214,22 +214,17 @@ export const generateEncouragementDisplays = (
  * - TODO: ターン詳細の「3位以上で合格」が未実装
  * - TODO: レッスン履歴が未実装
  */
-export const generateLessonDisplay = (
-  lessonGamePlay: LessonGamePlay,
-): LessonDisplay => {
-  const lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const modifiers = lesson.idol.modifiers.map((modifier) => {
     return {
       ...modifier,
-      label: metaModifierDictioanry[modifier.kind].label,
+      name: metaModifierDictioanry[modifier.kind].label,
       description: "",
     };
   });
   const encouragements = generateEncouragementDisplays(
-    lessonGamePlay.initialLesson.encouragements,
+    gamePlay.initialLesson.encouragements,
   );
   const turns: TurnDisplay[] = createActualTurns(lesson).map(
     (idolParameterKind, index) => {
@@ -240,8 +235,10 @@ export const generateLessonDisplay = (
       return {
         turnNumber,
         turnNumberDiff: turnNumber - lesson.turnNumber,
-        idolParameterKind,
-        idolParameterLabel: idolParameterKindLabels[idolParameterKind],
+        idolParameter: {
+          kind: idolParameterKind,
+          name: idolParameterKindNames[idolParameterKind],
+        },
         ...(encouragement ? { encouragement } : {}),
       };
     },
@@ -255,8 +252,8 @@ export const generateLessonDisplay = (
       ...generateCardInHandDisplay(
         lesson,
         cardId,
-        lessonGamePlay.getRandom,
-        lessonGamePlay.idGenerator,
+        gamePlay.getRandom,
+        gamePlay.idGenerator,
       ),
     };
   });
@@ -304,21 +301,15 @@ export const generateLessonDisplay = (
  *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
  *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
  *
- * @example
- *   // 変化する差分は updates に含まれるので、アニメーション処理はこの値を解析して使う
- *   const { cardDescription, updates } = previewCardPlay(lessonGamePlay, 0);
- *   // プレビュー用の差分を反映したレッスンの状態、UI側は各値につきこの値との差を使う
- *   const previewedLesson = patchUpdates(lessonGamePlay.initialLesson, updates);
+ * TODO: getRandom と idGenerator が実行されることでそれらの内部状態に変化してしまう。今の所実害はないが、可能なら複製して渡したい。
+ *
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
 export const generateCardPlayPreviewDisplay = (
-  lessonGamePlay: LessonGamePlay,
+  gamePlay: GamePlay,
   selectedCardInHandIndex: number,
 ): CardPlayPreviewDisplay => {
-  const lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const cardId = lesson.hand[selectedCardInHandIndex];
   if (cardId === undefined) {
     throw new Error("Invalid card index");
@@ -329,12 +320,12 @@ export const generateCardPlayPreviewDisplay = (
   }
   const cardContent = getCardContentData(card);
   const { updates } = useCard(lesson, 1, {
-    getRandom: lessonGamePlay.getRandom,
-    idGenerator: lessonGamePlay.idGenerator,
+    getRandom: gamePlay.getRandom,
+    idGenerator: gamePlay.idGenerator,
     selectedCardInHandIndex,
     preview: true,
   });
-  const cardDescription = generateCardDescription({
+  const description = generateCardDescription({
     cost: cardContent.cost,
     condition: cardContent.condition,
     effects: cardContent.effects,
@@ -343,9 +334,12 @@ export const generateCardPlayPreviewDisplay = (
     usableOncePerLesson: cardContent.usableOncePerLesson,
   });
   return {
-    cardDescription,
-    cardName: generateCardName(card),
-    cardCost: cardContent.cost,
+    card: {
+      cost: cardContent.cost,
+      description,
+      name: generateCardName(card),
+    },
+    lesson: patchDiffs(lesson, updates),
     updates,
   };
 };

@@ -18,7 +18,7 @@ import {
 } from "./display";
 import { prepareCardsForLesson } from "./models";
 import { createIdGenerator } from "./utils";
-import { createLessonGamePlayForTest } from "./test-utils";
+import { createGamePlayForTest } from "./test-utils";
 
 const createLessonForTest = (
   options: {
@@ -26,11 +26,11 @@ const createLessonForTest = (
     producerItems?: ProducerItemInProduction[];
   } = {},
 ): Lesson => {
-  const lessonGamePlay = createLessonGamePlayForTest({
+  const gamePlay = createGamePlayForTest({
     deck: options.deck,
     producerItems: options.producerItems,
   });
-  return lessonGamePlay.initialLesson;
+  return gamePlay.initialLesson;
 };
 
 describe("generateCardInHandDisplay", () => {
@@ -588,7 +588,7 @@ describe("generateLessonDisplay", () => {
       name: "hand - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             deck: [
               {
                 id: "c1",
@@ -636,7 +636,7 @@ describe("generateLessonDisplay", () => {
       name: "inventory.{deck,discardPile,hand,removedCardPile} - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             deck: [
               {
                 id: "c1",
@@ -680,7 +680,7 @@ describe("generateLessonDisplay", () => {
       name: 'producerItems - 概ね動作する | 強化済みの名称には、"+"を末尾へ付与する',
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             producerItems: [
               {
                 id: "p1",
@@ -711,7 +711,7 @@ describe("generateLessonDisplay", () => {
       name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.idol.modifiers = [
             { kind: "focus", amount: 1, id: "m1" },
           ];
@@ -724,7 +724,7 @@ describe("generateLessonDisplay", () => {
             id: "m1",
             kind: "focus",
             amount: 1,
-            label: "集中",
+            name: "集中",
             description: expect.any(String),
           },
         ],
@@ -734,7 +734,7 @@ describe("generateLessonDisplay", () => {
       name: "modifiers - 状態修正が存在しない時、空配列を返す",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           return gamePlay;
         })(),
       ],
@@ -746,7 +746,7 @@ describe("generateLessonDisplay", () => {
       name: "turns - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal", "visual", "dance"];
           gamePlay.initialLesson.encouragements = [
             {
@@ -762,22 +762,28 @@ describe("generateLessonDisplay", () => {
       expected: {
         turns: [
           {
+            idolParameter: {
+              kind: "vocal",
+              name: "ボーカル",
+            },
             turnNumber: 1,
             turnNumberDiff: -1,
-            idolParameterKind: "vocal",
-            idolParameterLabel: "ボーカル",
           },
           {
+            idolParameter: {
+              kind: "visual",
+              name: "ビジュアル",
+            },
             turnNumber: 2,
             turnNumberDiff: 0,
-            idolParameterKind: "visual",
-            idolParameterLabel: "ビジュアル",
           },
           {
+            idolParameter: {
+              kind: "dance",
+              name: "ダンス",
+            },
             turnNumber: 3,
             turnNumberDiff: 1,
-            idolParameterKind: "dance",
-            idolParameterLabel: "ダンス",
             encouragement: {
               turnNumber: 3,
               effect: expect.any(Object),
@@ -785,10 +791,12 @@ describe("generateLessonDisplay", () => {
             },
           },
           {
+            idolParameter: {
+              kind: "dance",
+              name: "ダンス",
+            },
             turnNumber: 4,
             turnNumberDiff: 2,
-            idolParameterKind: "dance",
-            idolParameterLabel: "ダンス",
           },
         ],
       } as LessonDisplay,
@@ -797,7 +805,7 @@ describe("generateLessonDisplay", () => {
       name: "scoreBonus - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal"];
           gamePlay.initialLesson.turnNumber = 1;
           gamePlay.initialLesson.idol.scoreBonus = {
@@ -828,7 +836,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       name: "概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             deck: [
               {
                 id: "c1",
@@ -853,11 +861,14 @@ describe("generateCardPlayPreviewDisplay", () => {
         0,
       ],
       expected: {
-        cardName: "情熱ターン+",
-        cardDescription: ["パラメータ+18", "{{集中}}+4"].join("\n"),
-        // スキルカードのプレビューには、消費体力減少効果は反映されていない
-        cardCost: { kind: "normal", value: 6 },
+        card: {
+          name: "情熱ターン+",
+          description: ["パラメータ+18", "{{集中}}+4"].join("\n"),
+          // スキルカードのプレビューには、消費体力減少効果は反映されていない
+          cost: { kind: "normal", value: 6 },
+        },
         // 「いつものメイクポーチ」は、本来発動するはずだが、プレビューなので発動していない
+        lesson: expect.any(Object),
         updates: [
           // 差分には、消費体力減少効果が反映されている
           {

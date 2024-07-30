@@ -140,7 +140,7 @@ export type ModifierData = Readonly<
        * - この状態修正は合算されない、例えば「国民的アイドル」を2回連続で使うと、2つの状態修正として表示される
        */
       kind: "doubleEffect";
-      /** 状態修正更新クエリとして使用する際に、1 なら追加、-1 は削除、の意味。0 は計算中の削除待ち状態であり得る。 */
+      /** 状態修正の更新差分として使用する際に、1 なら追加、-1 は削除、の意味。0 は計算中の削除待ち状態であり得る。 */
       times: 1 | 0 | -1;
     }
   | {
@@ -1222,6 +1222,104 @@ export type Lesson = {
 };
 
 /**
+ * レッスン更新差分
+ *
+ * - レッスンの状態の変化を表現したもの
+ */
+export type LessonUpdateDiff = Readonly<
+  | {
+      kind: "actionPoints";
+      amount: number;
+    }
+  | {
+      /**
+       * カード配置の上書き
+       *
+       * - 変化のあった配置のみプロパティが存在する
+       */
+      kind: "cardPlacement";
+      deck?: Array<Card["id"]>;
+      discardPile?: Array<Card["id"]>;
+      hand?: Array<Card["id"]>;
+      removedCardPile?: Array<Card["id"]>;
+    }
+  | {
+      /** スキルカードの追加 */
+      kind: "cards.addition";
+      card: Card;
+    }
+  | {
+      /** スキルカードの強化、「レッスン中強化」効果によるもの */
+      kind: "cards.enhancement.effect";
+      cardIds: Array<Card["id"]>;
+    }
+  | {
+      /**
+       * スキルカードの強化、レッスンサポートによるもの
+       *
+       * - supportCardIds は、要素数で強化数を表現している。サポートカードのID自体はまだ未実装
+       */
+      kind: "cards.enhancement.lessonSupport";
+      targets: Array<{
+        cardId: Card["id"];
+        supportCardIds: Array<{}>;
+      }>;
+    }
+  | {
+      /** レッスンサポートの削除 */
+      kind: "cards.removingLessonSupports";
+      cardIds: Array<Card["id"]>;
+    }
+  | {
+      kind: "life";
+      /** アイドルの状態へ実際に影響を与える数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は1になる。 */
+      actual: number;
+      /** アイドルの状態へ本来影響を影響を与えはずだった数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は3になる。 */
+      max: number;
+    }
+  | {
+      /** ターン開始時に付与されている状態修正IDリストの上書き */
+      kind: "modifierIdsAtTurnStart";
+      modifierIdsAtTurnStart: Array<Modifier["id"]>;
+    }
+  | {
+      /**
+       * 状態修正の差分
+       */
+      kind: "modifier";
+      actual: Modifier;
+      max: Modifier;
+    }
+  | {
+      kind: "playedCardsOnEmptyDeck";
+      cardIds: Lesson["playedCardsOnEmptyDeck"];
+    }
+  | {
+      kind: "producerItem.activationCount";
+      producerItemId: ProducerItem["id"];
+      value: ProducerItem["activationCount"];
+    }
+  | {
+      kind: "remainingTurns";
+      amount: number;
+    }
+  | {
+      kind: "score";
+      /** レッスンなどでパラメータの上限値が決まっている場合に、超過した分を差し引いた実際に上昇した数値 */
+      actual: number;
+      max: number;
+    }
+  | {
+      kind: "turnNumberIncrease";
+    }
+  | {
+      kind: "vitality";
+      actual: number;
+      max: number;
+    }
+>;
+
+/**
  * レッスン履歴レコード
  *
  * TODO: 本家のレッスン履歴の再現は、全般的に後回し。表示パターンの精査に対して個別のkindを割り振ることから始める必要がある。
@@ -1355,99 +1453,6 @@ export type LessonUpdateQueryReason = Readonly<
   }
 >;
 
-export type LessonUpdateQueryDiff = Readonly<
-  | {
-      kind: "actionPoints";
-      amount: number;
-    }
-  | {
-      /**
-       * カード配置の上書き
-       *
-       * - 変化のあった配置のみプロパティが存在する
-       */
-      kind: "cardPlacement";
-      deck?: Array<Card["id"]>;
-      discardPile?: Array<Card["id"]>;
-      hand?: Array<Card["id"]>;
-      removedCardPile?: Array<Card["id"]>;
-    }
-  | {
-      /** スキルカードの追加 */
-      kind: "cards.addition";
-      card: Card;
-    }
-  | {
-      /** スキルカードの強化、「レッスン中強化」効果によるもの */
-      kind: "cards.enhancement.effect";
-      cardIds: Array<Card["id"]>;
-    }
-  | {
-      /**
-       * スキルカードの強化、レッスンサポートによるもの
-       *
-       * - supportCardIds は、要素数で強化数を表現している。サポートカードのID自体はまだ未実装
-       */
-      kind: "cards.enhancement.lessonSupport";
-      targets: Array<{
-        cardId: Card["id"];
-        supportCardIds: Array<{}>;
-      }>;
-    }
-  | {
-      /** レッスンサポートの削除 */
-      kind: "cards.removingLessonSupports";
-      cardIds: Array<Card["id"]>;
-    }
-  | {
-      kind: "life";
-      /** アイドルの状態へ実際に影響を与える数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は1になる。 */
-      actual: number;
-      /** アイドルの状態へ本来影響を影響を与えはずだった数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は3になる。 */
-      max: number;
-    }
-  | {
-      /** ターン開始時に付与されている状態修正IDリストの上書き */
-      kind: "modifierIdsAtTurnStart";
-      modifierIdsAtTurnStart: Array<Modifier["id"]>;
-    }
-  | {
-      /**
-       * 状態修正の差分
-       */
-      kind: "modifier";
-      actual: Modifier;
-      max: Modifier;
-    }
-  | {
-      kind: "playedCardsOnEmptyDeck";
-      cardIds: Lesson["playedCardsOnEmptyDeck"];
-    }
-  | {
-      kind: "producerItem.activationCount";
-      producerItemId: ProducerItem["id"];
-      value: ProducerItem["activationCount"];
-    }
-  | {
-      kind: "remainingTurns";
-      amount: number;
-    }
-  | {
-      kind: "score";
-      /** レッスンなどでパラメータの上限値が決まっている場合に、超過した分を差し引いた実際に上昇した数値 */
-      actual: number;
-      max: number;
-    }
-  | {
-      kind: "turnNumberIncrease";
-    }
-  | {
-      kind: "vitality";
-      actual: number;
-      max: number;
-    }
->;
-
 /**
  * レッスン更新クエリ
  *
@@ -1458,14 +1463,18 @@ export type LessonUpdateQueryDiff = Readonly<
  * - このクエリを集計して、UIその他の各種機能に利用することもある
  *   - 具体的には、スキルカード選択時のプレビュー・ゲーム内のレッスン履歴表示・インタラクションやアニメーションなどに利用する
  */
-export type LessonUpdateQuery = LessonUpdateQueryDiff & {
+export type LessonUpdateQuery = LessonUpdateDiff & {
   reason: LessonUpdateQueryReason;
 };
 
 /**
- * レッスンのゲームプレイ記録
+ * ゲームプレイの状態
+ *
+ * - ゲームプレイ開始時に生成し、レッスンの経過を保持する
+ *   - なお、本実装での「レッスン」の概念には、「試験」「コンテスト」「アイドルの道」なども含まれる
+ * - 状態の変更毎に、この変数の参照を新しいものへ交換する
  */
-export type LessonGamePlay = {
+export type GamePlay = {
   getRandom: GetRandom;
   idGenerator: IdGenerator;
   /**
@@ -1537,9 +1546,15 @@ export type CardInHandDisplay = {
  * レッスン画面のスキルカード使用プレビューの表示用情報
  */
 export type CardPlayPreviewDisplay = {
-  cardCost: ActionCost;
-  cardDescription: string;
-  cardName: string;
+  /** プレビューで選択したスキルカードの情報、本家UIだとポップアップになっている部分 */
+  card: {
+    cost: ActionCost;
+    description: string;
+    name: string;
+  };
+  /** プレビューで選択したスキルカードの効果反映後のレッスン */
+  lesson: Lesson;
+  /** プレビューで選択したスキルカードの効果の更新クエリリスト */
   updates: LessonUpdateQuery[];
 };
 
@@ -1580,7 +1595,7 @@ export type ModifierDisplay = ModifierData & {
    */
   description: string;
   id: Modifier["id"];
-  label: string;
+  name: string;
 };
 
 /**
@@ -1590,8 +1605,10 @@ export type ModifierDisplay = ModifierData & {
  */
 export type TurnDisplay = {
   encouragement?: EncouragementDisplay;
-  idolParameterKind: IdolParameterKind;
-  idolParameterLabel: string;
+  idolParameter: {
+    kind: IdolParameterKind;
+    name: string;
+  };
   turnNumber: number;
   /** 現在のターンとの差、1が1ターン後、-1が1ターン前 */
   turnNumberDiff: number;

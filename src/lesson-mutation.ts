@@ -13,7 +13,7 @@ import type {
   Idol,
   Lesson,
   LessonUpdateQuery,
-  LessonUpdateQueryDiff,
+  LessonUpdateDiff,
   LessonUpdateQueryReason,
   MemoryEffect,
   Modifier,
@@ -37,14 +37,14 @@ import {
   isRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   maxHandSize,
-  patchUpdates,
+  patchDiffs,
   prepareCardsForLesson,
 } from "./models";
 import { shuffleArray, validateNumberInRange } from "./utils";
 
 /** 主に型都合のユーティリティ処理 */
 const createLessonUpdateQueryFromDiff = (
-  diff: LessonUpdateQueryDiff,
+  diff: LessonUpdateDiff,
   reason: LessonUpdateQueryReason,
 ): LessonUpdateQuery => ({ ...diff, reason });
 
@@ -131,7 +131,7 @@ export const createCardPlacementDiff = (
     hand?: Lesson["hand"];
     removedCardPile?: Lesson["removedCardPile"];
   },
-): Extract<LessonUpdateQueryDiff, { kind: "cardPlacement" }> => {
+): Extract<LessonUpdateDiff, { kind: "cardPlacement" }> => {
   return {
     kind: "cardPlacement" as const,
     ...(before.deck !== undefined &&
@@ -435,9 +435,9 @@ const calculateActualAndMaxComsumution = (
   };
 };
 
-/** LessonUpdateQueryDiff からコスト消費関係部分を抜き出したもの */
-type CostConsumptionUpdateQueryDiff = Extract<
-  LessonUpdateQueryDiff,
+/** LessonUpdatDiff からコスト消費関係部分を抜き出したもの */
+type CostConsumptionUpdateDiff = Extract<
+  LessonUpdateDiff,
   { kind: "life" } | { kind: "modifier" } | { kind: "vitality" }
 >;
 
@@ -456,10 +456,10 @@ export const calculateCostConsumption = (
   idol: Idol,
   cost: ActionCost,
   idGenerator: IdGenerator,
-): CostConsumptionUpdateQueryDiff[] => {
+): CostConsumptionUpdateDiff[] => {
   switch (cost.kind) {
     case "normal": {
-      const updates: CostConsumptionUpdateQueryDiff[] = [];
+      const updates: CostConsumptionUpdateDiff[] = [];
       let restCost = cost.value;
       if (idol.vitality > 0) {
         const result = calculateActualAndMaxComsumution(
@@ -578,7 +578,7 @@ export const calculatePerformingScoreEffect = (
   scoreBonus: number | undefined,
   remainingIncrementableScore: number | undefined,
   query: NonNullable<Extract<Effect, { kind: "perform" }>["score"]>,
-): Array<Extract<LessonUpdateQueryDiff, { kind: "score" }>> => {
+): Array<Extract<LessonUpdateDiff, { kind: "score" }>> => {
   const goodCondition = idol.modifiers.find((e) => e.kind === "goodCondition");
   const goodConditionDuration =
     goodCondition && "duration" in goodCondition ? goodCondition.duration : 0;
@@ -602,7 +602,7 @@ export const calculatePerformingScoreEffect = (
     scoreBonus !== undefined
       ? Math.ceil((baseScore * scoreBonus) / 100)
       : baseScore;
-  const diffs: Array<Extract<LessonUpdateQueryDiff, { kind: "score" }>> = [];
+  const diffs: Array<Extract<LessonUpdateDiff, { kind: "score" }>> = [];
   let remainingIncrementableScore_ = remainingIncrementableScore;
   for (let i = 0; i < (query.times !== undefined ? query.times : 1); i++) {
     diffs.push({
@@ -624,7 +624,7 @@ export const calculatePerformingScoreEffect = (
 export const calculatePerformingVitalityEffect = (
   idol: Idol,
   query: VitalityUpdateQuery,
-): Extract<LessonUpdateQueryDiff, { kind: "vitality" }> => {
+): Extract<LessonUpdateDiff, { kind: "vitality" }> => {
   const hasNoVitalityIncrease =
     idol.modifiers.find((e) => e.kind === "noVitalityIncrease") !== undefined;
   if (hasNoVitalityIncrease) {
@@ -667,7 +667,7 @@ export const activateEffect = (
   effect: Effect,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): LessonUpdateQueryDiff[] | undefined => {
+): LessonUpdateDiff[] | undefined => {
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   const scoreBonus =
     lesson.idol.scoreBonus !== undefined
@@ -684,7 +684,7 @@ export const activateEffect = (
     }
   }
 
-  let diffs: LessonUpdateQueryDiff[] = [];
+  let diffs: LessonUpdateDiff[] = [];
 
   //
   // 効果別の適用条件判定
@@ -1014,11 +1014,11 @@ const activateDelayedEffectModifier = (
   modifier: Extract<Modifier, { kind: "delayedEffect" }>,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): LessonUpdateQueryDiff[] => {
+): LessonUpdateDiff[] => {
   if (modifier.id === undefined) {
     throw new Error(`modifier.id is undefined: ${modifier}`);
   }
-  let diffs: LessonUpdateQueryDiff[] = [];
+  let diffs: LessonUpdateDiff[] = [];
   if (modifier.delay === 1) {
     const effectResult = activateEffect(
       lesson,
@@ -1060,7 +1060,7 @@ export const activateMemoryEffect = (
   memoryEffect: MemoryEffect,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): LessonUpdateQueryDiff[] => {
+): LessonUpdateDiff[] => {
   if (memoryEffect.probability <= getRandom() * 100) {
     return [];
   }
@@ -1124,7 +1124,7 @@ export const activateMemoryEffect = (
  * - 配列のインデックスは、実行した効果リストのインデックスに対応する
  * - undefined は、効果適用条件を満たさなかったもの
  */
-type EffectActivations = Array<LessonUpdateQueryDiff[] | undefined>;
+type EffectActivations = Array<LessonUpdateDiff[] | undefined>;
 
 /**
  * 効果リストを発動する
@@ -1157,8 +1157,8 @@ export const activateEffectsOfProducerItem = (
   producerItem: ProducerItem,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): LessonUpdateQueryDiff[] => {
-  let diffs: LessonUpdateQueryDiff[] = [];
+): LessonUpdateDiff[] => {
+  let diffs: LessonUpdateDiff[] = [];
   const producerItemContent = getProducerItemContentData(producerItem);
   diffs = activateEffects(
     lesson,
@@ -1220,7 +1220,7 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
     const innerUpdates = diffs.map((diff) =>
       createLessonUpdateQueryFromDiff(diff, reason),
     );
-    newLesson = patchUpdates(newLesson, innerUpdates);
+    newLesson = patchDiffs(newLesson, innerUpdates);
     updates = [...updates, ...innerUpdates];
   }
   return {
@@ -1275,7 +1275,7 @@ export const activateEffectsOnLessonStart = (
         }),
       );
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
         nextHistoryResultIndex++;
         if (isScoreSatisfyingPerfect(newLesson)) {
@@ -1325,7 +1325,7 @@ export const activateEncouragementOnTurnStart = (
         }),
       );
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         encouragementUpdates = [...encouragementUpdates, ...innerUpdates];
         nextHistoryResultIndex++;
       }
@@ -1372,7 +1372,7 @@ export const activateProducerItemEffectsOnTurnStart = (
         }),
       );
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         turnStartUpdates = [...turnStartUpdates, ...innerUpdates];
         nextHistoryResultIndex++;
         if (isScoreSatisfyingPerfect(newLesson)) {
@@ -1404,7 +1404,7 @@ export const activateProducerItemEffectsOnTurnStart = (
         }),
       );
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         turnStartEveryTwoTurnsUpdates = [
           ...turnStartEveryTwoTurnsUpdates,
           ...innerUpdates,
@@ -1462,7 +1462,7 @@ export const activateModifierEffectsOnTurnStart = (
         }),
       );
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         performDelayedEffectUpdates = [
           ...performDelayedEffectUpdates,
           ...innerUpdates,
@@ -1499,7 +1499,7 @@ export const activateModifierEffectsOnTurnStart = (
           }),
         );
         if (innerUpdates.length > 0) {
-          newLesson = patchUpdates(newLesson, innerUpdates);
+          newLesson = patchDiffs(newLesson, innerUpdates);
           drawCardDelayedEffectUpdates = [
             ...drawCardDelayedEffectUpdates,
             ...innerUpdates,
@@ -1534,7 +1534,7 @@ export const activateModifierEffectsOnTurnStart = (
           }),
         );
         if (innerUpdates.length > 0) {
-          newLesson = patchUpdates(newLesson, innerUpdates);
+          newLesson = patchDiffs(newLesson, innerUpdates);
           enhanceHandDelayedEffectUpdates = [
             ...enhanceHandDelayedEffectUpdates,
             ...innerUpdates,
@@ -1604,7 +1604,7 @@ export const drawCardsOnTurnStart = (
           },
         },
       ];
-      newLesson = patchUpdates(newLesson, moveInnateCardsUpdates);
+      newLesson = patchDiffs(newLesson, moveInnateCardsUpdates);
       nextHistoryResultIndex++;
     }
   }
@@ -1637,7 +1637,7 @@ export const drawCardsOnTurnStart = (
         },
       },
     ];
-    newLesson = patchUpdates(newLesson, playedCardsOnEmptyDeckUpdates);
+    newLesson = patchDiffs(newLesson, playedCardsOnEmptyDeckUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -1667,7 +1667,7 @@ export const drawCardsOnTurnStart = (
       },
     ),
   ];
-  newLesson = patchUpdates(newLesson, removeLessonSupportUpdates);
+  newLesson = patchDiffs(newLesson, removeLessonSupportUpdates);
   nextHistoryResultIndex++;
 
   //
@@ -1691,7 +1691,7 @@ export const drawCardsOnTurnStart = (
         historyResultIndex: nextHistoryResultIndex,
       }),
     );
-    newLesson = patchUpdates(newLesson, drawCardsEffectUpdates);
+    newLesson = patchDiffs(newLesson, drawCardsEffectUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -1723,7 +1723,7 @@ export const drawCardsOnTurnStart = (
         },
       },
     ];
-    newLesson = patchUpdates(newLesson, restoringPlayedCardsOnEmptyDeckUpdates);
+    newLesson = patchDiffs(newLesson, restoringPlayedCardsOnEmptyDeckUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -1806,7 +1806,7 @@ export const decreaseEachModifierDurationOverTime = (
       }
     }
   }
-  newLesson = patchUpdates(newLesson, modifierUpdates);
+  newLesson = patchDiffs(newLesson, modifierUpdates);
   nextHistoryResultIndex++;
 
   return {
@@ -1846,7 +1846,7 @@ export const activateMemoryEffectsOnLessonStart = (
         }),
       ),
     ];
-    newLesson = patchUpdates(newLesson, memoryEffectUpdates);
+    newLesson = patchDiffs(newLesson, memoryEffectUpdates);
   }
   if (memoryEffectUpdates.length > 0) {
     nextHistoryResultIndex++;
@@ -1874,7 +1874,7 @@ export const consumeRemainingCardUsageCount = (
   const additionalCardUsageCount = lesson.idol.modifiers.find(
     (e) => e.kind === "additionalCardUsageCount",
   );
-  let diff: LessonUpdateQueryDiff | undefined;
+  let diff: LessonUpdateDiff | undefined;
   if (additionalCardUsageCount) {
     const id = params.idGenerator();
     diff = {
@@ -1997,7 +1997,7 @@ export const useCard = (
         },
       ];
     }
-    newLesson = patchUpdates(newLesson, usedCardPlacementUpdates);
+    newLesson = patchDiffs(newLesson, usedCardPlacementUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -2017,7 +2017,7 @@ export const useCard = (
       historyResultIndex: nextHistoryResultIndex,
     },
   }));
-  newLesson = patchUpdates(newLesson, costConsumptionUpdates);
+  newLesson = patchDiffs(newLesson, costConsumptionUpdates);
   nextHistoryResultIndex++;
 
   //
@@ -2050,7 +2050,7 @@ export const useCard = (
           },
         ),
       ];
-      newLesson = patchUpdates(newLesson, innerUpdates);
+      newLesson = patchDiffs(newLesson, innerUpdates);
       effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
     }
 
@@ -2111,7 +2111,7 @@ export const useCard = (
             }),
           ),
         ];
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
       }
     }
@@ -2152,7 +2152,7 @@ export const useCard = (
             }),
           ),
         ];
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
       }
     }
@@ -2251,7 +2251,7 @@ export const useCard = (
         reason,
       },
     ];
-    newLesson = patchUpdates(newLesson, recoveringActionPointsUpdates);
+    newLesson = patchDiffs(newLesson, recoveringActionPointsUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -2300,7 +2300,7 @@ export const activateEffectsOnTurnEnd = (
         }),
       );
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         producerItemUpdates = [...producerItemUpdates, ...innerUpdates];
         nextHistoryResultIndex++;
         if (isScoreSatisfyingPerfect(newLesson)) {
@@ -2335,7 +2335,7 @@ export const activateEffectsOnTurnEnd = (
         }
       }
       if (innerUpdates.length > 0) {
-        newLesson = patchUpdates(newLesson, innerUpdates);
+        newLesson = patchDiffs(newLesson, innerUpdates);
         modifierUpdates = [...modifierUpdates, ...innerUpdates];
         nextHistoryResultIndex++;
         if (isScoreSatisfyingPerfect(newLesson)) {

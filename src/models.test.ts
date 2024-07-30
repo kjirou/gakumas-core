@@ -9,7 +9,7 @@ import {
   createIdolInProduction,
   createLessonGamePlay,
   getIdolParameterKindOnTurn,
-  patchUpdates,
+  patchDiffs,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
@@ -315,7 +315,7 @@ describe("calculateActualActionCost", () => {
     },
   );
 });
-describe("patchUpdates", () => {
+describe("patchDiffs", () => {
   describe("actionPoints", () => {
     test("it works", () => {
       let lessonMock = {
@@ -323,7 +323,7 @@ describe("patchUpdates", () => {
           actionPoints: 1,
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "actionPoints",
           amount: -1,
@@ -351,7 +351,7 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.enhancement.effect",
           cardIds: ["1"],
@@ -388,7 +388,7 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.enhancement.lessonSupport",
           targets: [
@@ -426,7 +426,7 @@ describe("patchUpdates", () => {
         hand: ["3"],
         removedCardPile: ["4"],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cardPlacement",
           deck: ["11", "111"],
@@ -452,7 +452,7 @@ describe("patchUpdates", () => {
         hand: ["3"],
         removedCardPile: ["4"],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cardPlacement",
           deck: ["11", "111"],
@@ -476,7 +476,7 @@ describe("patchUpdates", () => {
         hand: ["3"],
         removedCardPile: ["4"],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cardPlacement",
           hand: ["33", "333"],
@@ -503,7 +503,7 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.addition",
           card: { id: "2" } as Card,
@@ -544,7 +544,7 @@ describe("patchUpdates", () => {
           },
         ],
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "cards.removingLessonSupports",
           cardIds: ["1", "2", "4"],
@@ -572,7 +572,7 @@ describe("patchUpdates", () => {
           modifierIdsAtTurnStart: ["1", "2"],
         },
       } as Lesson;
-      const lesson = patchUpdates(lessonMock, [
+      const lesson = patchDiffs(lessonMock, [
         {
           kind: "modifierIdsAtTurnStart",
           modifierIdsAtTurnStart: ["3", "4"],
@@ -600,7 +600,7 @@ describe("patchUpdates", () => {
             ],
           },
         } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
+        lessonMock = patchDiffs(lessonMock, [
           {
             kind: "modifier",
             actual: {
@@ -679,7 +679,7 @@ describe("patchUpdates", () => {
                     ],
                   },
                 } as Lesson;
-                lessonMock = patchUpdates(lessonMock, [
+                lessonMock = patchDiffs(lessonMock, [
                   {
                     kind: "modifier",
                     actual: {
@@ -721,7 +721,7 @@ describe("patchUpdates", () => {
                     ],
                   },
                 } as Lesson;
-                lessonMock = patchUpdates(lessonMock, [
+                lessonMock = patchDiffs(lessonMock, [
                   {
                     kind: "modifier",
                     actual: {
@@ -771,7 +771,7 @@ describe("patchUpdates", () => {
             ],
           },
         } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
+        lessonMock = patchDiffs(lessonMock, [
           {
             kind: "modifier",
             actual: {
@@ -816,7 +816,7 @@ describe("patchUpdates", () => {
             ],
           },
         } as Lesson;
-        lessonMock = patchUpdates(lessonMock, [
+        lessonMock = patchDiffs(lessonMock, [
           {
             kind: "modifier",
             actual: {
@@ -849,7 +849,7 @@ describe("patchUpdates", () => {
           life: 5,
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "life",
           actual: -2,
@@ -869,7 +869,7 @@ describe("patchUpdates", () => {
       let lessonMock = {
         playedCardsOnEmptyDeck: ["1"],
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "playedCardsOnEmptyDeck",
           cardIds: ["2"],
@@ -893,7 +893,7 @@ describe("patchUpdates", () => {
           ],
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "producerItem.activationCount",
           producerItemId: "2",
@@ -922,7 +922,7 @@ describe("patchUpdates", () => {
       let lessonMock = {
         remainingTurns: 0,
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "remainingTurns",
           amount: 1,
@@ -941,7 +941,7 @@ describe("patchUpdates", () => {
       let lessonMock = {
         score: 1,
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "score",
           actual: 2,
@@ -961,7 +961,7 @@ describe("patchUpdates", () => {
       let lessonMock = {
         turnNumber: 0,
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "turnNumberIncrease",
           reason: {
@@ -981,7 +981,7 @@ describe("patchUpdates", () => {
           vitality: 5,
         },
       } as Lesson;
-      lessonMock = patchUpdates(lessonMock, [
+      lessonMock = patchDiffs(lessonMock, [
         {
           kind: "vitality",
           actual: -2,

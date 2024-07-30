@@ -46,7 +46,7 @@ import {
   createLessonGamePlay,
   getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
-  patchUpdates,
+  patchDiffs,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
@@ -200,10 +200,7 @@ export const startLessonTurn = (
 ): LessonGamePlay => {
   let { updates } = lessonGamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+  let lesson = patchDiffs(lessonGamePlay.initialLesson, lessonGamePlay.updates);
 
   //
   // レッスン開始時の効果発動
@@ -222,7 +219,7 @@ export const startLessonTurn = (
     updates = [...updates, ...activateEffectsOnLessonStartResult.updates];
     historyResultIndex =
       activateEffectsOnLessonStartResult.nextHistoryResultIndex;
-    lesson = patchUpdates(lesson, activateEffectsOnLessonStartResult.updates);
+    lesson = patchDiffs(lesson, activateEffectsOnLessonStartResult.updates);
   }
 
   //
@@ -257,7 +254,7 @@ export const startLessonTurn = (
     ];
     updates = [...updates, ...additionalCardUsageCountUpdates];
     historyResultIndex++;
-    lesson = patchUpdates(lesson, additionalCardUsageCountUpdates);
+    lesson = patchDiffs(lesson, additionalCardUsageCountUpdates);
   }
 
   //
@@ -274,7 +271,7 @@ export const startLessonTurn = (
     ];
     historyResultIndex =
       decreaseEachModifierDurationOverTimeResult.nextHistoryResultIndex;
-    lesson = patchUpdates(
+    lesson = patchDiffs(
       lesson,
       decreaseEachModifierDurationOverTimeResult.updates,
     );
@@ -296,7 +293,7 @@ export const startLessonTurn = (
   ];
   updates = [...updates, ...actionPointsUpdates];
   historyResultIndex++;
-  lesson = patchUpdates(lesson, actionPointsUpdates);
+  lesson = patchDiffs(lesson, actionPointsUpdates);
 
   //
   // ターン番号を増やす
@@ -311,7 +308,7 @@ export const startLessonTurn = (
   };
   updates = [...updates, increaseTurnNumberUpdate];
   historyResultIndex++;
-  lesson = patchUpdates(lesson, [increaseTurnNumberUpdate]);
+  lesson = patchDiffs(lesson, [increaseTurnNumberUpdate]);
 
   //
   // ターン開始時の効果発動順序のまとめ
@@ -360,7 +357,7 @@ export const startLessonTurn = (
   updates = [...updates, ...activateEncouragementOnTurnStartResult.updates];
   historyResultIndex =
     activateEncouragementOnTurnStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, activateEncouragementOnTurnStartResult.updates);
+  lesson = patchDiffs(lesson, activateEncouragementOnTurnStartResult.updates);
 
   //
   // Pアイテム起因の、ターン開始時・2ターンごとの効果発動
@@ -376,7 +373,7 @@ export const startLessonTurn = (
   ];
   historyResultIndex =
     activateProducerItemEffectsOnTurnStartResult.nextHistoryResultIndex;
-  lesson = patchUpdates(
+  lesson = patchDiffs(
     lesson,
     activateProducerItemEffectsOnTurnStartResult.updates,
   );
@@ -396,7 +393,7 @@ export const startLessonTurn = (
     );
     updates = [...updates, ...drawCardsOnLessonStartResult.updates];
     historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
-    lesson = patchUpdates(lesson, drawCardsOnLessonStartResult.updates);
+    lesson = patchDiffs(lesson, drawCardsOnLessonStartResult.updates);
   }
 
   //
@@ -411,7 +408,7 @@ export const startLessonTurn = (
     updates = [...updates, ...activateModifierEffectsOnTurnStartResult.updates];
     historyResultIndex =
       activateModifierEffectsOnTurnStartResult.nextHistoryResultIndex;
-    lesson = patchUpdates(
+    lesson = patchDiffs(
       lesson,
       activateModifierEffectsOnTurnStartResult.updates,
     );
@@ -429,7 +426,7 @@ export const startLessonTurn = (
     updates = [...updates, ...activateMemoryEffectsOnLessonStartResult.updates];
     historyResultIndex =
       activateMemoryEffectsOnLessonStartResult.nextHistoryResultIndex;
-    lesson = patchUpdates(
+    lesson = patchDiffs(
       lesson,
       activateMemoryEffectsOnLessonStartResult.updates,
     );
@@ -455,7 +452,7 @@ export const startLessonTurn = (
   ];
   updates = [...updates, ...modifierIdsAtTurnStartUpdates];
   historyResultIndex++;
-  lesson = patchUpdates(lesson, modifierIdsAtTurnStartUpdates);
+  lesson = patchDiffs(lesson, modifierIdsAtTurnStartUpdates);
 
   return {
     ...lessonGamePlay,
@@ -467,7 +464,7 @@ export const startLessonTurn = (
  * ターンが終了しているかを返す
  */
 export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
-  const lesson = patchUpdates(
+  const lesson = patchDiffs(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
@@ -485,10 +482,7 @@ export const playCard = (
 ): LessonGamePlay => {
   let { updates } = lessonGamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+  let lesson = patchDiffs(lessonGamePlay.initialLesson, lessonGamePlay.updates);
 
   //
   // アクションポイントがない場合は実行できない
@@ -512,7 +506,7 @@ export const playCard = (
   updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
   historyResultIndex =
     consumeRemainingCardUsageCountResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, consumeRemainingCardUsageCountResult.updates);
+  lesson = patchDiffs(lesson, consumeRemainingCardUsageCountResult.updates);
 
   //
   // ------------------
@@ -571,7 +565,7 @@ export const playCard = (
   });
   updates = [...updates, ...useCardResult.updates];
   historyResultIndex = useCardResult.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, useCardResult.updates);
+  lesson = patchDiffs(lesson, useCardResult.updates);
 
   return {
     ...lessonGamePlay,
@@ -588,10 +582,7 @@ export const playCard = (
 export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   let { updates } = lessonGamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+  let lesson = patchDiffs(lessonGamePlay.initialLesson, lessonGamePlay.updates);
 
   //
   // アクションポイントを0にする
@@ -609,7 +600,7 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   ];
   updates = [...updates, ...actionPointsUpdates];
   historyResultIndex++;
-  lesson = patchUpdates(lesson, actionPointsUpdates);
+  lesson = patchDiffs(lesson, actionPointsUpdates);
 
   //
   // 体力を2回復する
@@ -628,7 +619,7 @@ export const skipTurn = (lessonGamePlay: LessonGamePlay): LessonGamePlay => {
   ];
   updates = [...updates, ...recoveringLifeUpdates];
   historyResultIndex++;
-  lesson = patchUpdates(lesson, recoveringLifeUpdates);
+  lesson = patchDiffs(lesson, recoveringLifeUpdates);
 
   return {
     ...lessonGamePlay,
@@ -644,10 +635,7 @@ export const endLessonTurn = (
 ): LessonGamePlay => {
   let { updates } = lessonGamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+  let lesson = patchDiffs(lessonGamePlay.initialLesson, lessonGamePlay.updates);
 
   //
   // ターン終了時の効果発動順序のまとめ
@@ -682,7 +670,7 @@ export const endLessonTurn = (
   );
   updates = [...updates, ...activateEffectsOnTurnEndUpdates.updates];
   historyResultIndex = activateEffectsOnTurnEndUpdates.nextHistoryResultIndex;
-  lesson = patchUpdates(lesson, activateEffectsOnTurnEndUpdates.updates);
+  lesson = patchDiffs(lesson, activateEffectsOnTurnEndUpdates.updates);
 
   if (!isScoreSatisfyingPerfect(lesson)) {
     //
@@ -703,7 +691,7 @@ export const endLessonTurn = (
       ];
       updates = [...updates, ...discardHandUpdates];
       historyResultIndex++;
-      lesson = patchUpdates(lesson, discardHandUpdates);
+      lesson = patchDiffs(lesson, discardHandUpdates);
 
       //
       // 好印象によるスコア増加
@@ -716,7 +704,7 @@ export const endLessonTurn = (
       ];
       historyResultIndex =
         obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
-      lesson = patchUpdates(
+      lesson = patchDiffs(
         lesson,
         obtainPositiveImpressionScoreOnTurnEndResult.updates,
       );
@@ -738,7 +726,7 @@ export const endLessonTurn = (
  *   - `endLessonTurn`
  */
 export const isLessonEnded = (lessonGamePlay: LessonGamePlay): boolean => {
-  const lesson = patchUpdates(
+  const lesson = patchDiffs(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );

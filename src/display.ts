@@ -16,7 +16,7 @@ import type {
   Lesson,
   LessonDisplay,
   LessonGamePlay,
-  LessonUpdateQueryDiff,
+  LessonUpdateDiff,
   ProducerItemDisplay,
   TurnDisplay,
 } from "./types";
@@ -31,7 +31,7 @@ import {
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
   getRemainingProducerItemTimes,
-  patchUpdates,
+  patchDiffs,
 } from "./models";
 import {
   generateCardName,
@@ -93,7 +93,7 @@ export const generateCardInHandDisplay = (
     getRandom,
     idGenerator,
   );
-  const effectDiffs = effectActivations.reduce<LessonUpdateQueryDiff[]>(
+  const effectDiffs = effectActivations.reduce<LessonUpdateDiff[]>(
     (acc, effectActivation) =>
       effectActivation ? [...acc, ...effectActivation] : acc,
     [],
@@ -217,7 +217,7 @@ export const generateEncouragementDisplays = (
 export const generateLessonDisplay = (
   lessonGamePlay: LessonGamePlay,
 ): LessonDisplay => {
-  const lesson = patchUpdates(
+  const lesson = patchDiffs(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );
@@ -304,18 +304,13 @@ export const generateLessonDisplay = (
  *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
  *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
  *
- * @example
- *   // 変化する差分は updates に含まれるので、アニメーション処理はこの値を解析して使う
- *   const { cardDescription, updates } = previewCardPlay(lessonGamePlay, 0);
- *   // プレビュー用の差分を反映したレッスンの状態、UI側は各値につきこの値との差を使う
- *   const previewedLesson = patchUpdates(lessonGamePlay.initialLesson, updates);
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
 export const generateCardPlayPreviewDisplay = (
   lessonGamePlay: LessonGamePlay,
   selectedCardInHandIndex: number,
 ): CardPlayPreviewDisplay => {
-  const lesson = patchUpdates(
+  const lesson = patchDiffs(
     lessonGamePlay.initialLesson,
     lessonGamePlay.updates,
   );

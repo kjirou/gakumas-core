@@ -36,7 +36,7 @@ import {
   useCard,
   validateCostConsumution,
 } from "./lesson-mutation";
-import { patchUpdates } from "./models";
+import { patchDiffs } from "./models";
 import { createLessonGamePlayForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
 
@@ -2833,7 +2833,7 @@ describe("drawCardsOnLessonStart", () => {
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
     });
-    const newLesson = patchUpdates(lesson, updates);
+    const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(3);
     expect(newLesson.deck).toHaveLength(1);
     expect(newLesson.discardPile).toStrictEqual(["e"]);
@@ -3943,7 +3943,7 @@ describe("useCard preview:false", () => {
         },
       ]);
 
-      lesson = patchUpdates(lesson, updates1);
+      lesson = patchDiffs(lesson, updates1);
 
       const { updates: updates2a } = useCard(lesson, 2, {
         selectedCardInHandIndex: 0,
@@ -4031,7 +4031,7 @@ describe("useCard preview:false", () => {
         },
       ]);
 
-      lesson = patchUpdates(lesson, updates1);
+      lesson = patchDiffs(lesson, updates1);
 
       const { updates: updates2a } = useCard(lesson, 2, {
         selectedCardInHandIndex: 0,
@@ -4106,7 +4106,7 @@ describe("useCard preview:false", () => {
         },
       ]);
 
-      lesson = patchUpdates(lesson, updates1);
+      lesson = patchDiffs(lesson, updates1);
 
       const { updates: updates2 } = useCard(lesson, 2, {
         selectedCardInHandIndex: 0,
@@ -5127,7 +5127,7 @@ describe("useCard preview:false", () => {
         },
       ]);
       // さらに追加できるか確認
-      const newLesson = patchUpdates(lesson, updates);
+      const newLesson = patchDiffs(lesson, updates);
       const { updates: updates2 } = useCard(newLesson, 1, {
         selectedCardInHandIndex: 0,
         getRandom: () => 0,

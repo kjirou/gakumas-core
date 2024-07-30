@@ -29,6 +29,7 @@ import {
   Lesson,
   LessonGamePlay,
   LessonUpdateQuery,
+  LessonUpdateDiff,
   LessonUpdateQueryReason,
   MemoryEffect,
   Modifier,
@@ -390,18 +391,18 @@ export const calculateActualActionCost = (
 };
 
 /**
- * レッスン更新クエリを適用した結果のレッスンを返す
+ * レッスン更新差分を適用した結果のレッスンを返す
  *
  * - Redux の Action のような、単純な setter の塊
  *   - ロジックはなるべく含まない
- *     - 例えば、バリデーションや閾値処理などは、更新クエリを生成する際に行う
+ *     - 例えば、バリデーションや閾値処理などは、更新差分を生成する際に行う
  */
-export const patchUpdates = (
+export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
   lesson: Lesson,
-  updates: LessonUpdateQuery[],
+  diffs: LessonUpdateDiffLike[],
 ): Lesson => {
   let newLesson = lesson;
-  for (const update of updates) {
+  for (const update of diffs) {
     switch (update.kind) {
       case "actionPoints": {
         newLesson = {
@@ -689,6 +690,7 @@ export const patchUpdates = (
   }
   return newLesson;
 };
+
 /** 次のレッスン履歴インデックスを返す */
 export const getNextHistoryResultIndex = (
   updates: LessonUpdateQuery[],

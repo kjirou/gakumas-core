@@ -14,7 +14,7 @@ import {
   initializeGamePlay,
   isLessonEnded,
   isTurnEnded,
-  patchUpdates,
+  patchDiffs,
   playCard,
   startLessonTurn,
 } from "./index";
@@ -181,7 +181,7 @@ const applyEffect = (
   effect: Effect,
   options: {} = {},
 ): LessonGamePlay => {
-  const lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const diffs = activateEffect_(
     lesson,
     effect,
@@ -361,14 +361,14 @@ describe("水着麻央のプレイ再現", () => {
         },
       },
     ];
-    let lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
     //
     // 1ターン目
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 1,
       score: 0,
@@ -390,7 +390,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "apirunokihon2", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 2,
       score: 0,
@@ -410,7 +410,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 3,
       score: 16,
@@ -490,7 +490,7 @@ describe("水着麻央のプレイ再現", () => {
         },
       },
     ];
-    let lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     gamePlay.initialLesson.memoryEffects = [
       { kind: "goodCondition", probability: 100, value: 2 },
     ];
@@ -501,7 +501,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 1,
       score: 0,
@@ -522,7 +522,7 @@ describe("水着麻央のプレイ再現", () => {
     // 2ターン目
     //
     gamePlay = startLessonTurn(gamePlay);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 2,
       score: 0,
@@ -543,7 +543,7 @@ describe("水着麻央のプレイ再現", () => {
     // 3ターン目
     //
     gamePlay = startLessonTurn(gamePlay);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 3,
       score: 26,
@@ -563,7 +563,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyojonokihon2", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 4,
       score: 42,
@@ -584,7 +584,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "shinkokyu2", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 5,
       score: 42,
@@ -630,7 +630,7 @@ describe("水着麻央のプレイ再現", () => {
       "haitatchi2",
       "hyojonokihon",
     ];
-    let lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     lesson.idol.life = 31;
     gamePlay.initialLesson.encouragements = [
       { turnNumber: 4, effect: { kind: "perform", vitality: { value: 3 } } },
@@ -666,7 +666,7 @@ describe("水着麻央のプレイ再現", () => {
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
     gamePlay = addLessonSupport(gamePlay, "iji", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 1,
       score: 0,
@@ -686,7 +686,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 2,
       score: 0,
@@ -706,7 +706,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "pozunokihon", 2);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 3,
       score: 0,
@@ -729,7 +729,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     gamePlay = startLessonTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "pozunokihon", 2);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 4,
       score: 0,
@@ -751,7 +751,7 @@ describe("水着麻央のプレイ再現", () => {
     // 5ターン目
     //
     gamePlay = startLessonTurn(gamePlay);
-    lesson = patchUpdates(gamePlay.initialLesson, gamePlay.updates);
+    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 5,
       score: 0,

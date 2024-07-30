@@ -15,6 +15,7 @@ import {
   ActionCost,
   Card,
   CardContentData,
+  CardEffectDisplay,
   CardEnhancement,
   CardInProduction,
   Effect,
@@ -37,7 +38,7 @@ import {
   ProducerItemContentData,
   ProducerItemInProduction,
 } from "./types";
-import { createIdGenerator, shuffleArray } from "./utils";
+import { shuffleArray } from "./utils";
 
 /** ターン開始時の手札数 */
 export const handSizeOnLessonStart = 3;

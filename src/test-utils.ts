@@ -2,16 +2,16 @@ import type {
   CardInProduction,
   IdolData,
   Lesson,
-  LessonGamePlay,
+  GamePlay,
   ProducerItemInProduction,
 } from "./index";
 import {
   createIdGenerator,
   createIdolInProduction,
-  createLessonGamePlay,
+  createGamePlay,
 } from "./index";
 
-export const createLessonGamePlayForTest = (
+export const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     deck?: CardInProduction[];
@@ -21,7 +21,7 @@ export const createLessonGamePlayForTest = (
     talentAwakeningLevel?: number | undefined;
     turns?: Lesson["turns"];
   } = {},
-): LessonGamePlay => {
+): GamePlay => {
   const clearScoreThresholds = options.clearScoreThresholds;
   // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
   const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
@@ -37,7 +37,7 @@ export const createLessonGamePlayForTest = (
     ...(options.deck ? { deck: options.deck } : {}),
     ...(options.producerItems ? { producerItems: options.producerItems } : {}),
   });
-  return createLessonGamePlay({
+  return createGamePlay({
     clearScoreThresholds,
     idGenerator,
     idolInProduction,

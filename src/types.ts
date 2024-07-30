@@ -1468,9 +1468,13 @@ export type LessonUpdateQuery = LessonUpdateDiff & {
 };
 
 /**
- * レッスンのゲームプレイ記録
+ * ゲームプレイの状態
+ *
+ * - ゲームプレイ開始時に生成し、レッスンの経過を保持する
+ *   - なお、本実装での「レッスン」の概念には、「試験」「コンテスト」「アイドルの道」なども含まれる
+ * - 状態の変更毎に、この変数の参照を新しいものへ交換する
  */
-export type LessonGamePlay = {
+export type GamePlay = {
   getRandom: GetRandom;
   idGenerator: IdGenerator;
   /**

@@ -15,7 +15,6 @@ import {
   ActionCost,
   Card,
   CardContentData,
-  CardEffectDisplay,
   CardEnhancement,
   CardInProduction,
   Effect,
@@ -27,7 +26,7 @@ import {
   IdolInProduction,
   IdolParameterKind,
   Lesson,
-  LessonGamePlay,
+  GamePlay,
   LessonUpdateQuery,
   LessonUpdateDiff,
   LessonUpdateQueryReason,
@@ -264,13 +263,11 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
 };
 
 /**
- * レッスンのゲームプレイを初期化する
- *
- * - ここの「レッスン」には、試験・コンテスト・アイドルの道なども含む
+ * ゲームプレイのインスタンスを作成する
  *
  * @param params.idGenerator createIdolInProduction で使用した関数と同じものを渡す
  */
-export const createLessonGamePlay = (params: {
+export const createGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   encouragements?: Encouragement[];
   getRandom?: GetRandom;
@@ -280,7 +277,7 @@ export const createLessonGamePlay = (params: {
   memoryEffects?: MemoryEffect[];
   scoreBonus?: Idol["scoreBonus"];
   turns: Lesson["turns"];
-}): LessonGamePlay => {
+}): GamePlay => {
   const clearScoreThresholds =
     params.clearScoreThresholds !== undefined
       ? params.clearScoreThresholds

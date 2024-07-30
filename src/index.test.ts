@@ -3,7 +3,7 @@ import type {
   CardInProduction,
   Effect,
   Lesson,
-  LessonGamePlay,
+  GamePlay,
   LessonUpdateQuery,
 } from "./index";
 import { getCardDataById } from "./data/cards";
@@ -19,7 +19,7 @@ import {
   startLessonTurn,
 } from "./index";
 import { activateEffect as activateEffect_ } from "./lesson-mutation";
-import { createLessonGamePlayForTest } from "./test-utils";
+import { createGamePlayForTest } from "./test-utils";
 import { getIdolDataById } from "./data/idols";
 
 describe("initializeGamePlay", () => {
@@ -84,7 +84,7 @@ describe("initializeGamePlay", () => {
           ],
           turns: ["vocal"],
         },
-      } as LessonGamePlay,
+      } as GamePlay,
     },
     {
       name: "特訓段階と才能開花段階により、アイドル固有が強化される",
@@ -120,7 +120,7 @@ describe("initializeGamePlay", () => {
             },
           ],
         },
-      } as LessonGamePlay,
+      } as GamePlay,
     },
     {
       name: "体力が最大値を超えない",
@@ -139,7 +139,7 @@ describe("initializeGamePlay", () => {
             life: 28,
           },
         },
-      } as LessonGamePlay,
+      } as GamePlay,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
@@ -151,10 +151,10 @@ describe("initializeGamePlay", () => {
  * スキルカードへレッスンサポートの付与をする、本体は仕様不明瞭なのもあり未実装
  */
 const addLessonSupport = (
-  gamePlay: LessonGamePlay,
+  gamePlay: GamePlay,
   cardId: Card["id"],
   count: number,
-): LessonGamePlay => {
+): GamePlay => {
   const update: LessonUpdateQuery = {
     kind: "cards.enhancement.lessonSupport",
     targets: [{ cardId, supportCardIds: new Array<{}>(count).fill({}) }],
@@ -177,10 +177,10 @@ const addLessonSupport = (
  * - 主に未実装の、Pドリンク用
  */
 const applyEffect = (
-  gamePlay: LessonGamePlay,
+  gamePlay: GamePlay,
   effect: Effect,
   options: {} = {},
-): LessonGamePlay => {
+): GamePlay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const diffs = activateEffect_(
     lesson,
@@ -311,7 +311,7 @@ describe("水着麻央のプレイ再現", () => {
     deck: CardInProduction[];
     turns: Lesson["turns"];
   }) => {
-    return createLessonGamePlayForTest({
+    return createGamePlayForTest({
       clearScoreThresholds: params.clearScoreThresholds,
       deck: params.deck,
       idolDataId: "arimuramao-ssr-2",

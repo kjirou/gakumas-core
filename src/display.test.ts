@@ -18,7 +18,7 @@ import {
 } from "./display";
 import { prepareCardsForLesson } from "./models";
 import { createIdGenerator } from "./utils";
-import { createLessonGamePlayForTest } from "./test-utils";
+import { createGamePlayForTest } from "./test-utils";
 
 const createLessonForTest = (
   options: {
@@ -26,11 +26,11 @@ const createLessonForTest = (
     producerItems?: ProducerItemInProduction[];
   } = {},
 ): Lesson => {
-  const lessonGamePlay = createLessonGamePlayForTest({
+  const gamePlay = createGamePlayForTest({
     deck: options.deck,
     producerItems: options.producerItems,
   });
-  return lessonGamePlay.initialLesson;
+  return gamePlay.initialLesson;
 };
 
 describe("generateCardInHandDisplay", () => {
@@ -588,7 +588,7 @@ describe("generateLessonDisplay", () => {
       name: "hand - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             deck: [
               {
                 id: "c1",
@@ -636,7 +636,7 @@ describe("generateLessonDisplay", () => {
       name: "inventory.{deck,discardPile,hand,removedCardPile} - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             deck: [
               {
                 id: "c1",
@@ -680,7 +680,7 @@ describe("generateLessonDisplay", () => {
       name: 'producerItems - 概ね動作する | 強化済みの名称には、"+"を末尾へ付与する',
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             producerItems: [
               {
                 id: "p1",
@@ -711,7 +711,7 @@ describe("generateLessonDisplay", () => {
       name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.idol.modifiers = [
             { kind: "focus", amount: 1, id: "m1" },
           ];
@@ -734,7 +734,7 @@ describe("generateLessonDisplay", () => {
       name: "modifiers - 状態修正が存在しない時、空配列を返す",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           return gamePlay;
         })(),
       ],
@@ -746,7 +746,7 @@ describe("generateLessonDisplay", () => {
       name: "turns - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal", "visual", "dance"];
           gamePlay.initialLesson.encouragements = [
             {
@@ -797,7 +797,7 @@ describe("generateLessonDisplay", () => {
       name: "scoreBonus - 概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest();
+          const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.turns = ["vocal"];
           gamePlay.initialLesson.turnNumber = 1;
           gamePlay.initialLesson.idol.scoreBonus = {
@@ -828,7 +828,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       name: "概ね動作する",
       args: [
         (() => {
-          const gamePlay = createLessonGamePlayForTest({
+          const gamePlay = createGamePlayForTest({
             deck: [
               {
                 id: "c1",

@@ -7,7 +7,7 @@ import {
   calculateClearScoreProgress,
   createActualTurns,
   createIdolInProduction,
-  createLessonGamePlay,
+  createGamePlay,
   getIdolParameterKindOnTurn,
   patchDiffs,
 } from "./models";
@@ -150,7 +150,7 @@ describe("getIdolParameterKindOnTurn", () => {
     },
   );
 });
-describe("createLessonGamePlay", () => {
+describe("createGamePlay", () => {
   test("it creates a lesson game play", () => {
     const idGenerator = createIdGenerator();
     const idolInProduction = createIdolInProduction({
@@ -165,12 +165,12 @@ describe("createLessonGamePlay", () => {
       talentAwakeningLevel: 1,
       idGenerator,
     });
-    const lessonGamePlay = createLessonGamePlay({
+    const gamePlay = createGamePlay({
       idGenerator,
       idolInProduction,
       turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });
-    expect(lessonGamePlay).toStrictEqual({
+    expect(gamePlay).toStrictEqual({
       getRandom: expect.any(Function),
       idGenerator: expect.any(Function),
       initialLesson: {

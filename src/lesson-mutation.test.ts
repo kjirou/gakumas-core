@@ -37,7 +37,7 @@ import {
   validateCostConsumution,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
-import { createLessonGamePlayForTest } from "./test-utils";
+import { createGamePlayForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
 
 const createLessonForTest = (
@@ -46,11 +46,11 @@ const createLessonForTest = (
     producerItems?: ProducerItemInProduction[];
   } = {},
 ): Lesson => {
-  const lessonGamePlay = createLessonGamePlayForTest({
+  const gamePlay = createGamePlayForTest({
     deck: options.deck,
     producerItems: options.producerItems,
   });
-  return lessonGamePlay.initialLesson;
+  return gamePlay.initialLesson;
 };
 
 describe("drawCardsFromDeck", () => {

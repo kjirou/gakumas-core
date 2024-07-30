@@ -15,7 +15,7 @@ import type {
   IdGenerator,
   Lesson,
   LessonDisplay,
-  LessonGamePlay,
+  GamePlay,
   LessonUpdateDiff,
   ProducerItemDisplay,
   TurnDisplay,
@@ -214,13 +214,8 @@ export const generateEncouragementDisplays = (
  * - TODO: ターン詳細の「3位以上で合格」が未実装
  * - TODO: レッスン履歴が未実装
  */
-export const generateLessonDisplay = (
-  lessonGamePlay: LessonGamePlay,
-): LessonDisplay => {
-  const lesson = patchDiffs(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const modifiers = lesson.idol.modifiers.map((modifier) => {
     return {
       ...modifier,
@@ -229,7 +224,7 @@ export const generateLessonDisplay = (
     };
   });
   const encouragements = generateEncouragementDisplays(
-    lessonGamePlay.initialLesson.encouragements,
+    gamePlay.initialLesson.encouragements,
   );
   const turns: TurnDisplay[] = createActualTurns(lesson).map(
     (idolParameterKind, index) => {
@@ -255,8 +250,8 @@ export const generateLessonDisplay = (
       ...generateCardInHandDisplay(
         lesson,
         cardId,
-        lessonGamePlay.getRandom,
-        lessonGamePlay.idGenerator,
+        gamePlay.getRandom,
+        gamePlay.idGenerator,
       ),
     };
   });
@@ -307,13 +302,10 @@ export const generateLessonDisplay = (
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
 export const generateCardPlayPreviewDisplay = (
-  lessonGamePlay: LessonGamePlay,
+  gamePlay: GamePlay,
   selectedCardInHandIndex: number,
 ): CardPlayPreviewDisplay => {
-  const lesson = patchDiffs(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const cardId = lesson.hand[selectedCardInHandIndex];
   if (cardId === undefined) {
     throw new Error("Invalid card index");
@@ -324,8 +316,8 @@ export const generateCardPlayPreviewDisplay = (
   }
   const cardContent = getCardContentData(card);
   const { updates } = useCard(lesson, 1, {
-    getRandom: lessonGamePlay.getRandom,
-    idGenerator: lessonGamePlay.idGenerator,
+    getRandom: gamePlay.getRandom,
+    idGenerator: gamePlay.idGenerator,
     selectedCardInHandIndex,
     preview: true,
   });

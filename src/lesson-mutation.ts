@@ -40,7 +40,6 @@ import {
   patchUpdates,
   prepareCardsForLesson,
 } from "./models";
-import { generateCardName } from "./text-generation";
 import { shuffleArray, validateNumberInRange } from "./utils";
 
 /** 主に型都合のユーティリティ処理 */
@@ -1134,7 +1133,7 @@ type EffectActivations = Array<LessonUpdateQueryDiff[] | undefined>;
  * - 本処理内では、レッスンその他の状況は変わらない前提
  *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
  */
-const activateEffects = (
+export const activateEffects = (
   lesson: Lesson,
   effects: Effect[],
   getRandom: GetRandom,
@@ -1227,103 +1226,6 @@ export const applyEffectsEachProducerItemsAccordingToCardUsage = (
   return {
     lesson: newLesson,
     updates,
-  };
-};
-
-/**
- * 手札としてスキルカードを表示するために、スキルカード情報を要約する
- */
-export const summarizeCardInHand = (
-  lesson: Lesson,
-  cardId: Card["id"],
-  getRandom: GetRandom,
-  idGenerator: IdGenerator,
-): CardInHandDisplay => {
-  const card = lesson.cards.find((card) => card.id === cardId);
-  if (!card) {
-    throw new Error(`Card not found in cards: cardId=${cardId}`);
-  }
-  const cardContent = getCardContentData(card);
-  const effectActivations = activateEffects(
-    lesson,
-    cardContent.effects,
-    getRandom,
-    idGenerator,
-  );
-  const effectDiffs = effectActivations.reduce<LessonUpdateQueryDiff[]>(
-    (acc, effectActivation) =>
-      effectActivation ? [...acc, ...effectActivation] : acc,
-    [],
-  );
-  let scores: CardInHandDisplay["scores"] = [];
-  for (const effectActivation of effectActivations) {
-    if (effectActivation) {
-      if (effectActivation.length > 0 && effectActivation[0].kind === "score") {
-        scores = [
-          ...scores,
-          {
-            value: effectActivation[0].max,
-            // 1回の効果発動で複数回スコアが上がる時は、全てのスコアの値は同じになる前提
-            times: effectActivation.length,
-          },
-        ];
-      }
-    }
-  }
-  let vitality: CardInHandDisplay["vitality"] = undefined;
-  const firstVitalityUpdate = effectDiffs.find((e) => e.kind === "vitality");
-  if (firstVitalityUpdate) {
-    vitality = firstVitalityUpdate.max;
-  }
-  let effects: CardInHandDisplay["effects"] = [];
-  for (const [effectIndex, effect] of cardContent.effects.entries()) {
-    const applyable = effectActivations[effectIndex] !== undefined;
-    if (effect.kind === "getModifier") {
-      effects = [
-        ...effects,
-        {
-          kind: `modifier-${effect.modifier.kind}`,
-          applyable,
-        },
-      ];
-    } else if (effect.kind === "perform") {
-      if (effect.condition) {
-        if (effect.score) {
-          effects = [
-            ...effects,
-            {
-              kind: "perform-score",
-              applyable,
-            },
-          ];
-        } else if (effect.vitality) {
-          effects = [
-            ...effects,
-            {
-              kind: "perform-vitality",
-              applyable,
-            },
-          ];
-        }
-      }
-    } else {
-      effects = [
-        ...effects,
-        {
-          kind: effect.kind,
-          applyable,
-        },
-      ];
-    }
-  }
-  return {
-    cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),
-    effects,
-    enhancements: card.enhancements,
-    name: generateCardName(card),
-    playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
-    scores,
-    vitality,
   };
 };
 

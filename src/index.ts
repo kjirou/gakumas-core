@@ -15,24 +15,17 @@
 
 import {
   CardData,
-  CardPlayPreviewDisplay,
-  EncouragementDisplay,
   Idol,
   IdolData,
   Lesson,
   LessonGamePlay,
-  LessonDisplay,
   LessonUpdateQuery,
   ProducerItemData,
-  ProducerItemDisplay,
-  TurnDisplay,
   CardInProduction,
-  Card,
   ProducerItemInProduction,
   IdolInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
-import { metaModifierDictioanry } from "./data/modifiers";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
@@ -45,32 +38,20 @@ import {
   decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
   obtainPositiveImpressionScoreOnTurnEnd,
-  summarizeCardInHand,
   useCard,
 } from "./lesson-mutation";
 import {
   calculateRemainingTurns,
-  createActualTurns,
   createIdolInProduction,
   createLessonGamePlay,
-  getCardContentData,
   getNextHistoryResultIndex,
-  getIdolParameterKindOnTurn,
-  getProducerItemContentData,
-  getRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   patchUpdates,
 } from "./models";
-import {
-  generateCardDescription,
-  generateCardName,
-  generateEffectText,
-  generateProducerItemDescription,
-  idolParameterKindLabels,
-} from "./text-generation";
 import { createIdGenerator } from "./utils";
 
 export type * from "./types";
+export * from "./display";
 export * from "./models";
 export * from "./utils";
 
@@ -100,24 +81,6 @@ export * from "./utils";
 // setLesson(最新のLessonの状態を返す(newLessonGamePlay));
 // ```
 //
-
-/**
- * 応援/トラブル情報リストを取得する
- *
- * - 例えば、アイドルの道の各ステージ詳細の応援/トラブル詳細を表示する際に使う
- */
-export const getEncouragements = (
-  lessonGamePlay: LessonGamePlay,
-): EncouragementDisplay[] => {
-  return lessonGamePlay.initialLesson.encouragements.map((encouragement) => {
-    return {
-      ...encouragement,
-      description: generateEffectText(encouragement.effect, {
-        hasSeparator: false,
-      }),
-    };
-  });
-};
 
 /**
  * ゲームを初期化する
@@ -501,94 +464,6 @@ export const startLessonTurn = (
 };
 
 /**
- * レッスン中のPアイテム表示用情報リストを生成する
- */
-const createProducerDisplays = (lesson: Lesson): ProducerItemDisplay[] => {
-  return lesson.idol.producerItems.map((producerItem) => {
-    const producerItemContent = getProducerItemContentData(producerItem);
-    const name =
-      producerItem.original.data.name +
-      (producerItem.original.enhanced ? "+" : "");
-    return {
-      ...producerItem,
-      name,
-      description: generateProducerItemDescription({
-        condition: producerItemContent.condition,
-        cost: producerItemContent.cost,
-        effects: producerItemContent.effects,
-        times: producerItemContent.times,
-        trigger: producerItemContent.trigger,
-      }),
-      remainingTimes: getRemainingProducerItemTimes(producerItem),
-    };
-  });
-};
-
-/**
- * レッスン表示用情報を生成する
- *
- * - TODO: ターン詳細の「3位以上で合格」が未実装
- * - TODO: レッスン履歴が未実装
- */
-export const createLessonDisplay = (
-  lessonGamePlay: LessonGamePlay,
-): LessonDisplay => {
-  const lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
-  const modifiers = lesson.idol.modifiers.map((modifier) => {
-    return {
-      ...modifier,
-      label: metaModifierDictioanry[modifier.kind].label,
-      description: "",
-    };
-  });
-  const encouragements = getEncouragements(lessonGamePlay);
-  const turns: TurnDisplay[] = createActualTurns(lesson).map(
-    (idolParameterKind, index) => {
-      const turnNumber = index + 1;
-      const encouragement = encouragements.find(
-        (e) => e.turnNumber === turnNumber,
-      );
-      return {
-        turnNumber,
-        turnNumberDiff: turnNumber - lesson.turnNumber,
-        idolParameterKind,
-        idolParameterLabel: idolParameterKindLabels[idolParameterKind],
-        ...(encouragement ? { encouragement } : {}),
-      };
-    },
-  );
-  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
-  const scoreBonus = lesson.idol.scoreBonus
-    ? lesson.idol.scoreBonus[idolParameterKind]
-    : undefined;
-  const hand = lesson.hand.map((cardId) => {
-    return {
-      ...summarizeCardInHand(
-        lesson,
-        cardId,
-        lessonGamePlay.getRandom,
-        lessonGamePlay.idGenerator,
-      ),
-    };
-  });
-  return {
-    hand,
-    life: lesson.idol.life,
-    modifiers,
-    producerItems: createProducerDisplays(lesson),
-    remainingTurns: calculateRemainingTurns(lesson),
-    score: lesson.score,
-    scoreBonus,
-    turnNumber: lesson.turnNumber,
-    turns,
-    vitality: lesson.idol.vitality,
-  };
-};
-
-/**
  * ターンが終了しているかを返す
  */
 export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
@@ -597,70 +472,6 @@ export const isTurnEnded = (lessonGamePlay: LessonGamePlay): boolean => {
     lessonGamePlay.updates,
   );
   return lesson.idol.actionPoints === 0;
-};
-
-/**
- * スキルカード使用のプレビューを表示するための情報を返す
- *
- * - 本家のプレビュー仕様
- *   - 体力・元気の差分
- *     - 効果反映後の値に変わり、その近くに差分アイコンが +n/-n で表示される
- *     - 差分は実際に変化した値を表示する、例えば、結果的に値の変更がない場合は何も表示されない
- *   - 状態修正の差分
- *     - 新規: スキルカード追加使用など一部のものを除いて、左側の状態修正リストの末尾へ追加
- *     - 既存: 差分がある状態修正アイコンに差分適用後の値を表示し、その右に差分アイコンを表示する
- *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
- *   - スキルカード詳細ポップアップ
- *     - 全ての項目が、各効果による変化前のデータ定義時の値、強化段階のみ反映される
- *       - 例えば、「消費体力減少」が付与されていても、コストは半分にならない
- *   - プレビュー時には、選択したスキルカードの効果のみ反映される
- *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
- *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
- *
- * @example
- *   // 変化する差分は updates に含まれるので、アニメーション処理はこの値を解析して使う
- *   const { cardDescription, updates } = previewCardPlay(lessonGamePlay, 0);
- *   // プレビュー用の差分を反映したレッスンの状態、UI側は各値につきこの値との差を使う
- *   const previewedLesson = patchUpdates(lessonGamePlay.initialLesson, updates);
- * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
- */
-export const previewCardPlay = (
-  lessonGamePlay: LessonGamePlay,
-  selectedCardInHandIndex: number,
-): CardPlayPreviewDisplay => {
-  const lesson = patchUpdates(
-    lessonGamePlay.initialLesson,
-    lessonGamePlay.updates,
-  );
-  const cardId = lesson.hand[selectedCardInHandIndex];
-  if (cardId === undefined) {
-    throw new Error("Invalid card index");
-  }
-  const card = lesson.cards.find((e) => e.id === cardId);
-  if (card === undefined) {
-    throw new Error("Invalid card ID");
-  }
-  const cardContent = getCardContentData(card);
-  const { updates } = useCard(lesson, 1, {
-    getRandom: lessonGamePlay.getRandom,
-    idGenerator: lessonGamePlay.idGenerator,
-    selectedCardInHandIndex,
-    preview: true,
-  });
-  const cardDescription = generateCardDescription({
-    cost: cardContent.cost,
-    condition: cardContent.condition,
-    effects: cardContent.effects,
-    innate: cardContent.innate,
-    nonDuplicative: card.original.data.nonDuplicative,
-    usableOncePerLesson: cardContent.usableOncePerLesson,
-  });
-  return {
-    cardDescription,
-    cardName: generateCardName(card),
-    cardCost: cardContent.cost,
-    updates,
-  };
 };
 
 /**

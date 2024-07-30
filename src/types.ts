@@ -1463,7 +1463,7 @@ export type LessonUpdateQuery = LessonUpdateQueryDiff & {
 };
 
 /**
- * レッスンのプレイ記録
+ * レッスンのゲームプレイ記録
  */
 export type LessonGamePlay = {
   getRandom: GetRandom;
@@ -1487,27 +1487,35 @@ export type EncouragementDisplay = Encouragement & {
 };
 
 /**
- * レッスン中の手札の表示用情報
+ * レッスン画面のスキルカード効果の表示用情報
+ *
+ * - 本家UIでは、スキルカード左下の縦並びのアイコンリストで表現している内容
+ * - 本家に従い、スコアと元気に関しては、条件付きの時のみここへ表示する
+ */
+export type CardEffectDisplay = {
+  /**
+   * 効果適用条件を満たすか
+   *
+   * - 満たさない場合、本家UIだと、メインの手札表示内に限り、右にx印が付く
+   *   - なお、所持スキルカードダイアログ内の手札には付かない
+   */
+  applyable: boolean;
+  effect: Effect;
+  kind:
+    | Exclude<Effect, { kind: "getModifier" } | { kind: "perform" }>["kind"]
+    | `modifier-${Modifier["kind"]}`
+    | "perform-score"
+    | "perform-vitality";
+};
+
+/**
+ * レッスン画面の手札の表示用情報
  *
  * - 各値は、基本的には各種効果による変動を含めた値
  */
 export type CardInHandDisplay = {
   cost: ActionCost;
-  /**
-   * 効果概要リスト
-   *
-   * - 本家UIでは左下の縦並びのアイコンリストで表現している内容
-   * - スコアと元気に関しては、条件付きの時のみここへ表示する
-   */
-  effects: Array<{
-    kind:
-      | Exclude<Effect, { kind: "getModifier" } | { kind: "perform" }>["kind"]
-      | `modifier-${Modifier["kind"]}`
-      | "perform-score"
-      | "perform-vitality";
-    /** 効果適用条件を満たすか、本家UIだと右にx印が付く */
-    applyable: boolean;
-  }>;
+  effects: Array<CardEffectDisplay>;
   enhancements: CardEnhancement[];
   /** スキルカードの名称、末尾に強化数分の"+"が付く */
   name: string;
@@ -1526,7 +1534,27 @@ export type CardInHandDisplay = {
 };
 
 /**
- * レッスン中のPアイテムの表示用情報
+ * レッスン画面のスキルカード使用プレビューの表示用情報
+ */
+export type CardPlayPreviewDisplay = {
+  cardCost: ActionCost;
+  cardDescription: string;
+  cardName: string;
+  updates: LessonUpdateQuery[];
+};
+
+/**
+ * レッスン画面の所持スキルカードダイアログ内の各スキルカードの表示用情報
+ */
+export type CardInInventoryDisplay = Card & {
+  description: string;
+  /** この中の applyable は常に true */
+  effects: CardEffectDisplay[];
+  name: string;
+};
+
+/**
+ * レッスン画面のPアイテムの表示用情報
  *
  * - 主に、本家レッスン画面の、右上のアイコンリストをタッチした時の詳細情報に使用することを想定している
  */
@@ -1538,7 +1566,7 @@ export type ProducerItemDisplay = ProducerItem & {
 };
 
 /**
- * レッスン中の状態修正の表示用情報
+ * レッスン画面の状態修正の表示用情報
  *
  * - 主に、本家レッスン画面の、左上のアイコンリストをタッチした時の詳細情報に使用することを想定している
  * - TODO: 本家だと、1つ目に必ず「おすすめ効果」がある、おすすめ効果は状態修正を付与していなくても表示される
@@ -1556,7 +1584,7 @@ export type ModifierDisplay = ModifierData & {
 };
 
 /**
- * レッスン中の各ターンの表示用情報
+ * レッスン画面の各ターンの表示用情報
  *
  * - 主に、本家レッスン画面の、左上の現在ターンをタッチした時の詳細情報に使用することを想定している
  */
@@ -1574,6 +1602,12 @@ export type TurnDisplay = {
  */
 export type LessonDisplay = {
   hand: CardInHandDisplay[];
+  inventory: {
+    hand: CardInInventoryDisplay[];
+    deck: CardInInventoryDisplay[];
+    discardPile: CardInInventoryDisplay[];
+    removedCardPile: CardInInventoryDisplay[];
+  };
   life: Idol["life"];
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
@@ -1584,14 +1618,4 @@ export type LessonDisplay = {
   /** ターン追加を反映した長さのターンリスト */
   turns: TurnDisplay[];
   vitality: Idol["vitality"];
-};
-
-/**
- * スキルカード使用プレビューの表示用情報
- */
-export type CardPlayPreviewDisplay = {
-  cardCost: ActionCost;
-  cardDescription: string;
-  cardName: string;
-  updates: LessonUpdateQuery[];
 };

@@ -55,33 +55,6 @@ export * from "./display";
 export * from "./models";
 export * from "./utils";
 
-//
-// UI側での想定の呼び出し方
-//
-// ゲーム開始:
-// ```
-// const lessonGamePlay = createLessonGamePlay();
-// ```
-//
-// ターン開始:
-// ```
-// const newLessonGamePlay = startLessonTurn(lessonGamePlay);
-// const recentUpdates = newLessonGamePlay.updates.slice(lessonGamePlay.updates.length);
-// set状態遷移アニメーション(recentUpdates);
-// // アニメーション設定がある場合は、それが終わるまで表示上反映されない
-// setLesson(最新のLessonの状態を返す(newLessonGamePlay));
-// ```
-//
-// カード選択してスキルカード使用:
-// ```
-// const newLessonGamePlay = useCard(lessonGamePlay, cardInHandIndex);
-// const recentUpdates = newLessonGamePlay.updates.slice(lessonGamePlay.updates.length);
-// set状態遷移アニメーション(recentUpdates);
-// // アニメーション設定がある場合は、それが終わるまで表示上反映されない
-// setLesson(最新のLessonの状態を返す(newLessonGamePlay));
-// ```
-//
-
 /**
  * ゲームを初期化する
  *

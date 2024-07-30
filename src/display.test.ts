@@ -853,11 +853,14 @@ describe("generateCardPlayPreviewDisplay", () => {
         0,
       ],
       expected: {
-        cardName: "情熱ターン+",
-        cardDescription: ["パラメータ+18", "{{集中}}+4"].join("\n"),
-        // スキルカードのプレビューには、消費体力減少効果は反映されていない
-        cardCost: { kind: "normal", value: 6 },
+        card: {
+          name: "情熱ターン+",
+          description: ["パラメータ+18", "{{集中}}+4"].join("\n"),
+          // スキルカードのプレビューには、消費体力減少効果は反映されていない
+          cost: { kind: "normal", value: 6 },
+        },
         // 「いつものメイクポーチ」は、本来発動するはずだが、プレビューなので発動していない
+        lesson: expect.any(Object),
         updates: [
           // 差分には、消費体力減少効果が反映されている
           {

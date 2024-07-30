@@ -1546,9 +1546,15 @@ export type CardInHandDisplay = {
  * レッスン画面のスキルカード使用プレビューの表示用情報
  */
 export type CardPlayPreviewDisplay = {
-  cardCost: ActionCost;
-  cardDescription: string;
-  cardName: string;
+  /** プレビューで選択したスキルカードの情報、本家UIだとポップアップになっている部分 */
+  card: {
+    cost: ActionCost;
+    description: string;
+    name: string;
+  };
+  /** プレビューで選択したスキルカードの効果反映後のレッスン */
+  lesson: Lesson;
+  /** プレビューで選択したスキルカードの効果の更新クエリリスト */
   updates: LessonUpdateQuery[];
 };
 

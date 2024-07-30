@@ -321,7 +321,7 @@ export const generateCardPlayPreviewDisplay = (
     selectedCardInHandIndex,
     preview: true,
   });
-  const cardDescription = generateCardDescription({
+  const description = generateCardDescription({
     cost: cardContent.cost,
     condition: cardContent.condition,
     effects: cardContent.effects,
@@ -330,9 +330,12 @@ export const generateCardPlayPreviewDisplay = (
     usableOncePerLesson: cardContent.usableOncePerLesson,
   });
   return {
-    cardDescription,
-    cardName: generateCardName(card),
-    cardCost: cardContent.cost,
+    card: {
+      cost: cardContent.cost,
+      description,
+      name: generateCardName(card),
+    },
+    lesson: patchDiffs(lesson, updates),
     updates,
   };
 };

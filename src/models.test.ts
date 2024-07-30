@@ -327,11 +327,6 @@ describe("patchDiffs", () => {
         {
           kind: "actionPoints",
           amount: -1,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.actionPoints).toBe(0);
@@ -355,11 +350,6 @@ describe("patchDiffs", () => {
         {
           kind: "cards.enhancement.effect",
           cardIds: ["1"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([{ kind: "effect" }]);
@@ -396,11 +386,6 @@ describe("patchDiffs", () => {
             { cardId: "2", supportCardIds: [{}] },
             { cardId: "3", supportCardIds: [{}, {}] },
           ],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([
@@ -433,11 +418,6 @@ describe("patchDiffs", () => {
           discardPile: ["22", "222"],
           hand: ["33", "333"],
           removedCardPile: ["44", "444"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.deck).toStrictEqual(["11", "111"]);
@@ -457,11 +437,6 @@ describe("patchDiffs", () => {
           kind: "cardPlacement",
           deck: ["11", "111"],
           discardPile: ["22", "222"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.deck).toStrictEqual(["11", "111"]);
@@ -481,11 +456,6 @@ describe("patchDiffs", () => {
           kind: "cardPlacement",
           hand: ["33", "333"],
           removedCardPile: ["44", "444"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.deck).toStrictEqual(["1"]);
@@ -507,11 +477,6 @@ describe("patchDiffs", () => {
         {
           kind: "cards.addition",
           card: { id: "2" } as Card,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards).toStrictEqual([{ id: "1" }, { id: "2" }]);
@@ -548,11 +513,6 @@ describe("patchDiffs", () => {
         {
           kind: "cards.removingLessonSupports",
           cardIds: ["1", "2", "4"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.cards[0].enhancements).toStrictEqual([
@@ -576,11 +536,6 @@ describe("patchDiffs", () => {
         {
           kind: "modifierIdsAtTurnStart",
           modifierIdsAtTurnStart: ["3", "4"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lesson.idol.modifierIdsAtTurnStart).toStrictEqual(["3", "4"]);
@@ -612,11 +567,6 @@ describe("patchDiffs", () => {
               kind: "goodCondition",
               duration: 2,
               id: "b",
-            },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
             },
           },
         ]);
@@ -694,11 +644,6 @@ describe("patchDiffs", () => {
                       id: "b",
                       updateTargetId: "a",
                     },
-                    reason: {
-                      kind: "lessonStartTrigger",
-                      historyTurnNumber: 1,
-                      historyResultIndex: 1,
-                    },
                   } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
                 ]);
                 expect(lessonMock.idol.modifiers).toStrictEqual([
@@ -735,11 +680,6 @@ describe("patchDiffs", () => {
                       [propertyName]: -5,
                       id: "b",
                       updateTargetId: "a",
-                    },
-                    reason: {
-                      kind: "lessonStartTrigger",
-                      historyTurnNumber: 1,
-                      historyResultIndex: 1,
                     },
                   } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
                 ]);
@@ -786,11 +726,6 @@ describe("patchDiffs", () => {
               id: "c",
               updateTargetId: "b",
             },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
           },
         ]);
         expect(
@@ -831,11 +766,6 @@ describe("patchDiffs", () => {
               id: "b",
               updateTargetId: "a",
             },
-            reason: {
-              kind: "lessonStartTrigger",
-              historyTurnNumber: 1,
-              historyResultIndex: 1,
-            },
           },
         ]);
         expect(lessonMock.idol.modifiers).toStrictEqual([]);
@@ -854,11 +784,6 @@ describe("patchDiffs", () => {
           kind: "life",
           actual: -2,
           max: -3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.life).toBe(3);
@@ -873,11 +798,6 @@ describe("patchDiffs", () => {
         {
           kind: "playedCardsOnEmptyDeck",
           cardIds: ["2"],
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.playedCardsOnEmptyDeck).toStrictEqual(["2"]);
@@ -898,11 +818,6 @@ describe("patchDiffs", () => {
           kind: "producerItem.activationCount",
           producerItemId: "2",
           value: 3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.producerItems).toStrictEqual([
@@ -926,11 +841,6 @@ describe("patchDiffs", () => {
         {
           kind: "remainingTurns",
           amount: 1,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.remainingTurns).toBe(1);
@@ -946,11 +856,6 @@ describe("patchDiffs", () => {
           kind: "score",
           actual: 2,
           max: 3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.score).toBe(3);
@@ -961,16 +866,7 @@ describe("patchDiffs", () => {
       let lessonMock = {
         turnNumber: 0,
       } as Lesson;
-      lessonMock = patchDiffs(lessonMock, [
-        {
-          kind: "turnNumberIncrease",
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
-        },
-      ]);
+      lessonMock = patchDiffs(lessonMock, [{ kind: "turnNumberIncrease" }]);
       expect(lessonMock.turnNumber).toBe(1);
     });
   });
@@ -986,11 +882,6 @@ describe("patchDiffs", () => {
           kind: "vitality",
           actual: -2,
           max: -3,
-          reason: {
-            kind: "lessonStartTrigger",
-            historyTurnNumber: 1,
-            historyResultIndex: 1,
-          },
         },
       ]);
       expect(lessonMock.idol.vitality).toBe(3);

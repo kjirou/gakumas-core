@@ -219,7 +219,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   const modifiers = lesson.idol.modifiers.map((modifier) => {
     return {
       ...modifier,
-      label: metaModifierDictioanry[modifier.kind].label,
+      name: metaModifierDictioanry[modifier.kind].label,
       description: "",
     };
   });

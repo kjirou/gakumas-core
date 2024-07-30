@@ -1595,7 +1595,7 @@ export type ModifierDisplay = ModifierData & {
    */
   description: string;
   id: Modifier["id"];
-  label: string;
+  name: string;
 };
 
 /**

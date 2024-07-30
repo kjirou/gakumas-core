@@ -724,7 +724,7 @@ describe("generateLessonDisplay", () => {
             id: "m1",
             kind: "focus",
             amount: 1,
-            label: "集中",
+            name: "集中",
             description: expect.any(String),
           },
         ],

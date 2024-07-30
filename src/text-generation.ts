@@ -49,7 +49,7 @@ const generateRangedNumberText = (range: RangedNumber): string => {
 /**
  * パラメータ種別の表示名
  */
-export const idolParameterKindLabels = {
+export const idolParameterKindNames = {
   dance: "ダンス",
   visual: "ビジュアル",
   vocal: "ボーカル",

@@ -38,7 +38,7 @@ import {
   generateCardDescription,
   generateEffectText,
   generateProducerItemDescription,
-  idolParameterKindLabels,
+  idolParameterKindNames,
 } from "./text-generation";
 
 const generateEffectDisplay = (
@@ -235,8 +235,10 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
       return {
         turnNumber,
         turnNumberDiff: turnNumber - lesson.turnNumber,
-        idolParameterKind,
-        idolParameterLabel: idolParameterKindLabels[idolParameterKind],
+        idolParameter: {
+          kind: idolParameterKind,
+          name: idolParameterKindNames[idolParameterKind],
+        },
         ...(encouragement ? { encouragement } : {}),
       };
     },

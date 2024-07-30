@@ -762,22 +762,28 @@ describe("generateLessonDisplay", () => {
       expected: {
         turns: [
           {
+            idolParameter: {
+              kind: "vocal",
+              name: "ボーカル",
+            },
             turnNumber: 1,
             turnNumberDiff: -1,
-            idolParameterKind: "vocal",
-            idolParameterLabel: "ボーカル",
           },
           {
+            idolParameter: {
+              kind: "visual",
+              name: "ビジュアル",
+            },
             turnNumber: 2,
             turnNumberDiff: 0,
-            idolParameterKind: "visual",
-            idolParameterLabel: "ビジュアル",
           },
           {
+            idolParameter: {
+              kind: "dance",
+              name: "ダンス",
+            },
             turnNumber: 3,
             turnNumberDiff: 1,
-            idolParameterKind: "dance",
-            idolParameterLabel: "ダンス",
             encouragement: {
               turnNumber: 3,
               effect: expect.any(Object),
@@ -785,10 +791,12 @@ describe("generateLessonDisplay", () => {
             },
           },
           {
+            idolParameter: {
+              kind: "dance",
+              name: "ダンス",
+            },
             turnNumber: 4,
             turnNumberDiff: 2,
-            idolParameterKind: "dance",
-            idolParameterLabel: "ダンス",
           },
         ],
       } as LessonDisplay,

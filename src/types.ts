@@ -1605,8 +1605,10 @@ export type ModifierDisplay = ModifierData & {
  */
 export type TurnDisplay = {
   encouragement?: EncouragementDisplay;
-  idolParameterKind: IdolParameterKind;
-  idolParameterLabel: string;
+  idolParameter: {
+    kind: IdolParameterKind;
+    name: string;
+  };
   turnNumber: number;
   /** 現在のターンとの差、1が1ターン後、-1が1ターン前 */
   turnNumberDiff: number;

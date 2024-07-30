@@ -695,3 +695,13 @@ export const getNextHistoryResultIndex = (
   const lastUpdate = updates[updates.length - 1];
   return lastUpdate ? lastUpdate.reason.historyResultIndex + 1 : 1;
 };
+
+/**
+ * 新旧の更新クエリリストの差分を返す
+ *
+ * - 主に、最後の行動で発行された更新クエリリストの抽出に使う
+ */
+export const diffUpdates = (
+  previous: LessonUpdateQuery[],
+  current: LessonUpdateQuery[],
+) => current.slice(previous.length);

@@ -8,6 +8,7 @@ import {
   createActualTurns,
   createIdolInProduction,
   createGamePlay,
+  diffUpdates,
   getIdolParameterKindOnTurn,
   patchDiffs,
 } from "./models";
@@ -886,5 +887,36 @@ describe("patchDiffs", () => {
       ]);
       expect(lessonMock.idol.vitality).toBe(3);
     });
+  });
+});
+describe("diffUpdates", () => {
+  const testCases: Array<{
+    args: Parameters<typeof diffUpdates>;
+    expected: ReturnType<typeof diffUpdates>;
+  }> = [
+    {
+      args: [
+        [{ kind: "life" }] as LessonUpdateQuery[],
+        [{ kind: "life" }] as LessonUpdateQuery[],
+      ],
+      expected: [],
+    },
+    {
+      args: [
+        [{ kind: "life" }] as LessonUpdateQuery[],
+        [
+          { kind: "life" },
+          { kind: "score" },
+          { kind: "vitality" },
+        ] as LessonUpdateQuery[],
+      ],
+      expected: [
+        { kind: "score" },
+        { kind: "vitality" },
+      ] as LessonUpdateQuery[],
+    },
+  ];
+  test.each(testCases)("$args => $expected", ({ args, expected }) => {
+    expect(diffUpdates(...args)).toStrictEqual(expected);
   });
 });

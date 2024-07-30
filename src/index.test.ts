@@ -9,14 +9,14 @@ import type {
 import { getCardDataById } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
-  endLessonTurn,
+  endTurn,
   getNextHistoryResultIndex,
   initializeGamePlay,
   isLessonEnded,
   isTurnEnded,
   patchDiffs,
   playCard,
-  startLessonTurn,
+  startTurn,
 } from "./index";
 import { activateEffect as activateEffect_ } from "./lesson-mutation";
 import { createGamePlayForTest } from "./test-utils";
@@ -366,7 +366,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     // 1ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -383,12 +383,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 2ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "apirunokihon2", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -403,12 +403,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 3ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -499,7 +499,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     // 1ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -516,12 +516,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 2ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 2,
@@ -537,12 +537,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 3ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 3,
@@ -556,12 +556,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 4ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyojonokihon2", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -577,12 +577,12 @@ describe("水着麻央のプレイ再現", () => {
     gamePlay = applyEffect(gamePlay, { kind: "recoverLife", value: 6 }); // Pドリンク使用
     gamePlay = playCard(gamePlay, 0);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 5ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "shinkokyu2", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -663,7 +663,7 @@ describe("水着麻央のプレイ再現", () => {
     //
     // 1ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
     gamePlay = addLessonSupport(gamePlay, "iji", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
@@ -679,12 +679,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 2ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -699,12 +699,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 3ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "pozunokihon", 2);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -722,12 +722,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 4ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "pozunokihon", 2);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
@@ -745,12 +745,12 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     //
     // 5ターン目
     //
-    gamePlay = startLessonTurn(gamePlay);
+    gamePlay = startTurn(gamePlay);
     lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
     expect(lesson).toMatchObject({
       turnNumber: 5,
@@ -773,7 +773,7 @@ describe("水着麻央のプレイ再現", () => {
     expect(isTurnEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
     expect(isTurnEnded(gamePlay)).toBe(true);
-    gamePlay = endLessonTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
 
     // この後は山札が再構築されるので、プレイ再現が困難
   });

@@ -168,7 +168,7 @@ export const initializeGamePlay = (params: {
  *
  * - レッスン開始時に関わる処理も含む
  */
-export const startLessonTurn = (gamePlay: GamePlay): GamePlay => {
+export const startTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
@@ -598,7 +598,7 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
 /**
  * レッスンのターンを終了する
  */
-export const endLessonTurn = (gamePlay: GamePlay): GamePlay => {
+export const endTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
@@ -687,9 +687,9 @@ export const endLessonTurn = (gamePlay: GamePlay): GamePlay => {
  * レッスンが終了しているかを返す
  *
  * - 以下の処理の後に本関数を呼び出し、レッスンが終了しているかを判定する。終了していたら、その時点から後続処理を行わない。
- *   - `startLessonTurn`
+ *   - `startTurn`
  *   - `playCard`
- *   - `endLessonTurn`
+ *   - `endTurn`
  */
 export const isLessonEnded = (gamePlay: GamePlay): boolean => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);

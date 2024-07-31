@@ -111,9 +111,9 @@ const newGamePlay = endTrun(gamePlay);
 - `diffUpdates`: 2つのゲームプレイを比較して、間の更新差分を抽出する。
 - `endTurn`: ターン終了処理を実行する。
 - `generateCardPlayPreviewDisplay`: スキルカード選択時のプレビュー用の表示情報を生成する。
-- `isTurnEnded`: 手番が終了しているかを判定する。
-- `isLessonEnded`: レッスンが終了しているかを判定する。
 - `initializeGamePlay`: ゲームプレイを初期化する。
+- `isLessonEnded`: レッスンが終了しているかを判定する。
+- `isTurnEnded`: 手番が終了しているかを判定する。
 - `patchDiffs`: レッスンに対して、更新差分を適用して更新した結果のレッスンを返す。
 - `playCard`: スキルカードを使用する。
 - `skipTurn`: ターンをスキップする。

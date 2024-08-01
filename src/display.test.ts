@@ -745,6 +745,33 @@ describe("generateLessonDisplay", () => {
       } as LessonDisplay,
     },
     {
+      name: "modifiers - おすすめ効果を先頭へ配置し、他の整列順は変えない",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            idolDataId: "hanamisaki-ssr-1",
+          });
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "motivation", amount: 1, id: "m1" },
+            { kind: "focus", amount: 1, id: "m2" },
+            { kind: "goodCondition", duration: 1, id: "m3" },
+            { kind: "excellentCondition", duration: 1, id: "m4" },
+            { kind: "positiveImpression", amount: 1, id: "m5" },
+          ];
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        modifiers: [
+          { kind: "goodCondition" },
+          { kind: "motivation" },
+          { kind: "focus" },
+          { kind: "excellentCondition" },
+          { kind: "positiveImpression" },
+        ],
+      } as LessonDisplay,
+    },
+    {
       name: "turns - 概ね動作する",
       args: [
         (() => {

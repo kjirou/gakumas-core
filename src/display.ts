@@ -197,6 +197,29 @@ export const generateProducerItemDisplays = (
   });
 };
 
+const generateModifierDisplays = (lesson: Lesson): ModifierDisplay[] => {
+  let modifiers = lesson.idol.modifiers.map((modifier) => {
+    const representativeValue =
+      getDisplayedRepresentativeModifierValue(modifier);
+    return {
+      ...modifier,
+      name: metaModifierDictioanry[modifier.kind].label,
+      description: "",
+      representativeValue,
+      representativeValueText:
+        representativeValue !== undefined
+          ? representativeValue.toString()
+          : undefined,
+    };
+  });
+  const recommendedModifierKind =
+    lesson.idol.original.data.producePlan.recommendedEffect;
+  modifiers = modifiers.slice().sort((a, b) => {
+    return a.kind === recommendedModifierKind ? -1 : 0;
+  });
+  return modifiers;
+};
+
 export const generateEncouragementDisplays = (
   encouragements: Encouragement[],
 ): EncouragementDisplay[] => {
@@ -218,20 +241,7 @@ export const generateEncouragementDisplays = (
  */
 export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  const modifiers: ModifierDisplay[] = lesson.idol.modifiers.map((modifier) => {
-    const representativeValue =
-      getDisplayedRepresentativeModifierValue(modifier);
-    return {
-      ...modifier,
-      name: metaModifierDictioanry[modifier.kind].label,
-      description: "",
-      representativeValue,
-      representativeValueText:
-        representativeValue !== undefined
-          ? representativeValue.toString()
-          : undefined,
-    };
-  });
+  const modifiers = generateModifierDisplays(lesson);
   const encouragements = generateEncouragementDisplays(
     gamePlay.initialLesson.encouragements,
   );

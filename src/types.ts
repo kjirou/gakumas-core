@@ -138,6 +138,7 @@ export type ModifierData = Readonly<
        *   - 後者の「（1回）」は、変数ではなく固定のよう。下記の通り、複数回付与しても合算されないことから。
        *   - 前者の「もう1回発動」は、もしかしたら変数かもしれないが、現状は1回固定として扱う
        * - この状態修正は合算されない、例えば「国民的アイドル」を2回連続で使うと、2つの状態修正として表示される
+       *   - その割に、本家UIでは、アイコン横に"1"という数値が書いてあり、合算前提のように見える。詳細は不明。
        */
       kind: "doubleEffect";
       /** 状態修正の更新差分として使用する際に、1 なら追加、-1 は削除、の意味。0 は計算中の削除待ち状態であり得る。 */
@@ -242,6 +243,18 @@ export type MetaModifierData = Readonly<{
    * - 「次に使用するスキルカードの効果をもう1回発動」や、いわゆる持続効果・発動予約は合算しない
    */
   nonAggregation: boolean;
+  /**
+   * 代表して表示する値を格納しているプロパティ名
+   *
+   * - 主に、本家UIの状態修正アイコンに添えられている数値の表示に使う
+   */
+  displayedRepresentativeValuePropertyName:
+    | "amount"
+    | "delay"
+    | "duration"
+    | "times"
+    | "value"
+    | undefined;
 }>;
 
 /**
@@ -1596,6 +1609,15 @@ export type ModifierDisplay = ModifierData & {
   description: string;
   id: Modifier["id"];
   name: string;
+  representativeValue: number | undefined;
+  /**
+   * この状態修正が持つ代表的な数値をテキストにしたもの
+   *
+   * - 例えば、「好調」なら"1ターン"、「やる気」なら"1"、という感じ
+   *   - TODO: 現状は"1ターン"ではなく"1"という数値文字列だけにしている。仕様確認が必要なのと、テキスト生成をいじる必要があるので若干手間。なくても意味は通じるので優先度は低い。
+   * - 本家UIの状態修正アイコン一覧の横に付与されている値に相当
+   */
+  representativeValueText: string | undefined;
 };
 
 /**

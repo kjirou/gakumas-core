@@ -12,6 +12,7 @@ import type {
   Encouragement,
   EncouragementDisplay,
   GetRandom,
+  ModifierDisplay,
   IdGenerator,
   Lesson,
   LessonDisplay,
@@ -28,6 +29,7 @@ import {
   calculateRemainingTurns,
   createActualTurns,
   getCardContentData,
+  getDisplayedRepresentativeModifierValue,
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
   getRemainingProducerItemTimes,
@@ -216,11 +218,18 @@ export const generateEncouragementDisplays = (
  */
 export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  const modifiers = lesson.idol.modifiers.map((modifier) => {
+  const modifiers: ModifierDisplay[] = lesson.idol.modifiers.map((modifier) => {
+    const representativeValue =
+      getDisplayedRepresentativeModifierValue(modifier);
     return {
       ...modifier,
       name: metaModifierDictioanry[modifier.kind].label,
       description: "",
+      representativeValue,
+      representativeValueText:
+        representativeValue !== undefined
+          ? representativeValue.toString()
+          : undefined,
     };
   });
   const encouragements = generateEncouragementDisplays(

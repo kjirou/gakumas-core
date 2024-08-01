@@ -10,6 +10,7 @@ import {
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById } from "./data/idols";
+import { metaModifierDictioanry } from "./data/modifiers";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   ActionCost,
@@ -37,6 +38,7 @@ import {
   ProducerItem,
   ProducerItemContentData,
   ProducerItemInProduction,
+  MetaModifierData,
 } from "./types";
 import { shuffleArray } from "./utils";
 
@@ -103,6 +105,43 @@ export const isRemainingProducerItemTimes = (
 ): boolean => {
   const remainingTimes = getRemainingProducerItemTimes(producerItem);
   return remainingTimes !== undefined ? remainingTimes > 0 : true;
+};
+
+/** 状態修正の表示用の代表的な値を返す */
+export const getDisplayedRepresentativeModifierValue = <
+  ModifierLike extends ModifierData,
+>(
+  modifier: ModifierLike,
+): number | undefined => {
+  const { displayedRepresentativeValuePropertyName } =
+    metaModifierDictioanry[modifier.kind];
+  switch (displayedRepresentativeValuePropertyName) {
+    case "amount":
+      return displayedRepresentativeValuePropertyName in modifier
+        ? modifier.amount
+        : undefined;
+    case "delay":
+      return displayedRepresentativeValuePropertyName in modifier
+        ? modifier.delay
+        : undefined;
+    case "duration":
+      return displayedRepresentativeValuePropertyName in modifier
+        ? modifier.duration
+        : undefined;
+    case "times":
+      return displayedRepresentativeValuePropertyName in modifier
+        ? modifier.times
+        : undefined;
+    case "value":
+      return displayedRepresentativeValuePropertyName in modifier
+        ? modifier.value
+        : undefined;
+    case undefined:
+      return undefined;
+    default:
+      const unreachable: never = displayedRepresentativeValuePropertyName;
+      throw new Error(`Unreachable statement`);
+  }
 };
 
 /**

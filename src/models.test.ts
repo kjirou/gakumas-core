@@ -1,4 +1,4 @@
-import { Card, Lesson, LessonUpdateQuery } from "./types";
+import { Card, Lesson, LessonUpdateQuery, Modifier } from "./types";
 import { getCardDataById } from "./data/cards";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -9,6 +9,7 @@ import {
   createIdolInProduction,
   createGamePlay,
   diffUpdates,
+  getDisplayedRepresentativeModifierValue,
   getIdolParameterKindOnTurn,
   patchDiffs,
 } from "./models";
@@ -150,6 +151,44 @@ describe("getIdolParameterKindOnTurn", () => {
       expect(getIdolParameterKindOnTurn(...args)).toBe(expected);
     },
   );
+});
+describe("getDisplayedRepresentativeModifierValue", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getDisplayedRepresentativeModifierValue>;
+    expected: ReturnType<typeof getDisplayedRepresentativeModifierValue>;
+  }> = [
+    {
+      args: [{ kind: "focus", amount: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "goodCondition", duration: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "doubleEffect", times: 1 }],
+      expected: 1,
+    },
+    {
+      args: [{ kind: "debuffProtection", times: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "delayedEffect", delay: 2 } as Modifier],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "lifeConsumptionReduction", value: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "effectActivationOnTurnEnd" } as Modifier],
+      expected: undefined,
+    },
+  ];
+  test.each(testCases)("$args.0 => $expected", ({ args, expected }) => {
+    expect(getDisplayedRepresentativeModifierValue(...args)).toBe(expected);
+  });
 });
 describe("createGamePlay", () => {
   test("it creates a lesson game play", () => {

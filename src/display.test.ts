@@ -726,6 +726,8 @@ describe("generateLessonDisplay", () => {
             amount: 1,
             name: "集中",
             description: expect.any(String),
+            representativeValue: 1,
+            representativeValueText: "1",
           },
         ],
       } as LessonDisplay,

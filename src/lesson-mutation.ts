@@ -1128,8 +1128,8 @@ type EffectActivations = Array<LessonUpdateDiff[] | undefined>;
  * 効果リストを発動する
  *
  * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
- * - 本処理内では、レッスンその他の状況は変わらない前提
- *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
+ * - 効果リストの順番通りに発動し、後の効果は前の効果の結果に影響を受ける
+ *   - 仕様確認: https://github.com/kjirou/gakumas-core/issues/95
  */
 export const activateEffects = (
   lesson: Lesson,
@@ -1141,6 +1141,9 @@ export const activateEffects = (
   for (const effect of effects) {
     const activation = activateEffect(lesson, effect, getRandom, idGenerator);
     effectActivations = [...effectActivations, activation];
+    if (activation) {
+      lesson = patchDiffs(lesson, activation);
+    }
   }
   return effectActivations;
 };

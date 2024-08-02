@@ -4768,11 +4768,11 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "score") as any;
-        expect(update).toStrictEqual({
+        expect(updates.find((e) => e.kind === "score")).toStrictEqual({
           kind: "score",
-          actual: 20,
-          max: 20,
+          // 開花が持つやる気上昇の効果を受けている
+          actual: 32,
+          max: 32,
           reason: expect.any(Object),
         });
       });
@@ -4796,11 +4796,11 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "score") as any;
-        expect(update).toStrictEqual({
+        expect(updates.find((e) => e.kind === "score")).toStrictEqual({
           kind: "score",
-          actual: 10,
-          max: 10,
+          // 「200%スマイル」が持つ、好印象上昇の効果を受けている
+          actual: 15,
+          max: 15,
           reason: expect.any(Object),
         });
       });
@@ -4826,11 +4826,10 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "score") as any;
-        expect(update).toStrictEqual({
+        expect(updates.find((e) => e.kind === "score")).toStrictEqual({
           kind: "score",
           actual: 6,
-          max: 10,
+          max: 22,
           reason: expect.any(Object),
         });
       });

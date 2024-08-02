@@ -234,6 +234,7 @@ describe("createGamePlay", () => {
         playedCardsOnEmptyDeck: [],
         score: 0,
         turnNumber: 0,
+        turnEnded: false,
         turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
         remainingTurns: 0,
         encouragements: [],
@@ -899,6 +900,15 @@ describe("patchDiffs", () => {
         },
       ]);
       expect(lessonMock.score).toBe(3);
+    });
+  });
+  describe("turnEnded", () => {
+    test("it works", () => {
+      let lessonMock = {
+        turnEnded: false,
+      } as Lesson;
+      lessonMock = patchDiffs(lessonMock, [{ kind: "turnEnded", value: true }]);
+      expect(lessonMock.turnEnded).toBe(true);
     });
   });
   describe("turnNumberIncrease", () => {

@@ -23,7 +23,11 @@ import type {
 } from "./types";
 import { compareDeckOrder } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
-import { activateEffects, canUseCard, useCard } from "./lesson-mutation";
+import {
+  activateEffectsOnCardPlay,
+  canUseCard,
+  useCard,
+} from "./lesson-mutation";
 import {
   calculateActualActionCost,
   calculateRemainingTurns,
@@ -89,7 +93,7 @@ export const generateCardInHandDisplay = (
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
   const cardContent = getCardContentData(card);
-  const effectActivations = activateEffects(
+  const effectActivations = activateEffectsOnCardPlay(
     lesson,
     cardContent.effects,
     getRandom,

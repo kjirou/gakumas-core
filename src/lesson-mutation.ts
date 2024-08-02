@@ -1125,13 +1125,13 @@ export const activateMemoryEffect = (
 type EffectActivations = Array<LessonUpdateDiff[] | undefined>;
 
 /**
- * 効果リストを発動する
+ * スキルカード使用により効果リストを発動する
  *
  * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
  * - 効果リストの順番通りに発動し、後の効果は前の効果の結果に影響を受ける
  *   - 仕様確認: https://github.com/kjirou/gakumas-core/issues/95
  */
-export const activateEffects = (
+export const activateEffectsOnCardPlay = (
   lesson: Lesson,
   effects: Effect[],
   getRandom: GetRandom,
@@ -1161,12 +1161,8 @@ export const activateEffectsOfProducerItem = (
 ): LessonUpdateDiff[] => {
   let diffs: LessonUpdateDiff[] = [];
   const producerItemContent = getProducerItemContentData(producerItem);
-  diffs = activateEffects(
-    lesson,
-    producerItemContent.effects,
-    getRandom,
-    idGenerator,
-  )
+  diffs = producerItemContent.effects
+    .map((effect) => activateEffect(lesson, effect, getRandom, idGenerator))
     .filter((e) => e !== undefined)
     .reduce((acc, e) => [...acc, ...e], []);
   diffs = [
@@ -2118,7 +2114,7 @@ export const useCard = (
     //
     // 主効果発動
     //
-    const mainEffectActivations = activateEffects(
+    const mainEffectActivations = activateEffectsOnCardPlay(
       newLesson,
       // プレビュー時は、一部の効果は発動されていない
       cardContent.effects.filter(

@@ -7,6 +7,7 @@ import type {
   CardUsageCondition,
   Effect,
   EffectCondition,
+  EffectWithoutCondition,
   GetRandom,
   IdGenerator,
   Idol,
@@ -659,9 +660,11 @@ export const calculatePerformingVitalityEffect = (
 /**
  * 効果を発動する
  */
-export const activateEffect = (
+export const activateEffect = <
+  EffectWithoutConditionLike extends EffectWithoutCondition,
+>(
   lesson: Lesson,
-  effect: Effect,
+  effect: EffectWithoutConditionLike,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): LessonUpdateDiff[] => {

@@ -1192,7 +1192,7 @@ export const activateEffectsOfProducerItem = (
 /**
  * スキルカード使用に伴うPアイテムの効果を発動して反映する
  */
-export const applyEffectsEachProducerItemsAccordingToCardUsage = (
+export const activateEffectsEachProducerItemsAccordingToCardUsage = (
   lesson: Lesson,
   producerItemTriggerKind:
     | "afterCardEffectActivation"
@@ -2065,7 +2065,7 @@ export const useCard = (
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
-        applyEffectsEachProducerItemsAccordingToCardUsage(
+        activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
           "beforeCardEffectActivation",
           params.getRandom,
@@ -2173,7 +2173,7 @@ export const useCard = (
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
-        applyEffectsEachProducerItemsAccordingToCardUsage(
+        activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
           "afterCardEffectActivation",
           params.getRandom,
@@ -2198,7 +2198,7 @@ export const useCard = (
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
-        applyEffectsEachProducerItemsAccordingToCardUsage(
+        activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
           "modifierIncrease",
           params.getRandom,

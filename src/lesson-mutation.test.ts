@@ -11,6 +11,7 @@ import { getCardDataById } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   activateEffectIf,
+  activateEffectsEachProducerItemsAccordingToCardUsage,
   activateEffectsOfProducerItem,
   activateEffectsOnLessonStart,
   activateEffectsOnCardPlay,
@@ -21,7 +22,6 @@ import {
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
-  applyEffectsEachProducerItemsAccordingToCardUsage,
   calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
@@ -2394,7 +2394,7 @@ describe("activateMemoryEffect", () => {
     expect(activateMemoryEffect(...args)).toStrictEqual(expected);
   });
 });
-describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
+describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
   test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
     let lesson = createLessonForTest({
       producerItems: [
@@ -2412,7 +2412,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2439,7 +2439,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       },
     ]);
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2468,7 +2468,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2503,7 +2503,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       },
     ]);
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2535,7 +2535,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyTurnNumber: 1,
       historyResultIndex: 1,
     } as const;
-    const { updates } = applyEffectsEachProducerItemsAccordingToCardUsage(
+    const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
       lesson,
       "beforeCardEffectActivation",
       () => 0,
@@ -2600,7 +2600,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "afterCardEffectActivation",
         () => 0,
@@ -2643,7 +2643,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       { kind: "positiveImpression", amount: 5, id: "m1" },
     ];
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "afterCardEffectActivation",
         () => 0,
@@ -2669,7 +2669,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "modifierIncrease",
         () => 0,
@@ -2696,7 +2696,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       },
     ]);
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "modifierIncrease",
         () => 0,
@@ -3889,7 +3889,7 @@ describe("useCard preview:false", () => {
       });
     });
   });
-  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動", () => {
     test("「アドレナリン全開」の使用により「最高にハッピーの源」が発動する", () => {
       let lesson = createLessonForTest({
@@ -4987,7 +4987,7 @@ describe("useCard preview:false", () => {
       });
     });
   });
-  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動", () => {
     test("「えいえいおー」の使用により「テクノドッグ」が発動する", () => {
       let lesson = createLessonForTest({
@@ -5047,7 +5047,7 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
-  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカードの主効果による状態修正増加後の効果発動", () => {
     test("「意識の基本」の使用により「ひみつ特訓カーデ」が発動する", () => {
       let lesson = createLessonForTest({

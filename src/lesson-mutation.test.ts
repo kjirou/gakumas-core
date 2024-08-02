@@ -10,7 +10,7 @@ import {
 import { getCardDataById } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
-  activateEffect,
+  activateEffectIf,
   activateEffectsOfProducerItem,
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -24,7 +24,7 @@ import {
   calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
-  canApplyEffect,
+  canActivateEffect,
   canUseCard,
   canTriggerProducerItem,
   consumeRemainingCardUsageCount,
@@ -816,10 +816,10 @@ describe("canUseCard", () => {
     expect(canUseCard(...args)).toStrictEqual(expected);
   });
 });
-describe("canApplyEffect", () => {
+describe("canActivateEffect", () => {
   const testCases: Array<{
-    args: Parameters<typeof canApplyEffect>;
-    expected: ReturnType<typeof canApplyEffect>;
+    args: Parameters<typeof canActivateEffect>;
+    expected: ReturnType<typeof canActivateEffect>;
     name: string;
   }> = [
     {
@@ -1056,10 +1056,10 @@ describe("canApplyEffect", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canApplyEffect(...args)).toBe(expected);
+    expect(canActivateEffect(...args)).toBe(expected);
   });
 });
-// condition 条件は canApplyEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
+// condition 条件は canActivateEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
 describe("canTriggerProducerItem", () => {
   const testCases: Array<{
     args: Parameters<typeof canTriggerProducerItem>;
@@ -1950,10 +1950,10 @@ describe("calculatePerformingVitalityEffect", () => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
   });
 });
-describe("activateEffect", () => {
+describe("activateEffectIf", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateEffect>;
-    expected: ReturnType<typeof activateEffect>;
+    args: Parameters<typeof activateEffectIf>;
+    expected: ReturnType<typeof activateEffectIf>;
     name: string;
   }> = [
     {
@@ -2143,7 +2143,7 @@ describe("activateEffect", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEffect(...args)).toStrictEqual(expected);
+    expect(activateEffectIf(...args)).toStrictEqual(expected);
   });
 });
 describe("activateEffectsOfProducerItem", () => {

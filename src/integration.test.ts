@@ -19,7 +19,7 @@ import {
   playCard,
   startTurn,
 } from "./index";
-import { activateEffect as activateEffect_ } from "./lesson-mutation";
+import { activateEffectIf as activateEffect_ } from "./lesson-mutation";
 import { createGamePlayForTest } from "./test-utils";
 
 /**

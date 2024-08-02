@@ -17,11 +17,11 @@ export const getDefaultCardSetData = (
   proeducePlan: ProducePlan,
 ): CardSetData => {
   if (proeducePlan.kind === "logic") {
-    return proeducePlan.recommendedEffect === "motivation"
+    return proeducePlan.recommendedModifierKind === "motivation"
       ? getCardSetDataById("defaultLogicMotivation")
       : getCardSetDataById("defaultLogicPositiveImpression");
   } else {
-    return proeducePlan.recommendedEffect === "focus"
+    return proeducePlan.recommendedModifierKind === "focus"
       ? getCardSetDataById("defaultSenseFocus")
       : getCardSetDataById("defaultSenseGoodCondition");
   }

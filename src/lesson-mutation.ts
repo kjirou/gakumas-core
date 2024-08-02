@@ -213,7 +213,7 @@ export const validateCostConsumution = (
 };
 
 /** スキルカードが使用できるかを判定する */
-export const canUseCard = (
+export const canPlayCard = (
   lesson: Lesson,
   cost: ActionCost,
   condition: CardUsageCondition | undefined,
@@ -1956,7 +1956,7 @@ export const useCard = (
   //
   if (
     !params.preview &&
-    !canUseCard(lesson, cardContent.cost, cardContent.condition)
+    !canPlayCard(lesson, cardContent.cost, cardContent.condition)
   ) {
     throw new Error(`Can not use the card: ${card.original.data.name}`);
   }

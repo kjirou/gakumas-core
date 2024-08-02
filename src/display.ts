@@ -25,7 +25,7 @@ import { compareDeckOrder } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 import {
   activateEffectsOnCardPlay,
-  canUseCard,
+  canPlayCard,
   useCard,
 } from "./lesson-mutation";
 import {
@@ -137,7 +137,7 @@ export const generateCardInHandDisplay = (
     effects: effectDisplays,
     enhancements: card.enhancements,
     name: generateCardName(card),
-    playable: canUseCard(lesson, cardContent.cost, cardContent.condition),
+    playable: canPlayCard(lesson, cardContent.cost, cardContent.condition),
     scores,
     vitality,
   };

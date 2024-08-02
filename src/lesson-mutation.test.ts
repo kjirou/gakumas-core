@@ -26,7 +26,7 @@ import {
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
   canActivateEffect,
-  canUseCard,
+  canPlayCard,
   canTriggerProducerItem,
   consumeRemainingCardUsageCount,
   createCardPlacementDiff,
@@ -469,10 +469,10 @@ describe("validateCostConsumution", () => {
   });
 });
 // validateCostConsumution で検証できる内容はそちらで行う
-describe("canUseCard", () => {
+describe("canPlayCard", () => {
   const testCases: Array<{
-    args: Parameters<typeof canUseCard>;
-    expected: ReturnType<typeof canUseCard>;
+    args: Parameters<typeof canPlayCard>;
+    expected: ReturnType<typeof canPlayCard>;
     name: string;
   }> = [
     {
@@ -814,7 +814,7 @@ describe("canUseCard", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canUseCard(...args)).toStrictEqual(expected);
+    expect(canPlayCard(...args)).toStrictEqual(expected);
   });
 });
 describe("canActivateEffect", () => {

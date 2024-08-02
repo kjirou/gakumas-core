@@ -126,7 +126,7 @@ export type ModifierData = Readonly<
        *   - 解決優先度を定義しないといけない問題が発生する。例えば、スキルカードを引く→手札強化、の順番は固定だが、現在はそれをハードコーディングで表現している。
        */
       effect: Extract<
-        Effect,
+        EffectWithoutCondition,
         { kind: "drawCards" | "enhanceHand" | "perform" }
       >;
     }

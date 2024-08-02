@@ -1028,15 +1028,10 @@ const activateDelayedEffectModifier = (
   }
   let diffs: LessonUpdateDiff[] = [];
   if (modifier.delay === 1) {
-    const effectResult = activateEffectIf(
-      lesson,
-      modifier.effect,
-      getRandom,
-      idGenerator,
-    );
-    if (effectResult) {
-      diffs = [...diffs, ...effectResult];
-    }
+    diffs = [
+      ...diffs,
+      ...activateEffect(lesson, modifier.effect, getRandom, idGenerator),
+    ];
   }
   const id = idGenerator();
   diffs = [

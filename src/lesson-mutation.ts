@@ -2090,24 +2090,29 @@ export const useCard = (
         >
       >;
       for (const { effect } of effectsUponCardUsage) {
-        const effectResult = activateEffectIf(
+        const diffs = activateEffectIf(
           newLesson,
           effect,
           params.getRandom,
           params.idGenerator,
         );
-        const innerUpdates = [
-          ...(effectResult ?? []).map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "cardUsageTrigger",
-              cardId: card.id,
-              historyTurnNumber: newLesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          ),
-        ];
-        newLesson = patchDiffs(newLesson, innerUpdates);
-        effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
+        if (diffs) {
+          const innerUpdates = [
+            ...diffs.map((diff) =>
+              createLessonUpdateQueryFromDiff(diff, {
+                kind: "cardUsageTrigger",
+                cardId: card.id,
+                historyTurnNumber: newLesson.turnNumber,
+                historyResultIndex: nextHistoryResultIndex,
+              }),
+            ),
+          ];
+          newLesson = patchDiffs(newLesson, innerUpdates);
+          effectActivationUpdates = [
+            ...effectActivationUpdates,
+            ...innerUpdates,
+          ];
+        }
       }
     }
 

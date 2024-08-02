@@ -15,11 +15,13 @@
 
 import {
   CardData,
+  Encouragement,
   Idol,
   IdolData,
   Lesson,
   GamePlay,
   LessonUpdateQuery,
+  MemoryEffect,
   ProducerItemData,
   CardInProduction,
   ProducerItemInProduction,
@@ -62,10 +64,13 @@ export * from "./utils";
  *
  * @param params.cards アイドル固有に加えて、追加するスキルカードリスト
  * @param params.clearScoreThresholds クリアスコアとパーフェクトスコア設定、任意でデフォルトは上限なしを意味する undefined
+ * @param params.encouragements 応援/トラブル設定、任意
  * @param params.idolDataId プロデュースアイドルのID
+ * @param params.idolSpecificCardTestId テスト用、本来知る必要がない内部的なIDを指定する
  * @param params.ignoreIdolParameterKindConditionAfterClearing クリア後に、Pアイテムがパラメータ属性を無視して効果を発動するか。追い込みレッスンの設定。
  *                                                             任意でデフォルトは false
  * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値。なお、体力最大値は、True Endの効果を含む。
+ * @param params.memoryEffects メモリーのアビリティによる効果設定、任意
  * @param params.producerItems アイドル固有に加えて、追加するPアイテムリスト
  * @param params.scoreBonus スコアボーナス設定、任意でデフォルトは設定なしを意味する undefined
  * @param params.specialTrainingLevel 特訓段階、アイドル固有スキルカードの強化に影響を与えるのみ。任意でデフォルトは1。
@@ -108,11 +113,16 @@ export const initializeGamePlay = (params: {
   cards: Array<{
     enhanced?: CardInProduction["enhanced"];
     id: CardData["id"];
+    /** テスト用、本来知る必要がない内部的なIDを指定する */
+    testId?: CardInProduction["id"];
   }>;
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  encouragements?: Encouragement[];
   idolDataId: IdolData["id"];
+  idolSpecificCardTestId?: CardInProduction["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: IdolInProduction["life"];
+  memoryEffects?: MemoryEffect[];
   producerItems: Array<{
     enhanced?: ProducerItemInProduction["enhanced"];
     id: ProducerItemData["id"];
@@ -130,7 +140,7 @@ export const initializeGamePlay = (params: {
   const additionalCards: CardInProduction[] = params.cards.map(
     (cardSetting) => {
       return {
-        id: idGenerator(),
+        id: cardSetting.testId ?? idGenerator(),
         data: getCardDataById(cardSetting.id),
         enhanced: cardSetting.enhanced ?? false,
       };
@@ -151,13 +161,16 @@ export const initializeGamePlay = (params: {
     idolDataId: params.idolDataId,
     life: params.life,
     specialTrainingLevel,
+    specificCardId: params.idolSpecificCardTestId,
     talentAwakeningLevel,
   });
   return createGamePlay({
     clearScoreThresholds: params.clearScoreThresholds,
+    encouragements: params.encouragements,
     idGenerator,
     idolInProduction,
     ignoreIdolParameterKindConditionAfterClearing,
+    memoryEffects: params.memoryEffects,
     scoreBonus: params.scoreBonus,
     turns: params.turns,
   });

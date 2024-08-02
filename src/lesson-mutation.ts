@@ -1104,11 +1104,9 @@ export const activateMemoryEffect = (
     }
     case "vitality": {
       return [
-        {
-          kind: "vitality",
-          actual: memoryEffect.value,
-          max: memoryEffect.value,
-        },
+        calculatePerformingVitalityEffect(lesson.idol, {
+          value: memoryEffect.value,
+        }),
       ];
     }
     default: {
@@ -1831,22 +1829,20 @@ export const activateMemoryEffectsOnLessonStart = (
 
   let memoryEffectUpdates: LessonUpdateQuery[] = [];
   for (const memoryEffect of newLesson.memoryEffects) {
-    memoryEffectUpdates = [
-      ...memoryEffectUpdates,
-      ...activateMemoryEffect(
-        newLesson,
-        memoryEffect,
-        params.getRandom,
-        params.idGenerator,
-      ).map((diff) =>
-        createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex: nextHistoryResultIndex,
-        }),
-      ),
-    ];
-    newLesson = patchDiffs(newLesson, memoryEffectUpdates);
+    const innerUpdates = activateMemoryEffect(
+      newLesson,
+      memoryEffect,
+      params.getRandom,
+      params.idGenerator,
+    ).map((diff) =>
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "turnStartTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      }),
+    );
+    memoryEffectUpdates = [...memoryEffectUpdates, ...innerUpdates];
+    newLesson = patchDiffs(newLesson, innerUpdates);
   }
   if (memoryEffectUpdates.length > 0) {
     nextHistoryResultIndex++;

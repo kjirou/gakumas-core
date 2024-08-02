@@ -10,9 +10,11 @@ import {
 import { getCardDataById } from "./data/cards";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
-  activateEffect,
+  activateEffectIf,
+  activateEffectsEachProducerItemsAccordingToCardUsage,
   activateEffectsOfProducerItem,
   activateEffectsOnLessonStart,
+  activateEffectsOnCardPlay,
   activateEffectsOnTurnEnd,
   activateEncouragementOnTurnStart,
   activateMemoryEffect,
@@ -20,12 +22,11 @@ import {
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
   addCardsToHandOrDiscardPile,
-  applyEffectsEachProducerItemsAccordingToCardUsage,
   calculateCostConsumption,
   calculatePerformingScoreEffect,
   calculatePerformingVitalityEffect,
-  canApplyEffect,
-  canUseCard,
+  canActivateEffect,
+  canPlayCard,
   canTriggerProducerItem,
   consumeRemainingCardUsageCount,
   createCardPlacementDiff,
@@ -468,10 +469,10 @@ describe("validateCostConsumution", () => {
   });
 });
 // validateCostConsumution で検証できる内容はそちらで行う
-describe("canUseCard", () => {
+describe("canPlayCard", () => {
   const testCases: Array<{
-    args: Parameters<typeof canUseCard>;
-    expected: ReturnType<typeof canUseCard>;
+    args: Parameters<typeof canPlayCard>;
+    expected: ReturnType<typeof canPlayCard>;
     name: string;
   }> = [
     {
@@ -813,13 +814,13 @@ describe("canUseCard", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canUseCard(...args)).toStrictEqual(expected);
+    expect(canPlayCard(...args)).toStrictEqual(expected);
   });
 });
-describe("canApplyEffect", () => {
+describe("canActivateEffect", () => {
   const testCases: Array<{
-    args: Parameters<typeof canApplyEffect>;
-    expected: ReturnType<typeof canApplyEffect>;
+    args: Parameters<typeof canActivateEffect>;
+    expected: ReturnType<typeof canActivateEffect>;
     name: string;
   }> = [
     {
@@ -1056,10 +1057,10 @@ describe("canApplyEffect", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canApplyEffect(...args)).toBe(expected);
+    expect(canActivateEffect(...args)).toBe(expected);
   });
 });
-// condition 条件は canApplyEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
+// condition 条件は canActivateEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
 describe("canTriggerProducerItem", () => {
   const testCases: Array<{
     args: Parameters<typeof canTriggerProducerItem>;
@@ -1950,10 +1951,10 @@ describe("calculatePerformingVitalityEffect", () => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
   });
 });
-describe("activateEffect", () => {
+describe("activateEffectIf", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateEffect>;
-    expected: ReturnType<typeof activateEffect>;
+    args: Parameters<typeof activateEffectIf>;
+    expected: ReturnType<typeof activateEffectIf>;
     name: string;
   }> = [
     {
@@ -2143,7 +2144,78 @@ describe("activateEffect", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEffect(...args)).toStrictEqual(expected);
+    expect(activateEffectIf(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffectsOnCardPlay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOnCardPlay>;
+    expected: ReturnType<typeof activateEffectsOnCardPlay>;
+    name: string;
+  }> = [
+    {
+      name: "各効果発動は、自身より後の効果発動へ影響を与える",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.vitality = 0;
+          return lesson;
+        })(),
+        [
+          { kind: "perform", vitality: { value: 1 } },
+          { kind: "performLeveragingVitality", percentage: 100 },
+        ],
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        [{ kind: "vitality", actual: 1, max: 1 }],
+        [{ kind: "score", actual: 1, max: 1 }],
+      ],
+    },
+    {
+      name: "各効果の発動条件は、効果リスト発動前の状態を参照する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 1 },
+            condition: { kind: "hasGoodCondition" },
+          },
+        ],
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "goodCondition",
+              duration: 1,
+              id: expect.any(String),
+            },
+            max: {
+              kind: "goodCondition",
+              duration: 1,
+              id: expect.any(String),
+            },
+          },
+        ],
+        undefined,
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOnCardPlay(...args)).toStrictEqual(expected);
   });
 });
 describe("activateEffectsOfProducerItem", () => {
@@ -2322,7 +2394,7 @@ describe("activateMemoryEffect", () => {
     expect(activateMemoryEffect(...args)).toStrictEqual(expected);
   });
 });
-describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
+describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
   test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
     let lesson = createLessonForTest({
       producerItems: [
@@ -2340,7 +2412,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2367,7 +2439,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       },
     ]);
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2396,7 +2468,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2431,7 +2503,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       },
     ]);
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "beforeCardEffectActivation",
         () => 0,
@@ -2463,7 +2535,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyTurnNumber: 1,
       historyResultIndex: 1,
     } as const;
-    const { updates } = applyEffectsEachProducerItemsAccordingToCardUsage(
+    const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
       lesson,
       "beforeCardEffectActivation",
       () => 0,
@@ -2528,7 +2600,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "afterCardEffectActivation",
         () => 0,
@@ -2571,7 +2643,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       { kind: "positiveImpression", amount: 5, id: "m1" },
     ];
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "afterCardEffectActivation",
         () => 0,
@@ -2597,7 +2669,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       historyResultIndex: 1,
     } as const;
     const { updates: updates1 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "modifierIncrease",
         () => 0,
@@ -2624,7 +2696,7 @@ describe("applyEffectsEachProducerItemsAccordingToCardUsage", () => {
       },
     ]);
     const { updates: updates2 } =
-      applyEffectsEachProducerItemsAccordingToCardUsage(
+      activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
         "modifierIncrease",
         () => 0,
@@ -3817,7 +3889,7 @@ describe("useCard preview:false", () => {
       });
     });
   });
-  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動", () => {
     test("「アドレナリン全開」の使用により「最高にハッピーの源」が発動する", () => {
       let lesson = createLessonForTest({
@@ -4768,11 +4840,11 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "score") as any;
-        expect(update).toStrictEqual({
+        expect(updates.find((e) => e.kind === "score")).toStrictEqual({
           kind: "score",
-          actual: 20,
-          max: 20,
+          // 開花が持つやる気上昇の効果を受けている
+          actual: 32,
+          max: 32,
           reason: expect.any(Object),
         });
       });
@@ -4796,11 +4868,11 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "score") as any;
-        expect(update).toStrictEqual({
+        expect(updates.find((e) => e.kind === "score")).toStrictEqual({
           kind: "score",
-          actual: 10,
-          max: 10,
+          // 「200%スマイル」が持つ、好印象上昇の効果を受けている
+          actual: 15,
+          max: 15,
           reason: expect.any(Object),
         });
       });
@@ -4826,11 +4898,10 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        const update = updates.find((e) => e.kind === "score") as any;
-        expect(update).toStrictEqual({
+        expect(updates.find((e) => e.kind === "score")).toStrictEqual({
           kind: "score",
           actual: 6,
-          max: 10,
+          max: 22,
           reason: expect.any(Object),
         });
       });
@@ -4916,7 +4987,7 @@ describe("useCard preview:false", () => {
       });
     });
   });
-  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動", () => {
     test("「えいえいおー」の使用により「テクノドッグ」が発動する", () => {
       let lesson = createLessonForTest({
@@ -4976,7 +5047,7 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
-  // 基本的には applyEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカードの主効果による状態修正増加後の効果発動", () => {
     test("「意識の基本」の使用により「ひみつ特訓カーデ」が発動する", () => {
       let lesson = createLessonForTest({

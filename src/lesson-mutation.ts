@@ -2,12 +2,12 @@ import type {
   ActionCost,
   Card,
   CardData,
-  CardInHandDisplay,
   CardInProduction,
   CardSummaryKind,
   CardUsageCondition,
   Effect,
   EffectCondition,
+  EffectWithoutCondition,
   GetRandom,
   IdGenerator,
   Idol,
@@ -213,7 +213,7 @@ export const validateCostConsumution = (
 };
 
 /** スキルカードが使用できるかを判定する */
-export const canUseCard = (
+export const canPlayCard = (
   lesson: Lesson,
   cost: ActionCost,
   condition: CardUsageCondition | undefined,
@@ -291,7 +291,7 @@ export const canUseCard = (
 /**
  * 各効果が適用できるかを判定する
  */
-export const canApplyEffect = (
+export const canActivateEffect = (
   lesson: Lesson,
   condition: EffectCondition,
 ): boolean => {
@@ -419,7 +419,7 @@ export const canTriggerProducerItem = (
     modifierIncreaseCondition &&
     idolParameterKindCondition &&
     (producerItemContent.condition === undefined ||
-      canApplyEffect(lesson, producerItemContent.condition)) &&
+      canActivateEffect(lesson, producerItemContent.condition)) &&
     isRemainingProducerItemTimes(producerItem)
   );
 };
@@ -658,16 +658,16 @@ export const calculatePerformingVitalityEffect = (
 };
 
 /**
- * 効果を計算して更新差分リストを返す
- *
- * @return 効果適用条件を満たさない場合は undefined を返す、結果的に効果がなかった場合は空配列を返す
+ * 効果を発動する
  */
-export const activateEffect = (
+export const activateEffect = <
+  EffectWithoutConditionLike extends EffectWithoutCondition,
+>(
   lesson: Lesson,
-  effect: Effect,
+  effect: EffectWithoutConditionLike,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
-): LessonUpdateDiff[] | undefined => {
+): LessonUpdateDiff[] => {
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   const scoreBonus =
     lesson.idol.scoreBonus !== undefined
@@ -683,18 +683,7 @@ export const activateEffect = (
       remainingIncrementableScore = progress.remainingPerfectScore;
     }
   }
-
   let diffs: LessonUpdateDiff[] = [];
-
-  //
-  // 効果別の適用条件判定
-  //
-  if (effect.condition) {
-    if (!canApplyEffect(lesson, effect.condition)) {
-      return undefined;
-    }
-  }
-
   const effectKind = effect.kind;
   switch (effectKind) {
     case "drainLife": {
@@ -1009,6 +998,31 @@ export const activateEffect = (
   return diffs;
 };
 
+/**
+ * 効果の条件を満たせば、効果を発動する
+ *
+ * @param options.lessonForCondition 条件判定用のレッスンを効果発動用のレッスンと別に指定する時に使用する
+ * @return 効果適用条件を満たさない場合は undefined を返す、結果的に効果がなかった場合は空配列を返す
+ */
+export const activateEffectIf = (
+  lesson: Lesson,
+  effect: Effect,
+  getRandom: GetRandom,
+  idGenerator: IdGenerator,
+  options: {
+    lessonForCondition?: Lesson;
+  } = {},
+): LessonUpdateDiff[] | undefined => {
+  if (effect.condition) {
+    if (
+      !canActivateEffect(options.lessonForCondition ?? lesson, effect.condition)
+    ) {
+      return undefined;
+    }
+  }
+  return activateEffect(lesson, effect, getRandom, idGenerator);
+};
+
 const activateDelayedEffectModifier = (
   lesson: Lesson,
   modifier: Extract<Modifier, { kind: "delayedEffect" }>,
@@ -1020,15 +1034,10 @@ const activateDelayedEffectModifier = (
   }
   let diffs: LessonUpdateDiff[] = [];
   if (modifier.delay === 1) {
-    const effectResult = activateEffect(
-      lesson,
-      modifier.effect,
-      getRandom,
-      idGenerator,
-    );
-    if (effectResult) {
-      diffs = [...diffs, ...effectResult];
-    }
+    diffs = [
+      ...diffs,
+      ...activateEffect(lesson, modifier.effect, getRandom, idGenerator),
+    ];
   }
   const id = idGenerator();
   diffs = [
@@ -1125,22 +1134,30 @@ export const activateMemoryEffect = (
 type EffectActivations = Array<LessonUpdateDiff[] | undefined>;
 
 /**
- * 効果リストを発動する
+ * スキルカードの使用により、その効果リストを発動する
  *
- * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
- * - 本処理内では、レッスンその他の状況は変わらない前提
- *   - 「お嬢様の晴れ舞台」で、最初に加算される元気は、その後のパラメータ上昇の計算には含まれていない、などのことから
+ * - 効果リストの順番通りに発動し、後の効果は前の効果の結果に影響を受ける
+ *   - 仕様確認: https://github.com/kjirou/gakumas-core/issues/95
+ * - 一方で、各効果の効果発動条件については、スキルカード使用前のレッスンの状態を参照する
+ *   - 例えば、「楽観的」は、好調がない状態では、集中+1は発動しない
  */
-export const activateEffects = (
+export const activateEffectsOnCardPlay = (
   lesson: Lesson,
   effects: Effect[],
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): EffectActivations => {
+  const beforeLesson = lesson;
   let effectActivations: EffectActivations = [];
   for (const effect of effects) {
-    const activation = activateEffect(lesson, effect, getRandom, idGenerator);
-    effectActivations = [...effectActivations, activation];
+    const diffs = activateEffectIf(lesson, effect, getRandom, idGenerator, {
+      lessonForCondition: beforeLesson,
+    });
+    if (diffs) {
+      lesson = patchDiffs(lesson, diffs);
+    }
+    // diffs が undefined の時も記録する必要がある
+    effectActivations = [...effectActivations, diffs];
   }
   return effectActivations;
 };
@@ -1158,13 +1175,8 @@ export const activateEffectsOfProducerItem = (
 ): LessonUpdateDiff[] => {
   let diffs: LessonUpdateDiff[] = [];
   const producerItemContent = getProducerItemContentData(producerItem);
-  diffs = activateEffects(
-    lesson,
-    producerItemContent.effects,
-    getRandom,
-    idGenerator,
-  )
-    .filter((e) => e !== undefined)
+  diffs = producerItemContent.effects
+    .map((effect) => activateEffect(lesson, effect, getRandom, idGenerator))
     .reduce((acc, e) => [...acc, ...e], []);
   diffs = [
     ...diffs,
@@ -1180,7 +1192,7 @@ export const activateEffectsOfProducerItem = (
 /**
  * スキルカード使用に伴うPアイテムの効果を発動して反映する
  */
-export const applyEffectsEachProducerItemsAccordingToCardUsage = (
+export const activateEffectsEachProducerItemsAccordingToCardUsage = (
   lesson: Lesson,
   producerItemTriggerKind:
     | "afterCardEffectActivation"
@@ -1308,7 +1320,7 @@ export const activateEncouragementOnTurnStart = (
     (e) => e.turnNumber === lesson.turnNumber,
   );
   if (encouragement) {
-    const diffs = activateEffect(
+    const diffs = activateEffectIf(
       newLesson,
       encouragement.effect,
       params.getRandom,
@@ -1681,17 +1693,15 @@ export const drawCardsOnTurnStart = (
     // "drawCards" に限れば idGenerator は使われない
     () => "",
   );
-  if (drawCardsEffectDiffs) {
-    drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
-      createLessonUpdateQueryFromDiff(diff, {
-        kind: "turnStartTrigger",
-        historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
-      }),
-    );
-    newLesson = patchDiffs(newLesson, drawCardsEffectUpdates);
-    nextHistoryResultIndex++;
-  }
+  drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
+    createLessonUpdateQueryFromDiff(diff, {
+      kind: "turnStartTrigger",
+      historyTurnNumber: newLesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    }),
+  );
+  newLesson = patchDiffs(newLesson, drawCardsEffectUpdates);
+  nextHistoryResultIndex++;
 
   //
   // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す
@@ -1946,7 +1956,7 @@ export const useCard = (
   //
   if (
     !params.preview &&
-    !canUseCard(lesson, cardContent.cost, cardContent.condition)
+    !canPlayCard(lesson, cardContent.cost, cardContent.condition)
   ) {
     throw new Error(`Can not use the card: ${card.original.data.name}`);
   }
@@ -2055,7 +2065,7 @@ export const useCard = (
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
-        applyEffectsEachProducerItemsAccordingToCardUsage(
+        activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
           "beforeCardEffectActivation",
           params.getRandom,
@@ -2091,31 +2101,36 @@ export const useCard = (
         >
       >;
       for (const { effect } of effectsUponCardUsage) {
-        const effectResult = activateEffect(
+        const diffs = activateEffectIf(
           newLesson,
           effect,
           params.getRandom,
           params.idGenerator,
         );
-        const innerUpdates = [
-          ...(effectResult ?? []).map((diff) =>
-            createLessonUpdateQueryFromDiff(diff, {
-              kind: "cardUsageTrigger",
-              cardId: card.id,
-              historyTurnNumber: newLesson.turnNumber,
-              historyResultIndex: nextHistoryResultIndex,
-            }),
-          ),
-        ];
-        newLesson = patchDiffs(newLesson, innerUpdates);
-        effectActivationUpdates = [...effectActivationUpdates, ...innerUpdates];
+        if (diffs) {
+          const innerUpdates = [
+            ...diffs.map((diff) =>
+              createLessonUpdateQueryFromDiff(diff, {
+                kind: "cardUsageTrigger",
+                cardId: card.id,
+                historyTurnNumber: newLesson.turnNumber,
+                historyResultIndex: nextHistoryResultIndex,
+              }),
+            ),
+          ];
+          newLesson = patchDiffs(newLesson, innerUpdates);
+          effectActivationUpdates = [
+            ...effectActivationUpdates,
+            ...innerUpdates,
+          ];
+        }
       }
     }
 
     //
     // 主効果発動
     //
-    const mainEffectActivations = activateEffects(
+    const mainEffectActivations = activateEffectsOnCardPlay(
       newLesson,
       // プレビュー時は、一部の効果は発動されていない
       cardContent.effects.filter(
@@ -2158,7 +2173,7 @@ export const useCard = (
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
-        applyEffectsEachProducerItemsAccordingToCardUsage(
+        activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
           "afterCardEffectActivation",
           params.getRandom,
@@ -2183,7 +2198,7 @@ export const useCard = (
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
-        applyEffectsEachProducerItemsAccordingToCardUsage(
+        activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
           "modifierIncrease",
           params.getRandom,
@@ -2314,7 +2329,7 @@ export const activateEffectsOnTurnEnd = (
     for (const modifier of newLesson.idol.modifiers) {
       let innerUpdates: LessonUpdateQuery[] = [];
       if (modifier.kind === "effectActivationOnTurnEnd") {
-        const diffs = activateEffect(
+        const diffs = activateEffectIf(
           newLesson,
           modifier.effect,
           params.getRandom,

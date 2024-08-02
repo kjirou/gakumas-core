@@ -19,7 +19,7 @@ import {
   playCard,
   startTurn,
 } from "./index";
-import { activateEffect as activateEffect_ } from "./lesson-mutation";
+import { activateEffect } from "./lesson-mutation";
 import { createGamePlayForTest } from "./test-utils";
 
 /**
@@ -60,16 +60,13 @@ const applyEffect = (
   options: {} = {},
 ): GamePlay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  const diffs = activateEffect_(
+  const diffs = activateEffect(
     lesson,
     effect,
     gamePlay.getRandom,
     gamePlay.idGenerator,
   );
   const nextHistoryResultIndex = getNextHistoryResultIndex(gamePlay.updates);
-  if (!diffs) {
-    throw new Error("Effect not activated");
-  }
   const updates: LessonUpdateQuery[] = diffs.map((diff) => {
     return {
       ...diff,
@@ -774,7 +771,6 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
     gamePlay = playCard(gamePlay, 1);
     expect(isTurnEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
-    console.log(gamePlay.updates);
     // 3ターン目
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon2", 1);

@@ -2300,9 +2300,11 @@ describe("activateMemoryEffect", () => {
       ],
     },
     {
-      name: "元気を付与する",
+      name: "元気をやる気の補正を付与して加算する",
       args: [
-        { idol: { vitality: 1, modifiers: [] as Modifier[] } } as Lesson,
+        {
+          idol: { vitality: 1, modifiers: [{ kind: "motivation", amount: 1 }] },
+        } as Lesson,
         { kind: "vitality", value: 2, probability: 100 },
         () => 0.999999999,
         createIdGenerator(),
@@ -2310,8 +2312,8 @@ describe("activateMemoryEffect", () => {
       expected: [
         {
           kind: "vitality",
-          actual: 2,
-          max: 2,
+          actual: 3,
+          max: 3,
         },
       ],
     },

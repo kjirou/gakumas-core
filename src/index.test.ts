@@ -123,6 +123,44 @@ describe("initializeGamePlay", () => {
         },
       } as GamePlay,
     },
+    {
+      name: "応援/トラブルを設定できる",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          encouragements: [
+            { turnNumber: 1, effect: { kind: "perform", score: { value: 1 } } },
+          ],
+        },
+      ],
+      expected: {
+        initialLesson: {
+          encouragements: [
+            { turnNumber: 1, effect: { kind: "perform", score: { value: 1 } } },
+          ],
+        },
+      } as GamePlay,
+    },
+    {
+      name: "メモリーのアビリティによる効果発動が設定できる",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          memoryEffects: [{ kind: "vitality", value: 1, probability: 100 }],
+        },
+      ],
+      expected: {
+        initialLesson: {
+          memoryEffects: [{ kind: "vitality", value: 1, probability: 100 }],
+        },
+      } as GamePlay,
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(initializeGamePlay(...args)).toMatchObject(expected);

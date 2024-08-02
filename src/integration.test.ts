@@ -4,12 +4,15 @@ import type {
   Effect,
   Lesson,
   GamePlay,
+  LessonDisplay,
   LessonUpdateQuery,
 } from "./index";
 import { getCardDataById } from "./data/cards";
 import {
   endTurn,
+  generateLessonDisplay,
   getNextHistoryResultIndex,
+  initializeGamePlay,
   isLessonEnded,
   isTurnEnded,
   patchDiffs,
@@ -27,13 +30,16 @@ const addLessonSupport = (
   cardId: Card["id"],
   count: number,
 ): GamePlay => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  if (lesson.cards.find((card) => card.id === cardId) === undefined) {
+    throw new Error(`Card not found: ${cardId}`);
+  }
   const update: LessonUpdateQuery = {
     kind: "cards.enhancement.lessonSupport",
     targets: [{ cardId, supportCardIds: new Array<{}>(count).fill({}) }],
     reason: {
       kind: "unknown",
-      historyTurnNumber:
-        gamePlay.updates[gamePlay.updates.length - 1].reason.historyTurnNumber,
+      historyTurnNumber: lesson.turnNumber,
       historyResultIndex: getNextHistoryResultIndex(gamePlay.updates),
     },
   };
@@ -81,7 +87,7 @@ const applyEffect = (
 };
 
 // このプレイ動画: https://youtu.be/l0kHH_iSDJw を再現する
-describe("水着麻央のプレイ再現", () => {
+describe("センス（好調系・集中系）代表として、水着麻央のプレイを再現", () => {
   /** 中間試験まで6週時点(=開始時点)の山札 */
   const initialDeck = [
     {
@@ -648,5 +654,139 @@ describe("水着麻央のプレイ再現", () => {
     gamePlay = endTurn(gamePlay);
 
     // この後は山札が再構築されるので、プレイ再現が困難
+  });
+});
+describe("ロジックの好印象系の代表として、恒常SSRことねのプレイを再現", () => {
+  // この動画: https://youtu.be/bVVUPvtGK68 の再現をする
+  test("中間試験まで3週のSPレッスンを再現できる", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "fujitakotone-ssr-1",
+      specialTrainingLevel: 3,
+      talentAwakeningLevel: 1,
+      life: 29,
+      idolSpecificCardTestId: "yosomihadame",
+      cards: [
+        { id: "tebyoshi", testId: "tebyoshi" },
+        { id: "kawaiishigusa", testId: "kawaiishigusa" },
+        { id: "apirunokihon", testId: "apirunokihon" },
+        { id: "apirunokihon", testId: "apirunokihon2" },
+        { id: "pozunokihon", testId: "pozunokihon" },
+        { id: "hombanzenya", testId: "hombanzenya" },
+        { id: "fureai", testId: "fureai" },
+        { id: "fanshichamu", testId: "fanshichamu" },
+        { id: "risutato", testId: "risutato" },
+        { id: "mesennokihon", testId: "mesennokihon" },
+        { id: "mesennokihon", testId: "mesennokihon2" },
+        { id: "hyogennokihon", testId: "hyogennokihon" },
+        { id: "hyogennokihon", testId: "hyogennokihon2" },
+      ],
+      producerItems: [],
+      turns: ["dance", "dance", "dance", "dance", "dance", "dance"],
+      clearScoreThresholds: { clear: 45, perfect: 45 },
+      encouragements: [
+        { turnNumber: 2, effect: { kind: "perform", vitality: { value: 3 } } },
+        {
+          turnNumber: 4,
+          effect: {
+            kind: "getModifier",
+            modifier: {
+              kind: "positiveImpression",
+              amount: 3,
+            },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              range: { min: 3 },
+            },
+          },
+        },
+        {
+          turnNumber: 6,
+          effect: {
+            kind: "drainLife",
+            value: 6,
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              range: { min: 7 },
+            },
+          },
+        },
+      ],
+      memoryEffects: [
+        { kind: "halfLifeConsumption", value: 1, probability: 100 },
+        { kind: "motivation", value: 1, probability: 100 },
+        { kind: "vitality", value: 4, probability: 100 },
+      ],
+    });
+    gamePlay.initialLesson.deck = [
+      // 1
+      "hombanzenya",
+      "hyogennokihon",
+      "mesennokihon",
+      // 2
+      "apirunokihon",
+      "apirunokihon2",
+      "kawaiishigusa",
+      // 3
+      "tebyoshi",
+      "yosomihadame",
+      "hyogennokihon2",
+      // 4
+      "fureai",
+      "risutato",
+      "fanshichamu",
+      // 5、3枚目は山札再構築後なので不明。しかし、このターンからスキルカード使用してないので再現できる。
+      "mesennokihon2",
+      "pozunokihon",
+      // 6、山札再構築後なので不明
+    ];
+    // 1ターン目
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "hombanzenya", 1);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 29,
+      vitality: 5,
+      modifiers: [
+        { name: "消費体力減少", representativeValue: 1 },
+        { name: "やる気", representativeValue: 1 },
+      ],
+      score: 0,
+    } as LessonDisplay);
+    expect(isTurnEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 0);
+    expect(isTurnEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+    // 2ターン目
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 29,
+      vitality: 10,
+      modifiers: [
+        { name: "好印象", representativeValue: 5 },
+        { name: "やる気", representativeValue: 5 },
+      ],
+      score: 5,
+    } as LessonDisplay);
+    expect(isTurnEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 2);
+    expect(isTurnEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(isTurnEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+    console.log(gamePlay.updates);
+    // 3ターン目
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "hyogennokihon2", 1);
+    // TODO: 重めの修正に入るので、ここでテストは一旦終了。可愛い仕草の100%は効果内の好印象+2の影響を受けていた。
+    // expect(generateLessonDisplay(gamePlay)).toMatchObject({
+    //   life: 29,
+    //   vitality: 1,
+    //   modifiers: [
+    //     { name: "好印象", representativeValue: 9 },
+    //     { name: "やる気", representativeValue: 5 },
+    //   ],
+    //   score: 31,
+    // } as LessonDisplay);
   });
 });

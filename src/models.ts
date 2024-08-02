@@ -167,8 +167,9 @@ export const createDefaultCardSet = (
  *
  * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
  * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
- * @param params.deck 山札全体を明示的に指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
- * @param params.producerItems Pアイテム全体を指定する。アイドル固有を生成しないなど本来の処理を通さない。テスト用。
+ * @param params.deck 。テスト用、山札全体を明示的に指定する、アイドル固有を生成しないなど本来の処理を通さない
+ * @param params.specificCardId テスト用、アイドル固有スキルカードの内部IDを指定する
+ * @param params.producerItems テスト用、Pアイテム全体を指定する、アイドル固有を生成しないなど本来の処理を通さない
  * @param params.specialTrainingLevel 特訓段階
  * @param params.talentAwakeningLevel 才能開花段階
  */
@@ -180,6 +181,7 @@ export const createIdolInProduction = (params: {
   idolDataId: IdolData["id"];
   life?: IdolInProduction["life"];
   producerItems?: ProducerItemInProduction[];
+  specificCardId?: CardInProduction["id"];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
 }): IdolInProduction => {
@@ -193,7 +195,7 @@ export const createIdolInProduction = (params: {
     params.deck ??
     [
       {
-        id: params.idGenerator(),
+        id: params.specificCardId ?? params.idGenerator(),
         data: specificCardData,
         enhanced: params.specialTrainingLevel >= 3,
       },

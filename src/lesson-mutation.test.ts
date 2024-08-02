@@ -13,6 +13,7 @@ import {
   activateEffectIf,
   activateEffectsOfProducerItem,
   activateEffectsOnLessonStart,
+  activateEffectsOnCardPlay,
   activateEffectsOnTurnEnd,
   activateEncouragementOnTurnStart,
   activateMemoryEffect,
@@ -2144,6 +2145,77 @@ describe("activateEffectIf", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(activateEffectIf(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffectsOnCardPlay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOnCardPlay>;
+    expected: ReturnType<typeof activateEffectsOnCardPlay>;
+    name: string;
+  }> = [
+    {
+      name: "各効果発動は、自身より後の効果発動へ影響を与える",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.vitality = 0;
+          return lesson;
+        })(),
+        [
+          { kind: "perform", vitality: { value: 1 } },
+          { kind: "performLeveragingVitality", percentage: 100 },
+        ],
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        [{ kind: "vitality", actual: 1, max: 1 }],
+        [{ kind: "score", actual: 1, max: 1 }],
+      ],
+    },
+    {
+      name: "各効果の発動条件は、効果リスト発動前の状態を参照する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 1 },
+            condition: { kind: "hasGoodCondition" },
+          },
+        ],
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        [
+          {
+            kind: "modifier",
+            actual: {
+              kind: "goodCondition",
+              duration: 1,
+              id: expect.any(String),
+            },
+            max: {
+              kind: "goodCondition",
+              duration: 1,
+              id: expect.any(String),
+            },
+          },
+        ],
+        undefined,
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOnCardPlay(...args)).toStrictEqual(expected);
   });
 });
 describe("activateEffectsOfProducerItem", () => {

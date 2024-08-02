@@ -1001,6 +1001,7 @@ export const activateEffect = <
 /**
  * 効果の条件を満たせば、効果を発動する
  *
+ * @param options.lessonForCondition 条件判定用のレッスンを効果発動用のレッスンと別に指定する時に使用する
  * @return 効果適用条件を満たさない場合は undefined を返す、結果的に効果がなかった場合は空配列を返す
  */
 export const activateEffectIf = (
@@ -1008,9 +1009,14 @@ export const activateEffectIf = (
   effect: Effect,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
+  options: {
+    lessonForCondition?: Lesson;
+  } = {},
 ): LessonUpdateDiff[] | undefined => {
   if (effect.condition) {
-    if (!canActivateEffect(lesson, effect.condition)) {
+    if (
+      !canActivateEffect(options.lessonForCondition ?? lesson, effect.condition)
+    ) {
       return undefined;
     }
   }
@@ -1128,11 +1134,12 @@ export const activateMemoryEffect = (
 type EffectActivations = Array<LessonUpdateDiff[] | undefined>;
 
 /**
- * スキルカード使用により効果リストを発動する
+ * スキルカードの使用により、その効果リストを発動する
  *
- * - 1スキルカードや1Pアイテムが持つ効果リストに対して使う
  * - 効果リストの順番通りに発動し、後の効果は前の効果の結果に影響を受ける
  *   - 仕様確認: https://github.com/kjirou/gakumas-core/issues/95
+ * - 一方で、各効果の効果発動条件については、スキルカード使用前のレッスンの状態を参照する
+ *   - 例えば、「楽観的」は、好調がない状態では、集中+1は発動しない
  */
 export const activateEffectsOnCardPlay = (
   lesson: Lesson,
@@ -1140,13 +1147,17 @@ export const activateEffectsOnCardPlay = (
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): EffectActivations => {
+  const beforeLesson = lesson;
   let effectActivations: EffectActivations = [];
   for (const effect of effects) {
-    const activation = activateEffectIf(lesson, effect, getRandom, idGenerator);
-    effectActivations = [...effectActivations, activation];
-    if (activation) {
-      lesson = patchDiffs(lesson, activation);
+    const diffs = activateEffectIf(lesson, effect, getRandom, idGenerator, {
+      lessonForCondition: beforeLesson,
+    });
+    if (diffs) {
+      lesson = patchDiffs(lesson, diffs);
     }
+    // diffs が undefined の時も記録する必要がある
+    effectActivations = [...effectActivations, diffs];
   }
   return effectActivations;
 };

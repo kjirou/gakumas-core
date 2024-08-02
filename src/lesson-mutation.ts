@@ -2,7 +2,6 @@ import type {
   ActionCost,
   Card,
   CardData,
-  CardInHandDisplay,
   CardInProduction,
   CardSummaryKind,
   CardUsageCondition,
@@ -660,7 +659,7 @@ export const calculatePerformingVitalityEffect = (
 /**
  * 効果を発動する
  */
-const activateEffect = (
+export const activateEffect = (
   lesson: Lesson,
   effect: Effect,
   getRandom: GetRandom,
@@ -1168,8 +1167,7 @@ export const activateEffectsOfProducerItem = (
   let diffs: LessonUpdateDiff[] = [];
   const producerItemContent = getProducerItemContentData(producerItem);
   diffs = producerItemContent.effects
-    .map((effect) => activateEffectIf(lesson, effect, getRandom, idGenerator))
-    .filter((e) => e !== undefined)
+    .map((effect) => activateEffect(lesson, effect, getRandom, idGenerator))
     .reduce((acc, e) => [...acc, ...e], []);
   diffs = [
     ...diffs,
@@ -1679,24 +1677,22 @@ export const drawCardsOnTurnStart = (
   // - TODO: レッスンサポートを発動する
   //
   let drawCardsEffectUpdates: LessonUpdateQuery[] = [];
-  const drawCardsEffectDiffs = activateEffectIf(
+  const drawCardsEffectDiffs = activateEffect(
     newLesson,
     { kind: "drawCards", amount: Math.min(Math.max(innateCardCount, 3), 5) },
     params.getRandom,
     // "drawCards" に限れば idGenerator は使われない
     () => "",
   );
-  if (drawCardsEffectDiffs) {
-    drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
-      createLessonUpdateQueryFromDiff(diff, {
-        kind: "turnStartTrigger",
-        historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
-      }),
-    );
-    newLesson = patchDiffs(newLesson, drawCardsEffectUpdates);
-    nextHistoryResultIndex++;
-  }
+  drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
+    createLessonUpdateQueryFromDiff(diff, {
+      kind: "turnStartTrigger",
+      historyTurnNumber: newLesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    }),
+  );
+  newLesson = patchDiffs(newLesson, drawCardsEffectUpdates);
+  nextHistoryResultIndex++;
 
   //
   // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す

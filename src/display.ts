@@ -213,7 +213,7 @@ const generateModifierDisplays = (lesson: Lesson): ModifierDisplay[] => {
     };
   });
   const recommendedModifierKind =
-    lesson.idol.original.data.producePlan.recommendedEffect;
+    lesson.idol.original.data.producePlan.recommendedModifierKind;
   modifiers = modifiers.slice().sort((a, b) => {
     return a.kind === recommendedModifierKind ? -1 : 0;
   });

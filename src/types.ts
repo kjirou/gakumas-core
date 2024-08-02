@@ -26,12 +26,12 @@ export type ProducePlan = Readonly<
       /** 「ロジック」 */
       kind: "logic";
       /** 「おすすめ効果」 */
-      recommendedEffect: "motivation" | "positiveImpression";
+      recommendedModifierKind: "motivation" | "positiveImpression";
     }
   | {
       /** 「センス」 */
       kind: "sense";
-      recommendedEffect: "goodCondition" | "focus";
+      recommendedModifierKind: "goodCondition" | "focus";
     }
 >;
 

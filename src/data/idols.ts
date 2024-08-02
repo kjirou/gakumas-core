@@ -27,7 +27,7 @@ export const idols: IdolData[] = [
     characterId: "hanamisaki",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "ssr",
     specificCardId: "zettainimakenai",
@@ -39,7 +39,7 @@ export const idols: IdolData[] = [
     characterId: "hanamisaki",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "sr",
     specificCardId: "zettainimakenai",
@@ -51,7 +51,7 @@ export const idols: IdolData[] = [
     characterId: "hanamisaki",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "r",
     specificCardId: "shinshinkiei",
@@ -63,7 +63,7 @@ export const idols: IdolData[] = [
     characterId: "tsukimuratemari",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "ssr",
     specificCardId: "karamaruomoi",
@@ -75,7 +75,7 @@ export const idols: IdolData[] = [
     characterId: "tsukimuratemari",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "ssr",
     specificCardId: "sorezorenomichi",
@@ -87,7 +87,7 @@ export const idols: IdolData[] = [
     characterId: "tsukimuratemari",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "sr",
     specificCardId: "ronurufu",
@@ -99,7 +99,7 @@ export const idols: IdolData[] = [
     characterId: "tsukimuratemari",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "r",
     specificCardId: "ijippari",
@@ -111,7 +111,7 @@ export const idols: IdolData[] = [
     characterId: "fujitakotone",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "ssr",
     specificCardId: "adorenarinzenkai",
@@ -123,7 +123,7 @@ export const idols: IdolData[] = [
     characterId: "fujitakotone",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "ssr",
     specificCardId: "yosomihadame",
@@ -135,7 +135,7 @@ export const idols: IdolData[] = [
     characterId: "fujitakotone",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "sr",
     specificCardId: "colorfulcute",
@@ -147,7 +147,7 @@ export const idols: IdolData[] = [
     characterId: "fujitakotone",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "r",
     specificCardId: "arubaita",
@@ -159,7 +159,7 @@ export const idols: IdolData[] = [
     characterId: "arimuramao",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "ssr",
     specificCardId: "hinyarihitoyasumi",
@@ -171,7 +171,7 @@ export const idols: IdolData[] = [
     characterId: "arimuramao",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "ssr",
     specificCardId: "seisonohanagata",
@@ -183,7 +183,7 @@ export const idols: IdolData[] = [
     characterId: "arimuramao",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "sr",
     specificCardId: "rashisa",
@@ -195,7 +195,7 @@ export const idols: IdolData[] = [
     characterId: "arimuramao",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "goodCondition",
+      recommendedModifierKind: "goodCondition",
     },
     rarity: "r",
     specificCardId: "ritorupurinsu",
@@ -207,7 +207,7 @@ export const idols: IdolData[] = [
     characterId: "katsuragiririya",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "ssr",
     specificCardId: "mokowakunaikara",
@@ -219,7 +219,7 @@ export const idols: IdolData[] = [
     characterId: "katsuragiririya",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "sr",
     specificCardId: "jumpakunoyose",
@@ -231,7 +231,7 @@ export const idols: IdolData[] = [
     characterId: "katsuragiririya",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "positiveImpression",
+      recommendedModifierKind: "positiveImpression",
     },
     rarity: "r",
     specificCardId: "uchikikeishojo",
@@ -243,7 +243,7 @@ export const idols: IdolData[] = [
     characterId: "kuramotochina",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "ssr",
     specificCardId: "ojosamanoharebutai",
@@ -255,7 +255,7 @@ export const idols: IdolData[] = [
     characterId: "kuramotochina",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "sr",
     specificCardId: "isshokemmei",
@@ -267,7 +267,7 @@ export const idols: IdolData[] = [
     characterId: "kuramotochina",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "r",
     specificCardId: "genkiippai",
@@ -279,7 +279,7 @@ export const idols: IdolData[] = [
     characterId: "shiunsumika",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "ssr",
     specificCardId: "wammoasuteppu",
@@ -291,7 +291,7 @@ export const idols: IdolData[] = [
     characterId: "shiunsumika",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "sr",
     specificCardId: "yukinoippo",
@@ -303,7 +303,7 @@ export const idols: IdolData[] = [
     characterId: "shiunsumika",
     producePlan: {
       kind: "sense",
-      recommendedEffect: "focus",
+      recommendedModifierKind: "focus",
     },
     rarity: "r",
     specificCardId: "furendori",
@@ -315,7 +315,7 @@ export const idols: IdolData[] = [
     characterId: "shinosawahiro",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "ssr",
     specificCardId: "honkinoshumi",
@@ -327,7 +327,7 @@ export const idols: IdolData[] = [
     characterId: "shinosawahiro",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "sr",
     specificCardId: "kurushinogasuki",
@@ -339,7 +339,7 @@ export const idols: IdolData[] = [
     characterId: "shinosawahiro",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "r",
     specificCardId: "chokougakurekiaidoru",
@@ -351,7 +351,7 @@ export const idols: IdolData[] = [
     characterId: "hanamiume",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "ssr",
     specificCardId: "okkinaonigiri",
@@ -363,7 +363,7 @@ export const idols: IdolData[] = [
     characterId: "hanamiume",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "sr",
     specificCardId: "datoonechan",
@@ -375,7 +375,7 @@ export const idols: IdolData[] = [
     characterId: "hanamiume",
     producePlan: {
       kind: "logic",
-      recommendedEffect: "motivation",
+      recommendedModifierKind: "motivation",
     },
     rarity: "r",
     specificCardId: "mikannotaiki",

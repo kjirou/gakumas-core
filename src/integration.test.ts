@@ -774,7 +774,6 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
     gamePlay = playCard(gamePlay, 1);
     expect(isTurnEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
-    console.log(gamePlay.updates);
     // 3ターン目
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon2", 1);

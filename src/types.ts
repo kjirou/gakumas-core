@@ -1662,6 +1662,7 @@ export type TurnDisplay = {
  * レッスンの表示用情報
  */
 export type LessonDisplay = {
+  clearScoreThresholds: Lesson["clearScoreThresholds"];
   hand: CardInHandDisplay[];
   inventory: {
     hand: CardInInventoryDisplay[];

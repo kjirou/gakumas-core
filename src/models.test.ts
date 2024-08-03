@@ -104,20 +104,20 @@ describe("createActualTurns", () => {
     expected: ReturnType<typeof createActualTurns>;
   }> = [
     {
-      args: [{ turns: ["vocal", "dance"], remainingTurns: 0 } as Lesson],
+      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 0 } as Lesson],
       expected: ["vocal", "dance"],
     },
     {
-      args: [{ turns: ["vocal", "dance"], remainingTurns: 1 } as Lesson],
+      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 1 } as Lesson],
       expected: ["vocal", "dance", "dance"],
     },
     {
-      args: [{ turns: ["vocal", "dance"], remainingTurns: 2 } as Lesson],
+      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 2 } as Lesson],
       expected: ["vocal", "dance", "dance", "dance"],
     },
   ];
   test.each(testCases)(
-    "$args.0.turns, $args.0.remainingTurns => $expected",
+    "$args.0.turns, $args.0.remainingTurnsChange => $expected",
     ({ args, expected }) => {
       expect(createActualTurns(...args)).toStrictEqual(expected);
     },
@@ -236,7 +236,7 @@ describe("createGamePlay", () => {
         turnNumber: 0,
         turnEnded: false,
         turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-        remainingTurns: 0,
+        remainingTurnsChange: 0,
         encouragements: [],
         memoryEffects: [],
         ignoreIdolParameterKindConditionAfterClearing: false,
@@ -873,18 +873,18 @@ describe("patchDiffs", () => {
       ]);
     });
   });
-  describe("remainingTurns", () => {
+  describe("remainingTurnsChange", () => {
     test("it works", () => {
       let lessonMock = {
-        remainingTurns: 0,
+        remainingTurnsChange: 0,
       } as Lesson;
       lessonMock = patchDiffs(lessonMock, [
         {
-          kind: "remainingTurns",
+          kind: "remainingTurnsChange",
           amount: 1,
         },
       ]);
-      expect(lessonMock.remainingTurns).toBe(1);
+      expect(lessonMock.remainingTurnsChange).toBe(1);
     });
   });
   describe("score", () => {

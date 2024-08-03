@@ -692,23 +692,23 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
       updates = [...updates, ...discardHandUpdates];
       historyResultIndex++;
       lesson = patchDiffs(lesson, discardHandUpdates);
-
-      //
-      // 好印象によるスコア増加
-      //
-      const obtainPositiveImpressionScoreOnTurnEndResult =
-        obtainPositiveImpressionScoreOnTurnEnd(lesson, historyResultIndex);
-      updates = [
-        ...updates,
-        ...obtainPositiveImpressionScoreOnTurnEndResult.updates,
-      ];
-      historyResultIndex =
-        obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
-      lesson = patchDiffs(
-        lesson,
-        obtainPositiveImpressionScoreOnTurnEndResult.updates,
-      );
     }
+
+    //
+    // 好印象によるスコア増加
+    //
+    const obtainPositiveImpressionScoreOnTurnEndResult =
+      obtainPositiveImpressionScoreOnTurnEnd(lesson, historyResultIndex);
+    updates = [
+      ...updates,
+      ...obtainPositiveImpressionScoreOnTurnEndResult.updates,
+    ];
+    historyResultIndex =
+      obtainPositiveImpressionScoreOnTurnEndResult.nextHistoryResultIndex;
+    lesson = patchDiffs(
+      lesson,
+      obtainPositiveImpressionScoreOnTurnEndResult.updates,
+    );
   }
 
   //

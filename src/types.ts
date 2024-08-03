@@ -1225,8 +1225,8 @@ export type Lesson = {
    *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
    */
   playedCardsOnEmptyDeck: Array<Card["id"]>;
-  /** 最終ターン数への修正、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
-  remainingTurns: number;
+  /** 最終ターン数への変化、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
+  remainingTurnsChange: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */
   removedCardPile: Array<Card["id"]>;
   /**
@@ -1331,7 +1331,7 @@ export type LessonUpdateDiff = Readonly<
       value: ProducerItem["activationCount"];
     }
   | {
-      kind: "remainingTurns";
+      kind: "remainingTurnsChange";
       amount: number;
     }
   | {
@@ -1673,7 +1673,8 @@ export type LessonDisplay = {
   life: Idol["life"];
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
-  remainingTurns: Lesson["remainingTurns"];
+  remainingTurns: number;
+  remainingTurnsChange: Lesson["remainingTurnsChange"];
   score: Lesson["score"];
   scoreBonus: number | undefined;
   turnNumber: number;

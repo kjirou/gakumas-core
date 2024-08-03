@@ -355,7 +355,7 @@ export const createGamePlay = (params: {
       score: 0,
       turnNumber: 0,
       turnEnded: false,
-      remainingTurns: 0,
+      remainingTurnsChange: 0,
     },
     updates: [],
   };
@@ -368,7 +368,10 @@ export const createGamePlay = (params: {
  */
 export const createActualTurns = (lesson: Lesson): IdolParameterKind[] => {
   const lastTurn = lesson.turns[lesson.turns.length - 1];
-  return [...lesson.turns, ...new Array(lesson.remainingTurns).fill(lastTurn)];
+  return [
+    ...lesson.turns,
+    ...new Array(lesson.remainingTurnsChange).fill(lastTurn),
+  ];
 };
 
 /**
@@ -691,10 +694,10 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "remainingTurns": {
+      case "remainingTurnsChange": {
         newLesson = {
           ...newLesson,
-          remainingTurns: newLesson.remainingTurns + update.amount,
+          remainingTurnsChange: newLesson.remainingTurnsChange + update.amount,
         };
         break;
       }

@@ -957,7 +957,7 @@ describe("canActivateEffect", () => {
         {
           turnNumber: 4,
           turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-          remainingTurns: 0,
+          remainingTurnsChange: 0,
         } as Lesson,
         { kind: "countReminingTurns", max: 3 },
       ],
@@ -969,7 +969,7 @@ describe("canActivateEffect", () => {
         {
           turnNumber: 4,
           turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-          remainingTurns: 0,
+          remainingTurnsChange: 0,
         } as Lesson,
         { kind: "countReminingTurns", max: 2 },
       ],
@@ -2060,7 +2060,7 @@ describe("activateEffectIf", () => {
       ],
       expected: [
         {
-          kind: "remainingTurns",
+          kind: "remainingTurnsChange",
           amount: 1,
         },
       ],

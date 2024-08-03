@@ -299,6 +299,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
     modifiers,
     producerItems: generateProducerItemDisplays(lesson),
     remainingTurns: calculateRemainingTurns(lesson),
+    remainingTurnsChange: lesson.remainingTurnsChange,
     score: lesson.score,
     scoreBonus,
     turnNumber: lesson.turnNumber,

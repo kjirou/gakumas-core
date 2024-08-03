@@ -1180,7 +1180,13 @@ export type Lesson = {
   clearScoreThresholds:
     | {
         clear: number;
-        /** clear の数値を含む合計で指定する、本家の表現へ合わせている */
+        /**
+         * パーフェクトスコア
+         *
+         * - clear の数値を含む合計で指定する
+         *   - 例えば、1週目の設定なら、{ clear: 30, perfoct: 60 } である
+         *   - 本家UIで、スコア部分をタップした際の表現へ合わせている
+         */
         perfect?: number;
       }
     | undefined;
@@ -1229,6 +1235,12 @@ export type Lesson = {
    * - 原文では、レッスン時は「パラメータ」、試験・コンテスト時は「スコア」と表記されているもの
    */
   score: number;
+  /**
+   * ターンが終了したか
+   *
+   * - ターン終了処理時に true になり、次ターン開始処理時に false になる
+   */
+  turnEnded: boolean;
   /** ターン番号、初期化時は0でプレイヤー行動可能時点で1になる、関連する原文は「{turnNumber}目以降の場合、使用可」 */
   turnNumber: number;
   /**
@@ -1327,6 +1339,10 @@ export type LessonUpdateDiff = Readonly<
       /** レッスンなどでパラメータの上限値が決まっている場合に、超過した分を差し引いた実際に上昇した数値 */
       actual: number;
       max: number;
+    }
+  | {
+      kind: "turnEnded";
+      value: boolean;
     }
   | {
       kind: "turnNumberIncrease";
@@ -1646,6 +1662,7 @@ export type TurnDisplay = {
  * レッスンの表示用情報
  */
 export type LessonDisplay = {
+  clearScoreThresholds: Lesson["clearScoreThresholds"];
   hand: CardInHandDisplay[];
   inventory: {
     hand: CardInInventoryDisplay[];

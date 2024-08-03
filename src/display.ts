@@ -281,6 +281,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
     };
   });
   return {
+    clearScoreThresholds: lesson.clearScoreThresholds,
     hand,
     inventory: {
       deck: generateCardInInventoryDisplays(lesson.cards, lesson.deck),

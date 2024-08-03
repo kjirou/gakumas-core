@@ -91,7 +91,7 @@ export * from "./utils";
  *       { id: "masukottohikonin" },
  *     ],
  *     turns: ["dance", "dance", "dance", "dance", "dance", "dance", "dance"],
- *     clearScoreThresholds: { clear: 100, perfect: 100 },
+ *     clearScoreThresholds: { clear: 100, perfect: 200 },
  *   });
  *   // 追い込みレッスンの例
  *   const gamePlay = initializeGamePlay({
@@ -186,12 +186,12 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
-  //
-  // レッスン開始時の効果発動
-  //
-  // - ゲーム内の履歴を見ると、1ターン目の前にこれの結果が記載されている
-  //
   if (lesson.turnNumber === 0) {
+    //
+    // レッスン開始時の効果発動
+    //
+    // - ゲーム内の履歴を見ると、1ターン目の前にこれの結果が記載されている
+    //
     const activateEffectsOnLessonStartResult = activateEffectsOnLessonStart(
       lesson,
       historyResultIndex,
@@ -204,6 +204,24 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
     historyResultIndex =
       activateEffectsOnLessonStartResult.nextHistoryResultIndex;
     lesson = patchDiffs(lesson, activateEffectsOnLessonStartResult.updates);
+  } else {
+    //
+    // ターン終了フラグをOffにする
+    //
+    const turnEndedUpdates: LessonUpdateQuery[] = [
+      {
+        kind: "turnEnded",
+        value: false,
+        reason: {
+          kind: "turnEndTrigger",
+          historyTurnNumber: lesson.turnNumber,
+          historyResultIndex,
+        },
+      },
+    ];
+    updates = [...updates, ...turnEndedUpdates];
+    historyResultIndex++;
+    lesson = patchDiffs(lesson, turnEndedUpdates);
   }
 
   //
@@ -445,9 +463,9 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
 };
 
 /**
- * ターンが終了しているかを返す
+ * アイドルの行動が終了しているかどうか
  */
-export const isTurnEnded = (gamePlay: GamePlay): boolean => {
+export const hasActionEnded = (gamePlay: GamePlay): boolean => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   return lesson.idol.actionPoints === 0;
 };
@@ -690,6 +708,24 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
     }
   }
 
+  //
+  // ターン終了フラグをOnにする
+  //
+  const turnEndedUpdates: LessonUpdateQuery[] = [
+    {
+      kind: "turnEnded",
+      value: true,
+      reason: {
+        kind: "turnEndTrigger",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex,
+      },
+    },
+  ];
+  updates = [...updates, ...turnEndedUpdates];
+  historyResultIndex++;
+  lesson = patchDiffs(lesson, turnEndedUpdates);
+
   return {
     ...gamePlay,
     updates,
@@ -707,7 +743,9 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
 export const isLessonEnded = (gamePlay: GamePlay): boolean => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   return (
-    (calculateRemainingTurns(lesson) === 1 && lesson.idol.actionPoints === 0) ||
-    isScoreSatisfyingPerfect(lesson)
+    isScoreSatisfyingPerfect(lesson) ||
+    (calculateRemainingTurns(lesson) === 1 &&
+      lesson.idol.actionPoints === 0 &&
+      lesson.turnEnded)
   );
 };

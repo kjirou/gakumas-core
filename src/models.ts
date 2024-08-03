@@ -353,6 +353,7 @@ export const createGamePlay = (params: {
       playedCardsOnEmptyDeck: [],
       score: 0,
       turnNumber: 0,
+      turnEnded: false,
       remainingTurns: 0,
     },
     updates: [],
@@ -700,6 +701,13 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         newLesson = {
           ...newLesson,
           score: newLesson.score + update.actual,
+        };
+        break;
+      }
+      case "turnEnded": {
+        newLesson = {
+          ...newLesson,
+          turnEnded: update.value,
         };
         break;
       }

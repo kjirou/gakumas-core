@@ -694,7 +694,7 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "remainingTurns": {
+      case "remainingTurnsChange": {
         newLesson = {
           ...newLesson,
           remainingTurnsChange: newLesson.remainingTurnsChange + update.amount,

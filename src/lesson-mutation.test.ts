@@ -2060,7 +2060,7 @@ describe("activateEffectIf", () => {
       ],
       expected: [
         {
-          kind: "remainingTurns",
+          kind: "remainingTurnsChange",
           amount: 1,
         },
       ],

@@ -1331,7 +1331,7 @@ export type LessonUpdateDiff = Readonly<
       value: ProducerItem["activationCount"];
     }
   | {
-      kind: "remainingTurns";
+      kind: "remainingTurnsChange";
       amount: number;
     }
   | {

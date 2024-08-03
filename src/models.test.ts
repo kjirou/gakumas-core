@@ -880,7 +880,7 @@ describe("patchDiffs", () => {
       } as Lesson;
       lessonMock = patchDiffs(lessonMock, [
         {
-          kind: "remainingTurns",
+          kind: "remainingTurnsChange",
           amount: 1,
         },
       ]);

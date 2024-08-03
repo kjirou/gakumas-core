@@ -862,7 +862,7 @@ export const activateEffect = <
     }
     case "increaseRemainingTurns": {
       diffs.push({
-        kind: "remainingTurns",
+        kind: "remainingTurnsChange",
         amount: effect.amount,
       });
       break;

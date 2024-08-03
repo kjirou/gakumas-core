@@ -2,10 +2,12 @@ import type {
   Card,
   CardInProduction,
   Effect,
+  EffectWithoutCondition,
   Lesson,
   GamePlay,
   LessonDisplay,
   LessonUpdateQuery,
+  Modifier,
 } from "./index";
 import { getCardDataById } from "./data/cards";
 import {
@@ -55,10 +57,9 @@ const addLessonSupport = (
  *
  * - 主に未実装の、Pドリンク用
  */
-const applyEffect = (
+const activateAdditionalEffect = (
   gamePlay: GamePlay,
-  effect: Effect,
-  options: {} = {},
+  effect: EffectWithoutCondition,
 ): GamePlay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   const diffs = activateEffect(
@@ -450,7 +451,10 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
       },
     });
     expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = applyEffect(gamePlay, { kind: "recoverLife", value: 6 }); // Pドリンク使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "recoverLife",
+      value: 6,
+    }); // Pドリンク使用
     gamePlay = playCard(gamePlay, 0);
     expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
@@ -846,5 +850,395 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       score: 90,
     } as LessonDisplay);
     expect(isLessonEnded(gamePlay)).toBe(true);
+  });
+  // この動画: https://youtu.be/fhmTdsrS7PM の1戦目の再現をする
+  test("最終試験その1を再現できる", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "fujitakotone-ssr-1",
+      specialTrainingLevel: 3,
+      talentAwakeningLevel: 1,
+      life: 37,
+      maxLife: 37,
+      idolSpecificCardTestId: "yosomihadame",
+      cards: [
+        { id: "hombanzenya", testId: "hombanzenya", enhanced: true },
+        { id: "hombanzenya", testId: "hombanzenya2", enhanced: true },
+        { id: "hombanzenya", testId: "hombanzenya3" },
+        { id: "minnadaisuki", testId: "minnadaisuki", enhanced: true },
+        { id: "tebyoshi", testId: "tebyoshi", enhanced: true },
+        { id: "tebyoshi", testId: "tebyoshi2", enhanced: true },
+        { id: "kawaiishigusa", testId: "kawaiishigusa", enhanced: true },
+        { id: "apirunokihon", testId: "apirunokihon", enhanced: true },
+        { id: "pozunokihon", testId: "pozunokihon" },
+        { id: "watashigasta", testId: "watashigasta", enhanced: true },
+        {
+          id: "hoshikuzusenseshon",
+          testId: "hoshikuzusenseshon",
+          enhanced: true,
+        },
+        { id: "tokimeki", testId: "tokimeki", enhanced: true },
+        { id: "damedamekukkingu", testId: "damedamekukkingu" },
+        { id: "shiawasenajikan", testId: "shiawasenajikan" },
+        { id: "shiawasenajikan", testId: "shiawasenajikan2" },
+        { id: "shiawasenajikan", testId: "shiawasenajikan3" },
+        { id: "fureai", testId: "fureai" },
+        { id: "fanshichamu", testId: "fanshichamu", enhanced: true },
+        { id: "hagemashi", testId: "hagemashi" },
+        { id: "risutato", testId: "risutato" },
+        { id: "mesennokihon", testId: "mesennokihon" },
+        { id: "mesennokihon", testId: "mesennokihon2" },
+        { id: "usureyukukabe", testId: "usureyukukabe" },
+        { id: "hyogennokihon", testId: "hyogennokihon" },
+        { id: "hyogennokihon", testId: "hyogennokihon2" },
+        { id: "nemuke", testId: "nemuke" },
+        { id: "nemuke", testId: "nemuke2" },
+      ],
+      producerItems: [{ id: "nakanaorinokikkake" }],
+      turns: [
+        "dance",
+        "dance",
+        "visual",
+        "dance",
+        "visual",
+        "dance",
+        "vocal",
+        "visual",
+        "vocal",
+        "visual",
+        "dance",
+      ],
+      // 1700 かは不明
+      clearScoreThresholds: { clear: 1700 },
+      scoreBonus: { vocal: 522, dance: 1763, visual: 1458 },
+      encouragements: [
+        { turnNumber: 3, effect: { kind: "perform", vitality: { value: 3 } } },
+        {
+          turnNumber: 5,
+          effect: {
+            kind: "getModifier",
+            modifier: {
+              kind: "positiveImpression",
+              amount: 8,
+            },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              range: { min: 3 },
+            },
+          },
+        },
+        {
+          turnNumber: 8,
+          effect: {
+            kind: "getModifier",
+            modifier: {
+              kind: "positiveImpression",
+              amount: 11,
+            },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "positiveImpression",
+              range: { min: 14 },
+            },
+          },
+        },
+      ],
+      memoryEffects: [],
+    });
+    gamePlay.initialLesson.deck = [
+      // 残りターン数11、「初星ホエイプロテイン」使用
+      // （レッスン開始時手札の検証のため、後ろに置いている）
+      // 残りターン数10
+      "apirunokihon",
+      "minnadaisuki", // 使用1
+      "pozunokihon", // 使用2、Pアイテム「ビッグドリーム貯金箱」発動
+      // 残りターン数9
+      "hyogennokihon",
+      "kawaiishigusa", // 使用2
+      "yosomihadame", // 使用1
+      // 残りターン数8、Pアイテム「仲直りのきっかけ」発動
+      "nemuke",
+      "hyogennokihon2",
+      "hagemashi", // 使用
+      // 残りターン数7
+      "tebyoshi",
+      "watashigasta", // 使用1
+      "fureai",
+      "damedamekukkingu", // 「私がスター」で引く分、使用2
+      // 残りターン数6(+1)
+      "hoshikuzusenseshon", // 使用1
+      "fanshichamu", // 使用2
+      "mesennokihon", // 前ターンの「ダメダメクッキング」により強化
+      "usureyukukabe", // 「星屑センセーション」で引く分
+      // 残りターン数5(+1)、「初星ホエイプロテイン」使用
+      "shiawasenajikan", // 使用2
+      "tokimeki", // 使用1
+      "risutato",
+      // 残りターン数4(+1)
+      "tebyoshi2",
+      "nemuke2",
+      "shiawasenajikan2", // 使用
+      // 残りターン数3(+1)
+      "shiawasenajikan3", // 使用
+      "mesennokihon2",
+      "risutato", // このスキルカードから、本来は山札が再構築されている
+      // 残りターン数2(+1)
+      "shiawasenajikan", // 使用2
+      "minnadaisuki", // 使用1
+      "nemuke",
+      // 残りターン数1(+1)、「おしゃれハーブディー」使用、その前は体力・元気0でカードが使えない
+      "pozunokihon",
+      "usureyukukabe", // 使用
+      "apirunokihon",
+      // 残りターン数1
+      "tebyoshi", // 使用
+      "fureai", // 前ターンの「薄れゆく壁」により強化
+      "hyogennokihon", // 前ターンの「薄れゆく壁」により強化
+      // （レッスン開始時手札）
+      "hombanzenya3", // 使用3
+      "hombanzenya", // 使用1
+      "hombanzenya2", // 使用2
+    ];
+
+    // 残りターン数11
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 37,
+      vitality: 0,
+      modifiers: [] as Modifier[],
+      score: 0,
+    } as LessonDisplay);
+    // 「初星ホエイプロテイン」使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "getModifier",
+      modifier: { kind: "additionalCardUsageCount", amount: 1 },
+    });
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 0);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数10
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 22,
+      vitality: 0,
+      modifiers: [
+        { name: "好印象", representativeValue: 17 },
+        { name: "やる気", representativeValue: 11 },
+      ],
+      score: 300,
+    } as LessonDisplay);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数9
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 19,
+      vitality: 23,
+      modifiers: [
+        { name: "好印象", representativeValue: 16 },
+        { name: "やる気", representativeValue: 9 },
+        { name: "スキルカード使用数追加", representativeValue: 1 },
+      ],
+      score: 1007,
+    } as LessonDisplay);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 2);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数8
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 19,
+      vitality: 25,
+      modifiers: [
+        { name: "好印象", representativeValue: 27 },
+        { name: "やる気", representativeValue: 9 },
+      ],
+      score: 1912,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数7
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 19,
+      vitality: 21,
+      modifiers: [
+        { name: "好印象", representativeValue: 38 },
+        { name: "やる気", representativeValue: 12 },
+      ],
+      score: 2459,
+      remainingTurns: 7,
+      remainingTurnsChange: 0,
+    } as LessonDisplay);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 2);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数6(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 19,
+      vitality: 14,
+      modifiers: [
+        { name: "好印象", representativeValue: 40 },
+        { name: "やる気", representativeValue: 15 },
+      ],
+      score: 3057,
+      remainingTurns: 7,
+      remainingTurnsChange: 1,
+    } as LessonDisplay);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 0);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 0);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数5(+1)
+    gamePlay = startTurn(gamePlay);
+    // 「初星ホエイプロテイン」使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "getModifier",
+      modifier: { kind: "additionalCardUsageCount", amount: 1 },
+    });
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 19,
+      vitality: 10,
+      modifiers: [
+        { name: "好印象", representativeValue: 51 },
+        { name: "やる気", representativeValue: 12 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+        { name: "スキルカード使用数追加", representativeValue: 1 },
+      ],
+      score: 3974,
+    } as LessonDisplay);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 0);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数4(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 15,
+      vitality: 0,
+      modifiers: [
+        { name: "好印象", representativeValue: 79 },
+        { name: "やる気", representativeValue: 18 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 4335,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数3(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 10,
+      vitality: 0,
+      modifiers: [
+        { name: "好印象", representativeValue: 85 },
+        { name: "やる気", representativeValue: 18 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 5589,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数2(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 5,
+      vitality: 0,
+      modifiers: [
+        { name: "好印象", representativeValue: 91 },
+        { name: "やる気", representativeValue: 18 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 6070,
+    } as LessonDisplay);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 1);
+    expect(hasActionEnded(gamePlay)).toBe(false);
+    gamePlay = playCard(gamePlay, 0);
+    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数1(+1)
+    gamePlay = startTurn(gamePlay);
+    // 「おしゃれハーブティー」使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "performLeveragingModifier",
+      modifierKind: "positiveImpression",
+      percentage: 100,
+    });
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "perform",
+      vitality: { value: 3 },
+    });
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 0,
+      vitality: 19,
+      modifiers: [
+        { name: "好印象", representativeValue: 97 },
+        { name: "やる気", representativeValue: 16 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 10814,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数1
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 0,
+      vitality: 33,
+      modifiers: [
+        { name: "好印象", representativeValue: 97 },
+        { name: "やる気", representativeValue: 16 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+        { name: "発動予約", representativeValue: 1 },
+      ],
+      score: 12542,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    expect(isLessonEnded(gamePlay)).toBe(false);
+    gamePlay = endTurn(gamePlay);
+    expect(isLessonEnded(gamePlay)).toBe(true);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 0,
+      vitality: 28,
+      modifiers: [
+        { name: "好印象", representativeValue: 97 },
+        { name: "やる気", representativeValue: 16 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+        { name: "発動予約", representativeValue: 1 },
+      ],
+      score: 17674,
+    } as LessonDisplay);
   });
 });

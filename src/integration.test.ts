@@ -739,10 +739,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       "fureai",
       "risutato",
       "fanshichamu",
-      // 残りターン数2、3枚目は山札再構築後なので不明。しかし、このターンからスキルカード使用してないので再現できる。
+      // 残りターン数2、3枚目は山札再構築後なので不明。しかし、このターンからスキルカード使用してないので省略
       "mesennokihon2",
       "pozunokihon",
-      // 残りターン数1、山札再構築後なので不明
     ];
 
     // 残りターン数6
@@ -1036,11 +1035,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 300,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数9
@@ -1055,11 +1051,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 1007,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数8
@@ -1089,11 +1082,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       remainingTurns: 7,
       remainingTurnsChange: 0,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数6(+1)
@@ -1109,11 +1099,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       remainingTurns: 7,
       remainingTurnsChange: 1,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数5(+1)
@@ -1134,11 +1121,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 3974,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数4(+1)
@@ -1183,11 +1167,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 6070,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数1(+1)

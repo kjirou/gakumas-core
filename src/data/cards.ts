@@ -3507,7 +3507,7 @@ export const cards: CardData[] = [
         effects: [
           {
             kind: "getModifier",
-            modifier: { kind: "positiveImpression", amount: 3 },
+            modifier: { kind: "positiveImpression", amount: 5 },
           },
           {
             kind: "getModifier",

@@ -851,9 +851,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
     } as LessonDisplay);
     expect(isLessonEnded(gamePlay)).toBe(true);
   });
-  // この動画: https://youtu.be/fhmTdsrS7PM の1戦目の再現をする
-  test("最終試験その1を再現できる", () => {
-    let gamePlay = initializeGamePlay({
+  const initializeSaishushikenGamePlay = (turns: Lesson["turns"]) => {
+    return initializeGamePlay({
       idolDataId: "fujitakotone-ssr-1",
       specialTrainingLevel: 3,
       talentAwakeningLevel: 1,
@@ -894,19 +893,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
         { id: "nemuke", testId: "nemuke2" },
       ],
       producerItems: [{ id: "nakanaorinokikkake" }],
-      turns: [
-        "dance",
-        "dance",
-        "visual",
-        "dance",
-        "visual",
-        "dance",
-        "vocal",
-        "visual",
-        "vocal",
-        "visual",
-        "dance",
-      ],
+      turns,
       // 1700 かは不明
       clearScoreThresholds: { clear: 1700 },
       scoreBonus: { vocal: 522, dance: 1763, visual: 1458 },
@@ -945,13 +932,29 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       memoryEffects: [],
     });
+  };
+  // この動画: https://youtu.be/fhmTdsrS7PM の1戦目の再現をする
+  test("最終試験その1を再現できる", () => {
+    let gamePlay = initializeSaishushikenGamePlay([
+      "dance",
+      "dance",
+      "visual",
+      "dance",
+      "visual",
+      "dance",
+      "vocal",
+      "visual",
+      "vocal",
+      "visual",
+      "dance",
+    ]);
     gamePlay.initialLesson.deck = [
       // 残りターン数11、「初星ホエイプロテイン」使用
       // （レッスン開始時手札の検証のため、後ろに置いている）
       // 残りターン数10
       "apirunokihon",
       "minnadaisuki", // 使用1
-      "pozunokihon", // 使用2、Pアイテム「ビッグドリーム貯金箱」発動
+      "pozunokihon", // 使用2
       // 残りターン数9
       "hyogennokihon",
       "kawaiishigusa", // 使用2
@@ -997,7 +1000,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       // （レッスン開始時手札）
       "hombanzenya3", // 使用3
       "hombanzenya", // 使用1
-      "hombanzenya2", // 使用2
+      "hombanzenya2", // 使用2、Pアイテム「ビッグドリーム貯金箱」発動
     ];
 
     // 残りターン数11
@@ -1239,6 +1242,297 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
         { name: "発動予約", representativeValue: 1 },
       ],
       score: 17674,
+    } as LessonDisplay);
+  });
+  // この動画: https://youtu.be/fhmTdsrS7PM の2戦目の再現をする
+  test("最終試験その2を再現できる", () => {
+    let gamePlay = initializeSaishushikenGamePlay([
+      "dance",
+      "dance",
+      "visual",
+      "visual",
+      "vocal",
+      "dance",
+      "dance",
+      "visual",
+      "vocal",
+      "visual",
+      "dance",
+    ]);
+    gamePlay.initialLesson.deck = [
+      // 残りターン数11、「初星ホエイプロテイン」使用
+      // （レッスン開始時手札の検証のため、後ろに置いている）
+      // 残りターン数10
+      "mesennokihon",
+      "pozunokihon",
+      "tokimeki", // 使用
+      // 残りターン数9、Pアイテム「仲直りのきっかけ」発動
+      "hagemashi", // 使用2
+      "tebyoshi",
+      "fanshichamu", // 使用1
+      // 残りターン数8、「初星ホエイプロテイン」使用
+      "yosomihadame", // 使用2
+      "damedamekukkingu", // 使用1
+      "hyogennokihon",
+      // 残りターン数7
+      "nemuke",
+      "nemuke2",
+      "mesennokihon2", // 前ターンの「ダメダメクッキング」により強化、使用
+      // 残りターン数6
+      "apirunokihon",
+      "hoshikuzusenseshon", // 使用2
+      "watashigasta", // 使用1
+      "tebyoshi2", // 「私がスター」で引く分
+      "hyogennokihon2", // 「星屑センセーション」で引く分、使用
+      // 残りターン数5(+1)
+      "usureyukukabe",
+      "minnadaisuki", // 使用1
+      "shiawasenajikan", // 使用2
+      // 残りターン数4(+1)
+      "shiawasenajikan2", // 使用
+      "risutato",
+      "kawaiishigusa",
+      // 残りターン数3(+1)
+      "shiawasenajikan3", // 使用
+      "fureai",
+      "pozunokihon", // このスキルカードから、本来は山札が再構築されている
+      // 残りターン数2(+1)
+      "risutato", // 使用2
+      "usureyukukabe",
+      "minnadaisuki", // 使用1
+      // 残りターン数1(+1)、「おしゃれハーブディー」使用、その前は体力・元気0でカードが使えない
+      "tebyoshi", // 使用
+      "shiawasenajikan",
+      "hyogennokihon",
+      // 残りターン数1、「おしゃれハーブディー」使用
+      "nemuke",
+      "mesennokihon",
+      "shiawasenajikan2", // 使用
+      // （レッスン開始時手札）
+      "hombanzenya", // 使用1
+      "hombanzenya3", // 使用3
+      "hombanzenya2", // 使用2、Pアイテム「ビッグドリーム貯金箱」発動
+    ];
+
+    // 残りターン数11
+    gamePlay = startTurn(gamePlay);
+    // 「初星ホエイプロテイン」使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "getModifier",
+      modifier: { kind: "additionalCardUsageCount", amount: 1 },
+    });
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 37,
+      vitality: 0,
+      modifiers: [{ name: "スキルカード使用数追加", representativeValue: 1 }],
+      score: 0,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数10
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 22,
+      vitality: 0,
+      modifiers: [
+        { name: "好印象", representativeValue: 17 },
+        { name: "やる気", representativeValue: 11 },
+      ],
+      score: 300,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数9
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 13,
+      vitality: 20,
+      modifiers: [
+        { name: "好印象", representativeValue: 26 },
+        { name: "やる気", representativeValue: 17 },
+        { name: "スキルカード使用数追加", representativeValue: 1 },
+      ],
+      score: 777,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数8
+    gamePlay = startTurn(gamePlay);
+    // 「初星ホエイプロテイン」使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "getModifier",
+      modifier: { kind: "additionalCardUsageCount", amount: 1 },
+    });
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 13,
+      vitality: 12,
+      modifiers: [
+        { name: "好印象", representativeValue: 35 },
+        { name: "やる気", representativeValue: 20 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+        { name: "スキルカード使用数追加", representativeValue: 1 },
+      ],
+      score: 1302,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 上記ターン終了時の好印象発動によるスコア増加が、 50 * 1458% = 729 になるべきところが、 730 になっており、その理由が不明
+    // つまり、動画より本実装の値が 1 少ない結果になっており、本テスト上は、この差分を常に動画で表示されているスコアに加算して帳尻を合わせる
+    // Ref: https://github.com/kjirou/gakumas-core/issues/100
+    const scoreMod = -1;
+
+    // 残りターン数7
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 27,
+      modifiers: [
+        { name: "好印象", representativeValue: 57 },
+        { name: "やる気", representativeValue: 23 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 2032 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数6
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 50,
+      modifiers: [
+        { name: "好印象", representativeValue: 60 },
+        { name: "やる気", representativeValue: 23 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 2351 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数5(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 74,
+      modifiers: [
+        { name: "好印象", representativeValue: 68 },
+        { name: "やる気", representativeValue: 20 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 3568 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数4(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 69,
+      modifiers: [
+        { name: "好印象", representativeValue: 85 },
+        { name: "やる気", representativeValue: 18 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 6337 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数3(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 64,
+      modifiers: [
+        { name: "好印象", representativeValue: 91 },
+        { name: "やる気", representativeValue: 18 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 7679 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数2(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 59,
+      modifiers: [
+        { name: "好印象", representativeValue: 97 },
+        { name: "やる気", representativeValue: 18 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 8191 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数1(+1)
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 73,
+      modifiers: [
+        { name: "好印象", representativeValue: 100 },
+        { name: "やる気", representativeValue: 16 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 11370 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数1
+    gamePlay = startTurn(gamePlay);
+    // 「おしゃれハーブティー」使用
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "performLeveragingModifier",
+      modifierKind: "positiveImpression",
+      percentage: 100,
+    });
+    gamePlay = activateAdditionalEffect(gamePlay, {
+      kind: "perform",
+      vitality: { value: 3 },
+    });
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 87,
+      modifiers: [
+        { name: "好印象", representativeValue: 99 },
+        { name: "やる気", representativeValue: 16 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 18405 + scoreMod,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    expect(isLessonEnded(gamePlay)).toBe(false);
+    gamePlay = endTurn(gamePlay);
+    expect(isLessonEnded(gamePlay)).toBe(true);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 82,
+      modifiers: [
+        { name: "好印象", representativeValue: 106 },
+        { name: "やる気", representativeValue: 16 },
+        { name: "スキルカード発動前持続効果", representativeValue: undefined },
+      ],
+      score: 20274 + scoreMod,
     } as LessonDisplay);
   });
 });

@@ -250,8 +250,8 @@ export type MetaModifierData = Readonly<{
    */
   displayedRepresentativeValuePropertyName:
     | "amount"
-    | "delay"
     | "duration"
+    | "fixed1"
     | "times"
     | "value"
     | undefined;

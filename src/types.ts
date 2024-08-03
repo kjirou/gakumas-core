@@ -1673,7 +1673,8 @@ export type LessonDisplay = {
   life: Idol["life"];
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
-  remainingTurns: Lesson["remainingTurnsChange"];
+  remainingTurns: number;
+  remainingTurnsChange: Lesson["remainingTurnsChange"];
   score: Lesson["score"];
   scoreBonus: number | undefined;
   turnNumber: number;

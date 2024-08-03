@@ -121,14 +121,12 @@ export const getDisplayedRepresentativeModifierValue = <
       return displayedRepresentativeValuePropertyName in modifier
         ? modifier.amount
         : undefined;
-    case "delay":
-      return displayedRepresentativeValuePropertyName in modifier
-        ? modifier.delay
-        : undefined;
     case "duration":
       return displayedRepresentativeValuePropertyName in modifier
         ? modifier.duration
         : undefined;
+    case "fixed1":
+      return 1;
     case "times":
       return displayedRepresentativeValuePropertyName in modifier
         ? modifier.times

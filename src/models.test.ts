@@ -175,7 +175,7 @@ describe("getDisplayedRepresentativeModifierValue", () => {
     },
     {
       args: [{ kind: "delayedEffect", delay: 2 } as Modifier],
-      expected: 2,
+      expected: 1,
     },
     {
       args: [{ kind: "lifeConsumptionReduction", value: 2 }],

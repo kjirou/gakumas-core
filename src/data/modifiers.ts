@@ -15,13 +15,14 @@ export const metaModifierDictioanry = {
   },
   delayedEffect: {
     kind: "delayedEffect",
-    displayedRepresentativeValuePropertyName: "delay",
+    /** 本家UIでは、アイコン横に"1回"と表示されている。ただし、現状発動予約効果に複数回発動がないので、本実装だと回数を設定してない。そのため固定値で1を出す。 */
+    displayedRepresentativeValuePropertyName: "fixed1",
     label: "発動予約",
     nonAggregation: true,
   },
   doubleEffect: {
     kind: "doubleEffect",
-    /** 本家UIで、アイコン横に"1"と表示されているのは確認済み。それが回数を示すのか「もう1回発動」なのかは不明。一見回数のようだが、合算されない状態修正なのでそこと不整合。 */
+    /** 本家UIでは、アイコン横に"1"と表示されているのは確認済み。それが回数を示すのか「もう1回発動」なのかは不明。一見回数のようだが、合算されない状態修正なのでそこと不整合。 */
     displayedRepresentativeValuePropertyName: "times",
     label: "スキルカード追加発動",
     nonAggregation: true,

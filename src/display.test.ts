@@ -784,7 +784,7 @@ describe("generateLessonDisplay", () => {
             },
           ];
           gamePlay.initialLesson.turnNumber = 2;
-          gamePlay.initialLesson.remainingTurns = 1;
+          gamePlay.initialLesson.remainingTurnsChange = 1;
           return gamePlay;
         })(),
       ],

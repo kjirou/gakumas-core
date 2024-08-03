@@ -842,6 +842,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
     expect(hasActionEnded(gamePlay)).toBe(true);
     expect(isLessonEnded(gamePlay)).toBe(false);
     gamePlay = endTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      score: 90,
+    } as LessonDisplay);
     expect(isLessonEnded(gamePlay)).toBe(true);
   });
 });

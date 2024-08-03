@@ -14,7 +14,7 @@ import {
   getNextHistoryResultIndex,
   initializeGamePlay,
   isLessonEnded,
-  isTurnEnded,
+  hasActionEnded,
   patchDiffs,
   playCard,
   skipTurn,
@@ -256,9 +256,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         ],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -276,9 +276,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [{ kind: "focus", amount: 2, id: expect.any(String) }],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -296,10 +296,10 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [{ kind: "focus", amount: 2, id: expect.any(String) }],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     expect(isLessonEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     expect(isLessonEnded(gamePlay)).toBe(true);
   });
   test("中間試験まで3週のレッスンを再現できる", () => {
@@ -389,9 +389,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         ],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -410,9 +410,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         ],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -429,9 +429,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -449,10 +449,10 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = applyEffect(gamePlay, { kind: "recoverLife", value: 6 }); // Pドリンク使用
     gamePlay = playCard(gamePlay, 0);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -470,11 +470,11 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [{ kind: "focus", amount: 3, id: expect.any(String) }],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     expect(isLessonEnded(gamePlay)).toBe(false);
     lesson.hand = ["pozunokihon", "hinyarihitoyasumi", "shinkokyu2"];
     gamePlay = playCard(gamePlay, 1);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     // TODO: これが false になってたバグってる、水着麻央結合テストは全体的に書き直すのでそこで直す
     // expect(isLessonEnded(gamePlay)).toBe(true);
   });
@@ -553,9 +553,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -573,9 +573,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         modifiers: [{ kind: "focus", amount: 5, id: expect.any(String) }],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -596,9 +596,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         ],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -619,9 +619,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         ],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     //
@@ -647,9 +647,9 @@ describe("センス（好調系・集中系）代表として、水着麻央の�
         ],
       },
     });
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // この後は山札が再構築されるので、プレイ再現が困難
@@ -753,9 +753,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 0,
     } as LessonDisplay);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数5
@@ -769,11 +769,11 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 5,
     } as LessonDisplay);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数4
@@ -788,9 +788,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 31,
     } as LessonDisplay);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数3
@@ -805,9 +805,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 49,
     } as LessonDisplay);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = skipTurn(gamePlay);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数2
@@ -821,9 +821,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 69,
     } as LessonDisplay);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = skipTurn(gamePlay);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数1
@@ -837,9 +837,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 88,
     } as LessonDisplay);
-    expect(isTurnEnded(gamePlay)).toBe(false);
+    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = skipTurn(gamePlay);
-    expect(isTurnEnded(gamePlay)).toBe(true);
+    expect(hasActionEnded(gamePlay)).toBe(true);
     expect(isLessonEnded(gamePlay)).toBe(false);
     gamePlay = endTurn(gamePlay);
     expect(isLessonEnded(gamePlay)).toBe(true);

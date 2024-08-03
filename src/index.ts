@@ -463,9 +463,9 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
 };
 
 /**
- * ターンが終了しているかを返す
+ * アイドルの行動が終了しているかどうか
  */
-export const isTurnEnded = (gamePlay: GamePlay): boolean => {
+export const hasActionEnded = (gamePlay: GamePlay): boolean => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   return lesson.idol.actionPoints === 0;
 };

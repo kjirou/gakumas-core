@@ -69,7 +69,8 @@ export * from "./utils";
  * @param params.idolSpecificCardTestId テスト用、本来知る必要がない内部的なIDを指定する
  * @param params.ignoreIdolParameterKindConditionAfterClearing クリア後に、Pアイテムがパラメータ属性を無視して効果を発動するか。追い込みレッスンの設定。
  *                                                             任意でデフォルトは false
- * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値。なお、体力最大値は、True Endの効果を含む。
+ * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値
+ * @param params.maxLife レッスン開始時のアイドルの最大体力、任意でデフォルトはTrue Endの効果を含むアイドルの最大体力
  * @param params.memoryEffects メモリーのアビリティによる効果設定、任意
  * @param params.producerItems アイドル固有に加えて、追加するPアイテムリスト
  * @param params.scoreBonus スコアボーナス設定、任意でデフォルトは設定なしを意味する undefined
@@ -122,6 +123,7 @@ export const initializeGamePlay = (params: {
   idolSpecificCardTestId?: CardInProduction["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: IdolInProduction["life"];
+  maxLife?: IdolInProduction["maxLife"];
   memoryEffects?: MemoryEffect[];
   producerItems: Array<{
     enhanced?: ProducerItemInProduction["enhanced"];
@@ -160,6 +162,7 @@ export const initializeGamePlay = (params: {
     idGenerator,
     idolDataId: params.idolDataId,
     life: params.life,
+    maxLife: params.maxLife,
     specialTrainingLevel,
     specificCardId: params.idolSpecificCardTestId,
     talentAwakeningLevel,

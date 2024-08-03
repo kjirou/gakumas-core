@@ -105,6 +105,47 @@ describe("initializeGamePlay", () => {
       } as GamePlay,
     },
     {
+      name: "最大体力のデフォルト値は、True End効果を含むアイドルの設定値である",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            original: {
+              maxLife: 28,
+            },
+          },
+        },
+      } as GamePlay,
+    },
+    {
+      name: "最大体力を任意値に設定できる",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          maxLife: 100,
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            original: {
+              maxLife: 100,
+            },
+          },
+        },
+      } as GamePlay,
+    },
+    {
       name: "体力が最大値を超えない",
       args: [
         {
@@ -112,13 +153,14 @@ describe("initializeGamePlay", () => {
           cards: [],
           producerItems: [],
           turns: ["vocal"],
+          maxLife: 10,
           life: 100,
         },
       ],
       expected: {
         initialLesson: {
           idol: {
-            life: 28,
+            life: 10,
           },
         },
       } as GamePlay,

@@ -39,6 +39,7 @@ import {
   ProducerItemContentData,
   ProducerItemInProduction,
   MetaModifierData,
+  CharacterData,
 } from "./types";
 import { shuffleArray } from "./utils";
 
@@ -180,6 +181,7 @@ export const createIdolInProduction = (params: {
   idGenerator: IdGenerator;
   idolDataId: IdolData["id"];
   life?: IdolInProduction["life"];
+  maxLife?: CharacterData["maxLife"];
   producerItems?: ProducerItemInProduction[];
   specificCardId?: CardInProduction["id"];
   specialTrainingLevel: number;
@@ -209,13 +211,12 @@ export const createIdolInProduction = (params: {
     },
     ...(params.additionalProducerItems ?? []),
   ];
+  const maxLife = params.maxLife ?? characterData.maxLife;
   return {
     deck,
     data: idolData,
-    life: params.life
-      ? Math.min(params.life, characterData.maxLife)
-      : characterData.maxLife,
-    maxLife: characterData.maxLife,
+    life: params.life ? Math.min(params.life, maxLife) : maxLife,
+    maxLife,
     producerItems,
   };
 };

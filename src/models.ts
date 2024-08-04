@@ -661,6 +661,100 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
+      case "modifier.update": {
+        const targetedModifier = newLesson.idol.modifiers.find(
+          (e) => e.id === update.id,
+        );
+        if (targetedModifier === undefined) {
+          throw new Error(`Targeted modifier not found: ${update.id}`);
+        }
+        let newTargetedModifier: Modifier;
+        let newValue: number = 0;
+        switch (update.propertyNameKind) {
+          case "amount":
+            if ("amount" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
+            }
+            break;
+          case "delay":
+            if ("delay" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
+            }
+            break;
+          case "duration":
+            if ("duration" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
+            }
+            break;
+          case "times":
+            if ("times" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
+            }
+            break;
+          case "value":
+            if ("value" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
+            }
+            break;
+          default:
+            const unreachable: never = update.propertyNameKind;
+            throw new Error(`Unreachable statement`);
+        }
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            modifiers:
+              newValue === 0
+                ? newLesson.idol.modifiers.filter(
+                    (modifier) => modifier.id !== newTargetedModifier.id,
+                  )
+                : newLesson.idol.modifiers.map((modifier) =>
+                    modifier.id === newTargetedModifier.id
+                      ? newTargetedModifier
+                      : modifier,
+                  ),
+          },
+        };
+        break;
+      }
+      case "modifier.remove": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            modifiers: newLesson.idol.modifiers.filter(
+              (e) => e.id !== update.id,
+            ),
+          },
+        };
+        break;
+      }
       case "modifierIdsAtTurnStart": {
         newLesson = {
           ...newLesson,

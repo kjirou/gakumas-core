@@ -13,6 +13,7 @@ import {
   getIdolParameterKindOnTurn,
   patchDiffs,
 } from "./models";
+import { createGamePlayForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
 
 describe("createIdolInProduction", () => {
@@ -811,6 +812,223 @@ describe("patchDiffs", () => {
         ]);
         expect(lessonMock.idol.modifiers).toStrictEqual([]);
       });
+    });
+  });
+  describe("modifier.remove", () => {
+    const testCases: Array<{
+      args: Parameters<typeof patchDiffs>;
+      expected: ReturnType<typeof patchDiffs>;
+      name: string;
+    }> = [
+      {
+        name: "it works",
+        args: [
+          {
+            idol: {
+              modifiers: [{ id: "a" }, { id: "b" }, { id: "c" }],
+            },
+          } as Lesson,
+          [{ kind: "modifier.remove", id: "b" }],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ id: "a" }, { id: "c" }],
+          },
+        } as Lesson,
+      },
+    ];
+    test.each(testCases)("$name", ({ args, expected }) => {
+      expect(patchDiffs(...args)).toMatchObject(expected);
+    });
+  });
+  describe("modifier.update", () => {
+    const testCases: Array<{
+      args: Parameters<typeof patchDiffs>;
+      expected: ReturnType<typeof patchDiffs>;
+      name: string;
+    }> = [
+      {
+        name: "amount - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "focus", amount: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "focus", amount: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "delay - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "delayedEffect", delay: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "delay",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "delayedEffect", delay: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "duration - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "goodCondition", duration: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "duration",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "goodCondition", duration: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "times - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "debuffProtection", times: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "times",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "debuffProtection", times: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "value - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [
+                { kind: "lifeConsumptionReduction", value: 1, id: "a" },
+              ],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "value",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [
+              { kind: "lifeConsumptionReduction", value: 3, id: "a" },
+            ],
+          },
+        } as Lesson,
+      },
+      {
+        name: "減算できる",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "focus", amount: 10, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              actual: -2,
+              max: -2,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "focus", amount: 8, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "減算の結果、値が 0 になった時、削除される / 削除時にリストの順番を維持する",
+        args: [
+          {
+            idol: {
+              modifiers: [
+                { kind: "focus", amount: 1, id: "a" },
+                { kind: "motivation", amount: 1, id: "b" },
+                { kind: "positiveImpression", amount: 1, id: "c" },
+              ],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              actual: -1,
+              max: -1,
+              id: "b",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [
+              { kind: "focus", amount: 1, id: "a" },
+              { kind: "positiveImpression", amount: 1, id: "c" },
+            ],
+          },
+        } as Lesson,
+      },
+    ];
+    test.each(testCases)("$name", ({ args, expected }) => {
+      expect(patchDiffs(...args)).toMatchObject(expected);
     });
   });
   describe("life", () => {

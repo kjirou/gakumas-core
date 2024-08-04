@@ -1648,7 +1648,9 @@ describe("calculatePerformingScoreEffect", () => {
       name: "アイドルへパラメータ上昇量増加50%のみが付与されている時、1.5倍（端数切り上げ）したスコアを返す",
       args: [
         {
-          modifiers: [{ kind: "mightyPerformance", duration: 1 }],
+          modifiers: [
+            { kind: "mightyPerformance", duration: 1, percentage: 50 },
+          ],
         } as Idol,
         undefined,
         undefined,
@@ -1704,7 +1706,7 @@ describe("calculatePerformingScoreEffect", () => {
         {
           modifiers: [
             { kind: "goodCondition", duration: 1 },
-            { kind: "mightyPerformance", duration: 1 },
+            { kind: "mightyPerformance", duration: 1, percentage: 50 },
           ],
         } as Idol,
         undefined,

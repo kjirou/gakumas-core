@@ -200,7 +200,7 @@ const generateModifierText = (modifier: ModifierData): string => {
     case "lifeConsumptionReduction":
       return `${kwd("lifeConsumptionReduction")}${modifier.value}`;
     case "mightyPerformance":
-      return `${kwd("mightyPerformance")}50%（${modifier.duration}ターン）`;
+      return `${kwd("mightyPerformance")}${modifier.percentage}%（${modifier.duration}ターン）`;
     case "motivation":
       return `${kwd("motivation")}+${modifier.amount}`;
     case "noVitalityIncrease":

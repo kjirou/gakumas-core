@@ -1129,7 +1129,7 @@ export const producerItems: ProducerItemData[] = [
       effects: [
         {
           kind: "getModifier",
-          modifier: { kind: "mightyPerformance", duration: 1 },
+          modifier: { kind: "mightyPerformance", duration: 1, percentage: 50 },
         },
       ],
       times: 3,
@@ -1158,7 +1158,7 @@ export const producerItems: ProducerItemData[] = [
       effects: [
         {
           kind: "getModifier",
-          modifier: { kind: "mightyPerformance", duration: 1 },
+          modifier: { kind: "mightyPerformance", duration: 1, percentage: 50 },
         },
       ],
       times: 3,

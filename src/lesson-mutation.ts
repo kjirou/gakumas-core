@@ -567,8 +567,9 @@ export const calculatePerformingScoreEffect = (
   const focusAmount = focus && "amount" in focus ? focus.amount : 0;
   const hasExcellentCondition =
     idol.modifiers.find((e) => e.kind === "excellentCondition") !== undefined;
-  const hasMightyPerformance =
-    idol.modifiers.find((e) => e.kind === "mightyPerformance") !== undefined;
+  const mightyPerformance = idol.modifiers.find(
+    (e) => e.kind === "mightyPerformance",
+  );
   const focusMultiplier =
     query.focusMultiplier !== undefined ? query.focusMultiplier : 1;
   const baseScore = Math.ceil(
@@ -577,7 +578,7 @@ export const calculatePerformingScoreEffect = (
         (goodConditionDuration > 0 && hasExcellentCondition
           ? goodConditionDuration * 0.1
           : 0.0)) *
-      (hasMightyPerformance ? 1.5 : 1.0),
+      (mightyPerformance ? (100 + mightyPerformance.percentage) / 100 : 1.0),
   );
   const score =
     scoreBonus !== undefined

@@ -199,12 +199,13 @@ export type ModifierData = Readonly<
     }
   | {
       /**
-       * 「パラメータ上昇量増加50%（{duration}ターン）」
+       * 「パラメータ上昇量増加{percentage}%（{duration}ターン）」
        *
        * - 「ビジュアルレッスン・ビジュアルターンのみ」のような条件を伴うものが多いが、これは付与条件なので、状態修正としては付与されたら一律に効果を発する
        */
       kind: "mightyPerformance";
       duration: number;
+      percentage: number;
     }
   | {
       /** 「やる気+{amount}」 */

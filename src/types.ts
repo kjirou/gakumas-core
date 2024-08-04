@@ -202,8 +202,14 @@ export type ModifierData = Readonly<
        * 「パラメータ上昇量増加{percentage}%（{duration}ターン）」
        *
        * - 「ビジュアルレッスン・ビジュアルターンのみ」のような条件を伴うものが多いが、これは付与条件なので、状態修正としては付与されたら一律に効果を発する
+       * - Pアイテム・応援/トラブル・Pドリンクなどで付与される
+       *   - 例えば、咲季のアイドルの道14ステージに、永続15%のこれがある
+       * - 「パラメータ」の文言は状況により「スコア」へ変わる
+       * - 本実装では、割合でグルーピングして効果時間を合算しているが、本家仕様は不明
+       *   - Issue: https://github.com/kjirou/gakumas-core/issues/110
        */
       kind: "mightyPerformance";
+      /** 効果時間、TODO: アイドルの道やコンテストに永続設定のものがある */
       duration: number;
       percentage: number;
     }

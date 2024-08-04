@@ -1,7 +1,6 @@
+import { toUSVString } from "util";
 import type {
   Card,
-  CardInProduction,
-  Effect,
   EffectWithoutCondition,
   Lesson,
   GamePlay,
@@ -9,7 +8,6 @@ import type {
   LessonUpdateQuery,
   Modifier,
 } from "./index";
-import { getCardDataById } from "./data/cards";
 import {
   endTurn,
   generateLessonDisplay,
@@ -23,7 +21,7 @@ import {
   startTurn,
 } from "./index";
 import { activateEffect } from "./lesson-mutation";
-import { createGamePlayForTest } from "./test-utils";
+import exp from "constants";
 
 /**
  * スキルカードへレッスンサポートの付与をする、本体は仕様不明瞭なのもあり未実装
@@ -85,578 +83,442 @@ const activateAdditionalEffect = (
   };
 };
 
-// このプレイ動画: https://youtu.be/l0kHH_iSDJw を再現する
-describe("センス（好調系・集中系）代表として、水着麻央のプレイを再現", () => {
-  /** 中間試験まで6週時点(=開始時点)の山札 */
-  const initialDeck = [
-    {
-      id: "hinyarihitoyasumi",
-      data: getCardDataById("hinyarihitoyasumi"),
-      enhanced: true,
-    },
-    {
-      id: "haitatchi",
-      data: getCardDataById("haitatchi"),
-      enhanced: false,
-    },
-    {
-      id: "shikosakugo",
-      data: getCardDataById("shikosakugo"),
-      enhanced: false,
-    },
-    {
-      id: "apirunokihon",
-      data: getCardDataById("apirunokihon"),
-      enhanced: true,
-    },
-    {
-      id: "apirunokihon2",
-      data: getCardDataById("apirunokihon"),
-      enhanced: false,
-    },
-    {
-      id: "pozunokihon",
-      data: getCardDataById("pozunokihon"),
-      enhanced: false,
-    },
-    {
-      id: "hyojonokihon",
-      data: getCardDataById("hyojonokihon"),
-      enhanced: true,
-    },
-    {
-      id: "hyojonokihon2",
-      data: getCardDataById("hyojonokihon"),
-      enhanced: false,
-    },
-    {
-      id: "hyogennokihon",
-      data: getCardDataById("hyogennokihon"),
-      enhanced: false,
-    },
-    {
-      id: "hyogennokihon2",
-      data: getCardDataById("hyogennokihon"),
-      enhanced: false,
-    },
-  ];
-  /** 中間試験まで3週時点の山札 */
-  const deckUntil3WeeksMidtermExam = [
-    ...initialDeck,
-    {
-      id: "nemuke",
-      data: getCardDataById("nemuke"),
-      enhanced: false,
-    },
-    {
-      id: "shinkokyu",
-      data: getCardDataById("shinkokyu"),
-      enhanced: true,
-    },
-    {
-      id: "haitatchi2",
-      data: getCardDataById("haitatchi"),
-      enhanced: false,
-    },
-    {
-      id: "shinkokyu2",
-      data: getCardDataById("shinkokyu"),
-      enhanced: false,
-    },
-  ];
-  /** 中間試験まで1週時点(=追い込みレッスン時点)の山札 */
-  const deckUntil1WeekMidtermExam = [
-    ...deckUntil3WeeksMidtermExam.map((card) => {
-      if (card.id === "haitatchi") {
-        return { ...card, enhanced: true };
-      }
-      return card;
-    }),
-    {
-      id: "iji",
-      data: getCardDataById("iji"),
-      enhanced: false,
-    },
-    {
-      id: "usureyukukabe",
-      data: getCardDataById("usureyukukabe"),
-      enhanced: false,
-    },
-  ];
-  const createMaoForTest = (params: {
-    clearScoreThresholds: Lesson["clearScoreThresholds"];
-    deck: CardInProduction[];
-    turns: Lesson["turns"];
-  }) => {
-    return createGamePlayForTest({
-      clearScoreThresholds: params.clearScoreThresholds,
-      deck: params.deck,
+describe("センス・集中の代表として、水着麻央のプレイ動画を再現", () => {
+  // プレイ動画直リンク: https://youtu.be/l0kHH_iSDJw?t=22
+  test("中間試験まで6週の通常レッスンを再現できる", () => {
+    let gamePlay = initializeGamePlay({
       idolDataId: "arimuramao-ssr-2",
       specialTrainingLevel: 4,
       talentAwakeningLevel: 2,
-      turns: params.turns,
-    });
-  };
-  test("中間試験まで6週のレッスンを再現できる", () => {
-    let gamePlay = createMaoForTest({
-      clearScoreThresholds: { clear: 30, perfect: 60 },
-      deck: initialDeck,
+      life: 31,
+      idolSpecificCardTestId: "hinyarihitoyasumi",
+      cards: [
+        { id: "apirunokihon", testId: "apirunokihon", enhanced: true },
+        { id: "hyojonokihon", testId: "hyojonokihon" },
+        { id: "hyogennokihon", testId: "hyogennokihon" },
+        { id: "shikosakugo", testId: "shikosakugo" },
+        { id: "pozunokihon", testId: "pozunokihon" },
+        { id: "apirunokihon", testId: "apirunokihon2" },
+        { id: "hyogennokihon", testId: "hyogennokihon2", enhanced: true },
+        { id: "haitatchi", testId: "haitatchi" },
+      ],
+      producerItems: [],
       turns: ["visual", "visual", "visual", "visual", "visual"],
-    });
-    gamePlay.initialLesson.deck = [
-      // 1
-      "apirunokihon",
-      "hyojonokihon2",
-      "hyogennokihon",
-      // 2
-      "shikosakugo",
-      "pozunokihon",
-      "apirunokihon2",
-      // 3
-      "hyojonokihon",
-      "hinyarihitoyasumi",
-      "haitatchi",
-      // 以降不明
-      "hyogennokihon2",
-    ];
-    gamePlay.initialLesson.memoryEffects = [
-      { kind: "halfLifeConsumption", probability: 100, value: 1 },
-      { kind: "vitality", probability: 100, value: 2 },
-    ];
-    gamePlay.initialLesson.encouragements = [
-      { turnNumber: 2, effect: { kind: "perform", vitality: { value: 1 } } },
-      {
-        turnNumber: 4,
-        effect: {
-          kind: "drainLife",
-          value: 2,
-          condition: {
-            kind: "countModifier",
-            modifierKind: "focus",
-            range: { min: 1 },
+      clearScoreThresholds: { clear: 30, perfect: 60 },
+      encouragements: [
+        { turnNumber: 2, effect: { kind: "perform", vitality: { value: 1 } } },
+        {
+          turnNumber: 4,
+          effect: {
+            kind: "drainLife",
+            value: 2,
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 1 },
+            },
           },
         },
-      },
+      ],
+      memoryEffects: [
+        { kind: "halfLifeConsumption", probability: 100, value: 1 },
+        { kind: "vitality", probability: 100, value: 2 },
+      ],
+    });
+    gamePlay.initialLesson.deck = [
+      // 残りターン数5
+      "apirunokihon",
+      "hyojonokihon", // 使用
+      "hyogennokihon", // レッスンサポート1発動
+      // 残りターン数4
+      "shikosakugo",
+      "pozunokihon",
+      "apirunokihon2", // レッスンサポート1発動、使用
+      // 残りターン数3
+      "hyogennokihon2",
+      "hinyarihitoyasumi", // 使用
+      "haitatchi", // レッスンサポート1発動
     ];
-    let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
-    //
-    // 1ターン目
-    //
+    // 残りターン数5
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 1,
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 31,
+      vitality: 2,
+      modifiers: [{ name: "消費体力減少", representativeValue: 1 }],
       score: 0,
-      idol: {
-        life: 31,
-        vitality: 2,
-        modifiers: [
-          { kind: "halfLifeConsumption", duration: 1, id: expect.any(String) },
-        ],
-      },
-    });
+    } as LessonDisplay);
     expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
     expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
-    //
-    // 2ターン目
-    //
+    // 残りターン数4
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "apirunokihon2", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 2,
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 31,
+      vitality: 3,
+      modifiers: [{ name: "集中", representativeValue: 2 }],
       score: 0,
-      idol: {
-        life: 31,
-        vitality: 3,
-        modifiers: [{ kind: "focus", amount: 2, id: expect.any(String) }],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
+    } as LessonDisplay);
     gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
-    //
-    // 3ターン目
-    //
+    // 残りターン数3
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 3,
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 31,
+      vitality: 0,
+      modifiers: [{ name: "集中", representativeValue: 2 }],
       score: 16,
-      idol: {
-        life: 31,
-        vitality: 0,
-        modifiers: [{ kind: "focus", amount: 2, id: expect.any(String) }],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
+    } as LessonDisplay);
     expect(isLessonEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     expect(isLessonEnded(gamePlay)).toBe(true);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      score: 60,
+    } as LessonDisplay);
   });
-  test("中間試験まで3週のレッスンを再現できる", () => {
-    let gamePlay = createMaoForTest({
-      clearScoreThresholds: { clear: 45, perfect: 90 },
-      deck: deckUntil3WeeksMidtermExam,
-      turns: ["visual", "visual", "visual", "visual", "visual"],
+  // プレイ動画直リンク: https://youtu.be/l0kHH_iSDJw?t=1006
+  test("最終試験まで1週の追い込みレッスンを再現できる", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "arimuramao-ssr-2",
+      specialTrainingLevel: 4,
+      talentAwakeningLevel: 2,
+      life: 12,
+      idolSpecificCardTestId: "hinyarihitoyasumi",
+      cards: [
+        { id: "shizukanaishi", testId: "shizukanaishi", enhanced: true },
+        { id: "shizukanaishi", testId: "shizukanaishi2", enhanced: true },
+        { id: "tokutaimu", testId: "tokutaimu", enhanced: true },
+        { id: "usureyukukabe", testId: "usureyukukabe" },
+        { id: "aidorusengen", testId: "aidorusengen" },
+        { id: "nemuke", testId: "nemuke" },
+        { id: "shupurehikoru", testId: "shupurehikoru", enhanced: true },
+        { id: "koruresuponsu", testId: "koruresuponsu", enhanced: true },
+        { id: "shinkokyu", testId: "shinkokyu", enhanced: true },
+        { id: "hyojonokihon", testId: "hyojonokihon" },
+        { id: "miwakunoshisen", testId: "miwakunoshisen", enhanced: true },
+        {
+          id: "kokumintekiaidoru",
+          testId: "kokumintekiaidoru",
+          enhanced: true,
+        },
+        { id: "shikosakugo", testId: "shikosakugo" },
+        { id: "shinkokyu", testId: "shinkokyu2", enhanced: true },
+        { id: "apirunokihon", testId: "apirunokihon" },
+        { id: "sonzaikan", testId: "sonzaikan", enhanced: true },
+        { id: "haitatchi", testId: "haitatchi", enhanced: true },
+        { id: "hyogennokihon", testId: "hyogennokihon" },
+        { id: "sutandopure", testId: "sutandopure" },
+        { id: "haitatchi", testId: "haitatchi2", enhanced: true },
+        { id: "iji", testId: "iji" },
+        { id: "nemuke", testId: "nemuke2" },
+        { id: "hyogennokihon", testId: "hyogennokihon2" },
+        { id: "daiseien", testId: "daiseien", enhanced: true },
+        { id: "hyojonokihon", testId: "hyojonokihon2", enhanced: true },
+      ],
+      producerItems: [],
+      turns: new Array(12).fill("visual"),
+      clearScoreThresholds: { clear: 165, perfect: 600 },
+      ignoreIdolParameterKindConditionAfterClearing: true,
+      encouragements: [
+        { turnNumber: 4, effect: { kind: "perform", vitality: { value: 3 } } },
+        {
+          turnNumber: 6,
+          effect: {
+            kind: "drainLife",
+            value: 6,
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { max: 8 },
+            },
+          },
+        },
+        {
+          turnNumber: 8,
+          effect: {
+            kind: "getModifier",
+            modifier: {
+              kind: "focus",
+              amount: 6,
+            },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 18 },
+            },
+          },
+        },
+        {
+          turnNumber: 10,
+          effect: {
+            kind: "getModifier",
+            modifier: {
+              kind: "focus",
+              amount: 7,
+            },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "focus",
+              range: { min: 25 },
+            },
+          },
+        },
+      ],
+      memoryEffects: [],
     });
     gamePlay.initialLesson.deck = [
-      // 1
-      "hyogennokihon",
-      "nemuke",
-      "hyogennokihon2",
-      // 2
-      "shinkokyu2",
-      "apirunokihon",
-      "haitatchi",
-      // 3
-      "shikosakugo",
-      "apirunokihon2",
+      // 残りターン数12
+      "shizukanaishi", // レッスンサポート2発動、使用
+      "shizukanaishi2",
+      "hinyarihitoyasumi",
+      // 残りターン数11
+      "tokutaimu",
+      "usureyukukabe", // 使用3
+      "aidorusengen", // 使用1
+      "nemuke", // 「アイドル宣言」で引く分
+      "shupurehikoru", //「アイドル宣言」で引く分、使用2
+      // 残りターン数10
+      "koruresuponsu",
       "shinkokyu",
-      // 4
-      "hyojonokihon",
-      "hyojonokihon2",
-      "haitatchi2",
+      "hyojonokihon", // 「薄れゆく壁」の効果で強化、使用
+      // 残りターン数9
+      "miwakunoshisen", // レッスンサポート1発動、使用1
+      "kokumintekiaidoru",
+      "shikosakugo", // 「薄れゆく壁」の効果で強化、使用2
+      // 残りターン数8
+      "shinkokyu2", // 使用2
+      "apirunokihon", // レッスンサポート1発動
+      "sonzaikan", // 使用1
+      // 残りターン数7
+      "haitatchi",
+      "hyogennokihon",
+      "sutandopure", // 使用
+      // 残りターン数6
+      "haitatchi2", // レッスンサポート1発動
+      "iji", // 使用
+      "nemuke2",
+      // 残りターン数5
+      "hyogennokihon2",
+      "daiseien", // 使用
+      "hyojonokihon2", // レッスンサポート1発動
+      // 残りターン数4
+      "apirunokihon", // おそらくこれから山札再構築後、最初にスキルカード一覧を見てないので確認できない
+      "haitatchi", // 使用、クリア達成
+      "shinkokyu",
+      // 残りターン数3
+      "shinkokyu2",
+      "hyojonokihon", // レッスンサポート1発動
+      "kokumintekiaidoru", // 使用、その後ターンスキップ
+      // 残りターン数2
+      "haitatchi2", // 使用
+      "nemuke",
+      "tokutaimu",
+      // 残りターン数1
+      "koruresuponsu",
+      "hinyarihitoyasumi",
+      // 「静かな意志+」も引いていたが、追加するとレッスン開始時手札として移動してしまうので、追加しない
     ];
-    gamePlay.initialLesson.encouragements = [
-      {
-        turnNumber: 3,
-        effect: {
-          kind: "getModifier",
-          // 発動できなかったので、実際の数値は動画から判別できない
-          modifier: { kind: "focus", amount: 1 },
-          condition: {
-            kind: "countModifier",
-            modifierKind: "focus",
-            range: { min: 2 },
-          },
-        },
-      },
-      {
-        turnNumber: 4,
-        effect: {
-          kind: "drainLife",
-          value: 5,
-          condition: {
-            kind: "countModifier",
-            modifierKind: "focus",
-            range: { max: 4 },
-          },
-        },
-      },
-      {
-        turnNumber: 5,
-        effect: {
-          kind: "getModifier",
-          // 発動できなかったので、実際の数値は動画から判別できない
-          modifier: { kind: "focus", amount: 1 },
-          condition: {
-            kind: "countModifier",
-            modifierKind: "focus",
-            range: { min: 8 },
-          },
-        },
-      },
-    ];
-    let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    gamePlay.initialLesson.memoryEffects = [
-      { kind: "goodCondition", probability: 100, value: 2 },
-    ];
-    lesson.idol.life = 29;
 
-    //
-    // 1ターン目
-    //
+    // 残りターン数12
     gamePlay = startTurn(gamePlay);
-    gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 1,
+    gamePlay = addLessonSupport(gamePlay, "shizukanaishi", 2);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 12,
+      vitality: 0,
+      modifiers: [] as Modifier[],
       score: 0,
-      idol: {
-        life: 29,
-        vitality: 0,
-        modifiers: [
-          { kind: "goodCondition", duration: 2, id: expect.any(String) },
-        ],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
+    } as LessonDisplay);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
-    //
-    // 2ターン目
-    //
+    // 残りターン数11
     gamePlay = startTurn(gamePlay);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 2,
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 10,
+      vitality: 14,
+      modifiers: [
+        { name: "集中", representativeValue: 4 },
+        { name: "好調", representativeValue: 3 },
+      ],
       score: 0,
-      idol: {
-        life: 29,
-        vitality: 7,
-        modifiers: [
-          { kind: "goodCondition", duration: 1, id: expect.any(String) },
-        ],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
+    } as LessonDisplay);
     gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(true);
+    gamePlay = playCard(gamePlay, 3);
+    gamePlay = playCard(gamePlay, 1);
     gamePlay = endTurn(gamePlay);
 
-    //
-    // 3ターン目
-    //
+    // 残りターン数10
     gamePlay = startTurn(gamePlay);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 3,
-      score: 26,
-      idol: {
-        life: 29,
-        vitality: 3,
-        modifiers: [],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 12,
+      modifiers: [
+        { name: "集中", representativeValue: 2 },
+        { name: "好調", representativeValue: 5 },
+        { name: "発動予約", representativeValue: 1 },
+      ],
+      score: 12,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
     gamePlay = endTurn(gamePlay);
 
-    //
-    // 4ターン目
-    //
+    // 残りターン数9
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "miwakunoshisen", 1);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 15,
+      modifiers: [
+        { name: "集中", representativeValue: 5 },
+        { name: "好調", representativeValue: 4 },
+      ],
+      score: 12,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数8
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "apirunokihon", 1);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 12,
+      modifiers: [
+        { name: "集中", representativeValue: 2 },
+        { name: "好調", representativeValue: 3 },
+        { name: "絶好調", representativeValue: 6 },
+        { name: "消費体力減少", representativeValue: 5 },
+      ],
+      score: 58,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数7
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 10,
+      modifiers: [
+        { name: "集中", representativeValue: 10 },
+        { name: "好調", representativeValue: 4 },
+        { name: "絶好調", representativeValue: 5 },
+        { name: "消費体力減少", representativeValue: 4 },
+      ],
+      score: 58,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数6
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "haitatchi2", 1);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 14,
+      modifiers: [
+        { name: "集中", representativeValue: 15 },
+        { name: "好調", representativeValue: 3 },
+        { name: "絶好調", representativeValue: 4 },
+        { name: "消費体力減少", representativeValue: 3 },
+        { name: "消費体力増加", representativeValue: 2 },
+      ],
+      score: 100,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数5
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "hyojonokihon2", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 4,
-      score: 42,
-      idol: {
-        life: 20,
-        vitality: 0,
-        modifiers: [],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "recoverLife",
-      value: 6,
-    }); // Pドリンク使用
-    gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 15,
+      modifiers: [
+        { name: "集中", representativeValue: 25 },
+        { name: "好調", representativeValue: 2 },
+        { name: "絶好調", representativeValue: 3 },
+        { name: "消費体力減少", representativeValue: 2 },
+        { name: "消費体力増加", representativeValue: 1 },
+      ],
+      score: 100,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 1);
     gamePlay = endTurn(gamePlay);
 
-    //
-    // 5ターン目
-    //
+    // 残りターン数4
     gamePlay = startTurn(gamePlay);
-    gamePlay = addLessonSupport(gamePlay, "shinkokyu2", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 5,
-      score: 42,
-      idol: {
-        life: 25,
-        vitality: 15,
-        modifiers: [{ kind: "focus", amount: 3, id: expect.any(String) }],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 20,
+      modifiers: [
+        { name: "集中", representativeValue: 25 },
+        { name: "好調", representativeValue: 5 },
+        { name: "絶好調", representativeValue: 2 },
+        { name: "消費体力減少", representativeValue: 1 },
+      ],
+      score: 100,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 1);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数3
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "hyojonokihon", 1);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 9,
+      vitality: 18,
+      modifiers: [
+        { name: "集中", representativeValue: 32 },
+        { name: "好調", representativeValue: 4 },
+        { name: "絶好調", representativeValue: 1 },
+      ],
+      score: 246,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = skipTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数2
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 11,
+      vitality: 26,
+      modifiers: [
+        { name: "集中", representativeValue: 32 },
+        { name: "好調", representativeValue: 2 },
+        { name: "スキルカード追加発動", representativeValue: 1 },
+      ],
+      score: 246,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数1
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 11,
+      vitality: 22,
+      modifiers: [
+        { name: "集中", representativeValue: 32 },
+        { name: "好調", representativeValue: 1 },
+      ],
+      score: 508,
+    } as LessonDisplay);
     expect(isLessonEnded(gamePlay)).toBe(false);
-    lesson.hand = ["pozunokihon", "hinyarihitoyasumi", "shinkokyu2"];
-    gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
-    // TODO: これが false になってたバグってる、水着麻央結合テストは全体的に書き直すのでそこで直す
-    // expect(isLessonEnded(gamePlay)).toBe(true);
-  });
-  test("中間試験まで1週のレッスン(=追い込みレッスン)を再現できる", () => {
-    let gamePlay = createMaoForTest({
-      clearScoreThresholds: { clear: 90, perfect: 270 },
-      deck: deckUntil1WeekMidtermExam,
-      turns: new Array(9).fill("visual"),
-    });
-    gamePlay.initialLesson.ignoreIdolParameterKindConditionAfterClearing = true;
-    gamePlay.initialLesson.deck = [
-      // 1
-      "hyogennokihon",
-      "hyogennokihon2",
-      "iji",
-      // 2
-      "shikosakugo",
-      "haitatchi",
-      "shinkokyu2",
-      // 3
-      "pozunokihon",
-      "hyojonokihon2",
-      "apirunokihon2",
-      // 4
-      "nemuke",
-      "hinyarihitoyasumi",
-      "usureyukukabe",
-      // 5
-      "shinkokyu",
-      "haitatchi2",
-      "hyojonokihon",
-    ];
-    let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    lesson.idol.life = 31;
-    gamePlay.initialLesson.encouragements = [
-      { turnNumber: 4, effect: { kind: "perform", vitality: { value: 3 } } },
-      {
-        turnNumber: 5,
-        effect: {
-          kind: "drainLife",
-          value: 3,
-          condition: {
-            kind: "countModifier",
-            modifierKind: "focus",
-            range: { max: 5 },
-          },
-        },
-      },
-      {
-        turnNumber: 7,
-        effect: {
-          kind: "getModifier",
-          modifier: { kind: "focus", amount: 6 },
-          condition: {
-            kind: "countModifier",
-            modifierKind: "focus",
-            range: { min: 14 },
-          },
-        },
-      },
-    ];
-
-    //
-    // 1ターン目
-    //
-    gamePlay = startTurn(gamePlay);
-    gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
-    gamePlay = addLessonSupport(gamePlay, "iji", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 1,
-      score: 0,
-      idol: {
-        life: 31,
-        vitality: 0,
-        modifiers: [],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(true);
-    gamePlay = endTurn(gamePlay);
-
-    //
-    // 2ターン目
-    //
-    gamePlay = startTurn(gamePlay);
-    gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 2,
-      score: 0,
-      idol: {
-        life: 29,
-        vitality: 19,
-        modifiers: [{ kind: "focus", amount: 5, id: expect.any(String) }],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(true);
-    gamePlay = endTurn(gamePlay);
-
-    //
-    // 3ターン目
-    //
-    gamePlay = startTurn(gamePlay);
-    gamePlay = addLessonSupport(gamePlay, "pozunokihon", 2);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 3,
-      score: 0,
-      idol: {
-        life: 29,
-        vitality: 16,
-        modifiers: [
-          { kind: "focus", amount: 7, id: expect.any(String) },
-          { kind: "goodCondition", duration: 3, id: expect.any(String) },
-        ],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
-    gamePlay = endTurn(gamePlay);
-
-    //
-    // 4ターン目
-    //
-    gamePlay = startTurn(gamePlay);
-    gamePlay = addLessonSupport(gamePlay, "pozunokihon", 2);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 4,
-      score: 0,
-      idol: {
-        life: 29,
-        vitality: 19,
-        modifiers: [
-          { kind: "focus", amount: 9, id: expect.any(String) },
-          { kind: "goodCondition", duration: 2, id: expect.any(String) },
-        ],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
-    gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(true);
-    gamePlay = endTurn(gamePlay);
-
-    //
-    // 5ターン目
-    //
-    gamePlay = startTurn(gamePlay);
-    lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-    expect(lesson).toMatchObject({
-      turnNumber: 5,
-      score: 0,
-      idol: {
-        life: 29,
-        vitality: 17,
-        modifiers: [
-          { kind: "focus", amount: 9, id: expect.any(String) },
-          { kind: "goodCondition", duration: 1, id: expect.any(String) },
-          {
-            kind: "delayedEffect",
-            delay: 1,
-            effect: { kind: "enhanceHand" },
-            id: expect.any(String),
-          },
-        ],
-      },
-    });
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
-    gamePlay = endTurn(gamePlay);
-
-    // この後は山札が再構築されるので、プレイ再現が困難
+    expect(isLessonEnded(gamePlay)).toBe(true);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      score: 600,
+    } as LessonDisplay);
   });
 });
 describe("ロジックの好印象系の代表として、恒常SSRことねのプレイを再現", () => {

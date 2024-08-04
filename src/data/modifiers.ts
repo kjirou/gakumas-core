@@ -20,7 +20,7 @@ export const metaModifierDictioanry = {
   doubleEffect: {
     kind: "doubleEffect",
     /** 本家UIでは、アイコン横に"1"と表示されているのは確認済み。それが回数を示すのか「もう1回発動」なのかは不明。一見回数のようだが、合算されない状態修正なのでそこと不整合。 */
-    displayedRepresentativeValuePropertyName: "times",
+    displayedRepresentativeValuePropertyName: "fixed1",
     label: "スキルカード追加発動",
   },
   doubleLifeConsumption: {

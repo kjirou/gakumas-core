@@ -4056,7 +4056,7 @@ describe("useCard preview:false", () => {
           ],
         });
         lesson.hand = ["a"];
-        lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1, id: "x" }];
+        lesson.idol.modifiers = [{ kind: "doubleEffect", id: "x" }];
         const { updates } = useCard(lesson, 1, {
           selectedCardInHandIndex: 0,
           getRandom: () => 0,
@@ -5139,7 +5139,7 @@ describe("useCard preview:true", () => {
       ],
     });
     lesson.hand = ["a"];
-    lesson.idol.modifiers = [{ kind: "doubleEffect", times: 1, id: "x" }];
+    lesson.idol.modifiers = [{ kind: "doubleEffect", id: "x" }];
     const { updates } = useCard(lesson, 1, {
       selectedCardInHandIndex: 0,
       getRandom: () => 0,

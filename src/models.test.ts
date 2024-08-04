@@ -167,7 +167,7 @@ describe("getDisplayedRepresentativeModifierValue", () => {
       expected: 2,
     },
     {
-      args: [{ kind: "doubleEffect", times: 1 }],
+      args: [{ kind: "doubleEffect" }],
       expected: 1,
     },
     {

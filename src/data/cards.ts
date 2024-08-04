@@ -216,6 +216,7 @@ export const cards: CardData[] = [
         usableOncePerLesson: true,
       },
       {
+        cost: { kind: "normal", value: 5 },
         effects: [{ kind: "perform", score: { times: 2, value: 10 } }],
       },
       {

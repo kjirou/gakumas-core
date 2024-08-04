@@ -303,7 +303,7 @@ describe("generateEffectText", () => {
       args: [
         {
           kind: "getModifier",
-          modifier: { kind: "mightyPerformance", duration: 1 },
+          modifier: { kind: "mightyPerformance", duration: 1, percentage: 50 },
         },
       ],
       expected: "{{パラメータ上昇量増加}}50%（1ターン）",

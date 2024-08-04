@@ -2262,7 +2262,10 @@ describe("activateMemoryEffect", () => {
     {
       name: "可能性が0の時、常に結果を返さない",
       args: [
-        {} as Lesson,
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
         { kind: "focus", value: 1, probability: 0 },
         () => 0.999999999,
         createIdGenerator(),
@@ -2272,7 +2275,10 @@ describe("activateMemoryEffect", () => {
     {
       name: "値がamountプロパティな状態修正を新規で付与する",
       args: [
-        { idol: { modifiers: [] as Modifier[] } } as Lesson,
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
         { kind: "focus", value: 1, probability: 100 },
         () => 0.999999999,
         createIdGenerator(),
@@ -2288,35 +2294,32 @@ describe("activateMemoryEffect", () => {
     {
       name: "値がamountプロパティな状態修正を更新する",
       args: [
-        {
-          idol: { modifiers: [{ kind: "focus", amount: 1, id: "a" }] },
-        } as Lesson,
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [{ kind: "focus", amount: 1, id: "a" }];
+          return lesson;
+        })(),
         { kind: "focus", value: 2, probability: 100 },
         () => 0.999999999,
         createIdGenerator(),
       ],
       expected: [
         {
-          kind: "modifier",
-          actual: {
-            kind: "focus",
-            amount: 2,
-            id: expect.any(String),
-            updateTargetId: "a",
-          },
-          max: {
-            kind: "focus",
-            amount: 2,
-            id: expect.any(String),
-            updateTargetId: "a",
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: "a",
+          actual: 2,
+          max: 2,
         },
       ],
     },
     {
       name: "値がdurationプロパティな状態修正を新規で付与する",
       args: [
-        { idol: { modifiers: [] as Modifier[] } } as Lesson,
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
         { kind: "goodCondition", value: 1, probability: 100 },
         () => 0.999999999,
         createIdGenerator(),
@@ -2336,39 +2339,36 @@ describe("activateMemoryEffect", () => {
     {
       name: "値がdurationプロパティな状態修正を更新する",
       args: [
-        {
-          idol: {
-            modifiers: [{ kind: "goodCondition", duration: 1, id: "a" }],
-          },
-        } as Lesson,
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 1, id: "a" },
+          ];
+          return lesson;
+        })(),
         { kind: "goodCondition", value: 2, probability: 100 },
         () => 0.999999999,
         createIdGenerator(),
       ],
       expected: [
         {
-          kind: "modifier",
-          actual: {
-            kind: "goodCondition",
-            duration: 2,
-            id: expect.any(String),
-            updateTargetId: "a",
-          },
-          max: {
-            kind: "goodCondition",
-            duration: 2,
-            id: expect.any(String),
-            updateTargetId: "a",
-          },
+          kind: "modifier.update",
+          propertyNameKind: "duration",
+          id: "a",
+          actual: 2,
+          max: 2,
         },
       ],
     },
     {
       name: "元気をやる気の補正を付与して加算する",
       args: [
-        {
-          idol: { vitality: 1, modifiers: [{ kind: "motivation", amount: 1 }] },
-        } as Lesson,
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.vitality = 1;
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 1, id: "a" }];
+          return lesson;
+        })(),
         { kind: "vitality", value: 2, probability: 100 },
         () => 0.999999999,
         createIdGenerator(),

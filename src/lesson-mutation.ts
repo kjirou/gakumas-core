@@ -1127,50 +1127,38 @@ export const activateMemoryEffect = (
   if (memoryEffect.probability <= getRandom() * 100) {
     return [];
   }
-  const id = idGenerator();
-  const sameKindModifier = lesson.idol.modifiers.find(
-    (e) => e.kind === memoryEffect.kind,
-  );
   switch (memoryEffect.kind) {
     case "focus":
     case "motivation":
     case "positiveImpression": {
-      const modifier: Modifier = {
-        kind: memoryEffect.kind,
-        amount: memoryEffect.value,
-        id,
-        ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
-      };
-      return [
-        {
-          kind: "modifier",
-          actual: modifier,
-          max: modifier,
+      const effect: EffectWithoutCondition = {
+        kind: "getModifier",
+        modifier: {
+          kind: memoryEffect.kind,
+          amount: memoryEffect.value,
         },
-      ];
+      };
+      return activateEffect(lesson, effect, getRandom, idGenerator);
     }
     case "goodCondition":
     case "halfLifeConsumption": {
-      const modifier: Modifier = {
-        kind: memoryEffect.kind,
-        duration: memoryEffect.value,
-        id,
-        ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
-      };
-      return [
-        {
-          kind: "modifier",
-          actual: modifier,
-          max: modifier,
+      const effect: EffectWithoutCondition = {
+        kind: "getModifier",
+        modifier: {
+          kind: memoryEffect.kind,
+          duration: memoryEffect.value,
         },
-      ];
+      };
+      return activateEffect(lesson, effect, getRandom, idGenerator);
     }
     case "vitality": {
-      return [
-        calculatePerformingVitalityEffect(lesson.idol, {
+      const effect: EffectWithoutCondition = {
+        kind: "perform",
+        vitality: {
           value: memoryEffect.value,
-        }),
-      ];
+        },
+      };
+      return activateEffect(lesson, effect, getRandom, idGenerator);
     }
     default: {
       const unreachable: never = memoryEffect.kind;

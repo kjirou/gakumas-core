@@ -77,7 +77,9 @@ export type VitalityUpdateQuery = Readonly<{
 /**
  * 状態修正データ定義
  *
- * - Modifier をデータ定義で行う時の形式
+ * - データとして状態修正を表現するときの形式
+ * - 追加をイメージして記述する
+ *   - そのため各種値は、基本的には正の数である
  */
 export type ModifierData = Readonly<
   | {
@@ -116,7 +118,6 @@ export type ModifierData = Readonly<
        * - 本家の状態修正詳細のテキストは、ターンが進むごとに進んだ数が反映されて減っていく
        */
       kind: "delayedEffect";
-      /** 追加時は 1 以上、更新時は -1 のみ */
       delay: number;
       /**
        * 遅れて発動する効果
@@ -141,8 +142,6 @@ export type ModifierData = Readonly<
        *   - その割に、本家UIでは、アイコン横に"1"という数値が書いてあり、合算前提のように見える。詳細は不明。
        */
       kind: "doubleEffect";
-      /** 状態修正の更新差分として使用する際に、1 なら追加、-1 は削除、の意味。0 は計算中の削除待ち状態であり得る。 */
-      times: 1 | 0 | -1;
     }
   | {
       /** 「消費体力増加{duration}ターン」 */
@@ -238,12 +237,6 @@ export type MetaModifierData = Readonly<{
   kind: ModifierData["kind"];
   label: string;
   /**
-   * 同じ種別の状態修正を重複した時に合算するか
-   *
-   * - 「次に使用するスキルカードの効果をもう1回発動」や、いわゆる持続効果・発動予約は合算しない
-   */
-  nonAggregation: boolean;
-  /**
    * 代表して表示する値を格納しているプロパティ名
    *
    * - 主に、本家UIの状態修正アイコンに添えられている数値の表示に使う
@@ -260,8 +253,7 @@ export type MetaModifierData = Readonly<{
 /**
  * 状態修正
  *
- * - レッスン中に画面左上に表示されるアイコン群のことを、状態修正(modifier)と呼ぶ
- * - 現在の状況を表現するのに使うのと共に、更新を表現するのにも使う
+ * - レッスン中に画面左上に表示されるアイコン群に紐づく値のことを、本実装では状態修正(modifier)と呼ぶ
  * - 付与された順番で左側のアイコンとアイコンタップ時の説明リストに表示される
  *   - 「スキルカード使用数+1」のアイコンは別の場所に表示されるが、説明リストには追加された順に表示されている
  * - 種類は名詞句で表現する、原文が名詞だから
@@ -270,8 +262,6 @@ export type Modifier = Readonly<
   ModifierData & {
     /** 全てのインスタンスで一意のID */
     id: string;
-    /** 既存インスタンスの更新時にのみ存在する、対象のID */
-    updateTargetId?: string;
   }
 >;
 
@@ -1323,11 +1313,32 @@ export type LessonUpdateDiff = Readonly<
     }
   | {
       /**
-       * 状態修正の差分
+       * 状態修正の追加
        */
-      kind: "modifier";
+      kind: "modifier.add";
       actual: Modifier;
       max: Modifier;
+    }
+  | {
+      /**
+       * 既存の状態修正の削除
+       */
+      kind: "modifier.remove";
+      id: Modifier["id"];
+    }
+  | {
+      /**
+       * 既存の状態修正の更新
+       *
+       * - 汎用的な処理。更新対象の値が2つ以上になる時など、大幅に考慮と異なるなら対象外。
+       *   - その時は、専用のイベントを作る
+       */
+      kind: "modifier.update";
+      propertyNameKind: "amount" | "delay" | "duration" | "times" | "value";
+      /** 実際に変化する値、減少後に 0 になった時は、削除される */
+      actual: number;
+      id: Modifier["id"];
+      max: number;
     }
   | {
       kind: "playedCardsOnEmptyDeck";

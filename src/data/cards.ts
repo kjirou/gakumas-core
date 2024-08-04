@@ -5586,7 +5586,7 @@ export const cards: CardData[] = [
       {
         cost: { kind: "goodCondition", value: 1 },
         effects: [
-          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect" } },
           {
             kind: "getModifier",
             modifier: {
@@ -5600,7 +5600,7 @@ export const cards: CardData[] = [
       {
         effects: [
           { kind: "perform", vitality: { value: 8 } },
-          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect" } },
           {
             kind: "getModifier",
             modifier: {
@@ -5613,7 +5613,7 @@ export const cards: CardData[] = [
       {
         effects: [
           { kind: "perform", vitality: { value: 13 } },
-          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect" } },
           {
             kind: "getModifier",
             modifier: {
@@ -5626,7 +5626,7 @@ export const cards: CardData[] = [
       {
         effects: [
           { kind: "perform", vitality: { value: 16 } },
-          { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
+          { kind: "getModifier", modifier: { kind: "doubleEffect" } },
           {
             kind: "getModifier",
             modifier: {

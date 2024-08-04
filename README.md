@@ -20,7 +20,7 @@ yarn add gakumas-core
 
 ## :world_map: 概要
 
-ゲームの初期化処理例のです。生成した`gamePlay`変数は、ゲームの状態を表すものとして、保持する必要があります。
+ゲームの初期化処理の例です。生成した`gamePlay`変数は、ゲームの状態を表すものとして、保持する必要があります。
 
 ```ts
 import { initializeGamePlay } from "gakumas-core";
@@ -61,7 +61,7 @@ const latestUpdates = diffUpdates(gamePlay.updates, newGamePlay.updates);
 
 // スコアパーフェクトを満たすなどの理由で、既にゲームが終了しているかを判定します。
 // 例えば、「成就」の発動でスコアパーフェクトを満たす場合です。
-// 操作を禁止しする、画面をゲーム終了後に遷移する、などの処理が必要でしょう。
+// 操作を禁止する、画面をゲーム終了後に遷移する、などの処理が必要でしょう。
 const lessonEnded = isLessonEnded(gamePlay);
 
 // 更新後のレッスンの状態を保持します。

@@ -13,6 +13,7 @@ import {
   getIdolParameterKindOnTurn,
   patchDiffs,
 } from "./models";
+import { createGamePlayForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
 
 describe("createIdolInProduction", () => {
@@ -166,7 +167,7 @@ describe("getDisplayedRepresentativeModifierValue", () => {
       expected: 2,
     },
     {
-      args: [{ kind: "doubleEffect", times: 1 }],
+      args: [{ kind: "doubleEffect" }],
       expected: 1,
     },
     {
@@ -582,235 +583,263 @@ describe("patchDiffs", () => {
       expect(lesson.idol.modifierIdsAtTurnStart).toStrictEqual(["3", "4"]);
     });
   });
-  describe("modifier", () => {
-    describe("新規追加", () => {
-      test("既存の状態修正を指定しない時、末尾へ新規追加する", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "focus",
-                amount: 1,
-                id: "a",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchDiffs(lessonMock, [
-          {
-            kind: "modifier",
-            actual: {
-              kind: "goodCondition",
-              duration: 2,
-              id: "b",
+  describe("modifier.add", () => {
+    test("末尾へ新規追加する", () => {
+      let lessonMock = {
+        idol: {
+          modifiers: [
+            {
+              kind: "focus",
+              amount: 1,
+              id: "a",
             },
-            max: {
-              kind: "goodCondition",
-              duration: 2,
-              id: "b",
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "focus",
-            amount: 1,
-            id: "a",
-          },
-          {
+          ],
+        },
+      } as Lesson;
+      lessonMock = patchDiffs(lessonMock, [
+        {
+          kind: "modifier.add",
+          actual: {
             kind: "goodCondition",
             duration: 2,
             id: "b",
           },
-        ]);
-      });
+          max: {
+            kind: "goodCondition",
+            duration: 2,
+            id: "b",
+          },
+        },
+      ]);
+      expect(lessonMock.idol.modifiers).toStrictEqual([
+        {
+          kind: "focus",
+          amount: 1,
+          id: "a",
+        },
+        {
+          kind: "goodCondition",
+          duration: 2,
+          id: "b",
+        },
+      ]);
     });
-    describe("既存の特別な処理がない状態修正を指定した時、増減対象のプロパティ名称別に正しく更新できるか", () => {
-      const modifierPropertyNamesWithKindsList = [
-        [
-          "amount",
+  });
+  describe("modifier.remove", () => {
+    const testCases: Array<{
+      args: Parameters<typeof patchDiffs>;
+      expected: ReturnType<typeof patchDiffs>;
+      name: string;
+    }> = [
+      {
+        name: "it works",
+        args: [
+          {
+            idol: {
+              modifiers: [{ id: "a" }, { id: "b" }, { id: "c" }],
+            },
+          } as Lesson,
+          [{ kind: "modifier.remove", id: "b" }],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ id: "a" }, { id: "c" }],
+          },
+        } as Lesson,
+      },
+    ];
+    test.each(testCases)("$name", ({ args, expected }) => {
+      expect(patchDiffs(...args)).toMatchObject(expected);
+    });
+  });
+  describe("modifier.update", () => {
+    const testCases: Array<{
+      args: Parameters<typeof patchDiffs>;
+      expected: ReturnType<typeof patchDiffs>;
+      name: string;
+    }> = [
+      {
+        name: "amount - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "focus", amount: 1, id: "a" }],
+            },
+          } as Lesson,
           [
-            "additionalCardUsageCount",
-            "focus",
-            "motivation",
-            "positiveImpression",
+            {
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
           ],
         ],
-        ["delay", ["delayedEffect"]],
-        [
-          "duration",
+        expected: {
+          idol: {
+            modifiers: [{ kind: "focus", amount: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "delay - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "delayedEffect", delay: 1, id: "a" }],
+            },
+          } as Lesson,
           [
-            "doubleLifeConsumption",
-            "excellentCondition",
-            "goodCondition",
-            "halfLifeConsumption",
-            "mightyPerformance",
-            "noVitalityIncrease",
+            {
+              kind: "modifier.update",
+              propertyNameKind: "delay",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
           ],
         ],
-        ["times", ["debuffProtection"]],
-        ["value", ["lifeConsumptionReduction"]],
-      ] as const;
-      for (const [
-        propertyName,
-        modifierKinds,
-      ] of modifierPropertyNamesWithKindsList) {
-        describe(propertyName, () => {
-          for (const modifierKind of modifierKinds) {
-            describe(modifierKind, () => {
-              test("合算する", () => {
-                let lessonMock = {
-                  idol: {
-                    modifiers: [
-                      {
-                        kind: modifierKind,
-                        [propertyName]: 1,
-                        id: "a",
-                      },
-                    ],
-                  },
-                } as Lesson;
-                lessonMock = patchDiffs(lessonMock, [
-                  {
-                    kind: "modifier",
-                    actual: {
-                      kind: modifierKind,
-                      [propertyName]: 2,
-                      id: "b",
-                      updateTargetId: "a",
-                    },
-                    max: {
-                      kind: modifierKind,
-                      [propertyName]: 2,
-                      id: "b",
-                      updateTargetId: "a",
-                    },
-                  } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
-                ]);
-                expect(lessonMock.idol.modifiers).toStrictEqual([
-                  {
-                    kind: modifierKind,
-                    [propertyName]: 3,
-                    id: "a",
-                  },
-                ]);
-              });
-              test("合算した結果0になった時、削除する", () => {
-                let lessonMock = {
-                  idol: {
-                    modifiers: [
-                      {
-                        kind: modifierKind,
-                        [propertyName]: 5,
-                        id: "a",
-                      },
-                    ],
-                  },
-                } as Lesson;
-                lessonMock = patchDiffs(lessonMock, [
-                  {
-                    kind: "modifier",
-                    actual: {
-                      kind: modifierKind,
-                      [propertyName]: -5,
-                      id: "b",
-                      updateTargetId: "a",
-                    },
-                    max: {
-                      kind: modifierKind,
-                      [propertyName]: -5,
-                      id: "b",
-                      updateTargetId: "a",
-                    },
-                  } as Extract<LessonUpdateQuery, { kind: "modifier" }>,
-                ]);
-                expect(lessonMock.idol.modifiers).toStrictEqual([]);
-              });
-            });
-          }
-        });
-      }
-    });
-    describe("永続の状態修正が誤って消えない", () => {
-      test("effectActivationOnTurnEnd は、 focus を更新した操作により、誤って消えない", () => {
-        let lessonMock = {
+        expected: {
+          idol: {
+            modifiers: [{ kind: "delayedEffect", delay: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "duration - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "goodCondition", duration: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "duration",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "goodCondition", duration: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "times - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "debuffProtection", times: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "times",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "debuffProtection", times: 3, id: "a" }],
+          },
+        } as Lesson,
+      },
+      {
+        name: "value - 加算できる / actual の値を参照している",
+        args: [
+          {
+            idol: {
+              modifiers: [
+                { kind: "lifeConsumptionReduction", value: 1, id: "a" },
+              ],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "value",
+              actual: 2,
+              max: 10,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
           idol: {
             modifiers: [
-              {
-                kind: "effectActivationOnTurnEnd",
-                effect: {
-                  kind: "perform",
-                  score: { value: 1 },
-                },
-                id: "a",
-              },
-              {
-                kind: "focus",
-                amount: 1,
-                id: "b",
-              },
+              { kind: "lifeConsumptionReduction", value: 3, id: "a" },
             ],
           },
-        } as Lesson;
-        lessonMock = patchDiffs(lessonMock, [
+        } as Lesson,
+      },
+      {
+        name: "減算できる",
+        args: [
           {
-            kind: "modifier",
-            actual: {
-              kind: "focus",
-              amount: -1,
-              id: "c",
-              updateTargetId: "b",
+            idol: {
+              modifiers: [{ kind: "focus", amount: 10, id: "a" }],
             },
-            max: {
-              kind: "focus",
-              amount: -1,
-              id: "c",
-              updateTargetId: "b",
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              actual: -2,
+              max: -2,
+              id: "a",
             },
+          ],
+        ],
+        expected: {
+          idol: {
+            modifiers: [{ kind: "focus", amount: 8, id: "a" }],
           },
-        ]);
-        expect(
-          lessonMock.idol.modifiers.filter((m) => m.kind === "focus"),
-        ).toHaveLength(0);
-        expect(
-          lessonMock.idol.modifiers.filter(
-            (m) => m.kind === "effectActivationOnTurnEnd",
-          ),
-        ).toHaveLength(1);
-      });
-    });
-    describe("doubleEffect", () => {
-      test("既存の状態修正を指定した時、削除できる", () => {
-        let lessonMock = {
+        } as Lesson,
+      },
+      {
+        name: "減算の結果、値が 0 になった時、削除される / 削除時にリストの順番を維持する",
+        args: [
+          {
+            idol: {
+              modifiers: [
+                { kind: "focus", amount: 1, id: "a" },
+                { kind: "motivation", amount: 1, id: "b" },
+                { kind: "positiveImpression", amount: 1, id: "c" },
+              ],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              actual: -1,
+              max: -1,
+              id: "b",
+            },
+          ],
+        ],
+        expected: {
           idol: {
             modifiers: [
-              {
-                kind: "doubleEffect",
-                times: 1,
-                id: "a",
-              },
+              { kind: "focus", amount: 1, id: "a" },
+              { kind: "positiveImpression", amount: 1, id: "c" },
             ],
           },
-        } as Lesson;
-        lessonMock = patchDiffs(lessonMock, [
-          {
-            kind: "modifier",
-            actual: {
-              kind: "doubleEffect",
-              times: -1,
-              id: "b",
-              updateTargetId: "a",
-            },
-            max: {
-              kind: "doubleEffect",
-              times: -1,
-              id: "b",
-              updateTargetId: "a",
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([]);
-      });
+        } as Lesson,
+      },
+    ];
+    test.each(testCases)("$name", ({ args, expected }) => {
+      expect(patchDiffs(...args)).toMatchObject(expected);
     });
   });
   describe("life", () => {

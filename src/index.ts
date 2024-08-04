@@ -269,22 +269,10 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
     (e) => e.kind === "additionalCardUsageCount",
   );
   if (additionalCardUsageCount) {
-    const id = gamePlay.idGenerator();
     const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
       {
-        kind: "modifier",
-        actual: {
-          kind: "additionalCardUsageCount",
-          amount: -additionalCardUsageCount.amount,
-          id,
-          updateTargetId: additionalCardUsageCount.id,
-        },
-        max: {
-          kind: "additionalCardUsageCount",
-          amount: -additionalCardUsageCount.amount,
-          id,
-          updateTargetId: additionalCardUsageCount.id,
-        },
+        kind: "modifier.remove",
+        id: additionalCardUsageCount.id,
         reason: {
           kind: "turnEndTrigger",
           historyTurnNumber: lesson.turnNumber,
@@ -302,9 +290,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   //
   if (lesson.idol.modifierIdsAtTurnStart.length > 0) {
     const decreaseEachModifierDurationOverTimeResult =
-      decreaseEachModifierDurationOverTime(lesson, historyResultIndex, {
-        idGenerator: gamePlay.idGenerator,
-      });
+      decreaseEachModifierDurationOverTime(lesson, historyResultIndex);
     updates = [
       ...updates,
       ...decreaseEachModifierDurationOverTimeResult.updates,
@@ -526,9 +512,6 @@ export const playCard = (
   const consumeRemainingCardUsageCountResult = consumeRemainingCardUsageCount(
     lesson,
     historyResultIndex,
-    {
-      idGenerator: gamePlay.idGenerator,
-    },
   );
   updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
   historyResultIndex =

@@ -17,12 +17,12 @@ import type {
   LessonUpdateQueryReason,
   MemoryEffect,
   Modifier,
+  ModifierData,
   ProducerItem,
   ProducerItemTrigger,
   VitalityUpdateQuery,
 } from "./types";
 import { filterGeneratableCardsData, getCardDataById } from "./data/cards";
-import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -438,7 +438,7 @@ const calculateActualAndMaxComsumution = (
 /** LessonUpdatDiff からコスト消費関係部分を抜き出したもの */
 type CostConsumptionUpdateDiff = Extract<
   LessonUpdateDiff,
-  { kind: "life" } | { kind: "modifier" } | { kind: "vitality" }
+  { kind: "life" } | { kind: "modifier.update" } | { kind: "vitality" }
 >;
 
 /**
@@ -455,7 +455,6 @@ type CostConsumptionUpdateDiff = Extract<
 export const calculateCostConsumption = (
   idol: Idol,
   cost: ActionCost,
-  idGenerator: IdGenerator,
 ): CostConsumptionUpdateDiff[] => {
   switch (cost.kind) {
     case "normal": {
@@ -496,25 +495,16 @@ export const calculateCostConsumption = (
     case "focus":
     case "motivation":
     case "positiveImpression": {
-      const id = idGenerator();
       const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
       if (sameKindModifier && "amount" in sameKindModifier) {
         const actual = Math.min(cost.value, sameKindModifier.amount);
         return [
           {
-            kind: "modifier",
-            actual: {
-              kind: cost.kind,
-              amount: -actual + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
-            max: {
-              kind: cost.kind,
-              amount: -cost.value + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
+            kind: "modifier.update",
+            propertyNameKind: "amount",
+            id: sameKindModifier.id,
+            actual: -actual + 0,
+            max: -cost.value + 0,
           },
         ];
       } else {
@@ -523,25 +513,16 @@ export const calculateCostConsumption = (
       }
     }
     case "goodCondition": {
-      const id = idGenerator();
       const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
       if (sameKindModifier && "duration" in sameKindModifier) {
         const actual = Math.min(cost.value, sameKindModifier.duration);
         return [
           {
-            kind: "modifier",
-            actual: {
-              kind: cost.kind,
-              duration: -actual + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
-            max: {
-              kind: cost.kind,
-              duration: -cost.value + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
+            kind: "modifier.update",
+            propertyNameKind: "duration",
+            id: sameKindModifier.id,
+            actual: -actual + 0,
+            max: -cost.value + 0,
           },
         ];
       } else {
@@ -657,6 +638,21 @@ export const calculatePerformingVitalityEffect = (
   };
 };
 
+const createNewModifierDiff = (
+  modifierData: ModifierData,
+  id: Modifier["id"],
+): Extract<LessonUpdateDiff, { kind: "modifier.add" }> => {
+  const newModifier = {
+    ...modifierData,
+    id,
+  };
+  return {
+    kind: "modifier.add",
+    actual: newModifier,
+    max: newModifier,
+  };
+};
+
 /**
  * 効果を発動する
  */
@@ -689,11 +685,10 @@ export const activateEffect = <
     case "drainLife": {
       diffs = [
         ...diffs,
-        ...calculateCostConsumption(
-          lesson.idol,
-          { kind: "normal", value: effect.value },
-          idGenerator,
-        ),
+        ...calculateCostConsumption(lesson.idol, {
+          kind: "normal",
+          value: effect.value,
+        }),
       ];
       break;
     }
@@ -838,26 +833,82 @@ export const activateEffect = <
       break;
     }
     case "getModifier": {
-      const id = idGenerator();
       const sameKindModifier = lesson.idol.modifiers.find(
         (e) => e.kind === effect.modifier.kind,
       );
-      const isUpdate =
-        sameKindModifier !== undefined &&
-        !metaModifierDictioanry[effect.modifier.kind].nonAggregation;
-      diffs.push({
-        kind: "modifier",
-        actual: {
-          ...effect.modifier,
-          id,
-          ...(isUpdate ? { updateTargetId: sameKindModifier.id } : {}),
-        },
-        max: {
-          ...effect.modifier,
-          id,
-          ...(isUpdate ? { updateTargetId: sameKindModifier.id } : {}),
-        },
-      });
+      let diff: LessonUpdateDiff;
+      switch (effect.modifier.kind) {
+        case "additionalCardUsageCount":
+        case "focus":
+        case "motivation":
+        case "positiveImpression": {
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "amount",
+                actual: effect.modifier.amount,
+                max: effect.modifier.amount,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "debuffProtection": {
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "times",
+                actual: effect.modifier.times,
+                max: effect.modifier.times,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "doubleLifeConsumption":
+        case "excellentCondition":
+        case "goodCondition":
+        case "halfLifeConsumption":
+        case "mightyPerformance":
+        case "noVitalityIncrease": {
+          // TODO: パラメータ上昇量増加50%/30% は、それぞれの値も見ないと同じ種類かが判別できない
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "duration",
+                actual: effect.modifier.duration,
+                max: effect.modifier.duration,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "lifeConsumptionReduction": {
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "value",
+                actual: effect.modifier.value,
+                max: effect.modifier.value,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        // 常に新規追加になる状態修正群
+        case "delayedEffect":
+        case "doubleEffect":
+        case "effectActivationBeforeCardEffectActivation":
+        case "effectActivationOnTurnEnd": {
+          diff = createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        default: {
+          const unreachable: never = effect.modifier;
+          throw new Error(`Unreachable statement`);
+        }
+      }
+      diffs.push(diff);
       break;
     }
     case "increaseRemainingTurns": {
@@ -875,21 +926,12 @@ export const activateEffect = <
       if (modifier?.kind === "positiveImpression") {
         const amount =
           Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
-        const id = idGenerator();
         diffs.push({
-          kind: "modifier",
-          actual: {
-            kind: "positiveImpression",
-            amount,
-            id,
-            updateTargetId: modifier.id,
-          },
-          max: {
-            kind: "positiveImpression",
-            amount,
-            id,
-            updateTargetId: modifier.id,
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: modifier.id,
+          actual: amount,
+          max: amount,
         });
       }
       break;
@@ -1039,23 +1081,14 @@ const activateDelayedEffectModifier = (
       ...activateEffect(lesson, modifier.effect, getRandom, idGenerator),
     ];
   }
-  const id = idGenerator();
   diffs = [
     ...diffs,
     {
-      kind: "modifier",
-      actual: {
-        ...modifier,
-        delay: -1,
-        id,
-        updateTargetId: modifier.id,
-      },
-      max: {
-        ...modifier,
-        delay: -1,
-        id,
-        updateTargetId: modifier.id,
-      },
+      kind: "modifier.update",
+      propertyNameKind: "delay",
+      id: modifier.id,
+      actual: -1,
+      max: -1,
     },
   ];
   return diffs;
@@ -1073,50 +1106,38 @@ export const activateMemoryEffect = (
   if (memoryEffect.probability <= getRandom() * 100) {
     return [];
   }
-  const id = idGenerator();
-  const sameKindModifier = lesson.idol.modifiers.find(
-    (e) => e.kind === memoryEffect.kind,
-  );
   switch (memoryEffect.kind) {
     case "focus":
     case "motivation":
     case "positiveImpression": {
-      const modifier: Modifier = {
-        kind: memoryEffect.kind,
-        amount: memoryEffect.value,
-        id,
-        ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
-      };
-      return [
-        {
-          kind: "modifier",
-          actual: modifier,
-          max: modifier,
+      const effect: EffectWithoutCondition = {
+        kind: "getModifier",
+        modifier: {
+          kind: memoryEffect.kind,
+          amount: memoryEffect.value,
         },
-      ];
+      };
+      return activateEffect(lesson, effect, getRandom, idGenerator);
     }
     case "goodCondition":
     case "halfLifeConsumption": {
-      const modifier: Modifier = {
-        kind: memoryEffect.kind,
-        duration: memoryEffect.value,
-        id,
-        ...(sameKindModifier ? { updateTargetId: sameKindModifier.id } : {}),
-      };
-      return [
-        {
-          kind: "modifier",
-          actual: modifier,
-          max: modifier,
+      const effect: EffectWithoutCondition = {
+        kind: "getModifier",
+        modifier: {
+          kind: memoryEffect.kind,
+          duration: memoryEffect.value,
         },
-      ];
+      };
+      return activateEffect(lesson, effect, getRandom, idGenerator);
     }
     case "vitality": {
-      return [
-        calculatePerformingVitalityEffect(lesson.idol, {
+      const effect: EffectWithoutCondition = {
+        kind: "perform",
+        vitality: {
           value: memoryEffect.value,
-        }),
-      ];
+        },
+      };
+      return activateEffect(lesson, effect, getRandom, idGenerator);
     }
     default: {
       const unreachable: never = memoryEffect.kind;
@@ -1753,9 +1774,6 @@ export const drawCardsOnTurnStart = (
 export const decreaseEachModifierDurationOverTime = (
   lesson: Lesson,
   historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-  params: {
-    idGenerator: IdGenerator;
-  },
 ): LessonMutationResult => {
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
@@ -1776,36 +1794,28 @@ export const decreaseEachModifierDurationOverTime = (
         case "halfLifeConsumption":
         case "mightyPerformance":
         case "noVitalityIncrease": {
-          const change = {
-            kind: modifier.kind,
-            duration: -1,
-            id: params.idGenerator(),
-            updateTargetId: modifier.id,
-          };
           modifierUpdates = [
             ...modifierUpdates,
             {
-              kind: "modifier",
-              actual: change,
-              max: change,
+              kind: "modifier.update",
+              propertyNameKind: "duration",
+              id: modifier.id,
+              actual: -1,
+              max: -1,
               reason,
             },
           ];
           break;
         }
         case "positiveImpression": {
-          const change = {
-            kind: modifier.kind,
-            amount: -1,
-            id: params.idGenerator(),
-            updateTargetId: modifier.id,
-          };
           modifierUpdates = [
             ...modifierUpdates,
             {
-              kind: "modifier",
-              actual: change,
-              max: change,
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              id: modifier.id,
+              actual: -1,
+              max: -1,
               reason,
             },
           ];
@@ -1873,30 +1883,18 @@ export const activateMemoryEffectsOnLessonStart = (
 export const consumeRemainingCardUsageCount = (
   lesson: Lesson,
   historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-  params: {
-    idGenerator: IdGenerator;
-  },
 ): LessonMutationResult => {
   const additionalCardUsageCount = lesson.idol.modifiers.find(
     (e) => e.kind === "additionalCardUsageCount",
   );
   let diff: LessonUpdateDiff | undefined;
   if (additionalCardUsageCount) {
-    const id = params.idGenerator();
     diff = {
-      kind: "modifier",
-      actual: {
-        kind: "additionalCardUsageCount",
-        amount: -1,
-        id: params.idGenerator(),
-        updateTargetId: additionalCardUsageCount.id,
-      },
-      max: {
-        kind: "additionalCardUsageCount",
-        amount: -1,
-        id: params.idGenerator(),
-        updateTargetId: additionalCardUsageCount.id,
-      },
+      kind: "modifier.update",
+      propertyNameKind: "amount",
+      id: additionalCardUsageCount.id,
+      actual: -1,
+      max: -1,
     };
   } else {
     diff = {
@@ -2013,7 +2011,6 @@ export const useCard = (
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
     calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
-    params.idGenerator,
   ).map((diff) => ({
     ...diff,
     reason: {
@@ -2035,18 +2032,11 @@ export const useCard = (
     // 「次に使用するスキルカードの効果をもう1回発動」があれば、1 つ消費
     //
     if (doubleEffect && times === 1) {
-      const modifier = {
-        kind: "doubleEffect",
-        times: -1,
-        id: params.idGenerator(),
-        updateTargetId: doubleEffect.id,
-      } as const;
       const innerUpdates = [
         createLessonUpdateQueryFromDiff(
           {
-            kind: "modifier",
-            actual: modifier,
-            max: modifier,
+            kind: "modifier.remove",
+            id: doubleEffect.id,
           },
           {
             kind: "cardUsage",
@@ -2213,7 +2203,7 @@ export const useCard = (
             increasedModifierKinds: mainEffectActivations
               .filter((e) => e !== undefined)
               .reduce((acc, e) => [...acc, ...e], [])
-              .filter((e) => e.kind === "modifier")
+              .filter((e) => e.kind === "modifier.add")
               .map((e) => e.actual.kind),
           },
         );
@@ -2243,12 +2233,6 @@ export const useCard = (
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     } as const;
-    const modifierChange: Modifier = {
-      kind: "additionalCardUsageCount",
-      amount: -1,
-      id: params.idGenerator(),
-      updateTargetId: additionalCardUsageCount.id,
-    };
     recoveringActionPointsUpdates = [
       {
         kind: "actionPoints",
@@ -2256,9 +2240,11 @@ export const useCard = (
         reason,
       },
       {
-        kind: "modifier",
-        actual: modifierChange,
-        max: modifierChange,
+        kind: "modifier.update",
+        propertyNameKind: "amount",
+        id: additionalCardUsageCount.id,
+        actual: -1,
+        max: -1,
         reason,
       },
     ];

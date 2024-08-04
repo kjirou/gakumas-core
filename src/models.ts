@@ -38,7 +38,6 @@ import {
   ProducerItem,
   ProducerItemContentData,
   ProducerItemInProduction,
-  MetaModifierData,
   CharacterData,
 } from "./types";
 import { shuffleArray } from "./utils";
@@ -538,125 +537,107 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "modifier": {
-        const updateTargetId = update.actual.updateTargetId;
-        let newModifiers = newLesson.idol.modifiers;
-        if (updateTargetId === undefined) {
-          // 新規追加で負の値が入ることは想定していない
-          newModifiers = [...newModifiers, update.actual];
-        } else {
-          const targetedModifier = newLesson.idol.modifiers.find(
-            (e) => e.id === updateTargetId,
-          );
-          if (targetedModifier === undefined) {
-            throw new Error(`Targeted modifier not found: ${updateTargetId}`);
-          }
-          let newTargetedModifier = targetedModifier;
-          const updateModifierKind = update.actual.kind;
-          switch (updateModifierKind) {
-            // duration の設定もあるが、現在は常に 1 なので無視する
-            case "additionalCardUsageCount": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  amount: newTargetedModifier.amount + update.actual.amount,
-                };
-              }
-              break;
+      case "modifier.add": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            // 新規追加で負の値が入ることは想定していない
+            modifiers: [...newLesson.idol.modifiers, update.actual],
+          },
+        };
+        break;
+      }
+      case "modifier.update": {
+        const targetedModifier = newLesson.idol.modifiers.find(
+          (e) => e.id === update.id,
+        );
+        if (targetedModifier === undefined) {
+          throw new Error(`Targeted modifier not found: ${update.id}`);
+        }
+        let newTargetedModifier: Modifier;
+        let newValue: number = 0;
+        switch (update.propertyNameKind) {
+          case "amount":
+            if ("amount" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
             }
-            case "debuffProtection": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  times: newTargetedModifier.times + update.actual.times,
-                };
-              }
-              break;
+            break;
+          case "delay":
+            if ("delay" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
             }
-            case "delayedEffect": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  delay: newTargetedModifier.delay + update.actual.delay,
-                };
-              }
-              break;
+            break;
+          case "duration":
+            if ("duration" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
             }
-            // 合算できないので、この既存状態修正を指定した処理を行う時は、常に削除の意味になる
-            case "doubleEffect": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  times: 0,
-                };
-              }
-              break;
+            break;
+          case "times":
+            if ("times" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
             }
-            case "doubleLifeConsumption":
-            case "excellentCondition":
-            case "goodCondition":
-            case "halfLifeConsumption":
-            case "mightyPerformance":
-            case "noVitalityIncrease": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  duration:
-                    newTargetedModifier.duration + update.actual.duration,
-                };
-              }
-              break;
+            break;
+          case "value":
+            if ("value" in targetedModifier) {
+              newValue =
+                targetedModifier[update.propertyNameKind] + update.actual;
+              newTargetedModifier = {
+                ...targetedModifier,
+                [update.propertyNameKind]: newValue,
+              };
             }
-            case "focus":
-            case "motivation":
-            case "positiveImpression": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  amount: newTargetedModifier.amount + update.actual.amount,
-                };
-              }
-              break;
-            }
-            case "lifeConsumptionReduction": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  value: newTargetedModifier.value + update.actual.value,
-                };
-              }
-              break;
-            }
-            // 常に新規追加で、かつ削除できないので、ここを通ることはない
-            case "effectActivationOnTurnEnd":
-            case "effectActivationBeforeCardEffectActivation": {
-              throw new Error(
-                `Unexpected modifier kind: ${updateModifierKind}`,
-              );
-            }
-            default:
-              const unreachable: never = updateModifierKind;
-              throw new Error(`Unreachable statement`);
-          }
-          newModifiers = newModifiers
-            .map((modifier) =>
-              modifier.id === updateTargetId ? newTargetedModifier : modifier,
-            )
-            // "effectActivationOnTurnEnd" や "effectActivationBeforeCardEffectActivation" など、数値を持たないものは永続なので、削除しない
-            .filter(
-              (modifier) =>
-                !("amount" in modifier && modifier.amount === 0) &&
-                !("delay" in modifier && modifier.delay === 0) &&
-                !("duration" in modifier && modifier.duration === 0) &&
-                !("times" in modifier && modifier.times === 0) &&
-                !("value" in modifier && modifier.value === 0),
-            );
+            break;
+          default:
+            const unreachable: never = update.propertyNameKind;
+            throw new Error(`Unreachable statement`);
         }
         newLesson = {
           ...newLesson,
           idol: {
             ...newLesson.idol,
-            modifiers: newModifiers,
+            modifiers:
+              newValue === 0
+                ? newLesson.idol.modifiers.filter(
+                    (modifier) => modifier.id !== newTargetedModifier.id,
+                  )
+                : newLesson.idol.modifiers.map((modifier) =>
+                    modifier.id === newTargetedModifier.id
+                      ? newTargetedModifier
+                      : modifier,
+                  ),
+          },
+        };
+        break;
+      }
+      case "modifier.remove": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            modifiers: newLesson.idol.modifiers.filter(
+              (e) => e.id !== update.id,
+            ),
           },
         };
         break;

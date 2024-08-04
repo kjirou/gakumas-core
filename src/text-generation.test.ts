@@ -185,9 +185,7 @@ describe("generateEffectText", () => {
       name: "getModifier - delayedEffect - 2ターン後に drawCards",
     },
     {
-      args: [
-        { kind: "getModifier", modifier: { kind: "doubleEffect", times: 1 } },
-      ],
+      args: [{ kind: "getModifier", modifier: { kind: "doubleEffect" } }],
       expected: "次に使用するスキルカードの効果をもう1回発動（1回）",
       name: "getModifier - doubleEffect",
     },

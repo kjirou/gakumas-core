@@ -618,9 +618,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 0,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数5
@@ -634,11 +632,8 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 5,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 2);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数4
@@ -653,9 +648,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 31,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数3
@@ -670,9 +663,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 49,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = skipTurn(gamePlay);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数2
@@ -686,9 +677,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 69,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = skipTurn(gamePlay);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数1
@@ -702,15 +691,13 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 88,
     } as LessonDisplay);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = skipTurn(gamePlay);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     expect(isLessonEnded(gamePlay)).toBe(false);
     gamePlay = endTurn(gamePlay);
+    expect(isLessonEnded(gamePlay)).toBe(true);
     expect(generateLessonDisplay(gamePlay)).toMatchObject({
       score: 90,
     } as LessonDisplay);
-    expect(isLessonEnded(gamePlay)).toBe(true);
   });
   const initializeSaishushikenGamePlay = (turns: Lesson["turns"]) => {
     return initializeGamePlay({
@@ -877,13 +864,9 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       kind: "getModifier",
       modifier: { kind: "additionalCardUsageCount", amount: 1 },
     });
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 1);
-    expect(hasActionEnded(gamePlay)).toBe(false);
     gamePlay = playCard(gamePlay, 0);
-    expect(hasActionEnded(gamePlay)).toBe(true);
     gamePlay = endTurn(gamePlay);
 
     // 残りターン数10

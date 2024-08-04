@@ -539,124 +539,12 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         break;
       }
       case "modifier": {
-        const updateTargetId = update.actual.updateTargetId;
-        let newModifiers = newLesson.idol.modifiers;
-        if (updateTargetId === undefined) {
-          // 新規追加で負の値が入ることは想定していない
-          newModifiers = [...newModifiers, update.actual];
-        } else {
-          const targetedModifier = newLesson.idol.modifiers.find(
-            (e) => e.id === updateTargetId,
-          );
-          if (targetedModifier === undefined) {
-            throw new Error(`Targeted modifier not found: ${updateTargetId}`);
-          }
-          let newTargetedModifier = targetedModifier;
-          const updateModifierKind = update.actual.kind;
-          switch (updateModifierKind) {
-            // duration の設定もあるが、現在は常に 1 なので無視する
-            case "additionalCardUsageCount": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  amount: newTargetedModifier.amount + update.actual.amount,
-                };
-              }
-              break;
-            }
-            case "debuffProtection": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  times: newTargetedModifier.times + update.actual.times,
-                };
-              }
-              break;
-            }
-            case "delayedEffect": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  delay: newTargetedModifier.delay + update.actual.delay,
-                };
-              }
-              break;
-            }
-            // 合算できないので、この既存状態修正を指定した処理を行う時は、常に削除の意味になる
-            case "doubleEffect": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  times: 0,
-                };
-              }
-              break;
-            }
-            case "doubleLifeConsumption":
-            case "excellentCondition":
-            case "goodCondition":
-            case "halfLifeConsumption":
-            case "mightyPerformance":
-            case "noVitalityIncrease": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  duration:
-                    newTargetedModifier.duration + update.actual.duration,
-                };
-              }
-              break;
-            }
-            case "focus":
-            case "motivation":
-            case "positiveImpression": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  amount: newTargetedModifier.amount + update.actual.amount,
-                };
-              }
-              break;
-            }
-            case "lifeConsumptionReduction": {
-              if (update.actual.kind === newTargetedModifier.kind) {
-                newTargetedModifier = {
-                  ...newTargetedModifier,
-                  value: newTargetedModifier.value + update.actual.value,
-                };
-              }
-              break;
-            }
-            // 常に新規追加で、かつ削除できないので、ここを通ることはない
-            case "effectActivationOnTurnEnd":
-            case "effectActivationBeforeCardEffectActivation": {
-              throw new Error(
-                `Unexpected modifier kind: ${updateModifierKind}`,
-              );
-            }
-            default:
-              const unreachable: never = updateModifierKind;
-              throw new Error(`Unreachable statement`);
-          }
-          newModifiers = newModifiers
-            .map((modifier) =>
-              modifier.id === updateTargetId ? newTargetedModifier : modifier,
-            )
-            // "effectActivationOnTurnEnd" や "effectActivationBeforeCardEffectActivation" など、数値を持たないものは永続なので、削除しない
-            .filter(
-              (modifier) =>
-                !("amount" in modifier && modifier.amount === 0) &&
-                !("delay" in modifier && modifier.delay === 0) &&
-                !("duration" in modifier && modifier.duration === 0) &&
-                !("times" in modifier && modifier.times === 0) &&
-                !("value" in modifier && modifier.value === 0),
-            );
-        }
         newLesson = {
           ...newLesson,
           idol: {
             ...newLesson.idol,
-            modifiers: newModifiers,
+            // 新規追加で負の値が入ることは想定していない
+            modifiers: [...newLesson.idol.modifiers, update.actual],
           },
         };
         break;

@@ -269,8 +269,6 @@ export type Modifier = Readonly<
   ModifierData & {
     /** 全てのインスタンスで一意のID */
     id: string;
-    /** 既存インスタンスの更新時にのみ存在する、対象のID */
-    updateTargetId?: string;
   }
 >;
 

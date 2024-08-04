@@ -3184,41 +3184,21 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "y",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "y",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "y",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
     ]);
@@ -3257,23 +3237,13 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          id: expect.any(String),
-          effect: expect.any(Object),
-          updateTargetId: "x",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          id: expect.any(String),
-          effect: expect.any(Object),
-          updateTargetId: "x",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
     ]);
@@ -3336,59 +3306,29 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "y",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "y",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "y",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "z",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "z",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "z",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
     ]);
@@ -3427,23 +3367,13 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
       {
-        kind: "modifier",
-        actual: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
-        max: {
-          kind: "delayedEffect",
-          delay: -1,
-          effect: expect.any(Object),
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
         reason: expect.any(Object),
       },
     ]);

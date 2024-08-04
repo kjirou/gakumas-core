@@ -1102,23 +1102,14 @@ const activateDelayedEffectModifier = (
       ...activateEffect(lesson, modifier.effect, getRandom, idGenerator),
     ];
   }
-  const id = idGenerator();
   diffs = [
     ...diffs,
     {
-      kind: "modifier",
-      actual: {
-        ...modifier,
-        delay: -1,
-        id,
-        updateTargetId: modifier.id,
-      },
-      max: {
-        ...modifier,
-        delay: -1,
-        id,
-        updateTargetId: modifier.id,
-      },
+      kind: "modifier.update",
+      propertyNameKind: "delay",
+      id: modifier.id,
+      actual: -1,
+      max: -1,
     },
   ];
   return diffs;

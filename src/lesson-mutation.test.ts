@@ -3584,7 +3584,6 @@ describe("consumeRemainingCardUsageCount", () => {
           return lesson;
         })(),
         1,
-        { idGenerator: createIdGenerator() },
       ],
       expected: {
         updates: [
@@ -3606,7 +3605,6 @@ describe("consumeRemainingCardUsageCount", () => {
           return lesson;
         })(),
         1,
-        { idGenerator: createIdGenerator() },
       ],
       expected: {
         updates: [
@@ -3635,24 +3633,15 @@ describe("consumeRemainingCardUsageCount", () => {
           return lesson;
         })(),
         1,
-        { idGenerator: createIdGenerator() },
       ],
       expected: {
         updates: [
           {
-            kind: "modifier",
-            actual: {
-              kind: "additionalCardUsageCount",
-              amount: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
-            max: {
-              kind: "additionalCardUsageCount",
-              amount: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
+            kind: "modifier.update",
+            propertyNameKind: "amount",
+            id: "x",
+            actual: -1,
+            max: -1,
             reason: expect.any(Object),
           },
         ],

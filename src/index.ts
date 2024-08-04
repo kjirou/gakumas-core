@@ -512,9 +512,6 @@ export const playCard = (
   const consumeRemainingCardUsageCountResult = consumeRemainingCardUsageCount(
     lesson,
     historyResultIndex,
-    {
-      idGenerator: gamePlay.idGenerator,
-    },
   );
   updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
   historyResultIndex =

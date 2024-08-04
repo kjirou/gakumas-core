@@ -1904,30 +1904,18 @@ export const activateMemoryEffectsOnLessonStart = (
 export const consumeRemainingCardUsageCount = (
   lesson: Lesson,
   historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-  params: {
-    idGenerator: IdGenerator;
-  },
 ): LessonMutationResult => {
   const additionalCardUsageCount = lesson.idol.modifiers.find(
     (e) => e.kind === "additionalCardUsageCount",
   );
   let diff: LessonUpdateDiff | undefined;
   if (additionalCardUsageCount) {
-    const id = params.idGenerator();
     diff = {
-      kind: "modifier",
-      actual: {
-        kind: "additionalCardUsageCount",
-        amount: -1,
-        id: params.idGenerator(),
-        updateTargetId: additionalCardUsageCount.id,
-      },
-      max: {
-        kind: "additionalCardUsageCount",
-        amount: -1,
-        id: params.idGenerator(),
-        updateTargetId: additionalCardUsageCount.id,
-      },
+      kind: "modifier.update",
+      propertyNameKind: "amount",
+      id: additionalCardUsageCount.id,
+      actual: -1,
+      max: -1,
     };
   } else {
     diff = {

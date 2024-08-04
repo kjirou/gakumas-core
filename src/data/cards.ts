@@ -100,7 +100,7 @@ export const compareDeckOrder = (a: CardData, b: CardData) => {
  *       - kind > *Kind > それ以外をアルファベット順
  * - TODO: eslint
  */
-export const cards: CardData[] = [
+const cardsAsConst = [
   {
     id: "apirunokihon",
     name: "アピールの基本",
@@ -7321,4 +7321,8 @@ export const cards: CardData[] = [
       },
     ],
   },
-];
+] as const satisfies CardData[];
+
+export type CardDataId = (typeof cardsAsConst)[number]["id"];
+
+export const cards: CardData[] = cardsAsConst;

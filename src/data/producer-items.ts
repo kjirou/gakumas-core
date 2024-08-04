@@ -38,7 +38,7 @@ export const getProducerItemDataById = (
  * - Pアイテムは、スキルカードと異なり、未強化と強化済みが別レコードとして図鑑の一覧に並んでいる。今のところ影響はないが、本家のデータ構造はスキルカードと異なるのかもしれない。
  * - TODO: eslint
  */
-export const producerItems: ProducerItemData[] = [
+const producerItemsAsConst = [
   {
     id: "bakuonraion",
     name: "ばくおんライオン",
@@ -1288,4 +1288,8 @@ export const producerItems: ProducerItemData[] = [
       },
     },
   },
-];
+] as const satisfies ProducerItemData[];
+
+export type ProducerItemDataId = (typeof producerItems)[number]["id"];
+
+export const producerItems: ProducerItemData[] = producerItemsAsConst;

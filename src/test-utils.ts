@@ -4,18 +4,16 @@ import type {
   Lesson,
   GamePlay,
   ProducerItemInProduction,
-} from "./index";
-import {
-  createIdGenerator,
-  createIdolInProduction,
-  createGamePlay,
-} from "./index";
+} from "./types";
+import { type IdolDataId } from "./data/idols";
+import { createIdolInProduction, createGamePlay } from "./models";
+import { createIdGenerator } from "./utils";
 
 export const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     deck?: CardInProduction[];
-    idolDataId?: IdolData["id"];
+    idolDataId?: IdolDataId;
     producerItems?: ProducerItemInProduction[];
     specialTrainingLevel?: number | undefined;
     talentAwakeningLevel?: number | undefined;

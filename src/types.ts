@@ -116,7 +116,6 @@ export type ModifierData = Readonly<
        * - 本家の状態修正詳細のテキストは、ターンが進むごとに進んだ数が反映されて減っていく
        */
       kind: "delayedEffect";
-      /** 追加時は 1 以上、更新時は -1 のみ */
       delay: number;
       /**
        * 遅れて発動する効果

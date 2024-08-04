@@ -1315,7 +1315,7 @@ export type LessonUpdateDiff = Readonly<
       /**
        * 状態修正の追加
        */
-      kind: "modifier";
+      kind: "modifier.add";
       actual: Modifier;
       max: Modifier;
     }

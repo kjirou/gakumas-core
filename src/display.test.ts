@@ -913,7 +913,7 @@ describe("generateCardPlayPreviewDisplay", () => {
             reason: expect.any(Object),
           },
           {
-            kind: "modifier",
+            kind: "modifier.add",
             actual: {
               kind: "focus",
               amount: 4,

@@ -583,48 +583,46 @@ describe("patchDiffs", () => {
       expect(lesson.idol.modifierIdsAtTurnStart).toStrictEqual(["3", "4"]);
     });
   });
-  describe("modifier", () => {
-    describe("新規追加", () => {
-      test("既存の状態修正を指定しない時、末尾へ新規追加する", () => {
-        let lessonMock = {
-          idol: {
-            modifiers: [
-              {
-                kind: "focus",
-                amount: 1,
-                id: "a",
-              },
-            ],
-          },
-        } as Lesson;
-        lessonMock = patchDiffs(lessonMock, [
-          {
-            kind: "modifier",
-            actual: {
-              kind: "goodCondition",
-              duration: 2,
-              id: "b",
+  describe("modifier.add", () => {
+    test("末尾へ新規追加する", () => {
+      let lessonMock = {
+        idol: {
+          modifiers: [
+            {
+              kind: "focus",
+              amount: 1,
+              id: "a",
             },
-            max: {
-              kind: "goodCondition",
-              duration: 2,
-              id: "b",
-            },
-          },
-        ]);
-        expect(lessonMock.idol.modifiers).toStrictEqual([
-          {
-            kind: "focus",
-            amount: 1,
-            id: "a",
-          },
-          {
+          ],
+        },
+      } as Lesson;
+      lessonMock = patchDiffs(lessonMock, [
+        {
+          kind: "modifier.add",
+          actual: {
             kind: "goodCondition",
             duration: 2,
             id: "b",
           },
-        ]);
-      });
+          max: {
+            kind: "goodCondition",
+            duration: 2,
+            id: "b",
+          },
+        },
+      ]);
+      expect(lessonMock.idol.modifiers).toStrictEqual([
+        {
+          kind: "focus",
+          amount: 1,
+          id: "a",
+        },
+        {
+          kind: "goodCondition",
+          duration: 2,
+          id: "b",
+        },
+      ]);
     });
   });
   describe("modifier.remove", () => {

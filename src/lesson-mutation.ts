@@ -641,13 +641,13 @@ export const calculatePerformingVitalityEffect = (
 const createNewModifierDiff = (
   modifierData: ModifierData,
   id: Modifier["id"],
-): Extract<LessonUpdateDiff, { kind: "modifier" }> => {
+): Extract<LessonUpdateDiff, { kind: "modifier.add" }> => {
   const newModifier = {
     ...modifierData,
     id,
   };
   return {
-    kind: "modifier",
+    kind: "modifier.add",
     actual: newModifier,
     max: newModifier,
   };
@@ -2203,7 +2203,7 @@ export const useCard = (
             increasedModifierKinds: mainEffectActivations
               .filter((e) => e !== undefined)
               .reduce((acc, e) => [...acc, ...e], [])
-              .filter((e) => e.kind === "modifier")
+              .filter((e) => e.kind === "modifier.add")
               .map((e) => e.actual.kind),
           },
         );

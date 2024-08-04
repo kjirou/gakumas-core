@@ -537,7 +537,7 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "modifier": {
+      case "modifier.add": {
         newLesson = {
           ...newLesson,
           idol: {

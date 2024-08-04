@@ -439,7 +439,7 @@ const calculateActualAndMaxComsumution = (
 /** LessonUpdatDiff からコスト消費関係部分を抜き出したもの */
 type CostConsumptionUpdateDiff = Extract<
   LessonUpdateDiff,
-  { kind: "life" } | { kind: "modifier" } | { kind: "vitality" }
+  { kind: "life" } | { kind: "modifier.update" } | { kind: "vitality" }
 >;
 
 /**
@@ -456,7 +456,6 @@ type CostConsumptionUpdateDiff = Extract<
 export const calculateCostConsumption = (
   idol: Idol,
   cost: ActionCost,
-  idGenerator: IdGenerator,
 ): CostConsumptionUpdateDiff[] => {
   switch (cost.kind) {
     case "normal": {
@@ -497,25 +496,16 @@ export const calculateCostConsumption = (
     case "focus":
     case "motivation":
     case "positiveImpression": {
-      const id = idGenerator();
       const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
       if (sameKindModifier && "amount" in sameKindModifier) {
         const actual = Math.min(cost.value, sameKindModifier.amount);
         return [
           {
-            kind: "modifier",
-            actual: {
-              kind: cost.kind,
-              amount: -actual + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
-            max: {
-              kind: cost.kind,
-              amount: -cost.value + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
+            kind: "modifier.update",
+            propertyNameKind: "amount",
+            id: sameKindModifier.id,
+            actual: -actual + 0,
+            max: -cost.value + 0,
           },
         ];
       } else {
@@ -524,25 +514,16 @@ export const calculateCostConsumption = (
       }
     }
     case "goodCondition": {
-      const id = idGenerator();
       const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
       if (sameKindModifier && "duration" in sameKindModifier) {
         const actual = Math.min(cost.value, sameKindModifier.duration);
         return [
           {
-            kind: "modifier",
-            actual: {
-              kind: cost.kind,
-              duration: -actual + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
-            max: {
-              kind: cost.kind,
-              duration: -cost.value + 0,
-              id,
-              updateTargetId: sameKindModifier.id,
-            },
+            kind: "modifier.update",
+            propertyNameKind: "duration",
+            id: sameKindModifier.id,
+            actual: -actual + 0,
+            max: -cost.value + 0,
           },
         ];
       } else {
@@ -705,11 +686,10 @@ export const activateEffect = <
     case "drainLife": {
       diffs = [
         ...diffs,
-        ...calculateCostConsumption(
-          lesson.idol,
-          { kind: "normal", value: effect.value },
-          idGenerator,
-        ),
+        ...calculateCostConsumption(lesson.idol, {
+          kind: "normal",
+          value: effect.value,
+        }),
       ];
       break;
     }
@@ -2032,7 +2012,6 @@ export const useCard = (
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
     calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
-    params.idGenerator,
   ).map((diff) => ({
     ...diff,
     reason: {

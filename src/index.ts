@@ -290,9 +290,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   //
   if (lesson.idol.modifierIdsAtTurnStart.length > 0) {
     const decreaseEachModifierDurationOverTimeResult =
-      decreaseEachModifierDurationOverTime(lesson, historyResultIndex, {
-        idGenerator: gamePlay.idGenerator,
-      });
+      decreaseEachModifierDurationOverTime(lesson, historyResultIndex);
     updates = [
       ...updates,
       ...decreaseEachModifierDurationOverTimeResult.updates,

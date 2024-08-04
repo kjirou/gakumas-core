@@ -1795,9 +1795,6 @@ export const drawCardsOnTurnStart = (
 export const decreaseEachModifierDurationOverTime = (
   lesson: Lesson,
   historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-  params: {
-    idGenerator: IdGenerator;
-  },
 ): LessonMutationResult => {
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
@@ -1818,36 +1815,28 @@ export const decreaseEachModifierDurationOverTime = (
         case "halfLifeConsumption":
         case "mightyPerformance":
         case "noVitalityIncrease": {
-          const change = {
-            kind: modifier.kind,
-            duration: -1,
-            id: params.idGenerator(),
-            updateTargetId: modifier.id,
-          };
           modifierUpdates = [
             ...modifierUpdates,
             {
-              kind: "modifier",
-              actual: change,
-              max: change,
+              kind: "modifier.update",
+              propertyNameKind: "duration",
+              id: modifier.id,
+              actual: -1,
+              max: -1,
               reason,
             },
           ];
           break;
         }
         case "positiveImpression": {
-          const change = {
-            kind: modifier.kind,
-            amount: -1,
-            id: params.idGenerator(),
-            updateTargetId: modifier.id,
-          };
           modifierUpdates = [
             ...modifierUpdates,
             {
-              kind: "modifier",
-              actual: change,
-              max: change,
+              kind: "modifier.update",
+              propertyNameKind: "amount",
+              id: modifier.id,
+              actual: -1,
+              max: -1,
               reason,
             },
           ];

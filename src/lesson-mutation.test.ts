@@ -3443,24 +3443,15 @@ describe("decreaseEachModifierDurationOverTime", () => {
           return lesson;
         })(),
         1,
-        { idGenerator: createIdGenerator() },
       ],
       expected: {
         updates: [
           {
-            kind: "modifier",
-            actual: {
-              kind: "goodCondition",
-              duration: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
-            max: {
-              kind: "goodCondition",
-              duration: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
+            kind: "modifier.update",
+            propertyNameKind: "duration",
+            id: "x",
+            actual: -1,
+            max: -1,
             reason: expect.any(Object),
           },
         ],
@@ -3480,24 +3471,15 @@ describe("decreaseEachModifierDurationOverTime", () => {
           return lesson;
         })(),
         1,
-        { idGenerator: createIdGenerator() },
       ],
       expected: {
         updates: [
           {
-            kind: "modifier",
-            actual: {
-              kind: "goodCondition",
-              duration: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
-            max: {
-              kind: "goodCondition",
-              duration: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
+            kind: "modifier.update",
+            propertyNameKind: "duration",
+            id: "x",
+            actual: -1,
+            max: -1,
             reason: expect.any(Object),
           },
         ],
@@ -3516,24 +3498,15 @@ describe("decreaseEachModifierDurationOverTime", () => {
           return lesson;
         })(),
         1,
-        { idGenerator: createIdGenerator() },
       ],
       expected: {
         updates: [
           {
-            kind: "modifier",
-            actual: {
-              kind: "positiveImpression",
-              amount: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
-            max: {
-              kind: "positiveImpression",
-              amount: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
+            kind: "modifier.update",
+            propertyNameKind: "amount",
+            id: "x",
+            actual: -1,
+            max: -1,
             reason: expect.any(Object),
           },
         ],

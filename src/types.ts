@@ -238,12 +238,6 @@ export type MetaModifierData = Readonly<{
   kind: ModifierData["kind"];
   label: string;
   /**
-   * 同じ種別の状態修正を重複した時に合算するか
-   *
-   * - 「次に使用するスキルカードの効果をもう1回発動」や、いわゆる持続効果・発動予約は合算しない
-   */
-  nonAggregation: boolean;
-  /**
    * 代表して表示する値を格納しているプロパティ名
    *
    * - 主に、本家UIの状態修正アイコンに添えられている数値の表示に使う

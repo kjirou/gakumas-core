@@ -23,7 +23,6 @@ import type {
   VitalityUpdateQuery,
 } from "./types";
 import { filterGeneratableCardsData, getCardDataById } from "./data/cards";
-import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,

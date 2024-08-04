@@ -38,7 +38,6 @@ import {
   ProducerItem,
   ProducerItemContentData,
   ProducerItemInProduction,
-  MetaModifierData,
   CharacterData,
 } from "./types";
 import { shuffleArray } from "./utils";

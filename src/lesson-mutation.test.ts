@@ -4089,24 +4089,11 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         });
         expect(
-          updates.filter(
-            (e) => e.kind === "modifier" && e.actual.kind === "doubleEffect",
-          ),
+          updates.filter((e) => e.kind === "modifier.remove"),
         ).toStrictEqual([
           {
-            kind: "modifier",
-            actual: {
-              kind: "doubleEffect",
-              times: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
-            max: {
-              kind: "doubleEffect",
-              times: -1,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
+            kind: "modifier.remove",
+            id: "x",
             reason: expect.any(Object),
           },
         ]);
@@ -5163,21 +5150,10 @@ describe("useCard preview:true", () => {
       idGenerator: createIdGenerator(),
       preview: true,
     });
-    expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifier.remove")).toStrictEqual([
       {
-        kind: "modifier",
-        actual: {
-          kind: "doubleEffect",
-          times: -1,
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
-        max: {
-          kind: "doubleEffect",
-          times: -1,
-          id: expect.any(String),
-          updateTargetId: "x",
-        },
+        kind: "modifier.remove",
+        id: "x",
         reason: expect.any(Object),
       },
     ]);

@@ -2033,18 +2033,11 @@ export const useCard = (
     // 「次に使用するスキルカードの効果をもう1回発動」があれば、1 つ消費
     //
     if (doubleEffect && times === 1) {
-      const modifier = {
-        kind: "doubleEffect",
-        times: -1,
-        id: params.idGenerator(),
-        updateTargetId: doubleEffect.id,
-      } as const;
       const innerUpdates = [
         createLessonUpdateQueryFromDiff(
           {
-            kind: "modifier",
-            actual: modifier,
-            max: modifier,
+            kind: "modifier.remove",
+            id: doubleEffect.id,
           },
           {
             kind: "cardUsage",

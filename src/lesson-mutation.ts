@@ -2234,12 +2234,6 @@ export const useCard = (
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     } as const;
-    const modifierChange: Modifier = {
-      kind: "additionalCardUsageCount",
-      amount: -1,
-      id: params.idGenerator(),
-      updateTargetId: additionalCardUsageCount.id,
-    };
     recoveringActionPointsUpdates = [
       {
         kind: "actionPoints",
@@ -2247,9 +2241,11 @@ export const useCard = (
         reason,
       },
       {
-        kind: "modifier",
-        actual: modifierChange,
-        max: modifierChange,
+        kind: "modifier.update",
+        propertyNameKind: "amount",
+        id: additionalCardUsageCount.id,
+        actual: -1,
+        max: -1,
         reason,
       },
     ];

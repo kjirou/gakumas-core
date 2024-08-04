@@ -4934,7 +4934,11 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
       ]);
-      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      expect(
+        updates.filter(
+          (e) => e.kind === "modifier" || e.kind === "modifier.update",
+        ),
+      ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
@@ -4950,19 +4954,11 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier",
-          actual: {
-            kind: "additionalCardUsageCount",
-            amount: -1,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          max: {
-            kind: "additionalCardUsageCount",
-            amount: -1,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: expect.any(String),
+          actual: -1,
+          max: -1,
           reason: expect.any(Object),
         },
       ]);

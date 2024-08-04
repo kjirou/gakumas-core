@@ -17,6 +17,7 @@ import type {
   LessonUpdateQueryReason,
   MemoryEffect,
   Modifier,
+  ModifierData,
   ProducerItem,
   ProducerItemTrigger,
   VitalityUpdateQuery,
@@ -657,6 +658,21 @@ export const calculatePerformingVitalityEffect = (
   };
 };
 
+const createNewModifierDiff = (
+  modifierData: ModifierData,
+  id: Modifier["id"],
+): Extract<LessonUpdateDiff, { kind: "modifier" }> => {
+  const newModifier = {
+    ...modifierData,
+    id,
+  };
+  return {
+    kind: "modifier",
+    actual: newModifier,
+    max: newModifier,
+  };
+};
+
 /**
  * 効果を発動する
  */
@@ -838,26 +854,82 @@ export const activateEffect = <
       break;
     }
     case "getModifier": {
-      const id = idGenerator();
       const sameKindModifier = lesson.idol.modifiers.find(
         (e) => e.kind === effect.modifier.kind,
       );
-      const isUpdate =
-        sameKindModifier !== undefined &&
-        !metaModifierDictioanry[effect.modifier.kind].nonAggregation;
-      diffs.push({
-        kind: "modifier",
-        actual: {
-          ...effect.modifier,
-          id,
-          ...(isUpdate ? { updateTargetId: sameKindModifier.id } : {}),
-        },
-        max: {
-          ...effect.modifier,
-          id,
-          ...(isUpdate ? { updateTargetId: sameKindModifier.id } : {}),
-        },
-      });
+      let diff: LessonUpdateDiff;
+      switch (effect.modifier.kind) {
+        case "additionalCardUsageCount":
+        case "focus":
+        case "motivation":
+        case "positiveImpression": {
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "amount",
+                actual: effect.modifier.amount,
+                max: effect.modifier.amount,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "debuffProtection": {
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "times",
+                actual: effect.modifier.times,
+                max: effect.modifier.times,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "doubleLifeConsumption":
+        case "excellentCondition":
+        case "goodCondition":
+        case "halfLifeConsumption":
+        case "mightyPerformance":
+        case "noVitalityIncrease": {
+          // TODO: パラメータ上昇量増加50%/30% は、それぞれの値も見ないと同じ種類かが判別できない
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "duration",
+                actual: effect.modifier.duration,
+                max: effect.modifier.duration,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "lifeConsumptionReduction": {
+          diff = sameKindModifier
+            ? {
+                kind: "modifier.update",
+                id: sameKindModifier.id,
+                propertyNameKind: "value",
+                actual: effect.modifier.value,
+                max: effect.modifier.value,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        // 常に新規追加になる状態修正群
+        case "delayedEffect":
+        case "doubleEffect":
+        case "effectActivationBeforeCardEffectActivation":
+        case "effectActivationOnTurnEnd": {
+          diff = createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        default: {
+          const unreachable: never = effect.modifier;
+          throw new Error(`Unreachable statement`);
+        }
+      }
+      diffs.push(diff);
       break;
     }
     case "increaseRemainingTurns": {

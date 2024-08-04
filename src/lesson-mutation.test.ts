@@ -2607,23 +2607,17 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
         createIdGenerator(),
         dummyReason,
       );
-    expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
+    expect(updates1.filter((e) => e.kind === "modifier.update")).toStrictEqual([
       {
-        kind: "modifier",
-        actual: {
-          kind: "positiveImpression",
-          amount: 3,
-          id: expect.any(String),
-          updateTargetId: "m1",
-        },
-        max: {
-          kind: "positiveImpression",
-          amount: 3,
-          id: expect.any(String),
-          updateTargetId: "m1",
-        },
+        kind: "modifier.update",
+        propertyNameKind: "amount",
+        id: "m1",
+        actual: 3,
+        max: 3,
         reason: expect.any(Object),
       },
+    ]);
+    expect(updates1.filter((e) => e.kind === "modifier")).toStrictEqual([
       {
         kind: "modifier",
         actual: {
@@ -3915,7 +3909,11 @@ describe("useCard preview:false", () => {
         idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      expect(
+        updates.filter(
+          (e) => e.kind === "modifier" || e.kind === "modifier.update",
+        ),
+      ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
@@ -3931,19 +3929,11 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier",
-          actual: {
-            kind: "goodCondition",
-            duration: 3,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          max: {
-            kind: "goodCondition",
-            duration: 3,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
+          kind: "modifier.update",
+          propertyNameKind: "duration",
+          id: expect.any(String),
+          actual: 3,
+          max: 3,
           reason: expect.any(Object),
         },
         {
@@ -4025,21 +4015,15 @@ describe("useCard preview:false", () => {
         idGenerator,
         preview: false,
       });
-      expect(updates2a.filter((e) => e.kind === "modifier")).toStrictEqual([
+      expect(
+        updates2a.filter((e) => e.kind === "modifier.update"),
+      ).toStrictEqual([
         {
-          kind: "modifier",
-          actual: {
-            kind: "positiveImpression",
-            amount: 1,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          max: {
-            kind: "positiveImpression",
-            amount: 1,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: expect.any(String),
+          actual: 1,
+          max: 1,
           reason: expect.any(Object),
         },
       ]);
@@ -4246,7 +4230,13 @@ describe("useCard preview:false", () => {
           updates.filter(
             (e) => e.kind === "modifier" && e.actual.kind === "focus",
           ),
-        ).toHaveLength(2);
+        ).toHaveLength(1);
+        expect(
+          updates.filter(
+            (e) =>
+              e.kind === "modifier.update" && e.propertyNameKind === "amount",
+          ),
+        ).toHaveLength(1);
         expect(updates.filter((e) => e.kind === "score")[0]).toStrictEqual({
           kind: "score",
           actual: 6,
@@ -4590,21 +4580,15 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+        expect(
+          updates.filter((e) => e.kind === "modifier.update"),
+        ).toStrictEqual([
           {
-            kind: "modifier",
-            actual: {
-              kind: "goodCondition",
-              duration: 2,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
-            max: {
-              kind: "goodCondition",
-              duration: 2,
-              id: expect.any(String),
-              updateTargetId: "x",
-            },
+            kind: "modifier.update",
+            propertyNameKind: "duration",
+            id: "x",
+            actual: 2,
+            max: 2,
             reason: expect.any(Object),
           },
         ]);
@@ -5013,7 +4997,11 @@ describe("useCard preview:false", () => {
         idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      expect(
+        updates.filter(
+          (e) => e.kind === "modifier" || e.kind === "modifier.update",
+        ),
+      ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
@@ -5029,19 +5017,11 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier",
-          actual: {
-            kind: "motivation",
-            amount: 2,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          max: {
-            kind: "motivation",
-            amount: 2,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: expect.any(String),
+          actual: 2,
+          max: 2,
           reason: expect.any(Object),
         },
       ]);
@@ -5073,7 +5053,11 @@ describe("useCard preview:false", () => {
         idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates.filter((e) => e.kind === "modifier")).toStrictEqual([
+      expect(
+        updates.filter(
+          (e) => e.kind === "modifier" || e.kind === "modifier.update",
+        ),
+      ).toStrictEqual([
         {
           kind: "modifier",
           actual: {
@@ -5089,19 +5073,11 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier",
-          actual: {
-            kind: "motivation",
-            amount: 3,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
-          max: {
-            kind: "motivation",
-            amount: 3,
-            id: expect.any(String),
-            updateTargetId: expect.any(String),
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: expect.any(String),
+          actual: 3,
+          max: 3,
           reason: expect.any(Object),
         },
       ]);

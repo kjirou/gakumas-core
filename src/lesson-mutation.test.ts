@@ -2005,6 +2005,78 @@ describe("activateEffectIf", () => {
       ],
     },
     {
+      name: "getModifier - mightyPerformance で同じパーセンテージを追加した時、合算する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            {
+              kind: "mightyPerformance",
+              duration: 1,
+              percentage: 50,
+              id: "m1",
+            },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "getModifier",
+          modifier: { kind: "mightyPerformance", duration: 2, percentage: 50 },
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier.update",
+          propertyNameKind: "duration",
+          id: "m1",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "getModifier - mightyPerformance で異なるパーセンテージを追加した時、合算しない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            {
+              kind: "mightyPerformance",
+              duration: 1,
+              percentage: 50,
+              id: "m1",
+            },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "getModifier",
+          modifier: { kind: "mightyPerformance", duration: 2, percentage: 30 },
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifier.add",
+          actual: {
+            kind: "mightyPerformance",
+            duration: 2,
+            percentage: 30,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "mightyPerformance",
+            duration: 2,
+            percentage: 30,
+            id: expect.any(String),
+          },
+        },
+      ],
+    },
+    {
       name: "increaseRemainingTurns",
       args: [
         (() => {

@@ -870,13 +870,30 @@ export const activateEffect = <
         case "excellentCondition":
         case "goodCondition":
         case "halfLifeConsumption":
-        case "mightyPerformance":
         case "noVitalityIncrease": {
           // TODO: パラメータ上昇量増加50%/30% は、それぞれの値も見ないと同じ種類かが判別できない
           diff = sameKindModifier
             ? {
                 kind: "modifier.update",
                 id: sameKindModifier.id,
+                propertyNameKind: "duration",
+                actual: effect.modifier.duration,
+                max: effect.modifier.duration,
+              }
+            : createNewModifierDiff(effect.modifier, idGenerator());
+          break;
+        }
+        case "mightyPerformance": {
+          const isSameKindAndPercentageModifier = lesson.idol.modifiers.find(
+            (modifier) =>
+              modifier.kind === "mightyPerformance" &&
+              effect.modifier.kind === "mightyPerformance" &&
+              modifier.percentage === effect.modifier.percentage,
+          );
+          diff = isSameKindAndPercentageModifier
+            ? {
+                kind: "modifier.update",
+                id: isSameKindAndPercentageModifier.id,
                 propertyNameKind: "duration",
                 actual: effect.modifier.duration,
                 max: effect.modifier.duration,

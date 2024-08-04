@@ -269,22 +269,10 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
     (e) => e.kind === "additionalCardUsageCount",
   );
   if (additionalCardUsageCount) {
-    const id = gamePlay.idGenerator();
     const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
       {
-        kind: "modifier",
-        actual: {
-          kind: "additionalCardUsageCount",
-          amount: -additionalCardUsageCount.amount,
-          id,
-          updateTargetId: additionalCardUsageCount.id,
-        },
-        max: {
-          kind: "additionalCardUsageCount",
-          amount: -additionalCardUsageCount.amount,
-          id,
-          updateTargetId: additionalCardUsageCount.id,
-        },
+        kind: "modifier.remove",
+        id: additionalCardUsageCount.id,
         reason: {
           kind: "turnEndTrigger",
           historyTurnNumber: lesson.turnNumber,

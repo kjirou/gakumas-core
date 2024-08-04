@@ -180,6 +180,32 @@ export const initializeGamePlay = (params: {
 };
 
 /**
+ * そのターンのアイドルの行動が終了しているかを返す
+ */
+export const hasActionEnded = (gamePlay: GamePlay): boolean => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  return lesson.idol.actionPoints === 0;
+};
+
+/**
+ * レッスンが終了しているかを返す
+ *
+ * - 以下の処理の後に本関数を呼び出し、レッスンが終了しているかを判定する。終了していたら、その時点から後続処理を行わない。
+ *   - `startTurn`
+ *   - `playCard`
+ *   - `endTurn`
+ */
+export const isLessonEnded = (gamePlay: GamePlay): boolean => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  return (
+    isScoreSatisfyingPerfect(lesson) ||
+    (calculateRemainingTurns(lesson) === 1 &&
+      hasActionEnded(gamePlay) &&
+      lesson.turnEnded)
+  );
+};
+
+/**
  * レッスンのターンを開始する
  *
  * - レッスン開始時に関わる処理も含む
@@ -188,6 +214,15 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+
+  if (
+    (lesson.turnNumber !== 0 && lesson.turnEnded === false) ||
+    !hasActionEnded(gamePlay)
+  ) {
+    throw new Error("ターンが正常に終了していない");
+  } else if (isLessonEnded(gamePlay)) {
+    throw new Error("レッスンが終了している");
+  }
 
   if (lesson.turnNumber === 0) {
     //
@@ -466,14 +501,6 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
 };
 
 /**
- * アイドルの行動が終了しているかどうか
- */
-export const hasActionEnded = (gamePlay: GamePlay): boolean => {
-  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  return lesson.idol.actionPoints === 0;
-};
-
-/**
  * スキルカードを使用する
  *
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たす手札のみ選択可能
@@ -486,13 +513,11 @@ export const playCard = (
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
-  //
-  // アクションポイントがない場合は実行できない
-  //
-  // - スキルカード使用数が残っていても、使えない
-  //
-  if (lesson.idol.actionPoints === 0) {
-    throw new Error("No action points");
+  // アクションポイントがない場合は実行できない。なお、「スキルカード使用数は残っているがアクションポイントが0」という状態はない。
+  if (hasActionEnded(gamePlay)) {
+    throw new Error("アイドルの行動が終了している");
+  } else if (isLessonEnded(gamePlay)) {
+    throw new Error("レッスンが終了している");
   }
 
   //
@@ -586,6 +611,13 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
+  // アクションポイントがない場合は実行できない。なお、「スキルカード使用数は残っているがアクションポイントが0」という状態はない。
+  if (hasActionEnded(gamePlay)) {
+    throw new Error("アイドルの行動が終了している");
+  } else if (isLessonEnded(gamePlay)) {
+    throw new Error("レッスンが終了している");
+  }
+
   //
   // アクションポイントを0にする
   //
@@ -636,6 +668,14 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+
+  if (lesson.turnEnded) {
+    throw new Error("ターンが正常に開始していない");
+  } else if (!hasActionEnded(gamePlay)) {
+    throw new Error("アイドルの行動が終了していない");
+  } else if (isLessonEnded(gamePlay)) {
+    throw new Error("レッスンが終了している");
+  }
 
   //
   // ターン終了時の効果発動順序のまとめ
@@ -733,22 +773,4 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
     ...gamePlay,
     updates,
   };
-};
-
-/**
- * レッスンが終了しているかを返す
- *
- * - 以下の処理の後に本関数を呼び出し、レッスンが終了しているかを判定する。終了していたら、その時点から後続処理を行わない。
- *   - `startTurn`
- *   - `playCard`
- *   - `endTurn`
- */
-export const isLessonEnded = (gamePlay: GamePlay): boolean => {
-  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  return (
-    isScoreSatisfyingPerfect(lesson) ||
-    (calculateRemainingTurns(lesson) === 1 &&
-      lesson.idol.actionPoints === 0 &&
-      lesson.turnEnded)
-  );
 };

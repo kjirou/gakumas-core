@@ -77,7 +77,9 @@ export type VitalityUpdateQuery = Readonly<{
 /**
  * 状態修正データ定義
  *
- * - Modifier をデータ定義で行う時の形式
+ * - データとして状態修正を表現するときの形式
+ * - 追加をイメージして記述する
+ *   - そのため各種値は、基本的には正の数である
  */
 export type ModifierData = Readonly<
   | {

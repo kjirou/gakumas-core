@@ -947,21 +947,12 @@ export const activateEffect = <
       if (modifier?.kind === "positiveImpression") {
         const amount =
           Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
-        const id = idGenerator();
         diffs.push({
-          kind: "modifier",
-          actual: {
-            kind: "positiveImpression",
-            amount,
-            id,
-            updateTargetId: modifier.id,
-          },
-          max: {
-            kind: "positiveImpression",
-            amount,
-            id,
-            updateTargetId: modifier.id,
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: modifier.id,
+          actual: amount,
+          max: amount,
         });
       }
       break;

@@ -2126,19 +2126,11 @@ describe("activateEffectIf", () => {
       ],
       expected: [
         {
-          kind: "modifier",
-          actual: {
-            kind: "positiveImpression",
-            amount: 50,
-            id: expect.any(String),
-            updateTargetId: "m2",
-          },
-          max: {
-            kind: "positiveImpression",
-            amount: 50,
-            id: expect.any(String),
-            updateTargetId: "m2",
-          },
+          kind: "modifier.update",
+          propertyNameKind: "amount",
+          id: "m2",
+          actual: 50,
+          max: 50,
         },
       ],
     },

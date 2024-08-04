@@ -21,7 +21,7 @@ export const getIdolDataById = (id: IdolData["id"]): IdolData => {
  * - TODO: eslint
  * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
-export const idols: IdolData[] = [
+const idolsAsConst: IdolData[] = [
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",
@@ -382,4 +382,8 @@ export const idols: IdolData[] = [
     specificProducerItemId: "tekunodoggu",
     title: "学園生活",
   },
-];
+] as const satisfies IdolData[];
+
+export type IdolDataId = (typeof idolsAsConst)[number]["id"];
+
+export const idols: IdolData[] = idolsAsConst;

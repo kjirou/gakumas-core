@@ -14,21 +14,22 @@
 // TODO: コンテスト
 
 import {
-  CardData,
   Encouragement,
   Idol,
-  IdolData,
   Lesson,
   GamePlay,
   LessonUpdateQuery,
   MemoryEffect,
-  ProducerItemData,
   CardInProduction,
   ProducerItemInProduction,
   IdolInProduction,
 } from "./types";
-import { getCardDataById } from "./data/cards";
-import { getProducerItemDataById } from "./data/producer-items";
+import { type CardDataId, getCardDataById } from "./data/cards";
+import { type IdolDataId } from "./data/idols";
+import {
+  type ProducerItemDataId,
+  getProducerItemDataById,
+} from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
   activateEffectsOnTurnEnd,
@@ -113,13 +114,13 @@ export * from "./utils";
 export const initializeGamePlay = (params: {
   cards: Array<{
     enhanced?: CardInProduction["enhanced"];
-    id: CardData["id"];
+    id: CardDataId;
     /** テスト用、本来知る必要がない内部的なIDを指定する */
     testId?: CardInProduction["id"];
   }>;
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   encouragements?: Encouragement[];
-  idolDataId: IdolData["id"];
+  idolDataId: IdolDataId;
   idolSpecificCardTestId?: CardInProduction["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: IdolInProduction["life"];
@@ -127,7 +128,7 @@ export const initializeGamePlay = (params: {
   memoryEffects?: MemoryEffect[];
   producerItems: Array<{
     enhanced?: ProducerItemInProduction["enhanced"];
-    id: ProducerItemData["id"];
+    id: ProducerItemDataId;
   }>;
   scoreBonus?: Idol["scoreBonus"];
   specialTrainingLevel?: number | undefined;

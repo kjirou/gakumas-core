@@ -571,7 +571,7 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "modifier.add": {
+      case "modifiers.addition": {
         newLesson = {
           ...newLesson,
           idol: {
@@ -582,7 +582,7 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "modifier.update": {
+      case "modifiers.update": {
         const targetedModifier = newLesson.idol.modifiers.find(
           (e) => e.id === update.id,
         );
@@ -662,7 +662,7 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
-      case "modifier.remove": {
+      case "modifiers.removal": {
         newLesson = {
           ...newLesson,
           idol: {

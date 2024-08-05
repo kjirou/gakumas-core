@@ -691,7 +691,7 @@ describe("patchDiffs", () => {
       expect(lesson.idol.modifierIdsAtTurnStart).toStrictEqual(["3", "4"]);
     });
   });
-  describe("modifier.add", () => {
+  describe("modifiers.addition", () => {
     test("末尾へ新規追加する", () => {
       let lessonMock = {
         idol: {
@@ -706,7 +706,7 @@ describe("patchDiffs", () => {
       } as Lesson;
       lessonMock = patchDiffs(lessonMock, [
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "goodCondition",
             duration: 2,
@@ -733,7 +733,7 @@ describe("patchDiffs", () => {
       ]);
     });
   });
-  describe("modifier.remove", () => {
+  describe("modifiers.removal", () => {
     const testCases: Array<{
       args: Parameters<typeof patchDiffs>;
       expected: ReturnType<typeof patchDiffs>;
@@ -747,7 +747,7 @@ describe("patchDiffs", () => {
               modifiers: [{ id: "a" }, { id: "b" }, { id: "c" }],
             },
           } as Lesson,
-          [{ kind: "modifier.remove", id: "b" }],
+          [{ kind: "modifiers.removal", id: "b" }],
         ],
         expected: {
           idol: {
@@ -760,7 +760,7 @@ describe("patchDiffs", () => {
       expect(patchDiffs(...args)).toMatchObject(expected);
     });
   });
-  describe("modifier.update", () => {
+  describe("modifiers.update", () => {
     const testCases: Array<{
       args: Parameters<typeof patchDiffs>;
       expected: ReturnType<typeof patchDiffs>;
@@ -776,7 +776,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "amount",
               actual: 2,
               max: 10,
@@ -800,7 +800,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "delay",
               actual: 2,
               max: 10,
@@ -824,7 +824,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "duration",
               actual: 2,
               max: 10,
@@ -848,7 +848,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "times",
               actual: 2,
               max: 10,
@@ -874,7 +874,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "value",
               actual: 2,
               max: 10,
@@ -900,7 +900,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "amount",
               actual: -2,
               max: -2,
@@ -928,7 +928,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "amount",
               actual: -1,
               max: -1,
@@ -955,7 +955,7 @@ describe("patchDiffs", () => {
           } as Lesson,
           [
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "duration",
               actual: -1,
               max: -1,

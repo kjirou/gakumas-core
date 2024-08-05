@@ -227,6 +227,7 @@ describe("createGamePlay", () => {
           totalCardUsageCount: 0,
           actionPoints: 0,
           scoreBonus: undefined,
+          drinks: [],
         },
         cards: expect.any(Array),
         hand: [],
@@ -656,6 +657,22 @@ describe("patchDiffs", () => {
         { kind: "lessonSupport" },
       ]);
       expect(lesson.cards[3].enhancements).toStrictEqual([]);
+    });
+  });
+  describe("drinks.removal", () => {
+    test("it works", () => {
+      const lessonMock = {
+        idol: {
+          drinks: [{ id: "1" }, { id: "2" }, { id: "3" }],
+        },
+      } as Lesson;
+      const lesson = patchDiffs(lessonMock, [
+        {
+          kind: "drinks.removal",
+          id: "2",
+        },
+      ]);
+      expect(lesson.idol.drinks).toStrictEqual([{ id: "1" }, { id: "3" }]);
     });
   });
   describe("modifierIdsAtTurnStart", () => {

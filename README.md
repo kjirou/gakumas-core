@@ -104,7 +104,7 @@ const newGamePlay = endTrun(gamePlay);
 // ...ターン開始処理と同じなので略...
 ```
 
-## :book: APIドキュメント
+## :book: APIリファレンス
 
 主だったものの名称と、一言説明だけ記載します。より詳細は、ソースコードから探して読んでください。概ね、ソースコードコメントがあります。
 
@@ -118,6 +118,7 @@ const newGamePlay = endTrun(gamePlay);
 - `playCard`: スキルカードを使用する。
 - `skipTurn`: ターンをスキップする。
 - `startTurn`: ターン開始処理を実行する。
+- `useDrink`: Pドリンクを使用する。
 
 ## :writing_hand: 主なTODO
 

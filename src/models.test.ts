@@ -1,6 +1,6 @@
 import { Card, Lesson, LessonUpdateQuery, Modifier } from "./types";
 import { getCardDataByConstId } from "./data/cards";
-import { getIdolDataById } from "./data/idols";
+import { getIdolDataByConstId } from "./data/idols";
 import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   calculateActualActionCost,
@@ -278,7 +278,7 @@ describe("createIdolInProduction", () => {
           enhanced: false,
         },
       ],
-      data: getIdolDataById("hanamisaki-r-1"),
+      data: getIdolDataByConstId("hanamisaki-r-1"),
       life: 32,
       maxLife: 32,
       producerItems: [

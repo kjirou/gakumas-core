@@ -1,7 +1,7 @@
 import type { GamePlay } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataById } from "./data/drinks";
-import { getIdolDataById } from "./data/idols";
+import { getIdolDataByConstId } from "./data/idols";
 import { getProducerItemDataByConstId } from "./data/producer-items";
 import { initializeGamePlay } from "./index";
 
@@ -28,7 +28,7 @@ describe("initializeGamePlay", () => {
         initialLesson: {
           idol: {
             original: {
-              data: getIdolDataById("kuramotochina-ssr-1"),
+              data: getIdolDataByConstId("kuramotochina-ssr-1"),
             },
             producerItems: [
               {

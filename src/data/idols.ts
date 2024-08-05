@@ -11,6 +11,9 @@ export const getIdolDataById = (id: IdolData["id"]): IdolData => {
   return card;
 };
 
+export const getIdolDataByConstId = (id: IdolDataId): IdolData =>
+  getIdolDataById(id);
+
 /**
  * プロデュースアイドルの定義
  *

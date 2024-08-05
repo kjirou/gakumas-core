@@ -3520,6 +3520,49 @@ describe("decreaseEachModifierDurationOverTime", () => {
       },
     },
     {
+      name: "doubleEffect に duration が設定されている時、減少する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "doubleEffect", duration: 1, id: "m1" },
+          ];
+          lesson.idol.modifierIdsAtTurnStart = ["m1"];
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifier.update",
+            propertyNameKind: "duration",
+            id: "m1",
+            actual: -1,
+            max: -1,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "doubleEffect に duration が設定されていない時、減少しない / 更新が全くなかった時は履歴インデックスを加算しない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [{ kind: "doubleEffect", id: "m1" }];
+          lesson.idol.modifierIdsAtTurnStart = ["m1"];
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [],
+        nextHistoryResultIndex: 1,
+      },
+    },
+    {
       name: "強度のプロパティ名がdurationではない一部も状態修正も、この処理で減少する",
       args: [
         (() => {

@@ -9,6 +9,7 @@ import {
   createIdolInProduction,
   createGamePlay,
   diffUpdates,
+  findPrioritizedDoubleEffectModifier,
   getDisplayedRepresentativeModifierValue,
   getIdolParameterKindOnTurn,
   patchDiffs,
@@ -356,6 +357,96 @@ describe("calculateActualActionCost", () => {
       expect(calculateActualActionCost(...args)).toStrictEqual(expected);
     },
   );
+});
+describe("findPrioritizedDoubleEffectModifier", () => {
+  const testCases: Array<{
+    args: Parameters<typeof findPrioritizedDoubleEffectModifier>;
+    expected: ReturnType<typeof findPrioritizedDoubleEffectModifier>;
+    name: string;
+  }> = [
+    {
+      name: "doubleEffect がない時、undefined を返す",
+      args: ["active", [{ kind: "focus", amount: 1, id: "a" }]],
+      expected: undefined,
+    },
+    {
+      name: "doubleEffect がひとつだけある時、それを返す",
+      args: [
+        "active",
+        [
+          { kind: "focus", amount: 1, id: "a" },
+          { kind: "doubleEffect", id: "b" },
+          { kind: "motivation", amount: 1, id: "c" },
+        ],
+      ],
+      expected: { kind: "doubleEffect", id: "b" },
+    },
+    {
+      name: "cardSummaryKind 条件に合致しない doubleEffect のみがある時、undefined を返す",
+      args: [
+        "active",
+        [{ kind: "doubleEffect", cardSummaryKind: "mental", id: "a" }],
+      ],
+      expected: undefined,
+    },
+    {
+      name: "cardSummaryKind 条件に合致する doubleEffect のみがある時、それを返す",
+      args: [
+        "active",
+        [{ kind: "doubleEffect", cardSummaryKind: "active", id: "a" }],
+      ],
+      expected: { kind: "doubleEffect", cardSummaryKind: "active", id: "a" },
+    },
+    {
+      name: "同じ内容の doubleEffect が複数ある時、先頭を返す",
+      args: [
+        "active",
+        [
+          { kind: "doubleEffect", id: "a" },
+          { kind: "doubleEffect", id: "b" },
+        ],
+      ],
+      expected: { kind: "doubleEffect", id: "a" },
+    },
+    {
+      name: "同じ内容の duration 付き doubleEffect が複数ある時、先頭を返す",
+      args: [
+        "active",
+        [
+          { kind: "doubleEffect", duration: 1, id: "a" },
+          { kind: "doubleEffect", duration: 1, id: "b" },
+        ],
+      ],
+      expected: { kind: "doubleEffect", duration: 1, id: "a" },
+    },
+    {
+      name: "duration の有無それぞれで doubleEffect が複数ある時、duration 有りを返す",
+      args: [
+        "active",
+        [
+          { kind: "doubleEffect", id: "a" },
+          { kind: "doubleEffect", duration: 1, id: "b" },
+        ],
+      ],
+      expected: { kind: "doubleEffect", duration: 1, id: "b" },
+    },
+    {
+      name: "値の異なる duration 付き doubleEffect がある時、duration が短い方を返す",
+      args: [
+        "active",
+        [
+          { kind: "doubleEffect", duration: 2, id: "a" },
+          { kind: "doubleEffect", duration: 1, id: "b" },
+        ],
+      ],
+      expected: { kind: "doubleEffect", duration: 1, id: "b" },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(findPrioritizedDoubleEffectModifier(...args)).toStrictEqual(
+      expected,
+    );
+  });
 });
 describe("patchDiffs", () => {
   describe("actionPoints", () => {
@@ -835,6 +926,28 @@ describe("patchDiffs", () => {
               { kind: "positiveImpression", amount: 1, id: "c" },
             ],
           },
+        } as Lesson,
+      },
+      {
+        name: "doubleEffect の duration が設定されている時、減算できて、その結果 0 になったら削除する",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "doubleEffect", duration: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "duration",
+              actual: -1,
+              max: -1,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: { modifiers: [] as Modifier[] },
         } as Lesson,
       },
     ];

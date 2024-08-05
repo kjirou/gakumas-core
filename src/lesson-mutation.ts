@@ -30,6 +30,7 @@ import {
   getCardContentData,
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
+  findPrioritizedDoubleEffectModifier,
   isDelayedEffectModifierType,
   isDrawCardsEffectType,
   isEnhanceHandEffectType,
@@ -513,7 +514,9 @@ export const calculateCostConsumption = (
       }
     }
     case "goodCondition": {
-      const sameKindModifier = idol.modifiers.find((e) => e.kind === cost.kind);
+      const sameKindModifier = idol.modifiers.find(
+        (e) => e.kind === "goodCondition",
+      );
       if (sameKindModifier && "duration" in sameKindModifier) {
         const actual = Math.min(cost.value, sameKindModifier.duration);
         return [
@@ -1796,6 +1799,8 @@ export const decreaseEachModifierDurationOverTime = (
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 
+  // 毎ループに lesson の更新が必要かは不明
+  // 本実装では、とりあえず、全ループ後に 1 回だけ更新している
   let modifierUpdates: LessonUpdateQuery[] = [];
   for (const modifierId of newLesson.idol.modifierIdsAtTurnStart) {
     const modifier = newLesson.idol.modifiers.find((e) => e.id === modifierId);
@@ -1825,6 +1830,22 @@ export const decreaseEachModifierDurationOverTime = (
           ];
           break;
         }
+        case "doubleEffect": {
+          if (modifier.duration !== undefined) {
+            modifierUpdates = [
+              ...modifierUpdates,
+              {
+                kind: "modifier.update",
+                propertyNameKind: "duration",
+                id: modifier.id,
+                actual: -1,
+                max: -1,
+                reason,
+              },
+            ];
+          }
+          break;
+        }
         case "positiveImpression": {
           modifierUpdates = [
             ...modifierUpdates,
@@ -1842,8 +1863,10 @@ export const decreaseEachModifierDurationOverTime = (
       }
     }
   }
-  newLesson = patchDiffs(newLesson, modifierUpdates);
-  nextHistoryResultIndex++;
+  if (modifierUpdates.length > 0) {
+    newLesson = patchDiffs(newLesson, modifierUpdates);
+    nextHistoryResultIndex++;
+  }
 
   return {
     updates: [...modifierUpdates],
@@ -1959,11 +1982,13 @@ export const useCard = (
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
   const cardContent = getCardContentData(card);
-  const doubleEffect = lesson.idol.modifiers.find(
-    (e) => e.kind === "doubleEffect",
-  );
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
+
+  const doubleEffect = findPrioritizedDoubleEffectModifier(
+    card.original.data.cardSummaryKind,
+    newLesson.idol.modifiers,
+  );
 
   //
   // 使用可否のバリデーション

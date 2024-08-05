@@ -16,6 +16,7 @@ import {
   ActionCost,
   Card,
   CardContentData,
+  CardData,
   CardEnhancement,
   CardInProduction,
   Effect,
@@ -431,6 +432,34 @@ export const calculateActualActionCost = (
 };
 
 /**
+ * 次のスキルカード使用で消費する doubleEffect インスタンスを返す
+ *
+ * - 論点は以下へまとめている
+ *   -　Issue: https://github.com/kjirou/gakumas-core/issues/112
+ * - 優先順位は、duration 値が少ない > duration の設定がある > duration の設定がない
+ */
+export const findPrioritizedDoubleEffectModifier = (
+  cardSummaryKind: CardData["cardSummaryKind"],
+  modifiers: Modifier[],
+): Extract<Modifier, { kind: "doubleEffect" }> | undefined => {
+  const doubleEffects = modifiers
+    // これだけで filter を独立しないと、型を狭められない
+    .filter((e) => e.kind === "doubleEffect")
+    .filter(
+      (e) =>
+        e.cardSummaryKind === undefined ||
+        e.cardSummaryKind === cardSummaryKind,
+    )
+    .slice()
+    .sort((a, b) => {
+      const aScore = a.duration ?? 999999999;
+      const bScore = b.duration ?? 999999999;
+      return aScore < bScore ? -1 : 0;
+    });
+  return doubleEffects[0];
+};
+
+/**
  * レッスン更新差分を適用した結果のレッスンを返す
  *
  * - Redux の Action のような、単純な setter の塊
@@ -560,51 +589,49 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         switch (update.propertyNameKind) {
           case "amount":
             if ("amount" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.amount + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                amount: newValue,
               };
             }
             break;
           case "delay":
             if ("delay" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.delay + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                delay: newValue,
               };
             }
             break;
           case "duration":
-            if ("duration" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+            if (
+              "duration" in targetedModifier &&
+              targetedModifier.duration !== undefined
+            ) {
+              newValue = targetedModifier.duration + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                duration: newValue,
               };
             }
             break;
           case "times":
             if ("times" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.times + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                times: newValue,
               };
             }
             break;
           case "value":
             if ("value" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.value + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                value: newValue,
               };
             }
             break;

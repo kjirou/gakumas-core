@@ -439,7 +439,7 @@ const calculateActualAndMaxComsumution = (
 /** LessonUpdatDiff からコスト消費関係部分を抜き出したもの */
 type CostConsumptionUpdateDiff = Extract<
   LessonUpdateDiff,
-  { kind: "life" } | { kind: "modifier.update" } | { kind: "vitality" }
+  { kind: "life" } | { kind: "modifiers.update" } | { kind: "vitality" }
 >;
 
 /**
@@ -501,7 +501,7 @@ export const calculateCostConsumption = (
         const actual = Math.min(cost.value, sameKindModifier.amount);
         return [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "amount",
             id: sameKindModifier.id,
             actual: -actual + 0,
@@ -521,7 +521,7 @@ export const calculateCostConsumption = (
         const actual = Math.min(cost.value, sameKindModifier.duration);
         return [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "duration",
             id: sameKindModifier.id,
             actual: -actual + 0,
@@ -645,13 +645,13 @@ export const calculatePerformingVitalityEffect = (
 const createNewModifierDiff = (
   modifierData: ModifierData,
   id: Modifier["id"],
-): Extract<LessonUpdateDiff, { kind: "modifier.add" }> => {
+): Extract<LessonUpdateDiff, { kind: "modifiers.addition" }> => {
   const newModifier = {
     ...modifierData,
     id,
   };
   return {
-    kind: "modifier.add",
+    kind: "modifiers.addition",
     actual: newModifier,
     max: newModifier,
   };
@@ -848,7 +848,7 @@ export const activateEffect = <
         case "positiveImpression": {
           diff = sameKindModifier
             ? {
-                kind: "modifier.update",
+                kind: "modifiers.update",
                 id: sameKindModifier.id,
                 propertyNameKind: "amount",
                 actual: effect.modifier.amount,
@@ -860,7 +860,7 @@ export const activateEffect = <
         case "debuffProtection": {
           diff = sameKindModifier
             ? {
-                kind: "modifier.update",
+                kind: "modifiers.update",
                 id: sameKindModifier.id,
                 propertyNameKind: "times",
                 actual: effect.modifier.times,
@@ -877,7 +877,7 @@ export const activateEffect = <
           // TODO: パラメータ上昇量増加50%/30% は、それぞれの値も見ないと同じ種類かが判別できない
           diff = sameKindModifier
             ? {
-                kind: "modifier.update",
+                kind: "modifiers.update",
                 id: sameKindModifier.id,
                 propertyNameKind: "duration",
                 actual: effect.modifier.duration,
@@ -895,7 +895,7 @@ export const activateEffect = <
           );
           diff = isSameKindAndPercentageModifier
             ? {
-                kind: "modifier.update",
+                kind: "modifiers.update",
                 id: isSameKindAndPercentageModifier.id,
                 propertyNameKind: "duration",
                 actual: effect.modifier.duration,
@@ -907,7 +907,7 @@ export const activateEffect = <
         case "lifeConsumptionReduction": {
           diff = sameKindModifier
             ? {
-                kind: "modifier.update",
+                kind: "modifiers.update",
                 id: sameKindModifier.id,
                 propertyNameKind: "value",
                 actual: effect.modifier.value,
@@ -948,7 +948,7 @@ export const activateEffect = <
         const amount =
           Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
         diffs.push({
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: modifier.id,
           actual: amount,
@@ -1105,7 +1105,7 @@ const activateDelayedEffectModifier = (
   diffs = [
     ...diffs,
     {
-      kind: "modifier.update",
+      kind: "modifiers.update",
       propertyNameKind: "delay",
       id: modifier.id,
       actual: -1,
@@ -1820,7 +1820,7 @@ export const decreaseEachModifierDurationOverTime = (
           modifierUpdates = [
             ...modifierUpdates,
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "duration",
               id: modifier.id,
               actual: -1,
@@ -1835,7 +1835,7 @@ export const decreaseEachModifierDurationOverTime = (
             modifierUpdates = [
               ...modifierUpdates,
               {
-                kind: "modifier.update",
+                kind: "modifiers.update",
                 propertyNameKind: "duration",
                 id: modifier.id,
                 actual: -1,
@@ -1850,7 +1850,7 @@ export const decreaseEachModifierDurationOverTime = (
           modifierUpdates = [
             ...modifierUpdates,
             {
-              kind: "modifier.update",
+              kind: "modifiers.update",
               propertyNameKind: "amount",
               id: modifier.id,
               actual: -1,
@@ -2032,7 +2032,7 @@ export const consumeRemainingCardUsageCount = (
   let diff: LessonUpdateDiff | undefined;
   if (additionalCardUsageCount) {
     diff = {
-      kind: "modifier.update",
+      kind: "modifiers.update",
       propertyNameKind: "amount",
       id: additionalCardUsageCount.id,
       actual: -1,
@@ -2179,7 +2179,7 @@ export const useCard = (
       const innerUpdates = [
         createLessonUpdateQueryFromDiff(
           {
-            kind: "modifier.remove",
+            kind: "modifiers.removal",
             id: doubleEffect.id,
           },
           {
@@ -2347,7 +2347,7 @@ export const useCard = (
             increasedModifierKinds: mainEffectActivations
               .filter((e) => e !== undefined)
               .reduce((acc, e) => [...acc, ...e], [])
-              .filter((e) => e.kind === "modifier.add")
+              .filter((e) => e.kind === "modifiers.addition")
               .map((e) => e.actual.kind),
           },
         );
@@ -2384,7 +2384,7 @@ export const useCard = (
         reason,
       },
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "amount",
         id: additionalCardUsageCount.id,
         actual: -1,

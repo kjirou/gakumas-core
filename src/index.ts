@@ -285,7 +285,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   if (additionalCardUsageCount) {
     const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
       {
-        kind: "modifier.remove",
+        kind: "modifiers.removal",
         id: additionalCardUsageCount.id,
         reason: {
           kind: "turnEndTrigger",

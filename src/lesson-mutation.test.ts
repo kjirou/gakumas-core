@@ -1522,7 +1522,7 @@ describe("calculateCostConsumption", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: "a",
           actual: -3,
@@ -1540,7 +1540,7 @@ describe("calculateCostConsumption", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: "a",
           actual: -3,
@@ -1566,7 +1566,7 @@ describe("calculateCostConsumption", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "duration",
           id: "a",
           actual: -3,
@@ -1584,7 +1584,7 @@ describe("calculateCostConsumption", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "duration",
           id: "a",
           actual: -3,
@@ -2031,7 +2031,7 @@ describe("activateEffectIf", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "duration",
           id: "m1",
           actual: 2,
@@ -2063,7 +2063,7 @@ describe("activateEffectIf", () => {
       ],
       expected: [
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "mightyPerformance",
             duration: 2,
@@ -2158,7 +2158,7 @@ describe("activateEffectIf", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: "m2",
           actual: 50,
@@ -2221,7 +2221,7 @@ describe("activateEffectsOnCardPlay", () => {
       expected: [
         [
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: {
               kind: "goodCondition",
               duration: 1,
@@ -2269,7 +2269,7 @@ describe("activateEffectsOfProducerItem", () => {
       ],
       expected: [
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: { kind: "focus", amount: 3, id: expect.any(String) },
           max: { kind: "focus", amount: 3, id: expect.any(String) },
         },
@@ -2317,7 +2317,7 @@ describe("activateMemoryEffect", () => {
       ],
       expected: [
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: { kind: "focus", amount: 1, id: expect.any(String) },
           max: { kind: "focus", amount: 1, id: expect.any(String) },
         },
@@ -2337,7 +2337,7 @@ describe("activateMemoryEffect", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: "a",
           actual: 2,
@@ -2358,7 +2358,7 @@ describe("activateMemoryEffect", () => {
       ],
       expected: [
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "goodCondition",
             duration: 1,
@@ -2384,7 +2384,7 @@ describe("activateMemoryEffect", () => {
       ],
       expected: [
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "duration",
           id: "a",
           actual: 2,
@@ -2446,9 +2446,11 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           cardSummaryKind: "active",
         },
       );
-    expect(updates1.filter((e) => e.kind === "modifier.add")).toStrictEqual([
+    expect(
+      updates1.filter((e) => e.kind === "modifiers.addition"),
+    ).toStrictEqual([
       {
-        kind: "modifier.add",
+        kind: "modifiers.addition",
         actual: {
           kind: "focus",
           amount: 2,
@@ -2504,11 +2506,11 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       );
     expect(
       updates1.filter(
-        (e) => e.kind === "modifier.add" || e.kind === "vitality",
+        (e) => e.kind === "modifiers.addition" || e.kind === "vitality",
       ),
     ).toStrictEqual([
       {
-        kind: "modifier.add",
+        kind: "modifiers.addition",
         actual: {
           kind: "goodCondition",
           duration: 3,
@@ -2575,13 +2577,13 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     expect(
       updates.filter(
         (e) =>
-          e.kind === "modifier.add" ||
+          e.kind === "modifiers.addition" ||
           e.kind === "vitality" ||
           e.kind === "life",
       ),
     ).toStrictEqual([
       {
-        kind: "modifier.add",
+        kind: "modifiers.addition",
         actual: {
           kind: "goodCondition",
           duration: 3,
@@ -2635,19 +2637,23 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
         createIdGenerator(),
         dummyReason,
       );
-    expect(updates1.filter((e) => e.kind === "modifier.update")).toStrictEqual([
+    expect(updates1.filter((e) => e.kind === "modifiers.update")).toStrictEqual(
+      [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m1",
+          actual: 3,
+          max: 3,
+          reason: expect.any(Object),
+        },
+      ],
+    );
+    expect(
+      updates1.filter((e) => e.kind === "modifiers.addition"),
+    ).toStrictEqual([
       {
-        kind: "modifier.update",
-        propertyNameKind: "amount",
-        id: "m1",
-        actual: 3,
-        max: 3,
-        reason: expect.any(Object),
-      },
-    ]);
-    expect(updates1.filter((e) => e.kind === "modifier.add")).toStrictEqual([
-      {
-        kind: "modifier.add",
+        kind: "modifiers.addition",
         actual: {
           kind: "additionalCardUsageCount",
           amount: 1,
@@ -2701,9 +2707,11 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           increasedModifierKinds: ["motivation"],
         },
       );
-    expect(updates1.filter((e) => e.kind === "modifier.add")).toStrictEqual([
+    expect(
+      updates1.filter((e) => e.kind === "modifiers.addition"),
+    ).toStrictEqual([
       {
-        kind: "modifier.add",
+        kind: "modifiers.addition",
         actual: {
           kind: "motivation",
           amount: 3,
@@ -2758,7 +2766,7 @@ describe("activateEffectsOnLessonStart", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: { kind: "focus", amount: 3, id: expect.any(String) },
             max: { kind: "focus", amount: 3, id: expect.any(String) },
             reason: expect.any(Object),
@@ -3220,9 +3228,9 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "x",
         actual: -1,
@@ -3230,7 +3238,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "y",
         actual: -1,
@@ -3273,9 +3281,9 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "x",
         actual: -1,
@@ -3342,9 +3350,9 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "x",
         actual: -1,
@@ -3352,7 +3360,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "y",
         actual: -1,
@@ -3360,7 +3368,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "z",
         actual: -1,
@@ -3403,9 +3411,9 @@ describe("activateModifierEffectsOnTurnStart", () => {
         reason: expect.any(Object),
       },
     ]);
-    expect(updates.filter((e) => e.kind === "modifier.update")).toStrictEqual([
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
       {
-        kind: "modifier.update",
+        kind: "modifiers.update",
         propertyNameKind: "delay",
         id: "x",
         actual: -1,
@@ -3483,7 +3491,7 @@ describe("decreaseEachModifierDurationOverTime", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "duration",
             id: "x",
             actual: -1,
@@ -3511,7 +3519,7 @@ describe("decreaseEachModifierDurationOverTime", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "duration",
             id: "x",
             actual: -1,
@@ -3538,7 +3546,7 @@ describe("decreaseEachModifierDurationOverTime", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "duration",
             id: "m1",
             actual: -1,
@@ -3581,7 +3589,7 @@ describe("decreaseEachModifierDurationOverTime", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "amount",
             id: "x",
             actual: -1,
@@ -3634,7 +3642,7 @@ describe("activateMemoryEffectsOnLessonStart", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: { kind: "focus", amount: 1, id: expect.any(String) },
             max: { kind: "focus", amount: 1, id: expect.any(String) },
             reason: expect.any(Object),
@@ -3716,7 +3724,7 @@ describe("consumeRemainingCardUsageCount", () => {
       expected: {
         updates: [
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "amount",
             id: "x",
             actual: -1,
@@ -3874,11 +3882,12 @@ describe("useCard preview:false", () => {
       });
       expect(
         updates.filter(
-          (e) => e.kind === "modifier.add" || e.kind === "modifier.update",
+          (e) =>
+            e.kind === "modifiers.addition" || e.kind === "modifiers.update",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "goodCondition",
             duration: 3,
@@ -3892,7 +3901,7 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "duration",
           id: expect.any(String),
           actual: 3,
@@ -3900,7 +3909,7 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "excellentCondition",
             duration: 4,
@@ -3948,12 +3957,12 @@ describe("useCard preview:false", () => {
       expect(
         updates1.filter(
           (e) =>
-            e.kind === "modifier.add" &&
+            e.kind === "modifiers.addition" &&
             e.actual.kind === "effectActivationBeforeCardEffectActivation",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "mental",
@@ -3979,10 +3988,10 @@ describe("useCard preview:false", () => {
         preview: false,
       });
       expect(
-        updates2a.filter((e) => e.kind === "modifier.update"),
+        updates2a.filter((e) => e.kind === "modifiers.update"),
       ).toStrictEqual([
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: expect.any(String),
           actual: 1,
@@ -3997,9 +4006,9 @@ describe("useCard preview:false", () => {
         idGenerator,
         preview: false,
       });
-      expect(updates2b.filter((e) => e.kind === "modifier.add")).toStrictEqual(
-        [],
-      );
+      expect(
+        updates2b.filter((e) => e.kind === "modifiers.addition"),
+      ).toStrictEqual([]);
     });
     test("「演出計画」は、アクティブスキルカード使用時、固定元気を付与する。メンタルスキルカード使用時は付与しない", () => {
       let lesson = createLessonForTest({
@@ -4032,12 +4041,12 @@ describe("useCard preview:false", () => {
       expect(
         updates1.filter(
           (e) =>
-            e.kind === "modifier.add" &&
+            e.kind === "modifiers.addition" &&
             e.actual.kind === "effectActivationBeforeCardEffectActivation",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "effectActivationBeforeCardEffectActivation",
             cardKind: "active",
@@ -4109,12 +4118,12 @@ describe("useCard preview:false", () => {
       expect(
         updates1.filter(
           (e) =>
-            e.kind === "modifier.add" &&
+            e.kind === "modifiers.addition" &&
             e.actual.kind === "effectActivationBeforeCardEffectActivation",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "effectActivationBeforeCardEffectActivation",
             effect: expect.any(Object),
@@ -4193,13 +4202,13 @@ describe("useCard preview:false", () => {
         expect(updates.filter((e) => e.kind === "score")).toHaveLength(2);
         expect(
           updates.filter(
-            (e) => e.kind === "modifier.add" && e.actual.kind === "focus",
+            (e) => e.kind === "modifiers.addition" && e.actual.kind === "focus",
           ),
         ).toHaveLength(1);
         expect(
           updates.filter(
             (e) =>
-              e.kind === "modifier.update" && e.propertyNameKind === "amount",
+              e.kind === "modifiers.update" && e.propertyNameKind === "amount",
           ),
         ).toHaveLength(1);
         expect(updates.filter((e) => e.kind === "score")[0]).toStrictEqual({
@@ -4215,10 +4224,10 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         });
         expect(
-          updates.filter((e) => e.kind === "modifier.remove"),
+          updates.filter((e) => e.kind === "modifiers.removal"),
         ).toStrictEqual([
           {
-            kind: "modifier.remove",
+            kind: "modifiers.removal",
             id: "x",
             reason: expect.any(Object),
           },
@@ -4495,9 +4504,11 @@ describe("useCard preview:false", () => {
           idGenerator: createIdGenerator(),
           preview: false,
         });
-        expect(updates.filter((e) => e.kind === "modifier.add")).toStrictEqual([
+        expect(
+          updates.filter((e) => e.kind === "modifiers.addition"),
+        ).toStrictEqual([
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: {
               kind: "goodCondition",
               duration: 2,
@@ -4533,10 +4544,10 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         expect(
-          updates.filter((e) => e.kind === "modifier.update"),
+          updates.filter((e) => e.kind === "modifiers.update"),
         ).toStrictEqual([
           {
-            kind: "modifier.update",
+            kind: "modifiers.update",
             propertyNameKind: "duration",
             id: "x",
             actual: 2,
@@ -4572,12 +4583,12 @@ describe("useCard preview:false", () => {
         expect(
           updates.filter(
             (e) =>
-              e.kind === "modifier.add" &&
+              e.kind === "modifiers.addition" &&
               e.actual.kind === "effectActivationBeforeCardEffectActivation",
           ),
         ).toStrictEqual([
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: {
               kind: "effectActivationBeforeCardEffectActivation",
               cardKind: "active",
@@ -4951,11 +4962,12 @@ describe("useCard preview:false", () => {
       });
       expect(
         updates.filter(
-          (e) => e.kind === "modifier.add" || e.kind === "modifier.update",
+          (e) =>
+            e.kind === "modifiers.addition" || e.kind === "modifiers.update",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "motivation",
             amount: 3,
@@ -4969,7 +4981,7 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: expect.any(String),
           actual: 2,
@@ -5007,11 +5019,12 @@ describe("useCard preview:false", () => {
       });
       expect(
         updates.filter(
-          (e) => e.kind === "modifier.add" || e.kind === "modifier.update",
+          (e) =>
+            e.kind === "modifiers.addition" || e.kind === "modifiers.update",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "motivation",
             amount: 2,
@@ -5025,7 +5038,7 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: expect.any(String),
           actual: 3,
@@ -5062,11 +5075,12 @@ describe("useCard preview:false", () => {
       ]);
       expect(
         updates.filter(
-          (e) => e.kind === "modifier.add" || e.kind === "modifier.update",
+          (e) =>
+            e.kind === "modifiers.addition" || e.kind === "modifiers.update",
         ),
       ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "additionalCardUsageCount",
             amount: 1,
@@ -5080,7 +5094,7 @@ describe("useCard preview:false", () => {
           reason: expect.any(Object),
         },
         {
-          kind: "modifier.update",
+          kind: "modifiers.update",
           propertyNameKind: "amount",
           id: expect.any(String),
           actual: -1,
@@ -5272,13 +5286,15 @@ describe("useCard preview:true", () => {
       idGenerator: createIdGenerator(),
       preview: true,
     });
-    expect(updates.filter((e) => e.kind === "modifier.remove")).toStrictEqual([
-      {
-        kind: "modifier.remove",
-        id: "x",
-        reason: expect.any(Object),
-      },
-    ]);
+    expect(updates.filter((e) => e.kind === "modifiers.removal")).toStrictEqual(
+      [
+        {
+          kind: "modifiers.removal",
+          id: "x",
+          reason: expect.any(Object),
+        },
+      ],
+    );
     expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
       {
         kind: "score",
@@ -5362,7 +5378,7 @@ describe("useDrink", () => {
             max: -2,
           },
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: {
               kind: "doubleEffect",
               cardSummaryKind: "active",
@@ -5375,7 +5391,7 @@ describe("useDrink", () => {
             },
           },
           {
-            kind: "modifier.add",
+            kind: "modifiers.addition",
             actual: {
               kind: "doubleLifeConsumption",
               duration: 1,
@@ -5410,9 +5426,11 @@ describe("activateEffectsOnTurnEnd", () => {
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
       });
-      expect(updates.filter((e) => e.kind === "modifier.add")).toStrictEqual([
+      expect(
+        updates.filter((e) => e.kind === "modifiers.addition"),
+      ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "positiveImpression",
             amount: 4,
@@ -5445,9 +5463,11 @@ describe("activateEffectsOnTurnEnd", () => {
         getRandom: () => 0,
         idGenerator: createIdGenerator(),
       });
-      expect(updates.filter((e) => e.kind === "modifier.add")).toStrictEqual([
+      expect(
+        updates.filter((e) => e.kind === "modifiers.addition"),
+      ).toStrictEqual([
         {
-          kind: "modifier.add",
+          kind: "modifiers.addition",
           actual: {
             kind: "motivation",
             amount: 1,

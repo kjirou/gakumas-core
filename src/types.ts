@@ -84,7 +84,7 @@ export type VitalityUpdateQuery = Readonly<{
  * - 追加をイメージして記述する
  *   - そのため各種値は、基本的には正の数である
  * - 各状態修正の amount, delay, duration, times, value のプロパティ名は、処理上特殊な扱いになっている
- *   - 詳細は、 patchDiffs の "modifier.update" を参照
+ *   - 詳細は、 patchDiffs の "modifiers.update" を参照
  */
 export type ModifierData = Readonly<
   | {
@@ -1394,7 +1394,7 @@ export type LessonUpdateDiff = Readonly<
       /**
        * 状態修正の追加
        */
-      kind: "modifier.add";
+      kind: "modifiers.addition";
       actual: Modifier;
       max: Modifier;
     }
@@ -1402,7 +1402,7 @@ export type LessonUpdateDiff = Readonly<
       /**
        * 既存の状態修正の削除
        */
-      kind: "modifier.remove";
+      kind: "modifiers.removal";
       id: Modifier["id"];
     }
   | {
@@ -1412,7 +1412,7 @@ export type LessonUpdateDiff = Readonly<
        * - 汎用的な処理。更新対象の値が2つ以上になる時など、大幅に考慮と異なるなら対象外。
        *   - その時は、専用のイベントを作る
        */
-      kind: "modifier.update";
+      kind: "modifiers.update";
       propertyNameKind: "amount" | "delay" | "duration" | "times" | "value";
       /** 実際に変化する値、減少後に 0 になった時は、削除される */
       actual: number;

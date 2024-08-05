@@ -42,3 +42,10 @@ export const createGamePlayForTest = (
     turns,
   });
 };
+
+export const createLessonForTest = (
+  options: Parameters<typeof createGamePlayForTest>[0] = {},
+): Lesson => {
+  const gamePlay = createGamePlayForTest(options);
+  return gamePlay.initialLesson;
+};

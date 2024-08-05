@@ -1,12 +1,10 @@
 import {
   Card,
-  CardInProduction,
   Idol,
   Lesson,
   LessonUpdateQuery,
   Modifier,
   ProducerItem,
-  ProducerItemInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
@@ -41,21 +39,8 @@ import {
   validateCostConsumution,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
-import { createGamePlayForTest } from "./test-utils";
+import { createLessonForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
-
-const createLessonForTest = (
-  options: {
-    deck?: CardInProduction[];
-    producerItems?: ProducerItemInProduction[];
-  } = {},
-): Lesson => {
-  const gamePlay = createGamePlayForTest({
-    deck: options.deck,
-    producerItems: options.producerItems,
-  });
-  return gamePlay.initialLesson;
-};
 
 describe("drawCardsFromDeck", () => {
   test("山札がなくならない状態で1枚引いた時、1枚引けて、山札は再構築されず、山札が1枚減る", () => {

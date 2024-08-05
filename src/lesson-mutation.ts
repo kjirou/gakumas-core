@@ -1916,6 +1916,107 @@ export const activateMemoryEffectsOnLessonStart = (
 };
 
 /**
+ * Pドリンクを使用する
+ */
+export const useDrink = (
+  lesson: Lesson,
+  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
+  params: {
+    drinkIndex: number;
+    getRandom: GetRandom;
+    idGenerator: IdGenerator;
+  },
+): LessonMutationResult => {
+  let newLesson = lesson;
+  let nextHistoryResultIndex = historyResultIndex;
+
+  const drink = newLesson.idol.drinks[params.drinkIndex];
+  if (!drink) {
+    throw new Error(`Drink not found: drinkIndex=${params.drinkIndex}`);
+  }
+
+  if (
+    drink.data.cost &&
+    !validateCostConsumution(lesson.idol, drink.data.cost)
+  ) {
+    throw new Error(`Can not use the drink: ${drink.data.id}`);
+  }
+
+  //
+  // Pドリンクの消費
+  //
+  const drinkConsumptionUpdates: LessonUpdateQuery[] = [
+    createLessonUpdateQueryFromDiff(
+      {
+        kind: "drinks.removal",
+        id: drink.id,
+      },
+      {
+        kind: "drinkUsage.consumption",
+        drinkDataId: drink.data.id,
+        drinkIndex: params.drinkIndex,
+        historyTurnNumber: newLesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      },
+    ),
+  ];
+  newLesson = patchDiffs(newLesson, drinkConsumptionUpdates);
+  nextHistoryResultIndex++;
+
+  //
+  // コストの消費
+  //
+  let costConsumptionUpdates: LessonUpdateQuery[] = [];
+  if (drink.data.cost) {
+    costConsumptionUpdates = calculateCostConsumption(
+      newLesson.idol,
+      calculateActualActionCost(drink.data.cost, newLesson.idol.modifiers),
+    ).map((diff) =>
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "drinkUsage.costConsumption",
+        historyTurnNumber: newLesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      }),
+    );
+    newLesson = patchDiffs(newLesson, costConsumptionUpdates);
+    nextHistoryResultIndex++;
+  }
+
+  //
+  // 効果発動
+  //
+  let effectsUpdates: LessonUpdateQuery[] = [];
+  for (const effect of drink.data.effects) {
+    const innerUpdates = activateEffect(
+      newLesson,
+      effect,
+      params.getRandom,
+      params.idGenerator,
+    ).map((diff) =>
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "drinkUsage.effectActivation",
+        historyTurnNumber: lesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      }),
+    );
+    effectsUpdates = [...effectsUpdates, ...innerUpdates];
+    newLesson = patchDiffs(newLesson, innerUpdates);
+  }
+  if (effectsUpdates.length > 0) {
+    nextHistoryResultIndex++;
+  }
+
+  return {
+    updates: [
+      ...drinkConsumptionUpdates,
+      ...costConsumptionUpdates,
+      ...effectsUpdates,
+    ],
+    nextHistoryResultIndex,
+  };
+};
+
+/**
  * スキルカード使用数を1消費する
  *
  * - 「スキルカード使用数追加」を先に消費し、それがなければアクションポイントを消費する

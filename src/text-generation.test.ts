@@ -4,12 +4,14 @@ import {
   getCardContentDataList,
   getCardDataById,
 } from "./data/cards";
+import { type DrinkDataId, getDrinkDataByConstId } from "./data/drinks";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   generateActionCostText,
   generateCardDescription,
   generateCardName,
   generateCardUsageConditionText,
+  generateDrinkDescription,
   generateEffectText,
   generateProducerItemDescription,
   generateProducerItemTriggerAndConditionText,
@@ -645,7 +647,7 @@ describe("generateActionCostText", () => {
       args: [{ kind: "goodCondition", value: 1 }],
       expected: "{{好調}}消費1ターン",
     },
-    { args: [{ kind: "life", value: 1 }], expected: "体力消費1" },
+    { args: [{ kind: "life", value: 1 }], expected: "{{体力消費}}1" },
     { args: [{ kind: "motivation", value: 1 }], expected: "{{やる気}}消費1" },
     { args: [{ kind: "normal", value: 1 }], expected: undefined },
     {
@@ -693,7 +695,7 @@ describe("generateCardDescription", () => {
     {
       cardId: "kibuntenkan",
       expected: [
-        "体力消費5",
+        "{{体力消費}}5",
         "{{元気}}の100%分パラメータ上昇",
         "{{レッスン中1回}}",
       ].join("\n"),
@@ -756,7 +758,7 @@ describe("generateCardDescription", () => {
     {
       cardId: "mikannotaiki",
       expected: [
-        "体力消費3",
+        "{{体力消費}}3",
         "{{元気}}+2（レッスン中に使用したスキルカード1枚ごとに、{{元気}}増加量+3）",
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
@@ -774,7 +776,7 @@ describe("generateCardDescription", () => {
     {
       cardId: "hatonoaizu",
       expected: [
-        "体力消費3",
+        "{{体力消費}}3",
         "{{元気}}を半分にして、減少前の{{元気}}の130%分パラメータ上昇",
         "{{レッスン中1回}}",
       ].join("\n"),
@@ -1121,7 +1123,7 @@ describe("generateProducerItemDescription", () => {
       producerItemId: "chozetsuammimmasuku",
       expected: [
         "ターン開始時最終ターンの場合、{{元気}}の50%分パラメータ上昇",
-        "体力消費1",
+        "{{体力消費}}1",
       ].join("\n"),
     },
     {
@@ -1167,6 +1169,45 @@ describe("generateProducerItemDescription", () => {
           effects: producerItem.base.effects,
           times: producerItem.base.times,
           trigger: producerItem.base.trigger,
+        }),
+      ).toBe(expected);
+    },
+  );
+});
+describe("generateDrinkDescription", () => {
+  const testParameters: Array<{
+    drinkDataId: DrinkDataId;
+    expected: ReturnType<typeof generateDrinkDescription>;
+  }> = [
+    {
+      drinkDataId: "busutoekisu",
+      expected: [
+        "{{パラメータ上昇量増加}}30%（3ターン）",
+        "{{消費体力減少}}3ターン",
+        "{{体力消費}}2",
+      ].join("\n"),
+    },
+    {
+      drinkDataId: "gensenhatsuboshiburendo",
+      expected: ["以降、ターン終了時、{{やる気}}+1"].join("\n"),
+    },
+    {
+      drinkDataId: "tokuseihatsuboshiekisu",
+      expected: [
+        "次に使用する{{アクティブスキルカード}}の効果をもう1回発動（1回・1ターン）",
+        "{{体力消費}}2",
+        "{{消費体力増加}}1ターン",
+      ].join("\n"),
+    },
+  ];
+  test.each(testParameters)(
+    '$drinkDataId => "$expected"',
+    ({ drinkDataId, expected }) => {
+      const drinkData = getDrinkDataByConstId(drinkDataId);
+      expect(
+        generateDrinkDescription({
+          cost: drinkData.cost,
+          effects: drinkData.effects,
         }),
       ).toBe(expected);
     },

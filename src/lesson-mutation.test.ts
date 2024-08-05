@@ -3,11 +3,13 @@ import {
   CardInProduction,
   Idol,
   Lesson,
+  LessonUpdateQuery,
   Modifier,
   ProducerItem,
   ProducerItemInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
+import { getDrinkDataByConstId } from "./data/drinks";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   activateEffectIf,
@@ -35,6 +37,7 @@ import {
   drawCardsOnTurnStart,
   obtainPositiveImpressionScoreOnTurnEnd,
   useCard,
+  useDrink,
   validateCostConsumution,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
@@ -5290,6 +5293,105 @@ describe("useCard preview:true", () => {
         reason: expect.any(Object),
       },
     ]);
+  });
+});
+describe("useDrink", () => {
+  const testCases: Array<{
+    args: Parameters<typeof useDrink>;
+    expected: ReturnType<typeof useDrink>;
+    name: string;
+  }> = [
+    {
+      name: "コスト消費がないPアイテムを使用できる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.drinks = [
+            { data: getDrinkDataByConstId("hatsuboshimizu"), id: "a" },
+          ];
+          return lesson;
+        })(),
+        1,
+        {
+          drinkIndex: 0,
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "drinks.removal",
+            id: "a",
+          },
+          {
+            kind: "score",
+            actual: 10,
+            max: 10,
+          },
+        ] as LessonUpdateQuery[],
+        nextHistoryResultIndex: 3,
+      },
+    },
+    {
+      name: "コスト消費があるPアイテムを使用できる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.drinks = [
+            { data: getDrinkDataByConstId("tokuseihatsuboshiekisu"), id: "a" },
+          ];
+          return lesson;
+        })(),
+        1,
+        {
+          drinkIndex: 0,
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "drinks.removal",
+            id: "a",
+          },
+          {
+            kind: "life",
+            actual: -2,
+            max: -2,
+          },
+          {
+            kind: "modifier.add",
+            actual: {
+              kind: "doubleEffect",
+              cardSummaryKind: "active",
+              duration: 1,
+            },
+            max: {
+              kind: "doubleEffect",
+              cardSummaryKind: "active",
+              duration: 1,
+            },
+          },
+          {
+            kind: "modifier.add",
+            actual: {
+              kind: "doubleLifeConsumption",
+              duration: 1,
+            },
+            max: {
+              kind: "doubleLifeConsumption",
+              duration: 1,
+            },
+          },
+        ] as LessonUpdateQuery[],
+        nextHistoryResultIndex: 4,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(useDrink(...args)).toMatchObject(expected);
   });
 });
 describe("activateEffectsOnTurnEnd", () => {

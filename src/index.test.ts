@@ -1,5 +1,6 @@
 import type { GamePlay } from "./types";
 import { getCardDataById } from "./data/cards";
+import { getDrinkDataById } from "./data/drinks";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
 import { initializeGamePlay } from "./index";
@@ -183,6 +184,30 @@ describe("initializeGamePlay", () => {
           encouragements: [
             { turnNumber: 1, effect: { kind: "perform", score: { value: 1 } } },
           ],
+        },
+      } as GamePlay,
+    },
+    {
+      name: "Pドリンクが設定できる",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          drinks: [{ id: "hatsuboshimizu" }],
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            drinks: [
+              {
+                id: expect.any(String),
+                data: getDrinkDataById("hatsuboshimizu"),
+              },
+            ],
+          },
         },
       } as GamePlay,
     },

@@ -8,7 +8,6 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
-// TODO: Pドリンク
 // TODO: レッスン履歴
 // TODO: データの永続化サポート
 // TODO: コンテスト
@@ -23,8 +22,10 @@ import {
   CardInProduction,
   ProducerItemInProduction,
   IdolInProduction,
+  Drink,
 } from "./types";
 import { type CardDataId, getCardDataById } from "./data/cards";
+import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
 import { type IdolDataId } from "./data/idols";
 import {
   type ProducerItemDataId,
@@ -42,6 +43,7 @@ import {
   drawCardsOnTurnStart,
   obtainPositiveImpressionScoreOnTurnEnd,
   useCard,
+  useDrink as useDrinkMutation,
 } from "./lesson-mutation";
 import {
   calculateRemainingTurns,
@@ -65,6 +67,7 @@ export * from "./utils";
  *
  * @param params.cards アイドル固有に加えて、追加するスキルカードリスト
  * @param params.clearScoreThresholds クリアスコアとパーフェクトスコア設定、任意でデフォルトは上限なしを意味する undefined
+ * @param params.drinks Pドリンク設定、任意、本家と異なり上限数無し
  * @param params.encouragements 応援/トラブル設定、任意
  * @param params.idolDataId プロデュースアイドルのID
  * @param params.idolSpecificCardTestId テスト用、本来知る必要がない内部的なIDを指定する
@@ -119,6 +122,9 @@ export const initializeGamePlay = (params: {
     testId?: CardInProduction["id"];
   }>;
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  drinks?: Array<{
+    id: DrinkDataId;
+  }>;
   encouragements?: Encouragement[];
   idolDataId: IdolDataId;
   idolSpecificCardTestId?: CardInProduction["id"];
@@ -157,6 +163,12 @@ export const initializeGamePlay = (params: {
         enhanced: producerItemSetting.enhanced ?? false,
       };
     });
+  const drinks: Drink[] = (params.drinks ?? []).map((drinkSetting) => {
+    return {
+      id: idGenerator(),
+      data: getDrinkDataById(drinkSetting.id),
+    };
+  });
   const idolInProduction = createIdolInProduction({
     additionalCards,
     additionalProducerItems,
@@ -170,6 +182,7 @@ export const initializeGamePlay = (params: {
   });
   return createGamePlay({
     clearScoreThresholds: params.clearScoreThresholds,
+    drinks,
     encouragements: params.encouragements,
     idGenerator,
     idolInProduction,
@@ -500,8 +513,9 @@ export const playCard = (
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
-  // アクションポイントがない場合は実行できない。なお、「スキルカード使用数は残っているがアクションポイントが0」という状態はない。
-  if (hasActionEnded(gamePlay)) {
+  if (lesson.turnEnded) {
+    throw new Error("ターンが正常に開始していない");
+  } else if (hasActionEnded(gamePlay)) {
     throw new Error("アイドルの行動が終了している");
   } else if (isLessonEnded(gamePlay)) {
     throw new Error("レッスンが終了している");
@@ -585,6 +599,41 @@ export const playCard = (
 };
 
 /**
+ * Pドリンクを使用する
+ *
+ * - プレビューはない
+ *
+ * @param drinkIndex 選択するPドリンクのインデックス、使用条件を満たすPドリンクのみ選択可能
+ */
+export const useDrink = (gamePlay: GamePlay, drinkIndex: number): GamePlay => {
+  let { updates } = gamePlay;
+  let historyResultIndex = getNextHistoryResultIndex(updates);
+  let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+
+  if (lesson.turnEnded) {
+    throw new Error("ターンが正常に開始していない");
+  } else if (hasActionEnded(gamePlay)) {
+    throw new Error("アイドルの行動が終了している");
+  } else if (isLessonEnded(gamePlay)) {
+    throw new Error("レッスンが終了している");
+  }
+
+  const useDrinkResult = useDrinkMutation(lesson, historyResultIndex, {
+    getRandom: gamePlay.getRandom,
+    idGenerator: gamePlay.idGenerator,
+    drinkIndex,
+  });
+  updates = [...updates, ...useDrinkResult.updates];
+  historyResultIndex = useDrinkResult.nextHistoryResultIndex;
+  lesson = patchDiffs(lesson, useDrinkResult.updates);
+
+  return {
+    ...gamePlay,
+    updates,
+  };
+};
+
+/**
  * ターンをスキップする
  *
  * - 本家のボタンについているラベルは「Skip」
@@ -595,8 +644,9 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
 
-  // アクションポイントがない場合は実行できない。なお、「スキルカード使用数は残っているがアクションポイントが0」という状態はない。
-  if (hasActionEnded(gamePlay)) {
+  if (lesson.turnEnded) {
+    throw new Error("ターンが正常に開始していない");
+  } else if (hasActionEnded(gamePlay)) {
     throw new Error("アイドルの行動が終了している");
   } else if (isLessonEnded(gamePlay)) {
     throw new Error("レッスンが終了している");

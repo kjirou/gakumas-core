@@ -1,4 +1,3 @@
-import { toUSVString } from "util";
 import type {
   Card,
   EffectWithoutCondition,
@@ -19,9 +18,9 @@ import {
   playCard,
   skipTurn,
   startTurn,
+  useDrink,
 } from "./index";
 import { activateEffect } from "./lesson-mutation";
-import exp from "constants";
 
 /**
  * スキルカードへレッスンサポートの付与をする、本体は仕様不明瞭なのもあり未実装
@@ -47,39 +46,6 @@ const addLessonSupport = (
   return {
     ...gamePlay,
     updates: [...gamePlay.updates, update],
-  };
-};
-
-/**
- * テスト用に効果を反映する
- *
- * - 主に未実装の、Pドリンク用
- */
-const activateAdditionalEffect = (
-  gamePlay: GamePlay,
-  effect: EffectWithoutCondition,
-): GamePlay => {
-  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  const diffs = activateEffect(
-    lesson,
-    effect,
-    gamePlay.getRandom,
-    gamePlay.idGenerator,
-  );
-  const nextHistoryResultIndex = getNextHistoryResultIndex(gamePlay.updates);
-  const updates: LessonUpdateQuery[] = diffs.map((diff) => {
-    return {
-      ...diff,
-      reason: {
-        kind: "unknown",
-        historyTurnNumber: lesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
-      },
-    };
-  });
-  return {
-    ...gamePlay,
-    updates: [...gamePlay.updates, ...updates],
   };
 };
 
@@ -222,6 +188,11 @@ describe("センス・集中の代表として、水着麻央のプレイ動画�
         { id: "hyojonokihon", testId: "hyojonokihon2", enhanced: true },
       ],
       producerItems: [],
+      drinks: [
+        { id: "bitamindorinku" },
+        { id: "hatsuboshisupesharuaojiru" },
+        { id: "furesshubinega" },
+      ],
       turns: new Array(12).fill("visual"),
       clearScoreThresholds: { clear: 165, perfect: 600 },
       ignoreIdolParameterKindConditionAfterClearing: true,
@@ -741,6 +712,11 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
         { id: "nemuke", testId: "nemuke2" },
       ],
       producerItems: [{ id: "nakanaorinokikkake" }],
+      drinks: [
+        { id: "hoeipurotein" },
+        { id: "osharehabutei" },
+        { id: "hoeipurotein" },
+      ],
       turns,
       // 1700 かは不明
       clearScoreThresholds: { clear: 1700 },
@@ -858,12 +834,13 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       vitality: 0,
       modifiers: [] as Modifier[],
       score: 0,
+      drinks: [
+        { name: "ホエイプロテイン" },
+        { name: "おしゃれハーブティー" },
+        { name: "ホエイプロテイン" },
+      ],
     } as LessonDisplay);
-    // 「初星ホエイプロテイン」使用
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "getModifier",
-      modifier: { kind: "additionalCardUsageCount", amount: 1 },
-    });
+    gamePlay = useDrink(gamePlay, 2);
     gamePlay = playCard(gamePlay, 1);
     gamePlay = playCard(gamePlay, 1);
     gamePlay = playCard(gamePlay, 0);
@@ -879,6 +856,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
         { name: "やる気", representativeValue: 11 },
       ],
       score: 300,
+      drinks: [{ name: "ホエイプロテイン" }, { name: "おしゃれハーブティー" }],
     } as LessonDisplay);
     gamePlay = playCard(gamePlay, 1);
     gamePlay = playCard(gamePlay, 1);
@@ -950,11 +928,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
 
     // 残りターン数5(+1)
     gamePlay = startTurn(gamePlay);
-    // 「初星ホエイプロテイン」使用
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "getModifier",
-      modifier: { kind: "additionalCardUsageCount", amount: 1 },
-    });
+    gamePlay = useDrink(gamePlay, 0);
     expect(generateLessonDisplay(gamePlay)).toMatchObject({
       life: 19,
       vitality: 10,
@@ -1018,16 +992,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
 
     // 残りターン数1(+1)
     gamePlay = startTurn(gamePlay);
-    // 「おしゃれハーブティー」使用
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "performLeveragingModifier",
-      modifierKind: "positiveImpression",
-      percentage: 100,
-    });
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "perform",
-      vitality: { value: 3 },
-    });
+    gamePlay = useDrink(gamePlay, 0);
     expect(generateLessonDisplay(gamePlay)).toMatchObject({
       life: 0,
       vitality: 19,
@@ -1142,11 +1107,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
 
     // 残りターン数11
     gamePlay = startTurn(gamePlay);
-    // 「初星ホエイプロテイン」使用
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "getModifier",
-      modifier: { kind: "additionalCardUsageCount", amount: 1 },
-    });
+    gamePlay = useDrink(gamePlay, 2);
     expect(generateLessonDisplay(gamePlay)).toMatchObject({
       life: 37,
       vitality: 0,
@@ -1190,11 +1151,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
 
     // 残りターン数8
     gamePlay = startTurn(gamePlay);
-    // 「初星ホエイプロテイン」使用
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "getModifier",
-      modifier: { kind: "additionalCardUsageCount", amount: 1 },
-    });
+    gamePlay = useDrink(gamePlay, 0);
     expect(generateLessonDisplay(gamePlay)).toMatchObject({
       life: 13,
       vitality: 12,
@@ -1326,16 +1283,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
 
     // 残りターン数1
     gamePlay = startTurn(gamePlay);
-    // 「おしゃれハーブティー」使用
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "performLeveragingModifier",
-      modifierKind: "positiveImpression",
-      percentage: 100,
-    });
-    gamePlay = activateAdditionalEffect(gamePlay, {
-      kind: "perform",
-      vitality: { value: 3 },
-    });
+    gamePlay = useDrink(gamePlay, 0);
     expect(generateLessonDisplay(gamePlay)).toMatchObject({
       life: 12,
       vitality: 87,

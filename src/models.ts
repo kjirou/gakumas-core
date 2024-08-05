@@ -19,6 +19,7 @@ import {
   CardData,
   CardEnhancement,
   CardInProduction,
+  Drink,
   Effect,
   Encouragement,
   GetRandom,
@@ -219,26 +220,6 @@ export const createIdolInProduction = (params: {
   };
 };
 
-const createIdol = (params: {
-  idolInProduction: IdolInProduction;
-  scoreBonus?: Idol["scoreBonus"];
-}): Idol => {
-  return {
-    actionPoints: 0,
-    life: params.idolInProduction.life,
-    modifierIdsAtTurnStart: [],
-    modifiers: [],
-    original: params.idolInProduction,
-    // TODO: そのレッスン中に使用できる可能性があるPアイテムのみへ絞り込む
-    producerItems: prepareProducerItemsForLesson(
-      params.idolInProduction.producerItems,
-    ),
-    scoreBonus: params.scoreBonus,
-    totalCardUsageCount: 0,
-    vitality: 0,
-  };
-};
-
 export const prepareCardsForLesson = (
   cardsInProduction: CardInProduction[],
 ): Card[] => {
@@ -309,6 +290,7 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  */
 export const createGamePlay = (params: {
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  drinks?: Drink[];
   encouragements?: Encouragement[];
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
@@ -341,10 +323,21 @@ export const createGamePlay = (params: {
       discardPile: [],
       encouragements,
       hand: [],
-      idol: createIdol({
-        idolInProduction: params.idolInProduction,
+      idol: {
+        actionPoints: 0,
+        drinks: params.drinks ?? [],
+        life: params.idolInProduction.life,
+        modifierIdsAtTurnStart: [],
+        modifiers: [],
+        original: params.idolInProduction,
+        // TODO: そのレッスン中に使用できる可能性があるPアイテムのみへ絞り込む
+        producerItems: prepareProducerItemsForLesson(
+          params.idolInProduction.producerItems,
+        ),
         scoreBonus: params.scoreBonus,
-      }),
+        totalCardUsageCount: 0,
+        vitality: 0,
+      },
       ignoreIdolParameterKindConditionAfterClearing,
       memoryEffects,
       turns: params.turns,
@@ -553,6 +546,18 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
               ),
             };
           }),
+        };
+        break;
+      }
+      case "drinks.removal": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            drinks: newLesson.idol.drinks.filter(
+              (drink) => drink.id !== update.id,
+            ),
+          },
         };
         break;
       }

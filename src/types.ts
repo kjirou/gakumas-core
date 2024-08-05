@@ -47,6 +47,9 @@ type CardPossessionKind = ProducePlan["kind"] | "free";
 /** Pアイテム所持種別 */
 type ProducerItemPossessionKind = ProducePlan["kind"] | "free";
 
+/** Pドリンク所持種別 */
+type DrinkPossessionKind = ProducePlan["kind"] | "free";
+
 /**
  * スキルカード概要種別
  *
@@ -977,6 +980,10 @@ export type ProducerItemContentData = Readonly<{
  *   - 効果1つ目   : {trigger}[{condition}]{effect.0}
  *   - 効果2つ目以降: {effect.n}
  *   - コスト      : [{cost}]
+ *   - (悪い効果n個  : {effect.n})
+ *     - Pドリンクの「特製ハツボシエキス」を見ると、「体力消費2」「消費体力増加1ターン」になっている
+ *     - Pアイテムにはまだ存在しないので、配慮していない。効果の両悪（個別に条件分岐を作るので足りそう）で表示時にリストの位置の調整をする、という対応が必要。
+ *       - 「私の「初」の楽譜」の「体力減少1」は、悪い効果に入ってないし...
  *   - 発動回数    : [（レッスン内{times}回）]
  * - 原文の中で、参考になる効果説明欄を抜粋
  *   - 「ピンクのお揃いブレス」、 condition が無い場合の例
@@ -1051,6 +1058,51 @@ export type ProducerItem = {
 };
 
 /**
+ * Pドリンク定義
+ *
+ * - 原文の例、参考になりそうなもののみ抜粋
+ *   - 「ブーストエキス」
+ *     パラメータ上昇量増加30%（3ターン）
+ *     消費体力減少3ターン
+ *     体力消費2
+ *   - 「特製ハツボシエキス」、コストの後に効果が入っているのがPアイテムを含めても唯一
+ *     次に使用するアクティブスキルカードの効果をもう1回発動（1回・1ターン）
+ *     体力消費2
+ *     消費体力増加1ターン
+ */
+export type DrinkData = Readonly<{
+  cost?: ActionCost;
+  drinkPossessionKind: DrinkPossessionKind;
+  effects: EffectWithoutCondition[];
+  id: string;
+  name: string;
+  /** 「解放PLv」 */
+  necessaryProducerLevel?: number;
+  /**
+   * レアリティ
+   *
+   * - 本家だと、アイコンの色のみで表現されていて、「レアリティ」の表記がなさそう
+   */
+  rarity: "r" | "sr" | "ssr";
+}>;
+
+/**
+ * Pドリンク
+ *
+ * - CardData や ProducerItemData だと、間に CardInProduction や ProducerItemInProduction が挟まるが、Drink ではそれは設けない
+ *   - 元々、育成ゲーム部分も作ろうと思って 〜InProduction を作っていたが、その後、育成ゲーム部分は作らないことにしたため
+ */
+export type Drink = {
+  data: DrinkData;
+  /**
+   * PドリンクID
+   *
+   * - 1レッスン内で一意
+   */
+  id: string;
+};
+
+/**
  * アイドル個性定義
  */
 export type CharacterData = Readonly<{
@@ -1119,6 +1171,12 @@ export type Idol = {
    *   - 「ターン終了フラグ」も考えたが、コンテストで複数のアイドルがいる状況を考えると、アイドル側に持たせた方が良さそう
    */
   actionPoints: number;
+  /**
+   * Pドリンクリスト
+   *
+   * - 本家だと、上限3だが、本実装では上限なし
+   */
+  drinks: Drink[];
   life: number;
   /**
    * ターン開始時に付与されている状態修正IDリスト
@@ -1316,6 +1374,11 @@ export type LessonUpdateDiff = Readonly<
       cardIds: Array<Card["id"]>;
     }
   | {
+      /** Pドリンクの削除 */
+      kind: "drinks.removal";
+      id: Drink["id"];
+    }
+  | {
       kind: "life";
       /** アイドルの状態へ実際に影響を与える数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は1になる。 */
       actual: number;
@@ -1465,6 +1528,20 @@ export type LessonUpdateQueryReason = Readonly<
         /** スキルカード使用時トリガーにより発動した効果 */
         kind: "cardUsageTrigger";
         cardId: Card["id"];
+      }
+    | {
+        /** Pドリンク使用.消費 */
+        kind: "drinkUsage.consumption";
+        drinkDataId: DrinkData["id"];
+        drinkIndex: number;
+      }
+    | {
+        /** Pドリンク使用.コスト消費 */
+        kind: "drinkUsage.costConsumption";
+      }
+    | {
+        /** Pドリンク使用.効果発動 */
+        kind: "drinkUsage.effectActivation";
       }
     | {
         /** レッスン終了 */
@@ -1681,6 +1758,16 @@ export type ModifierDisplay = ModifierData & {
 };
 
 /**
+ * レッスン画面のPドリンクの表示用情報
+ */
+export type DrinkDisplay = Drink & {
+  description: string;
+  name: string;
+  /** 使用条件を満たすか */
+  usable: boolean;
+};
+
+/**
  * レッスン画面の各ターンの表示用情報
  *
  * - 主に、本家レッスン画面の、左上の現在ターンをタッチした時の詳細情報に使用することを想定している
@@ -1701,6 +1788,7 @@ export type TurnDisplay = {
  */
 export type LessonDisplay = {
   clearScoreThresholds: Lesson["clearScoreThresholds"];
+  drinks: DrinkDisplay[];
   hand: CardInHandDisplay[];
   inventory: {
     hand: CardInInventoryDisplay[];

@@ -8,6 +8,7 @@ import type {
   ProducerItemInProduction,
 } from "./types";
 import { getCardDataById } from "./data/cards";
+import { getDrinkDataByConstId } from "./data/drinks";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
   generateCardInHandDisplay,
@@ -585,6 +586,38 @@ describe("generateLessonDisplay", () => {
     name: string;
   }> = [
     {
+      name: "drinks - 概ね動作する",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          gamePlay.initialLesson.idol.life = 2;
+          gamePlay.initialLesson.idol.drinks = [
+            { id: "d1", data: getDrinkDataByConstId("hatsuboshimizu") },
+            { id: "d2", data: getDrinkDataByConstId("busutoekisu") },
+          ];
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        drinks: [
+          {
+            name: "初星水",
+            description: "パラメータ+10",
+            usable: true,
+          },
+          {
+            name: "ブーストエキス",
+            description: [
+              "{{パラメータ上昇量増加}}30%（3ターン）",
+              "{{消費体力減少}}3ターン",
+              "{{体力消費}}2",
+            ].join("\n"),
+            usable: true,
+          },
+        ],
+      } as LessonDisplay,
+    },
+    {
       name: "hand - 概ね動作する",
       args: [
         (() => {
@@ -677,37 +710,6 @@ describe("generateLessonDisplay", () => {
       } as LessonDisplay,
     },
     {
-      name: 'producerItems - 概ね動作する | 強化済みの名称には、"+"を末尾へ付与する',
-      args: [
-        (() => {
-          const gamePlay = createGamePlayForTest({
-            producerItems: [
-              {
-                id: "p1",
-                data: getProducerItemDataById("saigononatsunoomoide"),
-                enhanced: true,
-              },
-            ],
-          });
-          return gamePlay;
-        })(),
-      ],
-      expected: {
-        producerItems: [
-          {
-            id: "p1",
-            name: "最後の夏の思い出+",
-            description: [
-              "ターン開始時{{集中}}が3以上の場合、{{元気}}+14",
-              "（レッスン内1回）",
-            ].join("\n"),
-            activationCount: 0,
-            remainingTimes: 1,
-          },
-        ],
-      } as LessonDisplay,
-    },
-    {
       name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
       args: [
         (() => {
@@ -768,6 +770,37 @@ describe("generateLessonDisplay", () => {
           { kind: "focus" },
           { kind: "excellentCondition" },
           { kind: "positiveImpression" },
+        ],
+      } as LessonDisplay,
+    },
+    {
+      name: 'producerItems - 概ね動作する | 強化済みの名称には、"+"を末尾へ付与する',
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            producerItems: [
+              {
+                id: "p1",
+                data: getProducerItemDataById("saigononatsunoomoide"),
+                enhanced: true,
+              },
+            ],
+          });
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        producerItems: [
+          {
+            id: "p1",
+            name: "最後の夏の思い出+",
+            description: [
+              "ターン開始時{{集中}}が3以上の場合、{{元気}}+14",
+              "（レッスン内1回）",
+            ].join("\n"),
+            activationCount: 0,
+            remainingTimes: 1,
+          },
         ],
       } as LessonDisplay,
     },

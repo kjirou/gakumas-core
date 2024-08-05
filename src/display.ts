@@ -8,6 +8,7 @@ import type {
   CardInHandDisplay,
   CardInInventoryDisplay,
   CardPlayPreviewDisplay,
+  DrinkDisplay,
   Effect,
   Encouragement,
   EncouragementDisplay,
@@ -27,6 +28,7 @@ import {
   activateEffectsOnCardPlay,
   canPlayCard,
   useCard,
+  validateCostConsumution,
 } from "./lesson-mutation";
 import {
   calculateActualActionCost,
@@ -42,6 +44,7 @@ import {
 import {
   generateCardName,
   generateCardDescription,
+  generateDrinkDescription,
   generateEffectText,
   generateProducerItemDescription,
   idolParameterKindNames,
@@ -224,6 +227,22 @@ const generateModifierDisplays = (lesson: Lesson): ModifierDisplay[] => {
   return modifiers;
 };
 
+const generateDrinkDisplays = (lesson: Lesson): DrinkDisplay[] => {
+  return lesson.idol.drinks.map((drink) => {
+    return {
+      ...drink,
+      name: drink.data.name,
+      description: generateDrinkDescription({
+        cost: drink.data.cost,
+        effects: drink.data.effects,
+      }),
+      usable: drink.data.cost
+        ? validateCostConsumution(lesson.idol, drink.data.cost)
+        : true,
+    };
+  });
+};
+
 export const generateEncouragementDisplays = (
   encouragements: Encouragement[],
 ): EncouragementDisplay[] => {
@@ -282,6 +301,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   });
   return {
     clearScoreThresholds: lesson.clearScoreThresholds,
+    drinks: generateDrinkDisplays(lesson),
     hand,
     inventory: {
       deck: generateCardInInventoryDisplays(lesson.cards, lesson.deck),

@@ -6,7 +6,7 @@ import {
   Modifier,
   ProducerItem,
 } from "./types";
-import { getCardDataById } from "./data/cards";
+import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
@@ -1132,7 +1132,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         },
       ],
@@ -1197,7 +1197,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         },
       ],
@@ -1242,7 +1242,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       deck: [
         ...["a", "b"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -1327,7 +1327,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       deck: [
         ...["a", "b"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -1372,7 +1372,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
       deck: [
         ...["a", "b"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3255,7 +3255,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3280,7 +3280,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3302,7 +3302,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c", "d", "e"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3335,12 +3335,12 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
       ],
@@ -3369,17 +3369,17 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
         ...["e", "f"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
       ],
@@ -3405,22 +3405,22 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
         ...["e", "f", "g", "h"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
         ...["i"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3446,7 +3446,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3681,7 +3681,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -3704,7 +3704,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
         ],
@@ -3730,7 +3730,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -3765,7 +3765,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("genkinaaisatsu"),
+            data: getCardDataByConstId("genkinaaisatsu"),
             enhanced: false,
           },
         ],
@@ -3795,7 +3795,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("adorenarinzenkai"),
+            data: getCardDataByConstId("adorenarinzenkai"),
             enhanced: false,
           },
         ],
@@ -3865,17 +3865,17 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("fanshichamu"),
+            data: getCardDataByConstId("fanshichamu"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
           {
             id: "c",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -3949,17 +3949,17 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("enshutsukeikaku"),
+            data: getCardDataByConstId("enshutsukeikaku"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "c",
-            data: getCardDataById("shinkokyu"),
+            data: getCardDataByConstId("shinkokyu"),
             enhanced: false,
           },
         ],
@@ -4027,12 +4027,12 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("kagayakukimihe"),
+            data: getCardDataByConstId("kagayakukimihe"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
         ],
@@ -4098,7 +4098,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("hiyaku"),
+              data: getCardDataByConstId("hiyaku"),
               enhanced: false,
             },
           ],
@@ -4119,7 +4119,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("jumbiundo"),
+              data: getCardDataByConstId("jumbiundo"),
               enhanced: false,
             },
           ],
@@ -4174,12 +4174,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("aidorusengen"),
+              data: getCardDataByConstId("aidorusengen"),
               enhanced: false,
             },
             ...["b", "c"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4209,12 +4209,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("aidorusengen"),
+              data: getCardDataByConstId("aidorusengen"),
               enhanced: false,
             },
             ...["b", "c", "d"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4251,12 +4251,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("aidorusengen"),
+              data: getCardDataByConstId("aidorusengen"),
               enhanced: false,
             },
             ...["b", "c", "d", "e", "f", "g"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4285,17 +4285,17 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("teipatei"),
+              data: getCardDataByConstId("teipatei"),
               enhanced: false,
             },
             ...["b", "c", "d"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
             ...["e"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: true,
             })),
           ],
@@ -4325,12 +4325,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikirinaoshi"),
+              data: getCardDataByConstId("shikirinaoshi"),
               enhanced: false,
             },
             ...["b", "c", "d", "e", "f"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4363,12 +4363,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikirinaoshi"),
+              data: getCardDataByConstId("shikirinaoshi"),
               enhanced: false,
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4397,12 +4397,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikirinaoshi"),
+              data: getCardDataByConstId("shikirinaoshi"),
               enhanced: false,
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4426,7 +4426,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("furumainokihon"),
+              data: getCardDataByConstId("furumainokihon"),
               enhanced: false,
             },
           ],
@@ -4462,7 +4462,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("furumainokihon"),
+              data: getCardDataByConstId("furumainokihon"),
               enhanced: false,
             },
           ],
@@ -4495,7 +4495,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("enshutsukeikaku"),
+              data: getCardDataByConstId("enshutsukeikaku"),
               enhanced: false,
             },
           ],
@@ -4547,7 +4547,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -4579,7 +4579,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -4609,7 +4609,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -4638,7 +4638,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikosakugo"),
+              data: getCardDataByConstId("shikosakugo"),
               enhanced: false,
             },
           ],
@@ -4671,7 +4671,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("pozunokihon"),
+              data: getCardDataByConstId("pozunokihon"),
               enhanced: false,
             },
           ],
@@ -4708,7 +4708,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("kaika"),
+              data: getCardDataByConstId("kaika"),
               enhanced: false,
             },
           ],
@@ -4734,7 +4734,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("200sumairu"),
+              data: getCardDataByConstId("200sumairu"),
               enhanced: false,
             },
           ],
@@ -4762,7 +4762,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("kaika"),
+              data: getCardDataByConstId("kaika"),
               enhanced: false,
             },
           ],
@@ -4793,7 +4793,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("genkinaaisatsu"),
+              data: getCardDataByConstId("genkinaaisatsu"),
               enhanced: false,
             },
           ],
@@ -4819,7 +4819,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("hatonoaizu"),
+              data: getCardDataByConstId("hatonoaizu"),
               enhanced: false,
             },
           ],
@@ -4845,7 +4845,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("todoite"),
+              data: getCardDataByConstId("todoite"),
               enhanced: false,
             },
           ],
@@ -4875,7 +4875,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("eieio"),
+            data: getCardDataByConstId("eieio"),
             enhanced: false,
           },
         ],
@@ -4932,7 +4932,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("ishikinokihon"),
+            data: getCardDataByConstId("ishikinokihon"),
             enhanced: false,
           },
         ],
@@ -4988,7 +4988,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("hidamarinoseitokaishitsu"),
+            data: getCardDataByConstId("hidamarinoseitokaishitsu"),
             enhanced: false,
           },
         ],
@@ -5044,12 +5044,12 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -5094,12 +5094,12 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -5121,7 +5121,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("iji"),
+            data: getCardDataByConstId("iji"),
             enhanced: false,
           },
         ],
@@ -5146,7 +5146,7 @@ describe("useCard preview:true", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         },
       ],
@@ -5181,7 +5181,7 @@ describe("useCard preview:true", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("chosen"),
+          data: getCardDataByConstId("chosen"),
           enhanced: false,
         },
       ],
@@ -5207,7 +5207,7 @@ describe("useCard preview:true", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         },
       ],

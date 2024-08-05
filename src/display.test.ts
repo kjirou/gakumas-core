@@ -7,7 +7,7 @@ import type {
   Modifier,
   ProducerItemInProduction,
 } from "./types";
-import { getCardDataById } from "./data/cards";
+import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
@@ -47,7 +47,7 @@ describe("generateCardInHandDisplay", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -74,7 +74,7 @@ describe("generateCardInHandDisplay", () => {
             deck: [
               {
                 id: "a",
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: false,
               },
             ],
@@ -106,7 +106,7 @@ describe("generateCardInHandDisplay", () => {
             deck: [
               {
                 id: "a",
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: false,
               },
             ],
@@ -135,7 +135,7 @@ describe("generateCardInHandDisplay", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("rakkanteki"),
+              data: getCardDataByConstId("rakkanteki"),
               enhanced: false,
             },
           ],
@@ -172,7 +172,7 @@ describe("generateCardInHandDisplay", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("hiyaku"),
+              data: getCardDataByConstId("hiyaku"),
               enhanced: false,
             },
           ],
@@ -205,7 +205,7 @@ describe("generateCardInHandDisplay", () => {
             deck: [
               {
                 id: "a",
-                data: getCardDataById("hiyaku"),
+                data: getCardDataByConstId("hiyaku"),
                 enhanced: true,
               },
             ],
@@ -243,7 +243,7 @@ describe("generateCardInHandDisplay", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("honkinoshumi"),
+              data: getCardDataByConstId("honkinoshumi"),
               enhanced: false,
             },
           ],
@@ -276,7 +276,7 @@ describe("generateCardInHandDisplay", () => {
             deck: [
               {
                 id: "a",
-                data: getCardDataById("honkinoshumi"),
+                data: getCardDataByConstId("honkinoshumi"),
                 enhanced: true,
               },
             ],
@@ -312,7 +312,7 @@ describe("generateCardInHandDisplay", () => {
             deck: [
               {
                 id: "a",
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: true,
               },
             ],
@@ -347,7 +347,7 @@ describe("generateCardInHandDisplay", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("chosen"),
+              data: getCardDataByConstId("chosen"),
               enhanced: false,
             },
           ],
@@ -374,7 +374,7 @@ describe("generateCardInHandDisplay", () => {
             deck: [
               {
                 id: "a",
-                data: getCardDataById("wammoasuteppu"),
+                data: getCardDataByConstId("wammoasuteppu"),
                 enhanced: false,
               },
             ],
@@ -453,12 +453,12 @@ describe("generateCardInInventoryDisplays", () => {
         prepareCardsForLesson([
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
         ]),
@@ -472,7 +472,7 @@ describe("generateCardInInventoryDisplays", () => {
         prepareCardsForLesson([
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: true,
           },
         ]).map((card) => ({
@@ -495,7 +495,7 @@ describe("generateCardInInventoryDisplays", () => {
         prepareCardsForLesson([
           {
             id: "a",
-            data: getCardDataById("damedamekukkingu"),
+            data: getCardDataByConstId("damedamekukkingu"),
             enhanced: false,
           },
         ]),
@@ -517,12 +517,12 @@ describe("generateCardInInventoryDisplays", () => {
         prepareCardsForLesson([
           {
             id: "a",
-            data: getCardDataById("hiyaku"),
+            data: getCardDataByConstId("hiyaku"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("chokougakurekiaidoru"),
+            data: getCardDataByConstId("chokougakurekiaidoru"),
             enhanced: false,
           },
         ]),
@@ -539,12 +539,12 @@ describe("generateCardInInventoryDisplays", () => {
         prepareCardsForLesson([
           {
             id: "a",
-            data: getCardDataById("shikosakugo"),
+            data: getCardDataByConstId("shikosakugo"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("tegakinomesseji"),
+            data: getCardDataByConstId("tegakinomesseji"),
             enhanced: false,
           },
         ]),
@@ -558,12 +558,12 @@ describe("generateCardInInventoryDisplays", () => {
         prepareCardsForLesson([
           {
             id: "a",
-            data: getCardDataById("hyojonokihon"),
+            data: getCardDataByConstId("hyojonokihon"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("hiyaku"),
+            data: getCardDataByConstId("hiyaku"),
             enhanced: false,
           },
         ]),
@@ -625,12 +625,12 @@ describe("generateLessonDisplay", () => {
             deck: [
               {
                 id: "c1",
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: false,
               },
               {
                 id: "c2",
-                data: getCardDataById("hyogennokihon"),
+                data: getCardDataByConstId("hyogennokihon"),
                 enhanced: true,
               },
             ],
@@ -673,22 +673,22 @@ describe("generateLessonDisplay", () => {
             deck: [
               {
                 id: "c1",
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: false,
               },
               {
                 id: "c2",
-                data: getCardDataById("furumainokihon"),
+                data: getCardDataByConstId("furumainokihon"),
                 enhanced: false,
               },
               {
                 id: "c3",
-                data: getCardDataById("hyojonokihon"),
+                data: getCardDataByConstId("hyojonokihon"),
                 enhanced: false,
               },
               {
                 id: "c4",
-                data: getCardDataById("hyogennokihon"),
+                data: getCardDataByConstId("hyogennokihon"),
                 enhanced: false,
               },
             ],
@@ -902,7 +902,7 @@ describe("generateCardPlayPreviewDisplay", () => {
             deck: [
               {
                 id: "c1",
-                data: getCardDataById("jonetsutan"),
+                data: getCardDataByConstId("jonetsutan"),
                 enhanced: true,
               },
             ],

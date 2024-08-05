@@ -1,5 +1,5 @@
 import type { GamePlay } from "./types";
-import { getCardDataById } from "./data/cards";
+import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataById } from "./data/drinks";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -47,19 +47,19 @@ describe("initializeGamePlay", () => {
           cards: [
             {
               original: {
-                data: getCardDataById("ojosamanoharebutai"),
+                data: getCardDataByConstId("ojosamanoharebutai"),
                 enhanced: false,
               },
             },
             {
               original: {
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: false,
               },
             },
             {
               original: {
-                data: getCardDataById("hyogennokihon"),
+                data: getCardDataByConstId("hyogennokihon"),
                 enhanced: true,
               },
               enhancements: [{ kind: "original" }],
@@ -96,7 +96,7 @@ describe("initializeGamePlay", () => {
           cards: [
             {
               original: {
-                data: getCardDataById("ojosamanoharebutai"),
+                data: getCardDataByConstId("ojosamanoharebutai"),
                 enhanced: true,
               },
               enhancements: [{ kind: "original" }],

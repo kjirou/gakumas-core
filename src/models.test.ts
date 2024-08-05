@@ -1,5 +1,5 @@
 import { Card, Lesson, LessonUpdateQuery, Modifier } from "./types";
-import { getCardDataById } from "./data/cards";
+import { getCardDataByConstId } from "./data/cards";
 import { getIdolDataById } from "./data/idols";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
@@ -274,7 +274,7 @@ describe("createIdolInProduction", () => {
       deck: [
         {
           id: expect.any(String),
-          data: getCardDataById("shinshinkiei"),
+          data: getCardDataByConstId("shinshinkiei"),
           enhanced: false,
         },
       ],

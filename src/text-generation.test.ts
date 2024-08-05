@@ -1,8 +1,9 @@
 import type { Card, CardData, ProducerItemData } from "./types";
 import {
+  type CardDataId,
   findCardDataById,
   getCardContentDataList,
-  getCardDataById,
+  getCardDataByConstId,
 } from "./data/cards";
 import { type DrinkDataId, getDrinkDataByConstId } from "./data/drinks";
 import { getProducerItemDataById } from "./data/producer-items";
@@ -37,7 +38,7 @@ describe("generateCardName", () => {
       args: [
         {
           original: {
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
           },
           enhancements: [] as any,
         } as Card,
@@ -48,7 +49,7 @@ describe("generateCardName", () => {
       args: [
         {
           original: {
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
           },
           enhancements: [{ kind: "original" }],
         } as Card,
@@ -59,7 +60,7 @@ describe("generateCardName", () => {
       args: [
         {
           original: {
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
           },
           enhancements: [{ kind: "effect" }, { kind: "lessonSupport" }],
         } as Card,
@@ -70,7 +71,7 @@ describe("generateCardName", () => {
       args: [
         {
           original: {
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
           },
           enhancements: [
             { kind: "effect" },
@@ -661,7 +662,7 @@ describe("generateActionCostText", () => {
 });
 describe("generateCardDescription", () => {
   const testCases: Array<{
-    cardId: CardData["id"];
+    cardId: CardDataId;
     expected: ReturnType<typeof generateCardDescription>;
   }> = [
     {
@@ -871,7 +872,7 @@ describe("generateCardDescription", () => {
     },
   ];
   test.each(testCases)('$cardId => "$expected"', ({ cardId, expected }) => {
-    const card = getCardDataById(cardId);
+    const card = getCardDataByConstId(cardId);
     const contents = getCardContentDataList(card);
     expect(
       generateCardDescription({

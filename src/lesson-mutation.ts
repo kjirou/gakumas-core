@@ -30,6 +30,7 @@ import {
   getCardContentData,
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
+  findPrioritizedDoubleEffectModifier,
   isDelayedEffectModifierType,
   isDrawCardsEffectType,
   isEnhanceHandEffectType,
@@ -1981,11 +1982,13 @@ export const useCard = (
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
   const cardContent = getCardContentData(card);
-  const doubleEffect = lesson.idol.modifiers.find(
-    (e) => e.kind === "doubleEffect",
-  );
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
+
+  const doubleEffect = findPrioritizedDoubleEffectModifier(
+    card.original.data.cardSummaryKind,
+    newLesson.idol.modifiers,
+  );
 
   //
   // 使用可否のバリデーション

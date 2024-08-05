@@ -193,6 +193,17 @@ describe("generateEffectText", () => {
       args: [
         {
           kind: "getModifier",
+          modifier: { kind: "doubleEffect", cardSummaryKind: "active" },
+        },
+      ],
+      expected:
+        "次に使用する{{アクティブスキルカード}}の効果をもう1回発動（1回）",
+      name: "getModifier - doubleEffect - cardSummaryKind 有り",
+    },
+    {
+      args: [
+        {
+          kind: "getModifier",
           modifier: { kind: "doubleEffect", duration: 1 },
         },
       ],

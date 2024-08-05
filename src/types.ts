@@ -149,7 +149,7 @@ export type ModifierData = Readonly<
        * - 合算の有無だけでいうと、本実装ではとりあえず全てを合算しない
        */
       kind: "doubleEffect";
-      cardSummaryKind?: Omit<CardSummaryKind, "free">;
+      cardSummaryKind?: "active" | "mental";
       duration?: number;
     }
   | {

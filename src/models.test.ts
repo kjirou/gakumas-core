@@ -1,7 +1,7 @@
 import { Card, Lesson, LessonUpdateQuery, Modifier } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getIdolDataById } from "./data/idols";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -213,7 +213,7 @@ describe("createGamePlay", () => {
       producerItems: [
         {
           id: idGenerator(),
-          data: getProducerItemDataById("hatsuboshitecho"),
+          data: getProducerItemDataByConstId("hatsuboshitecho"),
         },
       ],
       specialTrainingLevel: 1,
@@ -284,7 +284,7 @@ describe("createIdolInProduction", () => {
       producerItems: [
         {
           id: expect.any(String),
-          data: getProducerItemDataById("bakuonraion"),
+          data: getProducerItemDataByConstId("bakuonraion"),
           enhanced: false,
         },
       ],

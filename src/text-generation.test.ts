@@ -6,7 +6,7 @@ import {
   getCardDataByConstId,
 } from "./data/cards";
 import { type DrinkDataId, getDrinkDataByConstId } from "./data/drinks";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   generateActionCostText,
   generateCardDescription,
@@ -1162,7 +1162,7 @@ describe("generateProducerItemDescription", () => {
   test.each(testCases)(
     '$producerItemId => "$expected"',
     ({ expected, producerItemId }) => {
-      const producerItem = getProducerItemDataById(producerItemId);
+      const producerItem = getProducerItemDataByConstId(producerItemId);
       expect(
         generateProducerItemDescription({
           cost: producerItem.base.cost,

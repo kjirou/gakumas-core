@@ -2,7 +2,7 @@ import type { GamePlay } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataById } from "./data/drinks";
 import { getIdolDataById } from "./data/idols";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import { initializeGamePlay } from "./index";
 
 describe("initializeGamePlay", () => {
@@ -33,13 +33,13 @@ describe("initializeGamePlay", () => {
             producerItems: [
               {
                 original: {
-                  data: getProducerItemDataById("himitsutokkunkade"),
+                  data: getProducerItemDataByConstId("himitsutokkunkade"),
                   enhanced: false,
                 },
               },
               {
                 original: {
-                  data: getProducerItemDataById("masukottohikonin"),
+                  data: getProducerItemDataByConstId("masukottohikonin"),
                 },
               },
             ],
@@ -87,7 +87,7 @@ describe("initializeGamePlay", () => {
             producerItems: [
               {
                 original: {
-                  data: getProducerItemDataById("himitsutokkunkade"),
+                  data: getProducerItemDataByConstId("himitsutokkunkade"),
                   enhanced: true,
                 },
               },

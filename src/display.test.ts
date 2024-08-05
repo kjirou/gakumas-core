@@ -9,7 +9,7 @@ import type {
 } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   generateCardInHandDisplay,
   generateCardInInventoryDisplays,
@@ -781,7 +781,7 @@ describe("generateLessonDisplay", () => {
             producerItems: [
               {
                 id: "p1",
-                data: getProducerItemDataById("saigononatsunoomoide"),
+                data: getProducerItemDataByConstId("saigononatsunoomoide"),
                 enhanced: true,
               },
             ],
@@ -909,7 +909,7 @@ describe("generateCardPlayPreviewDisplay", () => {
             producerItems: [
               {
                 id: "p1",
-                data: getProducerItemDataById("itsumonomeikupochi"),
+                data: getProducerItemDataByConstId("itsumonomeikupochi"),
                 enhanced: false,
               },
             ],

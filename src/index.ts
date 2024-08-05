@@ -29,7 +29,7 @@ import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
 import { type IdolDataId } from "./data/idols";
 import {
   type ProducerItemDataId,
-  getProducerItemDataById,
+  getProducerItemDataByConstId,
 } from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
@@ -159,7 +159,7 @@ export const initializeGamePlay = (params: {
     params.producerItems.map((producerItemSetting) => {
       return {
         id: idGenerator(),
-        data: getProducerItemDataById(producerItemSetting.id),
+        data: getProducerItemDataByConstId(producerItemSetting.id),
         enhanced: producerItemSetting.enhanced ?? false,
       };
     });

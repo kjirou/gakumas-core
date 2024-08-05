@@ -8,7 +8,7 @@ import {
 } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   activateEffectIf,
   activateEffectsEachProducerItemsAccordingToCardUsage,
@@ -308,7 +308,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("itsumonomeikupochi"),
+          data: getProducerItemDataByConstId("itsumonomeikupochi"),
           enhanced: false,
         },
       ],
@@ -366,7 +366,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("saikonihappinominamoto"),
+          data: getProducerItemDataByConstId("saikonihappinominamoto"),
           enhanced: false,
         },
       ],
@@ -432,12 +432,12 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("saikonihappinominamoto"),
+          data: getProducerItemDataByConstId("saikonihappinominamoto"),
           enhanced: false,
         },
         {
           id: "b",
-          data: getProducerItemDataById("kumoriwonuguttataoru"),
+          data: getProducerItemDataByConstId("kumoriwonuguttataoru"),
         },
       ],
     });
@@ -499,7 +499,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("biggudorimuchokimbako"),
+          data: getProducerItemDataByConstId("biggudorimuchokimbako"),
           enhanced: false,
         },
       ],
@@ -569,7 +569,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("himitsutokkunkade"),
+          data: getProducerItemDataByConstId("himitsutokkunkade"),
           enhanced: false,
         },
       ],
@@ -640,7 +640,7 @@ describe("activateEffectsOfProducerItem", () => {
           id: "a",
           original: {
             id: "a",
-            data: getProducerItemDataById("gesennosenrihin"),
+            data: getProducerItemDataByConstId("gesennosenrihin"),
             enhanced: false,
           },
           activationCount: 0,
@@ -750,7 +750,7 @@ describe("activateEffectsOnLessonStart", () => {
           producerItems: [
             {
               id: "a",
-              data: getProducerItemDataById("gesennosenrihin"),
+              data: getProducerItemDataByConstId("gesennosenrihin"),
               enhanced: false,
             },
           ],
@@ -791,7 +791,7 @@ describe("activateEffectsOnTurnEnd", () => {
         producerItems: [
           {
             id: "a",
-            data: getProducerItemDataById("okininosunika"),
+            data: getProducerItemDataByConstId("okininosunika"),
           },
         ],
       });
@@ -1420,7 +1420,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("bakuonraion"),
+          data: getProducerItemDataByConstId("bakuonraion"),
           enhanced: false,
         },
       ],
@@ -1445,7 +1445,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("bakuonraion"),
+          data: getProducerItemDataByConstId("bakuonraion"),
           enhanced: false,
         },
       ],
@@ -1461,7 +1461,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("shibainuposhetto"),
+          data: getProducerItemDataByConstId("shibainuposhetto"),
           enhanced: false,
         },
       ],
@@ -1485,7 +1485,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataById("shibainuposhetto"),
+          data: getProducerItemDataByConstId("shibainuposhetto"),
           enhanced: false,
         },
       ],
@@ -3802,7 +3802,7 @@ describe("useCard preview:false", () => {
         producerItems: [
           {
             id: "p",
-            data: getProducerItemDataById("saikonihappinominamoto"),
+            data: getProducerItemDataByConstId("saikonihappinominamoto"),
             enhanced: false,
           },
         ],
@@ -4882,7 +4882,7 @@ describe("useCard preview:false", () => {
         producerItems: [
           {
             id: "p1",
-            data: getProducerItemDataById("tekunodoggu"),
+            data: getProducerItemDataByConstId("tekunodoggu"),
             enhanced: false,
           },
         ],
@@ -4939,7 +4939,7 @@ describe("useCard preview:false", () => {
         producerItems: [
           {
             id: "p1",
-            data: getProducerItemDataById("himitsutokkunkade"),
+            data: getProducerItemDataByConstId("himitsutokkunkade"),
             enhanced: false,
           },
         ],

@@ -23,6 +23,7 @@ import type {
   VitalityUpdateQuery,
 } from "./types";
 import { filterGeneratableCardsData, getCardDataByConstId } from "./data/cards";
+import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -837,6 +838,22 @@ export const activateEffect = <
       break;
     }
     case "getModifier": {
+      const metaModifierData = metaModifierDictioanry[effect.modifier.kind];
+      const debuffProtection = lesson.idol.modifiers.find(
+        (e) => e.kind === "debuffProtection",
+      );
+      // 低下状態無効を付与していたら、デバフ的な状態修正は弾く
+      // 仕様確認Issue: https://github.com/kjirou/gakumas-core/issues/74
+      if (metaModifierData.debuff && debuffProtection) {
+        diffs.push({
+          kind: "modifiers.update",
+          propertyNameKind: "times",
+          id: debuffProtection.id,
+          actual: -1,
+          max: -1,
+        });
+        break;
+      }
       const sameKindModifier = lesson.idol.modifiers.find(
         (e) => e.kind === effect.modifier.kind,
       );

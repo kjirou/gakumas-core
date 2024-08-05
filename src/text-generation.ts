@@ -168,7 +168,9 @@ const generateModifierText = (modifier: ModifierData): string => {
           : `${modifier.delay}ターン後、`) + generateEffectText(modifier.effect)
       );
     case "doubleEffect":
-      return `次に使用するスキルカードの効果をもう1回発動（1回）`;
+      const durationText =
+        modifier.duration !== undefined ? `・${modifier.duration}ターン` : "";
+      return `次に使用するスキルカードの効果をもう1回発動（1回${durationText}）`;
     case "doubleLifeConsumption":
       return `${kwd("doubleLifeConsumption")}${modifier.duration}ターン`;
     case "effectActivationOnTurnEnd":

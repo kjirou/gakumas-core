@@ -193,6 +193,16 @@ describe("generateEffectText", () => {
       args: [
         {
           kind: "getModifier",
+          modifier: { kind: "doubleEffect", duration: 1 },
+        },
+      ],
+      expected: "次に使用するスキルカードの効果をもう1回発動（1回・1ターン）",
+      name: "getModifier - doubleEffect - duration 有り",
+    },
+    {
+      args: [
+        {
+          kind: "getModifier",
           modifier: { kind: "doubleLifeConsumption", duration: 1 },
         },
       ],

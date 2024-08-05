@@ -837,6 +837,28 @@ describe("patchDiffs", () => {
           },
         } as Lesson,
       },
+      {
+        name: "doubleEffect の duration が設定されている時、減算できて、その結果 0 になったら削除する",
+        args: [
+          {
+            idol: {
+              modifiers: [{ kind: "doubleEffect", duration: 1, id: "a" }],
+            },
+          } as Lesson,
+          [
+            {
+              kind: "modifier.update",
+              propertyNameKind: "duration",
+              actual: -1,
+              max: -1,
+              id: "a",
+            },
+          ],
+        ],
+        expected: {
+          idol: { modifiers: [] as Modifier[] },
+        } as Lesson,
+      },
     ];
     test.each(testCases)("$name", ({ args, expected }) => {
       expect(patchDiffs(...args)).toMatchObject(expected);

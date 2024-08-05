@@ -560,51 +560,49 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         switch (update.propertyNameKind) {
           case "amount":
             if ("amount" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.amount + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                amount: newValue,
               };
             }
             break;
           case "delay":
             if ("delay" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.delay + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                delay: newValue,
               };
             }
             break;
           case "duration":
-            if ("duration" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+            if (
+              "duration" in targetedModifier &&
+              targetedModifier.duration !== undefined
+            ) {
+              newValue = targetedModifier.duration + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                duration: newValue,
               };
             }
             break;
           case "times":
             if ("times" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.times + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                times: newValue,
               };
             }
             break;
           case "value":
             if ("value" in targetedModifier) {
-              newValue =
-                targetedModifier[update.propertyNameKind] + update.actual;
+              newValue = targetedModifier.value + update.actual;
               newTargetedModifier = {
                 ...targetedModifier,
-                [update.propertyNameKind]: newValue,
+                value: newValue,
               };
             }
             break;

@@ -22,7 +22,7 @@ import type {
   ProducerItemTrigger,
   VitalityUpdateQuery,
 } from "./types";
-import { filterGeneratableCardsData, getCardDataById } from "./data/cards";
+import { filterGeneratableCardsData, getCardDataByConstId } from "./data/cards";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -821,7 +821,7 @@ export const activateEffect = <
     case "generateTroubleCard": {
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
-        data: getCardDataById("nemuke"),
+        data: getCardDataByConstId("nemuke"),
         enhanced: false,
       };
       const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];

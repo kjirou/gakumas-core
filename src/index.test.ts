@@ -1,8 +1,8 @@
 import type { GamePlay } from "./types";
-import { getCardDataById } from "./data/cards";
+import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataById } from "./data/drinks";
-import { getIdolDataById } from "./data/idols";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getIdolDataByConstId } from "./data/idols";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import { initializeGamePlay } from "./index";
 
 describe("initializeGamePlay", () => {
@@ -28,18 +28,18 @@ describe("initializeGamePlay", () => {
         initialLesson: {
           idol: {
             original: {
-              data: getIdolDataById("kuramotochina-ssr-1"),
+              data: getIdolDataByConstId("kuramotochina-ssr-1"),
             },
             producerItems: [
               {
                 original: {
-                  data: getProducerItemDataById("himitsutokkunkade"),
+                  data: getProducerItemDataByConstId("himitsutokkunkade"),
                   enhanced: false,
                 },
               },
               {
                 original: {
-                  data: getProducerItemDataById("masukottohikonin"),
+                  data: getProducerItemDataByConstId("masukottohikonin"),
                 },
               },
             ],
@@ -47,19 +47,19 @@ describe("initializeGamePlay", () => {
           cards: [
             {
               original: {
-                data: getCardDataById("ojosamanoharebutai"),
+                data: getCardDataByConstId("ojosamanoharebutai"),
                 enhanced: false,
               },
             },
             {
               original: {
-                data: getCardDataById("apirunokihon"),
+                data: getCardDataByConstId("apirunokihon"),
                 enhanced: false,
               },
             },
             {
               original: {
-                data: getCardDataById("hyogennokihon"),
+                data: getCardDataByConstId("hyogennokihon"),
                 enhanced: true,
               },
               enhancements: [{ kind: "original" }],
@@ -87,7 +87,7 @@ describe("initializeGamePlay", () => {
             producerItems: [
               {
                 original: {
-                  data: getProducerItemDataById("himitsutokkunkade"),
+                  data: getProducerItemDataByConstId("himitsutokkunkade"),
                   enhanced: true,
                 },
               },
@@ -96,7 +96,7 @@ describe("initializeGamePlay", () => {
           cards: [
             {
               original: {
-                data: getCardDataById("ojosamanoharebutai"),
+                data: getCardDataByConstId("ojosamanoharebutai"),
                 enhanced: true,
               },
               enhancements: [{ kind: "original" }],

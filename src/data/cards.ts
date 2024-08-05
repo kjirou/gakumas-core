@@ -11,6 +11,9 @@ export const getCardDataById = (id: CardData["id"]): CardData => {
   return card;
 };
 
+export const getCardDataByConstId = (id: CardDataId): CardData =>
+  getCardDataById(id);
+
 /** 「ランダムな強化済みスキルカード（SSR）を、手札に生成」用の候補を返す */
 export const filterGeneratableCardsData = (
   producePlanKind: ProducePlan["kind"],

@@ -1,7 +1,7 @@
 import { Card, Lesson, LessonUpdateQuery, Modifier } from "./types";
-import { getCardDataById } from "./data/cards";
-import { getIdolDataById } from "./data/idols";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getCardDataByConstId } from "./data/cards";
+import { getIdolDataByConstId } from "./data/idols";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   calculateActualActionCost,
   calculateClearScoreProgress,
@@ -14,240 +14,8 @@ import {
   getIdolParameterKindOnTurn,
   patchDiffs,
 } from "./models";
-import { createGamePlayForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
 
-describe("createIdolInProduction", () => {
-  test("it creates an idol in production", () => {
-    const idGenerator = createIdGenerator();
-    const idolInProduction = createIdolInProduction({
-      idolDataId: "hanamisaki-r-1",
-      specialTrainingLevel: 1,
-      talentAwakeningLevel: 1,
-      idGenerator,
-    });
-    expect(idolInProduction).toStrictEqual({
-      deck: [
-        {
-          id: expect.any(String),
-          data: getCardDataById("shinshinkiei"),
-          enhanced: false,
-        },
-      ],
-      data: getIdolDataById("hanamisaki-r-1"),
-      life: 32,
-      maxLife: 32,
-      producerItems: [
-        {
-          id: expect.any(String),
-          data: getProducerItemDataById("bakuonraion"),
-          enhanced: false,
-        },
-      ],
-    });
-  });
-});
-describe("calculateClearScoreProgress", () => {
-  const testCases: Array<{
-    args: Parameters<typeof calculateClearScoreProgress>;
-    expected: ReturnType<typeof calculateClearScoreProgress>;
-  }> = [
-    {
-      args: [0, { clear: 100 }],
-      expected: {
-        necessaryClearScore: 100,
-        necessaryPerfectScore: undefined,
-        remainingClearScore: 100,
-        remainingPerfectScore: undefined,
-        clearScoreProgressPercentage: 0,
-      },
-    },
-    {
-      args: [10, { clear: 1000 }],
-      expected: {
-        necessaryClearScore: 1000,
-        necessaryPerfectScore: undefined,
-        remainingClearScore: 990,
-        remainingPerfectScore: undefined,
-        clearScoreProgressPercentage: 1,
-      },
-    },
-    {
-      args: [9, { clear: 1000 }],
-      expected: {
-        necessaryClearScore: 1000,
-        necessaryPerfectScore: undefined,
-        remainingClearScore: 991,
-        remainingPerfectScore: undefined,
-        clearScoreProgressPercentage: 0,
-      },
-    },
-    {
-      args: [50, { clear: 100, perfect: 300 }],
-      expected: {
-        necessaryClearScore: 100,
-        necessaryPerfectScore: 300,
-        remainingClearScore: 50,
-        remainingPerfectScore: 250,
-        clearScoreProgressPercentage: 50,
-      },
-    },
-  ];
-  test.each(testCases)(
-    "$args.0, $args.1 => $expected",
-    ({ args, expected }) => {
-      expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
-    },
-  );
-});
-describe("createActualTurns", () => {
-  const testCases: Array<{
-    args: Parameters<typeof createActualTurns>;
-    expected: ReturnType<typeof createActualTurns>;
-  }> = [
-    {
-      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 0 } as Lesson],
-      expected: ["vocal", "dance"],
-    },
-    {
-      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 1 } as Lesson],
-      expected: ["vocal", "dance", "dance"],
-    },
-    {
-      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 2 } as Lesson],
-      expected: ["vocal", "dance", "dance", "dance"],
-    },
-  ];
-  test.each(testCases)(
-    "$args.0.turns, $args.0.remainingTurnsChange => $expected",
-    ({ args, expected }) => {
-      expect(createActualTurns(...args)).toStrictEqual(expected);
-    },
-  );
-});
-describe("getIdolParameterKindOnTurn", () => {
-  const testCases: Array<{
-    args: Parameters<typeof getIdolParameterKindOnTurn>;
-    expected: ReturnType<typeof getIdolParameterKindOnTurn>;
-  }> = [
-    {
-      args: [{ turns: ["vocal", "dance"], turnNumber: 1 } as Lesson],
-      expected: "vocal",
-    },
-    {
-      args: [{ turns: ["vocal", "dance"], turnNumber: 2 } as Lesson],
-      expected: "dance",
-    },
-    {
-      args: [{ turns: ["vocal", "dance"], turnNumber: 3 } as Lesson],
-      expected: "dance",
-    },
-    {
-      args: [{ turns: ["vocal", "dance"], turnNumber: 0 } as Lesson],
-      expected: "vocal",
-    },
-  ];
-  test.each(testCases)(
-    "$args.0.turns, $args.0.turnNumber => $expected",
-    ({ args, expected }) => {
-      expect(getIdolParameterKindOnTurn(...args)).toBe(expected);
-    },
-  );
-});
-describe("getDisplayedRepresentativeModifierValue", () => {
-  const testCases: Array<{
-    args: Parameters<typeof getDisplayedRepresentativeModifierValue>;
-    expected: ReturnType<typeof getDisplayedRepresentativeModifierValue>;
-  }> = [
-    {
-      args: [{ kind: "focus", amount: 2 }],
-      expected: 2,
-    },
-    {
-      args: [{ kind: "goodCondition", duration: 2 }],
-      expected: 2,
-    },
-    {
-      args: [{ kind: "doubleEffect" }],
-      expected: 1,
-    },
-    {
-      args: [{ kind: "debuffProtection", times: 2 }],
-      expected: 2,
-    },
-    {
-      args: [{ kind: "delayedEffect", delay: 2 } as Modifier],
-      expected: 1,
-    },
-    {
-      args: [{ kind: "lifeConsumptionReduction", value: 2 }],
-      expected: 2,
-    },
-    {
-      args: [{ kind: "effectActivationOnTurnEnd" } as Modifier],
-      expected: undefined,
-    },
-  ];
-  test.each(testCases)("$args.0 => $expected", ({ args, expected }) => {
-    expect(getDisplayedRepresentativeModifierValue(...args)).toBe(expected);
-  });
-});
-describe("createGamePlay", () => {
-  test("it creates a lesson game play", () => {
-    const idGenerator = createIdGenerator();
-    const idolInProduction = createIdolInProduction({
-      idolDataId: "hanamisaki-r-1",
-      producerItems: [
-        {
-          id: idGenerator(),
-          data: getProducerItemDataById("hatsuboshitecho"),
-        },
-      ],
-      specialTrainingLevel: 1,
-      talentAwakeningLevel: 1,
-      idGenerator,
-    });
-    const gamePlay = createGamePlay({
-      idGenerator,
-      idolInProduction,
-      turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-    });
-    expect(gamePlay).toStrictEqual({
-      getRandom: expect.any(Function),
-      idGenerator: expect.any(Function),
-      initialLesson: {
-        clearScoreThresholds: undefined,
-        idol: {
-          original: idolInProduction,
-          life: 32,
-          vitality: 0,
-          producerItems: expect.any(Array),
-          modifiers: [],
-          modifierIdsAtTurnStart: [],
-          totalCardUsageCount: 0,
-          actionPoints: 0,
-          scoreBonus: undefined,
-          drinks: [],
-        },
-        cards: expect.any(Array),
-        hand: [],
-        deck: expect.any(Array),
-        discardPile: [],
-        removedCardPile: [],
-        playedCardsOnEmptyDeck: [],
-        score: 0,
-        turnNumber: 0,
-        turnEnded: false,
-        turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-        remainingTurnsChange: 0,
-        encouragements: [],
-        memoryEffects: [],
-        ignoreIdolParameterKindConditionAfterClearing: false,
-      },
-      updates: [],
-    });
-  });
-});
 describe("calculateActualActionCost", () => {
   const testCases: Array<{
     args: Parameters<typeof calculateActualActionCost>;
@@ -359,6 +127,201 @@ describe("calculateActualActionCost", () => {
     },
   );
 });
+describe("calculateClearScoreProgress", () => {
+  const testCases: Array<{
+    args: Parameters<typeof calculateClearScoreProgress>;
+    expected: ReturnType<typeof calculateClearScoreProgress>;
+  }> = [
+    {
+      args: [0, { clear: 100 }],
+      expected: {
+        necessaryClearScore: 100,
+        necessaryPerfectScore: undefined,
+        remainingClearScore: 100,
+        remainingPerfectScore: undefined,
+        clearScoreProgressPercentage: 0,
+      },
+    },
+    {
+      args: [10, { clear: 1000 }],
+      expected: {
+        necessaryClearScore: 1000,
+        necessaryPerfectScore: undefined,
+        remainingClearScore: 990,
+        remainingPerfectScore: undefined,
+        clearScoreProgressPercentage: 1,
+      },
+    },
+    {
+      args: [9, { clear: 1000 }],
+      expected: {
+        necessaryClearScore: 1000,
+        necessaryPerfectScore: undefined,
+        remainingClearScore: 991,
+        remainingPerfectScore: undefined,
+        clearScoreProgressPercentage: 0,
+      },
+    },
+    {
+      args: [50, { clear: 100, perfect: 300 }],
+      expected: {
+        necessaryClearScore: 100,
+        necessaryPerfectScore: 300,
+        remainingClearScore: 50,
+        remainingPerfectScore: 250,
+        clearScoreProgressPercentage: 50,
+      },
+    },
+  ];
+  test.each(testCases)(
+    "$args.0, $args.1 => $expected",
+    ({ args, expected }) => {
+      expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
+    },
+  );
+});
+describe("createActualTurns", () => {
+  const testCases: Array<{
+    args: Parameters<typeof createActualTurns>;
+    expected: ReturnType<typeof createActualTurns>;
+  }> = [
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 0 } as Lesson],
+      expected: ["vocal", "dance"],
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 1 } as Lesson],
+      expected: ["vocal", "dance", "dance"],
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], remainingTurnsChange: 2 } as Lesson],
+      expected: ["vocal", "dance", "dance", "dance"],
+    },
+  ];
+  test.each(testCases)(
+    "$args.0.turns, $args.0.remainingTurnsChange => $expected",
+    ({ args, expected }) => {
+      expect(createActualTurns(...args)).toStrictEqual(expected);
+    },
+  );
+});
+describe("createGamePlay", () => {
+  test("it creates a lesson game play", () => {
+    const idGenerator = createIdGenerator();
+    const idolInProduction = createIdolInProduction({
+      idolDataId: "hanamisaki-r-1",
+      producerItems: [
+        {
+          id: idGenerator(),
+          data: getProducerItemDataByConstId("hatsuboshitecho"),
+        },
+      ],
+      specialTrainingLevel: 1,
+      talentAwakeningLevel: 1,
+      idGenerator,
+    });
+    const gamePlay = createGamePlay({
+      idGenerator,
+      idolInProduction,
+      turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
+    });
+    expect(gamePlay).toStrictEqual({
+      getRandom: expect.any(Function),
+      idGenerator: expect.any(Function),
+      initialLesson: {
+        clearScoreThresholds: undefined,
+        idol: {
+          original: idolInProduction,
+          life: 32,
+          vitality: 0,
+          producerItems: expect.any(Array),
+          modifiers: [],
+          modifierIdsAtTurnStart: [],
+          totalCardUsageCount: 0,
+          actionPoints: 0,
+          scoreBonus: undefined,
+          drinks: [],
+        },
+        cards: expect.any(Array),
+        hand: [],
+        deck: expect.any(Array),
+        discardPile: [],
+        removedCardPile: [],
+        playedCardsOnEmptyDeck: [],
+        score: 0,
+        turnNumber: 0,
+        turnEnded: false,
+        turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
+        remainingTurnsChange: 0,
+        encouragements: [],
+        memoryEffects: [],
+        ignoreIdolParameterKindConditionAfterClearing: false,
+      },
+      updates: [],
+    });
+  });
+});
+describe("createIdolInProduction", () => {
+  test("it creates an idol in production", () => {
+    const idGenerator = createIdGenerator();
+    const idolInProduction = createIdolInProduction({
+      idolDataId: "hanamisaki-r-1",
+      specialTrainingLevel: 1,
+      talentAwakeningLevel: 1,
+      idGenerator,
+    });
+    expect(idolInProduction).toStrictEqual({
+      deck: [
+        {
+          id: expect.any(String),
+          data: getCardDataByConstId("shinshinkiei"),
+          enhanced: false,
+        },
+      ],
+      data: getIdolDataByConstId("hanamisaki-r-1"),
+      life: 32,
+      maxLife: 32,
+      producerItems: [
+        {
+          id: expect.any(String),
+          data: getProducerItemDataByConstId("bakuonraion"),
+          enhanced: false,
+        },
+      ],
+    });
+  });
+});
+describe("diffUpdates", () => {
+  const testCases: Array<{
+    args: Parameters<typeof diffUpdates>;
+    expected: ReturnType<typeof diffUpdates>;
+  }> = [
+    {
+      args: [
+        [{ kind: "life" }] as LessonUpdateQuery[],
+        [{ kind: "life" }] as LessonUpdateQuery[],
+      ],
+      expected: [],
+    },
+    {
+      args: [
+        [{ kind: "life" }] as LessonUpdateQuery[],
+        [
+          { kind: "life" },
+          { kind: "score" },
+          { kind: "vitality" },
+        ] as LessonUpdateQuery[],
+      ],
+      expected: [
+        { kind: "score" },
+        { kind: "vitality" },
+      ] as LessonUpdateQuery[],
+    },
+  ];
+  test.each(testCases)("$args => $expected", ({ args, expected }) => {
+    expect(diffUpdates(...args)).toStrictEqual(expected);
+  });
+});
 describe("findPrioritizedDoubleEffectModifier", () => {
   const testCases: Array<{
     args: Parameters<typeof findPrioritizedDoubleEffectModifier>;
@@ -448,6 +411,73 @@ describe("findPrioritizedDoubleEffectModifier", () => {
       expected,
     );
   });
+});
+describe("getDisplayedRepresentativeModifierValue", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getDisplayedRepresentativeModifierValue>;
+    expected: ReturnType<typeof getDisplayedRepresentativeModifierValue>;
+  }> = [
+    {
+      args: [{ kind: "focus", amount: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "goodCondition", duration: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "doubleEffect" }],
+      expected: 1,
+    },
+    {
+      args: [{ kind: "debuffProtection", times: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "delayedEffect", delay: 2 } as Modifier],
+      expected: 1,
+    },
+    {
+      args: [{ kind: "lifeConsumptionReduction", value: 2 }],
+      expected: 2,
+    },
+    {
+      args: [{ kind: "effectActivationOnTurnEnd" } as Modifier],
+      expected: undefined,
+    },
+  ];
+  test.each(testCases)("$args.0 => $expected", ({ args, expected }) => {
+    expect(getDisplayedRepresentativeModifierValue(...args)).toBe(expected);
+  });
+});
+describe("getIdolParameterKindOnTurn", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getIdolParameterKindOnTurn>;
+    expected: ReturnType<typeof getIdolParameterKindOnTurn>;
+  }> = [
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 1 } as Lesson],
+      expected: "vocal",
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 2 } as Lesson],
+      expected: "dance",
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 3 } as Lesson],
+      expected: "dance",
+    },
+    {
+      args: [{ turns: ["vocal", "dance"], turnNumber: 0 } as Lesson],
+      expected: "vocal",
+    },
+  ];
+  test.each(testCases)(
+    "$args.0.turns, $args.0.turnNumber => $expected",
+    ({ args, expected }) => {
+      expect(getIdolParameterKindOnTurn(...args)).toBe(expected);
+    },
+  );
 });
 describe("patchDiffs", () => {
   describe("actionPoints", () => {
@@ -1095,36 +1125,5 @@ describe("patchDiffs", () => {
       ]);
       expect(lessonMock.idol.vitality).toBe(3);
     });
-  });
-});
-describe("diffUpdates", () => {
-  const testCases: Array<{
-    args: Parameters<typeof diffUpdates>;
-    expected: ReturnType<typeof diffUpdates>;
-  }> = [
-    {
-      args: [
-        [{ kind: "life" }] as LessonUpdateQuery[],
-        [{ kind: "life" }] as LessonUpdateQuery[],
-      ],
-      expected: [],
-    },
-    {
-      args: [
-        [{ kind: "life" }] as LessonUpdateQuery[],
-        [
-          { kind: "life" },
-          { kind: "score" },
-          { kind: "vitality" },
-        ] as LessonUpdateQuery[],
-      ],
-      expected: [
-        { kind: "score" },
-        { kind: "vitality" },
-      ] as LessonUpdateQuery[],
-    },
-  ];
-  test.each(testCases)("$args => $expected", ({ args, expected }) => {
-    expect(diffUpdates(...args)).toStrictEqual(expected);
   });
 });

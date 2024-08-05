@@ -24,12 +24,12 @@ import {
   IdolInProduction,
   Drink,
 } from "./types";
-import { type CardDataId, getCardDataById } from "./data/cards";
+import { type CardDataId, getCardDataByConstId } from "./data/cards";
 import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
 import { type IdolDataId } from "./data/idols";
 import {
   type ProducerItemDataId,
-  getProducerItemDataById,
+  getProducerItemDataByConstId,
 } from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
@@ -150,7 +150,7 @@ export const initializeGamePlay = (params: {
     (cardSetting) => {
       return {
         id: cardSetting.testId ?? idGenerator(),
-        data: getCardDataById(cardSetting.id),
+        data: getCardDataByConstId(cardSetting.id),
         enhanced: cardSetting.enhanced ?? false,
       };
     },
@@ -159,7 +159,7 @@ export const initializeGamePlay = (params: {
     params.producerItems.map((producerItemSetting) => {
       return {
         id: idGenerator(),
-        data: getProducerItemDataById(producerItemSetting.id),
+        data: getProducerItemDataByConstId(producerItemSetting.id),
         enhanced: producerItemSetting.enhanced ?? false,
       };
     });

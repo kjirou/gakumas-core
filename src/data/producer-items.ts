@@ -15,6 +15,10 @@ export const getProducerItemDataById = (
   return producerItem;
 };
 
+export const getProducerItemDataByConstId = (
+  id: ProducerItemDataId,
+): ProducerItemData => getProducerItemDataById(id);
+
 /**
  * Pアイテムデータの定義
  *

@@ -1,16 +1,14 @@
 import {
   Card,
-  CardInProduction,
   Idol,
   Lesson,
   LessonUpdateQuery,
   Modifier,
   ProducerItem,
-  ProducerItemInProduction,
 } from "./types";
-import { getCardDataById } from "./data/cards";
+import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
-import { getProducerItemDataById } from "./data/producer-items";
+import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   activateEffectIf,
   activateEffectsEachProducerItemsAccordingToCardUsage,
@@ -41,68 +39,1463 @@ import {
   validateCostConsumution,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
-import { createGamePlayForTest } from "./test-utils";
+import { createLessonForTest } from "./test-utils";
 import { createIdGenerator } from "./utils";
 
-const createLessonForTest = (
-  options: {
-    deck?: CardInProduction[];
-    producerItems?: ProducerItemInProduction[];
-  } = {},
-): Lesson => {
-  const gamePlay = createGamePlayForTest({
-    deck: options.deck,
-    producerItems: options.producerItems,
+describe("activateEffectIf", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectIf>;
+    expected: ReturnType<typeof activateEffectIf>;
+    name: string;
+  }> = [
+    {
+      name: "drainLife",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.life = 1;
+          lesson.idol.vitality = 3;
+          return lesson;
+        })(),
+        { kind: "drainLife", value: 5 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "vitality",
+          actual: -3,
+          max: -5,
+        },
+        {
+          kind: "life",
+          actual: -1,
+          max: -2,
+        },
+      ],
+    },
+    {
+      name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ deck: [] });
+          return lesson;
+        })(),
+        { kind: "generateCard" },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "cards.addition",
+          card: {
+            id: expect.any(String),
+            enhancements: [{ kind: "original" }],
+            original: {
+              id: expect.any(String),
+              data: expect.objectContaining({
+                rarity: "ssr",
+              }),
+              enhanced: true,
+            },
+          },
+        },
+        {
+          kind: "cardPlacement",
+          hand: [expect.any(String)],
+        },
+      ],
+    },
+    {
+      name: "generateTroubleCard - 山札0枚で実行した時、眠気スキルカードを追加して、山札はその1枚になる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ deck: [] });
+          return lesson;
+        })(),
+        { kind: "generateTroubleCard" },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "cards.addition",
+          card: {
+            id: expect.any(String),
+            enhancements: [],
+            original: {
+              id: expect.any(String),
+              data: expect.objectContaining({
+                id: "nemuke",
+              }),
+              enhanced: false,
+            },
+          },
+        },
+        {
+          kind: "cardPlacement",
+          deck: [expect.any(String)],
+        },
+      ],
+    },
+    {
+      name: "getModifier - mightyPerformance で同じパーセンテージを追加した時、合算する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            {
+              kind: "mightyPerformance",
+              duration: 1,
+              percentage: 50,
+              id: "m1",
+            },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "getModifier",
+          modifier: { kind: "mightyPerformance", duration: 2, percentage: 50 },
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "duration",
+          id: "m1",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "getModifier - mightyPerformance で異なるパーセンテージを追加した時、合算しない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            {
+              kind: "mightyPerformance",
+              duration: 1,
+              percentage: 50,
+              id: "m1",
+            },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "getModifier",
+          modifier: { kind: "mightyPerformance", duration: 2, percentage: 30 },
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.addition",
+          actual: {
+            kind: "mightyPerformance",
+            duration: 2,
+            percentage: 30,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "mightyPerformance",
+            duration: 2,
+            percentage: 30,
+            id: expect.any(String),
+          },
+        },
+      ],
+    },
+    {
+      name: "increaseRemainingTurns",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "increaseRemainingTurns", amount: 1 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "remainingTurnsChange",
+          amount: 1,
+        },
+      ],
+    },
+    {
+      name: "recoverLife - 体力回復で最大体力以下まで回復した時、指定した数値分の体力を回復する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.life = 1;
+          return lesson;
+        })(),
+        { kind: "recoverLife", value: 2 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "life",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "recoverLife - 体力回復で最大体力を超過して回復した時、最大値に到達するまでの体力を回復する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.life = lesson.idol.original.maxLife - 1;
+          return lesson;
+        })(),
+        { kind: "recoverLife", value: 2 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "life",
+          actual: 1,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "multiplyModifier",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "focus", amount: 10, id: "m1" },
+            { kind: "positiveImpression", amount: 100, id: "m2" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "multiplyModifier",
+          modifierKind: "positiveImpression",
+          multiplier: 1.5,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m2",
+          actual: 50,
+          max: 50,
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectIf(...args)).toStrictEqual(expected);
   });
-  return gamePlay.initialLesson;
-};
-
-describe("drawCardsFromDeck", () => {
-  test("山札がなくならない状態で1枚引いた時、1枚引けて、山札は再構築されず、山札が1枚減る", () => {
-    const deck = ["1", "2", "3"];
-    const {
-      drawnCards,
-      deck: newDeck,
-      deckRebuilt,
-    } = drawCardsFromDeck(deck, 1, [], Math.random);
-    expect(drawnCards).toHaveLength(1);
-    expect(newDeck).toHaveLength(2);
-    expect(deckRebuilt).toBe(false);
-  });
-  test("山札の最後の1枚を1枚だけ引いた時、1枚引けて、山札は再構築されず、山札が1枚減り、捨札は変わらない", () => {
-    const deck = ["1", "2", "3"];
-    const discardPile = ["4"];
-    const {
-      drawnCards,
-      deck: newDeck,
-      deckRebuilt,
-      discardPile: newDiscardPile,
-    } = drawCardsFromDeck(deck, 1, discardPile, Math.random);
-    expect(drawnCards).toHaveLength(1);
-    expect(newDeck).toHaveLength(2);
-    expect(deckRebuilt).toBe(false);
-    expect(newDiscardPile).toStrictEqual(discardPile);
-  });
-  test("山札が残り1枚で2枚引いた時、山札は再構築され、2枚引けて、捨札は山札に移動して空になり、山札は捨札の-1枚の数になる", () => {
-    const deck = ["1"];
-    const discardPile = ["2", "3", "4", "5"];
-    const {
-      drawnCards,
-      deck: newDeck,
-      deckRebuilt,
-      discardPile: newDiscardPile,
-    } = drawCardsFromDeck(deck, 2, discardPile, Math.random);
-    expect(drawnCards).toHaveLength(2);
-    expect(newDeck).toHaveLength(3);
-    expect(deckRebuilt).toBe(true);
-    expect(newDiscardPile).toStrictEqual([]);
-    expect([...drawnCards, ...newDeck].sort()).toStrictEqual([
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
+});
+describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
+  test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("itsumonomeikupochi"),
+          enhanced: false,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardSummaryKind: "active",
+        },
+      );
+    expect(
+      updates1.filter((e) => e.kind === "modifiers.addition"),
+    ).toStrictEqual([
+      {
+        kind: "modifiers.addition",
+        actual: {
+          kind: "focus",
+          amount: 2,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "focus",
+          amount: 2,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
     ]);
+    const { updates: updates2 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardSummaryKind: "mental",
+        },
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+  test("「最高にハッピーの源」は、「アドレナリン全開」スキルカード使用時、好調と固定元気を付与する。他スキルカード使用時は付与しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("saikonihappinominamoto"),
+          enhanced: false,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardDataId: "adorenarinzenkai",
+        },
+      );
+    expect(
+      updates1.filter(
+        (e) => e.kind === "modifiers.addition" || e.kind === "vitality",
+      ),
+    ).toStrictEqual([
+      {
+        kind: "modifiers.addition",
+        actual: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "vitality",
+        actual: 5,
+        max: 5,
+        reason: expect.any(Object),
+      },
+    ]);
+    const { updates: updates2 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "beforeCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          cardDataId: "apirunokihon",
+        },
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+  test("「最高にハッピーの源」と「曇りをぬぐったタオル」は、1枚のアクティブスキルカード使用時に同時に効果発動し得る", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("saikonihappinominamoto"),
+          enhanced: false,
+        },
+        {
+          id: "b",
+          data: getProducerItemDataByConstId("kumoriwonuguttataoru"),
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
+      lesson,
+      "beforeCardEffectActivation",
+      () => 0,
+      createIdGenerator(),
+      dummyReason,
+      {
+        cardDataId: "adorenarinzenkai",
+        cardSummaryKind: "active",
+      },
+    );
+    expect(
+      updates.filter(
+        (e) =>
+          e.kind === "modifiers.addition" ||
+          e.kind === "vitality" ||
+          e.kind === "life",
+      ),
+    ).toStrictEqual([
+      {
+        kind: "modifiers.addition",
+        actual: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "goodCondition",
+          duration: 3,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "vitality",
+        actual: 5,
+        max: 5,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "life",
+        actual: 0,
+        max: 2,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("スキルカード使用後トリガーである、「ビッグドリーム貯金箱」を、好印象が6以上の時、発動する。好印象が6未満の時、発動しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("biggudorimuchokimbako"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.idol.modifiers = [
+      { kind: "positiveImpression", amount: 6, id: "m1" },
+    ];
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "afterCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+      );
+    expect(updates1.filter((e) => e.kind === "modifiers.update")).toStrictEqual(
+      [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m1",
+          actual: 3,
+          max: 3,
+          reason: expect.any(Object),
+        },
+      ],
+    );
+    expect(
+      updates1.filter((e) => e.kind === "modifiers.addition"),
+    ).toStrictEqual([
+      {
+        kind: "modifiers.addition",
+        actual: {
+          kind: "additionalCardUsageCount",
+          amount: 1,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "additionalCardUsageCount",
+          amount: 1,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+    lesson.idol.modifiers = [
+      { kind: "positiveImpression", amount: 5, id: "m1" },
+    ];
+    const { updates: updates2 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "afterCardEffectActivation",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+  test("状態修正トリガーである、「ひみつ特訓カーデ」を、やる気が上昇した時、発動する。やる気ではない時、発動しない", () => {
+    let lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("himitsutokkunkade"),
+          enhanced: false,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "cardUsage",
+      cardId: "x",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates: updates1 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "modifierIncrease",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          increasedModifierKinds: ["motivation"],
+        },
+      );
+    expect(
+      updates1.filter((e) => e.kind === "modifiers.addition"),
+    ).toStrictEqual([
+      {
+        kind: "modifiers.addition",
+        actual: {
+          kind: "motivation",
+          amount: 3,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "motivation",
+          amount: 3,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+    ]);
+    const { updates: updates2 } =
+      activateEffectsEachProducerItemsAccordingToCardUsage(
+        lesson,
+        "modifierIncrease",
+        () => 0,
+        createIdGenerator(),
+        dummyReason,
+        {
+          increasedModifierKinds: ["positiveImpression"],
+        },
+      );
+    expect(updates2).toStrictEqual([]);
+  });
+});
+describe("activateEffectsOfProducerItem", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOfProducerItem>;
+    expected: ReturnType<typeof activateEffectsOfProducerItem>;
+    name: string;
+  }> = [
+    {
+      name: "activationCount を 1 増加する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ producerItems: [] });
+          return lesson;
+        })(),
+        {
+          id: "a",
+          original: {
+            id: "a",
+            data: getProducerItemDataByConstId("gesennosenrihin"),
+            enhanced: false,
+          },
+          activationCount: 0,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.addition",
+          actual: { kind: "focus", amount: 3, id: expect.any(String) },
+          max: { kind: "focus", amount: 3, id: expect.any(String) },
+        },
+        {
+          kind: "producerItem.activationCount",
+          producerItemId: "a",
+          value: 1,
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOfProducerItem(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffectsOnCardPlay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOnCardPlay>;
+    expected: ReturnType<typeof activateEffectsOnCardPlay>;
+    name: string;
+  }> = [
+    {
+      name: "各効果発動は、自身より後の効果発動へ影響を与える",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.vitality = 0;
+          return lesson;
+        })(),
+        [
+          { kind: "perform", vitality: { value: 1 } },
+          { kind: "performLeveragingVitality", percentage: 100 },
+        ],
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        [{ kind: "vitality", actual: 1, max: 1 }],
+        [{ kind: "score", actual: 1, max: 1 }],
+      ],
+    },
+    {
+      name: "各効果の発動条件は、効果リスト発動前の状態を参照する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "focus", amount: 1 },
+            condition: { kind: "hasGoodCondition" },
+          },
+        ],
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        [
+          {
+            kind: "modifiers.addition",
+            actual: {
+              kind: "goodCondition",
+              duration: 1,
+              id: expect.any(String),
+            },
+            max: {
+              kind: "goodCondition",
+              duration: 1,
+              id: expect.any(String),
+            },
+          },
+        ],
+        undefined,
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOnCardPlay(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffectsOnLessonStart", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEffectsOnLessonStart>;
+    expected: ReturnType<typeof activateEffectsOnLessonStart>;
+    name: string;
+  }> = [
+    {
+      name: "「ゲーセンの戦利品」を発動する",
+      args: [
+        createLessonForTest({
+          producerItems: [
+            {
+              id: "a",
+              data: getProducerItemDataByConstId("gesennosenrihin"),
+              enhanced: false,
+            },
+          ],
+        }),
+        1,
+        {
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifiers.addition",
+            actual: { kind: "focus", amount: 3, id: expect.any(String) },
+            max: { kind: "focus", amount: 3, id: expect.any(String) },
+            reason: expect.any(Object),
+          },
+          {
+            kind: "producerItem.activationCount",
+            producerItemId: "a",
+            value: 1,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEffectsOnLessonStart(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateEffectsOnTurnEnd", () => {
+  describe('Pアイテムの "turnEnd" による効果発動', () => {
+    test("「お気にのスニーカー」を発動する", () => {
+      const lesson = createLessonForTest({
+        producerItems: [
+          {
+            id: "a",
+            data: getProducerItemDataByConstId("okininosunika"),
+          },
+        ],
+      });
+      lesson.idol.vitality = 7;
+      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+      });
+      expect(
+        updates.filter((e) => e.kind === "modifiers.addition"),
+      ).toStrictEqual([
+        {
+          kind: "modifiers.addition",
+          actual: {
+            kind: "positiveImpression",
+            amount: 4,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "positiveImpression",
+            amount: 4,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
+  describe("状態修正による効果発動", () => {
+    test("effectActivationOnTurnEnd", () => {
+      const lesson = createLessonForTest();
+      lesson.idol.modifiers = [
+        {
+          kind: "effectActivationOnTurnEnd",
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 1 },
+          },
+          id: "x",
+        },
+      ];
+      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+      });
+      expect(
+        updates.filter((e) => e.kind === "modifiers.addition"),
+      ).toStrictEqual([
+        {
+          kind: "modifiers.addition",
+          actual: {
+            kind: "motivation",
+            amount: 1,
+            id: expect.any(String),
+          },
+          max: {
+            kind: "motivation",
+            amount: 1,
+            id: expect.any(String),
+          },
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
+});
+describe("activateEncouragementOnTurnStart", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateEncouragementOnTurnStart>;
+    expected: ReturnType<typeof activateEncouragementOnTurnStart>;
+    name: string;
+  }> = [
+    {
+      name: "ターン番号が一致し、効果発動条件を満たす時、発動する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.turnNumber = 1;
+          lesson.encouragements = [
+            {
+              turnNumber: 1,
+              effect: {
+                kind: "perform",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "motivation",
+                  range: { min: 1 },
+                },
+                score: { value: 1 },
+              },
+            },
+          ];
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 1, id: "m1" }];
+          return lesson;
+        })(),
+        1,
+        {
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "score",
+            actual: 1,
+            max: 1,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "ターン番号は一致するが、効果発動条件を満たさない時、発動しない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.turnNumber = 1;
+          lesson.encouragements = [
+            {
+              turnNumber: 1,
+              effect: {
+                kind: "perform",
+                condition: {
+                  kind: "countModifier",
+                  modifierKind: "motivation",
+                  range: { min: 1 },
+                },
+                score: { value: 1 },
+              },
+            },
+          ];
+          return lesson;
+        })(),
+        1,
+        {
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+        },
+      ],
+      expected: {
+        updates: [],
+        nextHistoryResultIndex: 1,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateEncouragementOnTurnStart(...args)).toStrictEqual(expected);
+  });
+});
+describe("activateMemoryEffect", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateMemoryEffect>;
+    expected: ReturnType<typeof activateMemoryEffect>;
+    name: string;
+  }> = [
+    {
+      name: "可能性が0の時、常に結果を返さない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "focus", value: 1, probability: 0 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [],
+    },
+    {
+      name: "値がamountプロパティな状態修正を新規で付与する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "focus", value: 1, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.addition",
+          actual: { kind: "focus", amount: 1, id: expect.any(String) },
+          max: { kind: "focus", amount: 1, id: expect.any(String) },
+        },
+      ],
+    },
+    {
+      name: "値がamountプロパティな状態修正を更新する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [{ kind: "focus", amount: 1, id: "a" }];
+          return lesson;
+        })(),
+        { kind: "focus", value: 2, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "a",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "値がdurationプロパティな状態修正を新規で付与する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "goodCondition", value: 1, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.addition",
+          actual: {
+            kind: "goodCondition",
+            duration: 1,
+            id: expect.any(String),
+          },
+          max: { kind: "goodCondition", duration: 1, id: expect.any(String) },
+        },
+      ],
+    },
+    {
+      name: "値がdurationプロパティな状態修正を更新する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 1, id: "a" },
+          ];
+          return lesson;
+        })(),
+        { kind: "goodCondition", value: 2, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "duration",
+          id: "a",
+          actual: 2,
+          max: 2,
+        },
+      ],
+    },
+    {
+      name: "元気をやる気の補正を付与して加算する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.vitality = 1;
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 1, id: "a" }];
+          return lesson;
+        })(),
+        { kind: "vitality", value: 2, probability: 100 },
+        () => 0.999999999,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "vitality",
+          actual: 3,
+          max: 3,
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateMemoryEffect(...args)).toStrictEqual(expected);
+  });
+});
+// 基本的には activateMemoryEffect 側でテストする
+describe("activateMemoryEffectsOnLessonStart", () => {
+  const testCases: Array<{
+    args: Parameters<typeof activateMemoryEffectsOnLessonStart>;
+    expected: ReturnType<typeof activateMemoryEffectsOnLessonStart>;
+    name: string;
+  }> = [
+    {
+      name: "設定がない時、発動しない",
+      args: [
+        createLessonForTest(),
+        1,
+        { getRandom: () => 0, idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [],
+        nextHistoryResultIndex: 1,
+      },
+    },
+    {
+      name: "100%発動する設定がある時、発動する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.memoryEffects = [
+            { kind: "focus", value: 1, probability: 100 },
+          ];
+          return lesson;
+        })(),
+        1,
+        { getRandom: () => 0, idGenerator: createIdGenerator() },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifiers.addition",
+            actual: { kind: "focus", amount: 1, id: expect.any(String) },
+            max: { kind: "focus", amount: 1, id: expect.any(String) },
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(activateMemoryEffectsOnLessonStart(...args)).toStrictEqual(expected);
+  });
+});
+// Pアイテム発動条件については、canTriggerProducerItem のテストケースで可能な範囲はそちらで検証する
+describe("activateModifierEffectsOnTurnStart", () => {
+  test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
+    const lesson = createLessonForTest({
+      deck: [
+        {
+          id: "a",
+          data: getCardDataByConstId("apirunokihon"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "perform",
+          score: {
+            value: 10,
+          },
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 2,
+        id: "y",
+        effect: {
+          kind: "perform",
+          score: {
+            value: 15,
+          },
+        },
+      },
+    ];
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        actual: 10,
+        max: 10,
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "y",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターンにスキルカードを1枚引く状態修正がある時、手札が1枚増え、その状態修正を減少する", () => {
+    const lesson = createLessonForTest({
+      deck: [
+        {
+          id: "a",
+          data: getCardDataByConstId("apirunokihon"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.deck = ["a"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+    ];
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a"],
+        deck: [],
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターン・2ターン後・次ターンにスキルカードを1枚引く状態修正がある時、手札1枚増加を2回行い、全ての状態修正を減少する", () => {
+    const lesson = createLessonForTest({
+      deck: [
+        ...["a", "b"].map((id) => ({
+          id,
+          data: getCardDataByConstId("apirunokihon"),
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.deck = ["a", "b"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 2,
+        id: "y",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "z",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+    ];
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
+      {
+        kind: "cardPlacement",
+        hand: ["a"],
+        deck: ["b"],
+        reason: expect.any(Object),
+      },
+      {
+        kind: "cardPlacement",
+        hand: ["a", "b"],
+        deck: [],
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "y",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "z",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターンに手札を強化するを状態修正がある時、手札が全て強化され、その状態修正を減少する", () => {
+    const lesson = createLessonForTest({
+      deck: [
+        ...["a", "b"].map((id) => ({
+          id,
+          data: getCardDataByConstId("apirunokihon"),
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.hand = ["a", "b"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "enhanceHand",
+        },
+      },
+    ];
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(
+      updates.filter((e) => e.kind === "cards.enhancement.effect"),
+    ).toStrictEqual([
+      {
+        kind: "cards.enhancement.effect",
+        cardIds: ["a", "b"],
+        reason: expect.any(Object),
+      },
+    ]);
+    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "delay",
+        id: "x",
+        actual: -1,
+        max: -1,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("次ターンにスキルカードを引く状態修正と手札を強化する状態修正がある時、手札が引かれた状態で、手札が全て強化される", () => {
+    const lesson = createLessonForTest({
+      deck: [
+        ...["a", "b"].map((id) => ({
+          id,
+          data: getCardDataByConstId("apirunokihon"),
+          enhanced: false,
+        })),
+      ],
+    });
+    lesson.hand = ["a"];
+    lesson.deck = ["b"];
+    lesson.idol.modifiers = [
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "x",
+        effect: {
+          kind: "enhanceHand",
+        },
+      },
+      {
+        kind: "delayedEffect",
+        delay: 1,
+        id: "y",
+        effect: {
+          kind: "drawCards",
+          amount: 1,
+        },
+      },
+    ];
+    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+      idGenerator: createIdGenerator(),
+    });
+    expect(
+      updates.filter((e) => e.kind === "cards.enhancement.effect"),
+    ).toStrictEqual([
+      {
+        kind: "cards.enhancement.effect",
+        cardIds: ["a", "b"],
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+});
+// canTriggerProducerItem のテストケースで可能な範囲はそちらで検証する
+describe("activateProducerItemEffectsOnTurnStart", () => {
+  test("「ばくおんライオン」を、好調状態の時、発動する", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("bakuonraion"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.idol.modifiers = [{ kind: "goodCondition", duration: 1, id: "x" }];
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
+      {
+        kind: "score",
+        // 好調が付与されているので1.5倍になっている
+        actual: 9,
+        max: 9,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("「ばくおんライオン」を、好調状態ではない時、発動しない", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("bakuonraion"),
+          enhanced: false,
+        },
+      ],
+    });
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([]);
+  });
+  test("「柴犬ポシェット」を、2ターン目の時、発動する", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("shibainuposhetto"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.turnNumber = 2;
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([
+      {
+        kind: "vitality",
+        actual: 5,
+        max: 5,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
+  test("「柴犬ポシェット」を、1ターン目の時、発動しない", () => {
+    const lesson = createLessonForTest({
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("shibainuposhetto"),
+          enhanced: false,
+        },
+      ],
+    });
+    lesson.turnNumber = 1;
+    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+      idGenerator: createIdGenerator(),
+    });
+    expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([]);
   });
 });
 describe("addCardsToHandOrDiscardPile", () => {
@@ -156,1276 +1549,6 @@ describe("addCardsToHandOrDiscardPile", () => {
       expect(addCardsToHandOrDiscardPile(...args)).toStrictEqual(expected);
     },
   );
-});
-describe("createCardPlacementDiff", () => {
-  const testCases: {
-    args: Parameters<typeof createCardPlacementDiff>;
-    expected: ReturnType<typeof createCardPlacementDiff>;
-    name: string;
-  }[] = [
-    {
-      name: "before側だけ存在しても差分は返さない",
-      args: [
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-        {},
-      ],
-      expected: { kind: "cardPlacement" },
-    },
-    {
-      name: "after側だけ存在しても差分は返さない",
-      args: [
-        {},
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-      ],
-      expected: { kind: "cardPlacement" },
-    },
-    {
-      name: "全ての値がbefore/afterで同じ場合は差分を返さない",
-      args: [
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-      ],
-      expected: { kind: "cardPlacement" },
-    },
-    {
-      name: "deckのみの差分を返せる",
-      args: [
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-        {
-          deck: ["11"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-      ],
-      expected: { kind: "cardPlacement", deck: ["11"] },
-    },
-    {
-      name: "discardPileのみの差分を返せる",
-      args: [
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-        {
-          deck: ["1"],
-          discardPile: ["22"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-      ],
-      expected: { kind: "cardPlacement", discardPile: ["22"] },
-    },
-    {
-      name: "handのみの差分を返せる",
-      args: [
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["33"],
-          removedCardPile: ["4"],
-        },
-      ],
-      expected: { kind: "cardPlacement", hand: ["33"] },
-    },
-    {
-      name: "removedCardPileのみの差分を返せる",
-      args: [
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["4"],
-        },
-        {
-          deck: ["1"],
-          discardPile: ["2"],
-          hand: ["3"],
-          removedCardPile: ["44"],
-        },
-      ],
-      expected: { kind: "cardPlacement", removedCardPile: ["44"] },
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(createCardPlacementDiff(...args)).toStrictEqual(expected);
-  });
-});
-describe("validateCostConsumution", () => {
-  const testCases: Array<{
-    args: Parameters<typeof validateCostConsumution>;
-    expected: ReturnType<typeof validateCostConsumution>;
-    name: string;
-  }> = [
-    {
-      name: "normalコストに対してlifeが足りる時、スキルカードが使える",
-      args: [
-        {
-          life: 3,
-          vitality: 0,
-          modifiers: [] as Idol["modifiers"],
-        } as Idol,
-        { kind: "normal", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "normalコストに対してvitalityが足りる時、スキルカードが使える",
-      args: [
-        {
-          life: 0,
-          vitality: 3,
-          modifiers: [] as Idol["modifiers"],
-        } as Idol,
-        { kind: "normal", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "normalコストに対してlifeとvitalityの合計が足りる時、スキルカードが使える",
-      args: [
-        {
-          life: 1,
-          vitality: 2,
-          modifiers: [] as Idol["modifiers"],
-        } as Idol,
-        { kind: "normal", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "normalコストに対してlifeとvitalityの合計が足りない時、スキルカードが使えない",
-      args: [
-        {
-          life: 1,
-          vitality: 2,
-          modifiers: [] as Idol["modifiers"],
-        } as Idol,
-        { kind: "normal", value: 4 },
-      ],
-      expected: false,
-    },
-    {
-      name: "lifeコストを満たす時、スキルカードが使える",
-      args: [
-        {
-          life: 3,
-          vitality: 0,
-          modifiers: [] as Idol["modifiers"],
-        } as Idol,
-        { kind: "life", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "lifeコスト満たさない時、スキルカードが使えない",
-      args: [
-        {
-          life: 3,
-          vitality: 10,
-          modifiers: [] as Idol["modifiers"],
-        } as Idol,
-        { kind: "life", value: 4 },
-      ],
-      expected: false,
-    },
-    {
-      name: "focusコストを満たす時、スキルカードが使える",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [{ kind: "focus", amount: 3 }] as Idol["modifiers"],
-        } as Idol,
-        { kind: "focus", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "focusコストを満たさない時、スキルカードが使えない",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [{ kind: "focus", amount: 3 }] as Idol["modifiers"],
-        } as Idol,
-        { kind: "focus", value: 4 },
-      ],
-      expected: false,
-    },
-    {
-      name: "goodConditionコストを満たす時、スキルカードが使える",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [
-            { kind: "goodCondition", duration: 3 },
-          ] as Idol["modifiers"],
-        } as Idol,
-        { kind: "goodCondition", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "goodConditionコストを満たさない時、スキルカードが使えない",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [
-            { kind: "goodCondition", duration: 3 },
-          ] as Idol["modifiers"],
-        } as Idol,
-        { kind: "goodCondition", value: 4 },
-      ],
-      expected: false,
-    },
-    {
-      name: "motivationコストを満たす時、スキルカードが使える",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [{ kind: "motivation", amount: 3 }] as Idol["modifiers"],
-        } as Idol,
-        { kind: "motivation", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "motivationコストを満たさない時、スキルカードが使えない",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [{ kind: "motivation", amount: 3 }] as Idol["modifiers"],
-        } as Idol,
-        { kind: "motivation", value: 4 },
-      ],
-      expected: false,
-    },
-    {
-      name: "positiveImpressionコストを満たす時、スキルカードが使える",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [
-            { kind: "positiveImpression", amount: 3 },
-          ] as Idol["modifiers"],
-        } as Idol,
-        { kind: "positiveImpression", value: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "positiveImpressionコストを満たさない時、スキルカードが使えない",
-      args: [
-        {
-          life: 0,
-          vitality: 0,
-          modifiers: [
-            { kind: "positiveImpression", amount: 3 },
-          ] as Idol["modifiers"],
-        } as Idol,
-        { kind: "positiveImpression", value: 4 },
-      ],
-      expected: false,
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(validateCostConsumution(...args)).toStrictEqual(expected);
-  });
-});
-// validateCostConsumution で検証できる内容はそちらで行う
-describe("canPlayCard", () => {
-  const testCases: Array<{
-    args: Parameters<typeof canPlayCard>;
-    expected: ReturnType<typeof canPlayCard>;
-    name: string;
-  }> = [
-    {
-      name: "コストを満たすリソースがない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 3,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 4 },
-        undefined,
-      ],
-      expected: false,
-    },
-    {
-      name: "コストを満たすリソースがあり、追加条件が無い時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 3,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        undefined,
-      ],
-      expected: true,
-    },
-    {
-      name: "ターン数の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          turnNumber: 3,
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        { kind: "countTurnNumber", min: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "ターン数の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          turnNumber: 2,
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        { kind: "countTurnNumber", min: 3 },
-      ],
-      expected: false,
-    },
-    {
-      name: "元気0の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          turnNumber: 3,
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        { kind: "countVitalityZero" },
-      ],
-      expected: true,
-    },
-    {
-      name: "元気0の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 1,
-            modifiers: [] as Idol["modifiers"],
-          },
-          turnNumber: 3,
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        { kind: "countVitalityZero" },
-      ],
-      expected: false,
-    },
-    {
-      name: "好調所持の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 3,
-            vitality: 0,
-            modifiers: [
-              { kind: "goodCondition", duration: 1 },
-            ] as Idol["modifiers"],
-          },
-          turnNumber: 3,
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        { kind: "hasGoodCondition" },
-      ],
-      expected: true,
-    },
-    {
-      name: "好調所持の追加条件を満たさない時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 3,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          turnNumber: 3,
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        { kind: "hasGoodCondition" },
-      ],
-      expected: false,
-    },
-    {
-      name: "life比率以上の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 5,
-            original: {
-              maxLife: 10,
-            },
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        {
-          kind: "measureValue",
-          valueKind: "life",
-          criterionKind: "greaterEqual",
-          percentage: 50,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "life比率以上の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 4,
-            original: {
-              maxLife: 10,
-            },
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        {
-          kind: "measureValue",
-          valueKind: "life",
-          criterionKind: "greaterEqual",
-          percentage: 50,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "life比率以下の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 5,
-            original: {
-              maxLife: 10,
-            },
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        {
-          kind: "measureValue",
-          valueKind: "life",
-          criterionKind: "lessEqual",
-          percentage: 50,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "life比率以下の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 6,
-            original: {
-              maxLife: 10,
-            },
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        {
-          kind: "measureValue",
-          valueKind: "life",
-          criterionKind: "lessEqual",
-          percentage: 50,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "score比率以上の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 10,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "greaterEqual",
-          percentage: 100,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "score比率以上の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 9,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "greaterEqual",
-          percentage: 100,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "score比率以下の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 10,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "lessEqual",
-          percentage: 100,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "score比率以下の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 11,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "lessEqual",
-          percentage: 100,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "score比率の追加条件があるが、レッスンにクリアスコア閾値が設定されていない時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 10,
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "greaterEqual",
-          percentage: 100,
-        },
-      ],
-      expected: true,
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canPlayCard(...args)).toStrictEqual(expected);
-  });
-});
-describe("canActivateEffect", () => {
-  const testCases: Array<{
-    args: Parameters<typeof canActivateEffect>;
-    expected: ReturnType<typeof canActivateEffect>;
-    name: string;
-  }> = [
-    {
-      name: "countModifierのfocusを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [{ kind: "focus", amount: 3 }] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "countModifier", modifierKind: "focus", range: { min: 3 } },
-      ],
-      expected: true,
-    },
-    {
-      name: "countModifierのfocusを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [{ kind: "focus", amount: 2 }] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "countModifier", modifierKind: "focus", range: { min: 3 } },
-      ],
-      expected: false,
-    },
-    {
-      name: "countModifierのgoodConditionを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [
-              { kind: "goodCondition", duration: 3 },
-            ] as Idol["modifiers"],
-          },
-        } as Lesson,
-        {
-          kind: "countModifier",
-          modifierKind: "goodCondition",
-          range: { min: 3 },
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "countModifierのgoodConditionを満たさない時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [
-              { kind: "goodCondition", duration: 2 },
-            ] as Idol["modifiers"],
-          },
-        } as Lesson,
-        {
-          kind: "countModifier",
-          modifierKind: "goodCondition",
-          range: { min: 3 },
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "countModifierのmotivationを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [{ kind: "motivation", amount: 3 }] as Idol["modifiers"],
-          },
-        } as Lesson,
-        {
-          kind: "countModifier",
-          modifierKind: "motivation",
-          range: { min: 3 },
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "countModifierのmotivationを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [{ kind: "motivation", amount: 2 }] as Idol["modifiers"],
-          },
-        } as Lesson,
-        {
-          kind: "countModifier",
-          modifierKind: "motivation",
-          range: { min: 3 },
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "countModifierのpositiveImpressionを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [
-              { kind: "positiveImpression", amount: 3 },
-            ] as Idol["modifiers"],
-          },
-        } as Lesson,
-        {
-          kind: "countModifier",
-          modifierKind: "positiveImpression",
-          range: { min: 3 },
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "countModifierのpositiveImpressionを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [
-              { kind: "positiveImpression", amount: 2 },
-            ] as Idol["modifiers"],
-          },
-        } as Lesson,
-        {
-          kind: "countModifier",
-          modifierKind: "positiveImpression",
-          range: { min: 3 },
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "countReminingTurnsを満たす時、trueを返す",
-      args: [
-        {
-          turnNumber: 4,
-          turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-          remainingTurnsChange: 0,
-        } as Lesson,
-        { kind: "countReminingTurns", max: 3 },
-      ],
-      expected: true,
-    },
-    {
-      name: "countReminingTurnsを満たさない時、falseを返す",
-      args: [
-        {
-          turnNumber: 4,
-          turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-          remainingTurnsChange: 0,
-        } as Lesson,
-        { kind: "countReminingTurns", max: 2 },
-      ],
-      expected: false,
-    },
-    {
-      name: "countVitalityを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            vitality: 1,
-          },
-        } as Lesson,
-        { kind: "countVitality", range: { min: 1, max: 1 } },
-      ],
-      expected: true,
-    },
-    {
-      name: "countVitalityを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            vitality: 1,
-          },
-        } as Lesson,
-        { kind: "countVitality", range: { min: 2, max: 2 } },
-      ],
-      expected: false,
-    },
-    {
-      name: "hasGoodConditionを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [
-              { kind: "goodCondition", duration: 1 },
-            ] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "hasGoodCondition" },
-      ],
-      expected: true,
-    },
-    {
-      name: "hasGoodConditionを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [{ kind: "focus", amount: 1 }] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "hasGoodCondition" },
-      ],
-      expected: false,
-    },
-    {
-      name: "measureIfLifeIsEqualGreaterThanHalfを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            life: 5,
-            original: {
-              maxLife: 10,
-            },
-          },
-        } as Lesson,
-        { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-      ],
-      expected: true,
-    },
-    {
-      name: "measureIfLifeIsEqualGreaterThanHalfを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            life: 4,
-            original: {
-              maxLife: 10,
-            },
-          },
-        } as Lesson,
-        { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-      ],
-      expected: false,
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canActivateEffect(...args)).toBe(expected);
-  });
-});
-// condition 条件は canActivateEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
-describe("canTriggerProducerItem", () => {
-  const testCases: Array<{
-    args: Parameters<typeof canTriggerProducerItem>;
-    expected: ReturnType<typeof canTriggerProducerItem>;
-    name: string;
-  }> = [
-    {
-      name: "トリガー種別以外の条件がなく、トリガー種別が一致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" } } },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: true,
-    },
-    {
-      name: "トリガー種別以外の条件がなく、トリガー種別が一致しない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" } } },
-          },
-        } as ProducerItem,
-        "turnEnd",
-      ],
-      expected: false,
-    },
-    {
-      name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "vocal" },
-              },
-            },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: true,
-    },
-    {
-      name: "アイドルパラメータ種別条件があり、合致しない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "dance" },
-              },
-            },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: false,
-    },
-    {
-      name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になる時、trueを返す",
-      args: [
-        {
-          turns: ["vocal"],
-          turnNumber: 1,
-          ignoreIdolParameterKindConditionAfterClearing: true,
-          clearScoreThresholds: { clear: 1 },
-          score: 1,
-        } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "dance" },
-              },
-            },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: true,
-    },
-    {
-      name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になるがまだクリア済みでない時、falseを返す",
-      args: [
-        {
-          turns: ["vocal"],
-          turnNumber: 1,
-          ignoreIdolParameterKindConditionAfterClearing: true,
-          clearScoreThresholds: { clear: 2 },
-          score: 1,
-        } as Lesson,
-        {
-          activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "dance" },
-              },
-            },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: false,
-    },
-    {
-      name: "発動回数条件があり、残り発動回数が足りている時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 1,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: true,
-    },
-    {
-      name: "発動回数条件があり、残り発動回数が足りていない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 2,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: false,
-    },
-    {
-      name: "turnStartEveryTwoTurns で、2ターン目の時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 2 } as Lesson,
-        {
-          original: {
-            data: {
-              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-            },
-          },
-        } as ProducerItem,
-        "turnStartEveryTwoTurns",
-      ],
-      expected: true,
-    },
-    {
-      name: "turnStartEveryTwoTurns で、1ターン目の時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-            },
-          },
-        } as ProducerItem,
-        "turnStartEveryTwoTurns",
-      ],
-      expected: false,
-    },
-    {
-      name: "turnStartEveryTwoTurns で、0ターン目の時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 0 } as Lesson,
-        {
-          original: {
-            data: {
-              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-            },
-          },
-        } as ProducerItem,
-        "turnStartEveryTwoTurns",
-      ],
-      expected: false,
-    },
-    {
-      name: "beforeCardEffectActivation で、スキルカード定義IDとスキルカード概要種別が一致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDataId: "a",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "beforeCardEffectActivation",
-        {
-          cardDataId: "a",
-          cardSummaryKind: "active",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "beforeCardEffectActivation で、スキルカード定義IDが一致せず、スキルカード概要種別が一致する時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDataId: "a",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "beforeCardEffectActivation",
-        {
-          cardDataId: "b",
-          cardSummaryKind: "active",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "beforeCardEffectActivation で、スキルカード定義IDが一致し、スキルカード概要種別が一致しない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDataId: "a",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "beforeCardEffectActivation",
-        {
-          cardDataId: "a",
-          cardSummaryKind: "mental",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "afterCardEffectActivation で、スキルカード概要種別が一致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "afterCardEffectActivation",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "afterCardEffectActivation",
-        {
-          cardSummaryKind: "active",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "afterCardEffectActivation で、スキルカード概要種別が一致しない時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "afterCardEffectActivation",
-                  cardSummaryKind: "active",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "afterCardEffectActivation",
-        {
-          cardSummaryKind: "mental",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれる時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "modifierIncrease",
-                  modifierKind: "focus",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "modifierIncrease",
-        {
-          increasedModifierKinds: ["focus"],
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "modifierIncrease",
-                  modifierKind: "focus",
-                },
-              },
-            },
-          },
-        } as ProducerItem,
-        "modifierIncrease",
-        {
-          increasedModifierKinds: ["goodCondition"],
-        },
-      ],
-      expected: false,
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(canTriggerProducerItem(...args)).toStrictEqual(expected);
-  });
 });
 describe("calculateCostConsumption", () => {
   const testCases: Array<{
@@ -1911,870 +2034,1035 @@ describe("calculatePerformingVitalityEffect", () => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
   });
 });
-describe("activateEffectIf", () => {
+describe("canActivateEffect", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateEffectIf>;
-    expected: ReturnType<typeof activateEffectIf>;
+    args: Parameters<typeof canActivateEffect>;
+    expected: ReturnType<typeof canActivateEffect>;
     name: string;
   }> = [
     {
-      name: "drainLife",
+      name: "countModifierのfocusを満たす時、trueを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.life = 1;
-          lesson.idol.vitality = 3;
-          return lesson;
-        })(),
-        { kind: "drainLife", value: 5 },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
         {
-          kind: "vitality",
-          actual: -3,
-          max: -5,
-        },
-        {
-          kind: "life",
-          actual: -1,
-          max: -2,
-        },
-      ],
-    },
-    {
-      name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
-      args: [
-        (() => {
-          const lesson = createLessonForTest({ deck: [] });
-          return lesson;
-        })(),
-        { kind: "generateCard" },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "cards.addition",
-          card: {
-            id: expect.any(String),
-            enhancements: [{ kind: "original" }],
-            original: {
-              id: expect.any(String),
-              data: expect.objectContaining({
-                rarity: "ssr",
-              }),
-              enhanced: true,
-            },
+          idol: {
+            modifiers: [{ kind: "focus", amount: 3 }] as Idol["modifiers"],
           },
-        },
-        {
-          kind: "cardPlacement",
-          hand: [expect.any(String)],
-        },
+        } as Lesson,
+        { kind: "countModifier", modifierKind: "focus", range: { min: 3 } },
       ],
+      expected: true,
     },
     {
-      name: "generateTroubleCard - 山札0枚で実行した時、眠気スキルカードを追加して、山札はその1枚になる",
+      name: "countModifierのfocusを満たさない時、falseを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest({ deck: [] });
-          return lesson;
-        })(),
-        { kind: "generateTroubleCard" },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
         {
-          kind: "cards.addition",
-          card: {
-            id: expect.any(String),
-            enhancements: [],
-            original: {
-              id: expect.any(String),
-              data: expect.objectContaining({
-                id: "nemuke",
-              }),
-              enhanced: false,
-            },
+          idol: {
+            modifiers: [{ kind: "focus", amount: 2 }] as Idol["modifiers"],
           },
-        },
-        {
-          kind: "cardPlacement",
-          deck: [expect.any(String)],
-        },
+        } as Lesson,
+        { kind: "countModifier", modifierKind: "focus", range: { min: 3 } },
       ],
+      expected: false,
     },
     {
-      name: "getModifier - mightyPerformance で同じパーセンテージを追加した時、合算する",
+      name: "countModifierのgoodConditionを満たす時、trueを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [
-            {
-              kind: "mightyPerformance",
-              duration: 1,
-              percentage: 50,
-              id: "m1",
-            },
-          ];
-          return lesson;
-        })(),
         {
-          kind: "getModifier",
-          modifier: { kind: "mightyPerformance", duration: 2, percentage: 50 },
-        },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "modifiers.update",
-          propertyNameKind: "duration",
-          id: "m1",
-          actual: 2,
-          max: 2,
-        },
-      ],
-    },
-    {
-      name: "getModifier - mightyPerformance で異なるパーセンテージを追加した時、合算しない",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [
-            {
-              kind: "mightyPerformance",
-              duration: 1,
-              percentage: 50,
-              id: "m1",
-            },
-          ];
-          return lesson;
-        })(),
-        {
-          kind: "getModifier",
-          modifier: { kind: "mightyPerformance", duration: 2, percentage: 30 },
-        },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "modifiers.addition",
-          actual: {
-            kind: "mightyPerformance",
-            duration: 2,
-            percentage: 30,
-            id: expect.any(String),
+          idol: {
+            modifiers: [
+              { kind: "goodCondition", duration: 3 },
+            ] as Idol["modifiers"],
           },
-          max: {
-            kind: "mightyPerformance",
-            duration: 2,
-            percentage: 30,
-            id: expect.any(String),
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "goodCondition",
+          range: { min: 3 },
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "countModifierのgoodConditionを満たさない時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "goodCondition", duration: 2 },
+            ] as Idol["modifiers"],
           },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "goodCondition",
+          range: { min: 3 },
         },
       ],
+      expected: false,
     },
     {
-      name: "increaseRemainingTurns",
+      name: "countModifierのmotivationを満たす時、trueを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          return lesson;
-        })(),
-        { kind: "increaseRemainingTurns", amount: 1 },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
         {
-          kind: "remainingTurnsChange",
-          amount: 1,
+          idol: {
+            modifiers: [{ kind: "motivation", amount: 3 }] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "motivation",
+          range: { min: 3 },
         },
       ],
+      expected: true,
     },
     {
-      name: "recoverLife - 体力回復で最大体力以下まで回復した時、指定した数値分の体力を回復する",
+      name: "countModifierのmotivationを満たさない時、falseを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.life = 1;
-          return lesson;
-        })(),
-        { kind: "recoverLife", value: 2 },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
         {
-          kind: "life",
-          actual: 2,
-          max: 2,
+          idol: {
+            modifiers: [{ kind: "motivation", amount: 2 }] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "motivation",
+          range: { min: 3 },
         },
       ],
+      expected: false,
     },
     {
-      name: "recoverLife - 体力回復で最大体力を超過して回復した時、最大値に到達するまでの体力を回復する",
+      name: "countModifierのpositiveImpressionを満たす時、trueを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.life = lesson.idol.original.maxLife - 1;
-          return lesson;
-        })(),
-        { kind: "recoverLife", value: 2 },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
         {
-          kind: "life",
-          actual: 1,
-          max: 2,
-        },
-      ],
-    },
-    {
-      name: "multiplyModifier",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [
-            { kind: "focus", amount: 10, id: "m1" },
-            { kind: "positiveImpression", amount: 100, id: "m2" },
-          ];
-          return lesson;
-        })(),
+          idol: {
+            modifiers: [
+              { kind: "positiveImpression", amount: 3 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
         {
-          kind: "multiplyModifier",
+          kind: "countModifier",
           modifierKind: "positiveImpression",
-          multiplier: 1.5,
+          range: { min: 3 },
         },
-        () => 0,
-        createIdGenerator(),
       ],
-      expected: [
+      expected: true,
+    },
+    {
+      name: "countModifierのpositiveImpressionを満たさない時、falseを返す",
+      args: [
         {
-          kind: "modifiers.update",
-          propertyNameKind: "amount",
-          id: "m2",
-          actual: 50,
-          max: 50,
+          idol: {
+            modifiers: [
+              { kind: "positiveImpression", amount: 2 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "positiveImpression",
+          range: { min: 3 },
         },
       ],
+      expected: false,
+    },
+    {
+      name: "countReminingTurnsを満たす時、trueを返す",
+      args: [
+        {
+          turnNumber: 4,
+          turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
+          remainingTurnsChange: 0,
+        } as Lesson,
+        { kind: "countReminingTurns", max: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "countReminingTurnsを満たさない時、falseを返す",
+      args: [
+        {
+          turnNumber: 4,
+          turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
+          remainingTurnsChange: 0,
+        } as Lesson,
+        { kind: "countReminingTurns", max: 2 },
+      ],
+      expected: false,
+    },
+    {
+      name: "countVitalityを満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            vitality: 1,
+          },
+        } as Lesson,
+        { kind: "countVitality", range: { min: 1, max: 1 } },
+      ],
+      expected: true,
+    },
+    {
+      name: "countVitalityを満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            vitality: 1,
+          },
+        } as Lesson,
+        { kind: "countVitality", range: { min: 2, max: 2 } },
+      ],
+      expected: false,
+    },
+    {
+      name: "hasGoodConditionを満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "goodCondition", duration: 1 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "hasGoodCondition" },
+      ],
+      expected: true,
+    },
+    {
+      name: "hasGoodConditionを満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [{ kind: "focus", amount: 1 }] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "hasGoodCondition" },
+      ],
+      expected: false,
+    },
+    {
+      name: "measureIfLifeIsEqualGreaterThanHalfを満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            life: 5,
+            original: {
+              maxLife: 10,
+            },
+          },
+        } as Lesson,
+        { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      ],
+      expected: true,
+    },
+    {
+      name: "measureIfLifeIsEqualGreaterThanHalfを満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            life: 4,
+            original: {
+              maxLife: 10,
+            },
+          },
+        } as Lesson,
+        { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      ],
+      expected: false,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEffectIf(...args)).toStrictEqual(expected);
+    expect(canActivateEffect(...args)).toBe(expected);
   });
 });
-describe("activateEffectsOnCardPlay", () => {
+// validateCostConsumution で検証できる内容はそちらで行う
+describe("canPlayCard", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateEffectsOnCardPlay>;
-    expected: ReturnType<typeof activateEffectsOnCardPlay>;
+    args: Parameters<typeof canPlayCard>;
+    expected: ReturnType<typeof canPlayCard>;
     name: string;
   }> = [
     {
-      name: "各効果発動は、自身より後の効果発動へ影響を与える",
+      name: "コストを満たすリソースがない時、スキルカードを使えない",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.vitality = 0;
-          return lesson;
-        })(),
-        [
-          { kind: "perform", vitality: { value: 1 } },
-          { kind: "performLeveragingVitality", percentage: 100 },
-        ],
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
-        [{ kind: "vitality", actual: 1, max: 1 }],
-        [{ kind: "score", actual: 1, max: 1 }],
-      ],
-    },
-    {
-      name: "各効果の発動条件は、効果リスト発動前の状態を参照する",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          return lesson;
-        })(),
-        [
-          {
-            kind: "getModifier",
-            modifier: { kind: "goodCondition", duration: 1 },
+        {
+          idol: {
+            life: 3,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
           },
-          {
-            kind: "getModifier",
-            modifier: { kind: "focus", amount: 1 },
-            condition: { kind: "hasGoodCondition" },
-          },
-        ],
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
-        [
-          {
-            kind: "modifiers.addition",
-            actual: {
-              kind: "goodCondition",
-              duration: 1,
-              id: expect.any(String),
-            },
-            max: {
-              kind: "goodCondition",
-              duration: 1,
-              id: expect.any(String),
-            },
-          },
-        ],
+        } as Lesson,
+        { kind: "normal", value: 4 },
         undefined,
       ],
+      expected: false,
+    },
+    {
+      name: "コストを満たすリソースがあり、追加条件が無い時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 3,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        undefined,
+      ],
+      expected: true,
+    },
+    {
+      name: "ターン数の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          turnNumber: 3,
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        { kind: "countTurnNumber", min: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "ターン数の追加条件を満たさない時、スキルカードを使えない",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          turnNumber: 2,
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        { kind: "countTurnNumber", min: 3 },
+      ],
+      expected: false,
+    },
+    {
+      name: "元気0の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          turnNumber: 3,
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        { kind: "countVitalityZero" },
+      ],
+      expected: true,
+    },
+    {
+      name: "元気0の追加条件を満たさない時、スキルカードを使えない",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 1,
+            modifiers: [] as Idol["modifiers"],
+          },
+          turnNumber: 3,
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        { kind: "countVitalityZero" },
+      ],
+      expected: false,
+    },
+    {
+      name: "好調所持の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 3,
+            vitality: 0,
+            modifiers: [
+              { kind: "goodCondition", duration: 1 },
+            ] as Idol["modifiers"],
+          },
+          turnNumber: 3,
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        { kind: "hasGoodCondition" },
+      ],
+      expected: true,
+    },
+    {
+      name: "好調所持の追加条件を満たさない時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 3,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          turnNumber: 3,
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        { kind: "hasGoodCondition" },
+      ],
+      expected: false,
+    },
+    {
+      name: "life比率以上の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 5,
+            original: {
+              maxLife: 10,
+            },
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        {
+          kind: "measureValue",
+          valueKind: "life",
+          criterionKind: "greaterEqual",
+          percentage: 50,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "life比率以上の追加条件を満たさない時、スキルカードを使えない",
+      args: [
+        {
+          idol: {
+            life: 4,
+            original: {
+              maxLife: 10,
+            },
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        {
+          kind: "measureValue",
+          valueKind: "life",
+          criterionKind: "greaterEqual",
+          percentage: 50,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "life比率以下の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 5,
+            original: {
+              maxLife: 10,
+            },
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        {
+          kind: "measureValue",
+          valueKind: "life",
+          criterionKind: "lessEqual",
+          percentage: 50,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "life比率以下の追加条件を満たさない時、スキルカードを使えない",
+      args: [
+        {
+          idol: {
+            life: 6,
+            original: {
+              maxLife: 10,
+            },
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        { kind: "normal", value: 3 },
+        {
+          kind: "measureValue",
+          valueKind: "life",
+          criterionKind: "lessEqual",
+          percentage: 50,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "score比率以上の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 10,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "greaterEqual",
+          percentage: 100,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "score比率以上の追加条件を満たさない時、スキルカードを使えない",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 9,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "greaterEqual",
+          percentage: 100,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "score比率以下の追加条件を満たす時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 10,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "lessEqual",
+          percentage: 100,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "score比率以下の追加条件を満たさない時、スキルカードを使えない",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 11,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "lessEqual",
+          percentage: 100,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "score比率の追加条件があるが、レッスンにクリアスコア閾値が設定されていない時、スキルカードを使える",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 10,
+        } as Lesson,
+        { kind: "normal", value: 0 },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "greaterEqual",
+          percentage: 100,
+        },
+      ],
+      expected: true,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEffectsOnCardPlay(...args)).toStrictEqual(expected);
+    expect(canPlayCard(...args)).toStrictEqual(expected);
   });
 });
-describe("activateEffectsOfProducerItem", () => {
+// condition 条件は canActivateEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
+describe("canTriggerProducerItem", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateEffectsOfProducerItem>;
-    expected: ReturnType<typeof activateEffectsOfProducerItem>;
+    args: Parameters<typeof canTriggerProducerItem>;
+    expected: ReturnType<typeof canTriggerProducerItem>;
     name: string;
   }> = [
     {
-      name: "activationCount を 1 増加する",
+      name: "トリガー種別以外の条件がなく、トリガー種別が一致する時、trueを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest({ producerItems: [] });
-          return lesson;
-        })(),
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          id: "a",
-          original: {
-            id: "a",
-            data: getProducerItemDataById("gesennosenrihin"),
-            enhanced: false,
-          },
           activationCount: 0,
-        },
-        () => 0,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "modifiers.addition",
-          actual: { kind: "focus", amount: 3, id: expect.any(String) },
-          max: { kind: "focus", amount: 3, id: expect.any(String) },
-        },
-        {
-          kind: "producerItem.activationCount",
-          producerItemId: "a",
-          value: 1,
-        },
-      ],
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEffectsOfProducerItem(...args)).toStrictEqual(expected);
-  });
-});
-describe("activateMemoryEffect", () => {
-  const testCases: Array<{
-    args: Parameters<typeof activateMemoryEffect>;
-    expected: ReturnType<typeof activateMemoryEffect>;
-    name: string;
-  }> = [
-    {
-      name: "可能性が0の時、常に結果を返さない",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          return lesson;
-        })(),
-        { kind: "focus", value: 1, probability: 0 },
-        () => 0.999999999,
-        createIdGenerator(),
-      ],
-      expected: [],
-    },
-    {
-      name: "値がamountプロパティな状態修正を新規で付与する",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          return lesson;
-        })(),
-        { kind: "focus", value: 1, probability: 100 },
-        () => 0.999999999,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "modifiers.addition",
-          actual: { kind: "focus", amount: 1, id: expect.any(String) },
-          max: { kind: "focus", amount: 1, id: expect.any(String) },
-        },
-      ],
-    },
-    {
-      name: "値がamountプロパティな状態修正を更新する",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [{ kind: "focus", amount: 1, id: "a" }];
-          return lesson;
-        })(),
-        { kind: "focus", value: 2, probability: 100 },
-        () => 0.999999999,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "modifiers.update",
-          propertyNameKind: "amount",
-          id: "a",
-          actual: 2,
-          max: 2,
-        },
-      ],
-    },
-    {
-      name: "値がdurationプロパティな状態修正を新規で付与する",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          return lesson;
-        })(),
-        { kind: "goodCondition", value: 1, probability: 100 },
-        () => 0.999999999,
-        createIdGenerator(),
-      ],
-      expected: [
-        {
-          kind: "modifiers.addition",
-          actual: {
-            kind: "goodCondition",
-            duration: 1,
-            id: expect.any(String),
+          original: {
+            data: { base: { trigger: { kind: "turnStart" } } },
           },
-          max: { kind: "goodCondition", duration: 1, id: expect.any(String) },
-        },
+        } as ProducerItem,
+        "turnStart",
       ],
+      expected: true,
     },
     {
-      name: "値がdurationプロパティな状態修正を更新する",
+      name: "トリガー種別以外の条件がなく、トリガー種別が一致しない時、falseを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [
-            { kind: "goodCondition", duration: 1, id: "a" },
-          ];
-          return lesson;
-        })(),
-        { kind: "goodCondition", value: 2, probability: 100 },
-        () => 0.999999999,
-        createIdGenerator(),
-      ],
-      expected: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          kind: "modifiers.update",
-          propertyNameKind: "duration",
-          id: "a",
-          actual: 2,
-          max: 2,
-        },
+          activationCount: 0,
+          original: {
+            data: { base: { trigger: { kind: "turnStart" } } },
+          },
+        } as ProducerItem,
+        "turnEnd",
       ],
+      expected: false,
     },
     {
-      name: "元気をやる気の補正を付与して加算する",
+      name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.vitality = 1;
-          lesson.idol.modifiers = [{ kind: "motivation", amount: 1, id: "a" }];
-          return lesson;
-        })(),
-        { kind: "vitality", value: 2, probability: 100 },
-        () => 0.999999999,
-        createIdGenerator(),
-      ],
-      expected: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          kind: "vitality",
-          actual: 3,
-          max: 3,
-        },
+          activationCount: 0,
+          original: {
+            data: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "vocal" },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
       ],
+      expected: true,
     },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateMemoryEffect(...args)).toStrictEqual(expected);
-  });
-});
-describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
-  test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
-    let lesson = createLessonForTest({
-      producerItems: [
+    {
+      name: "アイドルパラメータ種別条件があり、合致しない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          id: "a",
-          data: getProducerItemDataById("itsumonomeikupochi"),
-          enhanced: false,
-        },
+          activationCount: 0,
+          original: {
+            data: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
       ],
-    });
-    const dummyReason = {
-      kind: "cardUsage",
-      cardId: "x",
-      historyTurnNumber: 1,
-      historyResultIndex: 1,
-    } as const;
-    const { updates: updates1 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
+      expected: false,
+    },
+    {
+      name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になる時、trueを返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          ignoreIdolParameterKindConditionAfterClearing: true,
+          clearScoreThresholds: { clear: 1 },
+          score: 1,
+        } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            data: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: true,
+    },
+    {
+      name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になるがまだクリア済みでない時、falseを返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          ignoreIdolParameterKindConditionAfterClearing: true,
+          clearScoreThresholds: { clear: 2 },
+          score: 1,
+        } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            data: {
+              base: {
+                trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: false,
+    },
+    {
+      name: "発動回数条件があり、残り発動回数が足りている時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 1,
+          original: {
+            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: true,
+    },
+    {
+      name: "発動回数条件があり、残り発動回数が足りていない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          activationCount: 2,
+          original: {
+            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryTwoTurns で、2ターン目の時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 2 } as Lesson,
+        {
+          original: {
+            data: {
+              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
+            },
+          },
+        } as ProducerItem,
+        "turnStartEveryTwoTurns",
+      ],
+      expected: true,
+    },
+    {
+      name: "turnStartEveryTwoTurns で、1ターン目の時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
+            },
+          },
+        } as ProducerItem,
+        "turnStartEveryTwoTurns",
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryTwoTurns で、0ターン目の時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 0 } as Lesson,
+        {
+          original: {
+            data: {
+              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
+            },
+          },
+        } as ProducerItem,
+        "turnStartEveryTwoTurns",
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation で、スキルカード定義IDとスキルカード概要種別が一致する時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "beforeCardEffectActivation",
+                  cardDataId: "a",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
         "beforeCardEffectActivation",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
+        {
+          cardDataId: "a",
+          cardSummaryKind: "active",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivation で、スキルカード定義IDが一致せず、スキルカード概要種別が一致する時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "beforeCardEffectActivation",
+                  cardDataId: "a",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "beforeCardEffectActivation",
+        {
+          cardDataId: "b",
+          cardSummaryKind: "active",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation で、スキルカード定義IDが一致し、スキルカード概要種別が一致しない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "beforeCardEffectActivation",
+                  cardDataId: "a",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "beforeCardEffectActivation",
+        {
+          cardDataId: "a",
+          cardSummaryKind: "mental",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "afterCardEffectActivation で、スキルカード概要種別が一致する時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "afterCardEffectActivation",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "afterCardEffectActivation",
         {
           cardSummaryKind: "active",
         },
-      );
-    expect(
-      updates1.filter((e) => e.kind === "modifiers.addition"),
-    ).toStrictEqual([
-      {
-        kind: "modifiers.addition",
-        actual: {
-          kind: "focus",
-          amount: 2,
-          id: expect.any(String),
-        },
-        max: {
-          kind: "focus",
-          amount: 2,
-          id: expect.any(String),
-        },
-        reason: expect.any(Object),
-      },
-    ]);
-    const { updates: updates2 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
-        "beforeCardEffectActivation",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
+      ],
+      expected: true,
+    },
+    {
+      name: "afterCardEffectActivation で、スキルカード概要種別が一致しない時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "afterCardEffectActivation",
+                  cardSummaryKind: "active",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
+        "afterCardEffectActivation",
         {
           cardSummaryKind: "mental",
         },
-      );
-    expect(updates2).toStrictEqual([]);
-  });
-  test("「最高にハッピーの源」は、「アドレナリン全開」スキルカード使用時、好調と固定元気を付与する。他スキルカード使用時は付与しない", () => {
-    let lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("saikonihappinominamoto"),
-          enhanced: false,
-        },
       ],
-    });
-    const dummyReason = {
-      kind: "cardUsage",
-      cardId: "x",
-      historyTurnNumber: 1,
-      historyResultIndex: 1,
-    } as const;
-    const { updates: updates1 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
-        "beforeCardEffectActivation",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
+      expected: false,
+    },
+    {
+      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれる時、trueを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          cardDataId: "adorenarinzenkai",
-        },
-      );
-    expect(
-      updates1.filter(
-        (e) => e.kind === "modifiers.addition" || e.kind === "vitality",
-      ),
-    ).toStrictEqual([
-      {
-        kind: "modifiers.addition",
-        actual: {
-          kind: "goodCondition",
-          duration: 3,
-          id: expect.any(String),
-        },
-        max: {
-          kind: "goodCondition",
-          duration: 3,
-          id: expect.any(String),
-        },
-        reason: expect.any(Object),
-      },
-      {
-        kind: "vitality",
-        actual: 5,
-        max: 5,
-        reason: expect.any(Object),
-      },
-    ]);
-    const { updates: updates2 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
-        "beforeCardEffectActivation",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
-        {
-          cardDataId: "apirunokihon",
-        },
-      );
-    expect(updates2).toStrictEqual([]);
-  });
-  test("「最高にハッピーの源」と「曇りをぬぐったタオル」は、1枚のアクティブスキルカード使用時に同時に効果発動し得る", () => {
-    let lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("saikonihappinominamoto"),
-          enhanced: false,
-        },
-        {
-          id: "b",
-          data: getProducerItemDataById("kumoriwonuguttataoru"),
-        },
-      ],
-    });
-    const dummyReason = {
-      kind: "cardUsage",
-      cardId: "x",
-      historyTurnNumber: 1,
-      historyResultIndex: 1,
-    } as const;
-    const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
-      lesson,
-      "beforeCardEffectActivation",
-      () => 0,
-      createIdGenerator(),
-      dummyReason,
-      {
-        cardDataId: "adorenarinzenkai",
-        cardSummaryKind: "active",
-      },
-    );
-    expect(
-      updates.filter(
-        (e) =>
-          e.kind === "modifiers.addition" ||
-          e.kind === "vitality" ||
-          e.kind === "life",
-      ),
-    ).toStrictEqual([
-      {
-        kind: "modifiers.addition",
-        actual: {
-          kind: "goodCondition",
-          duration: 3,
-          id: expect.any(String),
-        },
-        max: {
-          kind: "goodCondition",
-          duration: 3,
-          id: expect.any(String),
-        },
-        reason: expect.any(Object),
-      },
-      {
-        kind: "vitality",
-        actual: 5,
-        max: 5,
-        reason: expect.any(Object),
-      },
-      {
-        kind: "life",
-        actual: 0,
-        max: 2,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("スキルカード使用後トリガーである、「ビッグドリーム貯金箱」を、好印象が6以上の時、発動する。好印象が6未満の時、発動しない", () => {
-    let lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("biggudorimuchokimbako"),
-          enhanced: false,
-        },
-      ],
-    });
-    lesson.idol.modifiers = [
-      { kind: "positiveImpression", amount: 6, id: "m1" },
-    ];
-    const dummyReason = {
-      kind: "cardUsage",
-      cardId: "x",
-      historyTurnNumber: 1,
-      historyResultIndex: 1,
-    } as const;
-    const { updates: updates1 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
-        "afterCardEffectActivation",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
-      );
-    expect(updates1.filter((e) => e.kind === "modifiers.update")).toStrictEqual(
-      [
-        {
-          kind: "modifiers.update",
-          propertyNameKind: "amount",
-          id: "m1",
-          actual: 3,
-          max: 3,
-          reason: expect.any(Object),
-        },
-      ],
-    );
-    expect(
-      updates1.filter((e) => e.kind === "modifiers.addition"),
-    ).toStrictEqual([
-      {
-        kind: "modifiers.addition",
-        actual: {
-          kind: "additionalCardUsageCount",
-          amount: 1,
-          id: expect.any(String),
-        },
-        max: {
-          kind: "additionalCardUsageCount",
-          amount: 1,
-          id: expect.any(String),
-        },
-        reason: expect.any(Object),
-      },
-    ]);
-    lesson.idol.modifiers = [
-      { kind: "positiveImpression", amount: 5, id: "m1" },
-    ];
-    const { updates: updates2 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
-        "afterCardEffectActivation",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
-      );
-    expect(updates2).toStrictEqual([]);
-  });
-  test("状態修正トリガーである、「ひみつ特訓カーデ」を、やる気が上昇した時、発動する。やる気ではない時、発動しない", () => {
-    let lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("himitsutokkunkade"),
-          enhanced: false,
-        },
-      ],
-    });
-    const dummyReason = {
-      kind: "cardUsage",
-      cardId: "x",
-      historyTurnNumber: 1,
-      historyResultIndex: 1,
-    } as const;
-    const { updates: updates1 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "modifierIncrease",
+                  modifierKind: "focus",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
         "modifierIncrease",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
         {
-          increasedModifierKinds: ["motivation"],
+          increasedModifierKinds: ["focus"],
         },
-      );
-    expect(
-      updates1.filter((e) => e.kind === "modifiers.addition"),
-    ).toStrictEqual([
-      {
-        kind: "modifiers.addition",
-        actual: {
-          kind: "motivation",
-          amount: 3,
-          id: expect.any(String),
-        },
-        max: {
-          kind: "motivation",
-          amount: 3,
-          id: expect.any(String),
-        },
-        reason: expect.any(Object),
-      },
-    ]);
-    const { updates: updates2 } =
-      activateEffectsEachProducerItemsAccordingToCardUsage(
-        lesson,
+      ],
+      expected: true,
+    },
+    {
+      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれない時、falseを返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1 } as Lesson,
+        {
+          original: {
+            data: {
+              base: {
+                trigger: {
+                  kind: "modifierIncrease",
+                  modifierKind: "focus",
+                },
+              },
+            },
+          },
+        } as ProducerItem,
         "modifierIncrease",
-        () => 0,
-        createIdGenerator(),
-        dummyReason,
         {
-          increasedModifierKinds: ["positiveImpression"],
+          increasedModifierKinds: ["goodCondition"],
         },
-      );
-    expect(updates2).toStrictEqual([]);
+      ],
+      expected: false,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(canTriggerProducerItem(...args)).toStrictEqual(expected);
   });
 });
-describe("activateEffectsOnLessonStart", () => {
+describe("consumeRemainingCardUsageCount", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateEffectsOnLessonStart>;
-    expected: ReturnType<typeof activateEffectsOnLessonStart>;
+    args: Parameters<typeof consumeRemainingCardUsageCount>;
+    expected: ReturnType<typeof consumeRemainingCardUsageCount>;
     name: string;
   }> = [
     {
-      name: "「ゲーセンの戦利品」を発動する",
+      name: "スキルカード使用数追加がない時、アクションポイントを減らす",
       args: [
-        createLessonForTest({
-          producerItems: [
-            {
-              id: "a",
-              data: getProducerItemDataById("gesennosenrihin"),
-              enhanced: false,
-            },
-          ],
-        }),
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 1;
+          return lesson;
+        })(),
         1,
-        {
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
-        },
       ],
       expected: {
         updates: [
           {
-            kind: "modifiers.addition",
-            actual: { kind: "focus", amount: 3, id: expect.any(String) },
-            max: { kind: "focus", amount: 3, id: expect.any(String) },
+            kind: "actionPoints",
+            amount: -1,
             reason: expect.any(Object),
           },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "スキルカード使用数追加もアクションポイントもない時、アクションポイントを0変更する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 0;
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
           {
-            kind: "producerItem.activationCount",
-            producerItemId: "a",
-            value: 1,
+            kind: "actionPoints",
+            amount: 0,
+            reason: expect.any(Object),
+          },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "スキルカード使用数追加とアクションポイントがある時、スキルカード使用数追加を減らす",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.actionPoints = 1;
+          lesson.idol.modifiers = [
+            {
+              kind: "additionalCardUsageCount",
+              amount: 1,
+              id: "x",
+            },
+          ];
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "modifiers.update",
+            propertyNameKind: "amount",
+            id: "x",
+            actual: -1,
+            max: -1,
             reason: expect.any(Object),
           },
         ],
@@ -2783,92 +3071,182 @@ describe("activateEffectsOnLessonStart", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEffectsOnLessonStart(...args)).toStrictEqual(expected);
+    expect(consumeRemainingCardUsageCount(...args)).toStrictEqual(expected);
   });
 });
-describe("activateEncouragementOnTurnStart", () => {
-  const testCases: Array<{
-    args: Parameters<typeof activateEncouragementOnTurnStart>;
-    expected: ReturnType<typeof activateEncouragementOnTurnStart>;
+describe("createCardPlacementDiff", () => {
+  const testCases: {
+    args: Parameters<typeof createCardPlacementDiff>;
+    expected: ReturnType<typeof createCardPlacementDiff>;
     name: string;
-  }> = [
+  }[] = [
     {
-      name: "ターン番号が一致し、効果発動条件を満たす時、発動する",
+      name: "before側だけ存在しても差分は返さない",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.turnNumber = 1;
-          lesson.encouragements = [
-            {
-              turnNumber: 1,
-              effect: {
-                kind: "perform",
-                condition: {
-                  kind: "countModifier",
-                  modifierKind: "motivation",
-                  range: { min: 1 },
-                },
-                score: { value: 1 },
-              },
-            },
-          ];
-          lesson.idol.modifiers = [{ kind: "motivation", amount: 1, id: "m1" }];
-          return lesson;
-        })(),
-        1,
         {
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
         },
+        {},
       ],
-      expected: {
-        updates: [
-          {
-            kind: "score",
-            actual: 1,
-            max: 1,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
+      expected: { kind: "cardPlacement" },
     },
     {
-      name: "ターン番号は一致するが、効果発動条件を満たさない時、発動しない",
+      name: "after側だけ存在しても差分は返さない",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.turnNumber = 1;
-          lesson.encouragements = [
-            {
-              turnNumber: 1,
-              effect: {
-                kind: "perform",
-                condition: {
-                  kind: "countModifier",
-                  modifierKind: "motivation",
-                  range: { min: 1 },
-                },
-                score: { value: 1 },
-              },
-            },
-          ];
-          return lesson;
-        })(),
-        1,
+        {},
         {
-          getRandom: () => 0,
-          idGenerator: createIdGenerator(),
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
         },
       ],
-      expected: {
-        updates: [],
-        nextHistoryResultIndex: 1,
-      },
+      expected: { kind: "cardPlacement" },
+    },
+    {
+      name: "全ての値がbefore/afterで同じ場合は差分を返さない",
+      args: [
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+      ],
+      expected: { kind: "cardPlacement" },
+    },
+    {
+      name: "deckのみの差分を返せる",
+      args: [
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+        {
+          deck: ["11"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+      ],
+      expected: { kind: "cardPlacement", deck: ["11"] },
+    },
+    {
+      name: "discardPileのみの差分を返せる",
+      args: [
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+        {
+          deck: ["1"],
+          discardPile: ["22"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+      ],
+      expected: { kind: "cardPlacement", discardPile: ["22"] },
+    },
+    {
+      name: "handのみの差分を返せる",
+      args: [
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["33"],
+          removedCardPile: ["4"],
+        },
+      ],
+      expected: { kind: "cardPlacement", hand: ["33"] },
+    },
+    {
+      name: "removedCardPileのみの差分を返せる",
+      args: [
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["4"],
+        },
+        {
+          deck: ["1"],
+          discardPile: ["2"],
+          hand: ["3"],
+          removedCardPile: ["44"],
+        },
+      ],
+      expected: { kind: "cardPlacement", removedCardPile: ["44"] },
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateEncouragementOnTurnStart(...args)).toStrictEqual(expected);
+    expect(createCardPlacementDiff(...args)).toStrictEqual(expected);
+  });
+});
+describe("drawCardsFromDeck", () => {
+  test("山札がなくならない状態で1枚引いた時、1枚引けて、山札は再構築されず、山札が1枚減る", () => {
+    const deck = ["1", "2", "3"];
+    const {
+      drawnCards,
+      deck: newDeck,
+      deckRebuilt,
+    } = drawCardsFromDeck(deck, 1, [], Math.random);
+    expect(drawnCards).toHaveLength(1);
+    expect(newDeck).toHaveLength(2);
+    expect(deckRebuilt).toBe(false);
+  });
+  test("山札の最後の1枚を1枚だけ引いた時、1枚引けて、山札は再構築されず、山札が1枚減り、捨札は変わらない", () => {
+    const deck = ["1", "2", "3"];
+    const discardPile = ["4"];
+    const {
+      drawnCards,
+      deck: newDeck,
+      deckRebuilt,
+      discardPile: newDiscardPile,
+    } = drawCardsFromDeck(deck, 1, discardPile, Math.random);
+    expect(drawnCards).toHaveLength(1);
+    expect(newDeck).toHaveLength(2);
+    expect(deckRebuilt).toBe(false);
+    expect(newDiscardPile).toStrictEqual(discardPile);
+  });
+  test("山札が残り1枚で2枚引いた時、山札は再構築され、2枚引けて、捨札は山札に移動して空になり、山札は捨札の-1枚の数になる", () => {
+    const deck = ["1"];
+    const discardPile = ["2", "3", "4", "5"];
+    const {
+      drawnCards,
+      deck: newDeck,
+      deckRebuilt,
+      discardPile: newDiscardPile,
+    } = drawCardsFromDeck(deck, 2, discardPile, Math.random);
+    expect(drawnCards).toHaveLength(2);
+    expect(newDeck).toHaveLength(3);
+    expect(deckRebuilt).toBe(true);
+    expect(newDiscardPile).toStrictEqual([]);
+    expect([...drawnCards, ...newDeck].sort()).toStrictEqual([
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+    ]);
   });
 });
 describe("drawCardsOnLessonStart", () => {
@@ -2877,7 +3255,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -2902,7 +3280,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c", "d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -2924,7 +3302,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c", "d", "e"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -2957,12 +3335,12 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
       ],
@@ -2991,17 +3369,17 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
         ...["e", "f"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
       ],
@@ -3027,22 +3405,22 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
         ...["d"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
         ...["e", "f", "g", "h"].map((id) => ({
           id,
-          data: getCardDataById("shizukanaishi"),
+          data: getCardDataByConstId("shizukanaishi"),
           enhanced: false,
         })),
         ...["i"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3068,7 +3446,7 @@ describe("drawCardsOnLessonStart", () => {
       deck: [
         ...["a", "b", "c"].map((id) => ({
           id,
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         })),
       ],
@@ -3090,379 +3468,6 @@ describe("drawCardsOnLessonStart", () => {
       {
         kind: "cards.removingLessonSupports",
         cardIds: ["a", "c"],
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-});
-// canTriggerProducerItem のテストケースで可能な範囲はそちらで検証する
-describe("activateProducerItemEffectsOnTurnStart", () => {
-  test("「ばくおんライオン」を、好調状態の時、発動する", () => {
-    const lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("bakuonraion"),
-          enhanced: false,
-        },
-      ],
-    });
-    lesson.idol.modifiers = [{ kind: "goodCondition", duration: 1, id: "x" }];
-    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
-      getRandom: () => 0,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
-      {
-        kind: "score",
-        // 好調が付与されているので1.5倍になっている
-        actual: 9,
-        max: 9,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("「ばくおんライオン」を、好調状態ではない時、発動しない", () => {
-    const lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("bakuonraion"),
-          enhanced: false,
-        },
-      ],
-    });
-    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
-      getRandom: () => 0,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([]);
-  });
-  test("「柴犬ポシェット」を、2ターン目の時、発動する", () => {
-    const lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("shibainuposhetto"),
-          enhanced: false,
-        },
-      ],
-    });
-    lesson.turnNumber = 2;
-    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
-      getRandom: () => 0,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([
-      {
-        kind: "vitality",
-        actual: 5,
-        max: 5,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("「柴犬ポシェット」を、1ターン目の時、発動しない", () => {
-    const lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataById("shibainuposhetto"),
-          enhanced: false,
-        },
-      ],
-    });
-    lesson.turnNumber = 1;
-    const { updates } = activateProducerItemEffectsOnTurnStart(lesson, 1, {
-      getRandom: () => 0,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([]);
-  });
-});
-// Pアイテム発動条件については、canTriggerProducerItem のテストケースで可能な範囲はそちらで検証する
-describe("activateModifierEffectsOnTurnStart", () => {
-  test("次ターンと2ターン後にパラメータ追加する状態修正がある時、1回パラメータを追加し、それらの状態修正の残りターン数を減少する", () => {
-    const lesson = createLessonForTest({
-      deck: [
-        {
-          id: "a",
-          data: getCardDataById("apirunokihon"),
-          enhanced: false,
-        },
-      ],
-    });
-    lesson.idol.modifiers = [
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "x",
-        effect: {
-          kind: "perform",
-          score: {
-            value: 10,
-          },
-        },
-      },
-      {
-        kind: "delayedEffect",
-        delay: 2,
-        id: "y",
-        effect: {
-          kind: "perform",
-          score: {
-            value: 15,
-          },
-        },
-      },
-    ];
-    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
-      getRandom: Math.random,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "score")).toStrictEqual([
-      {
-        kind: "score",
-        actual: 10,
-        max: 10,
-        reason: expect.any(Object),
-      },
-    ]);
-    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "x",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "y",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("次ターンにスキルカードを1枚引く状態修正がある時、手札が1枚増え、その状態修正を減少する", () => {
-    const lesson = createLessonForTest({
-      deck: [
-        {
-          id: "a",
-          data: getCardDataById("apirunokihon"),
-          enhanced: false,
-        },
-      ],
-    });
-    lesson.deck = ["a"];
-    lesson.idol.modifiers = [
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "x",
-        effect: {
-          kind: "drawCards",
-          amount: 1,
-        },
-      },
-    ];
-    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
-      getRandom: Math.random,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
-      {
-        kind: "cardPlacement",
-        hand: ["a"],
-        deck: [],
-        reason: expect.any(Object),
-      },
-    ]);
-    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "x",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("次ターン・2ターン後・次ターンにスキルカードを1枚引く状態修正がある時、手札1枚増加を2回行い、全ての状態修正を減少する", () => {
-    const lesson = createLessonForTest({
-      deck: [
-        ...["a", "b"].map((id) => ({
-          id,
-          data: getCardDataById("apirunokihon"),
-          enhanced: false,
-        })),
-      ],
-    });
-    lesson.deck = ["a", "b"];
-    lesson.idol.modifiers = [
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "x",
-        effect: {
-          kind: "drawCards",
-          amount: 1,
-        },
-      },
-      {
-        kind: "delayedEffect",
-        delay: 2,
-        id: "y",
-        effect: {
-          kind: "drawCards",
-          amount: 1,
-        },
-      },
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "z",
-        effect: {
-          kind: "drawCards",
-          amount: 1,
-        },
-      },
-    ];
-    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
-      getRandom: Math.random,
-      idGenerator: createIdGenerator(),
-    });
-    expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
-      {
-        kind: "cardPlacement",
-        hand: ["a"],
-        deck: ["b"],
-        reason: expect.any(Object),
-      },
-      {
-        kind: "cardPlacement",
-        hand: ["a", "b"],
-        deck: [],
-        reason: expect.any(Object),
-      },
-    ]);
-    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "x",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "y",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "z",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("次ターンに手札を強化するを状態修正がある時、手札が全て強化され、その状態修正を減少する", () => {
-    const lesson = createLessonForTest({
-      deck: [
-        ...["a", "b"].map((id) => ({
-          id,
-          data: getCardDataById("apirunokihon"),
-          enhanced: false,
-        })),
-      ],
-    });
-    lesson.hand = ["a", "b"];
-    lesson.idol.modifiers = [
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "x",
-        effect: {
-          kind: "enhanceHand",
-        },
-      },
-    ];
-    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
-      getRandom: Math.random,
-      idGenerator: createIdGenerator(),
-    });
-    expect(
-      updates.filter((e) => e.kind === "cards.enhancement.effect"),
-    ).toStrictEqual([
-      {
-        kind: "cards.enhancement.effect",
-        cardIds: ["a", "b"],
-        reason: expect.any(Object),
-      },
-    ]);
-    expect(updates.filter((e) => e.kind === "modifiers.update")).toStrictEqual([
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "delay",
-        id: "x",
-        actual: -1,
-        max: -1,
-        reason: expect.any(Object),
-      },
-    ]);
-  });
-  test("次ターンにスキルカードを引く状態修正と手札を強化する状態修正がある時、手札が引かれた状態で、手札が全て強化される", () => {
-    const lesson = createLessonForTest({
-      deck: [
-        ...["a", "b"].map((id) => ({
-          id,
-          data: getCardDataById("apirunokihon"),
-          enhanced: false,
-        })),
-      ],
-    });
-    lesson.hand = ["a"];
-    lesson.deck = ["b"];
-    lesson.idol.modifiers = [
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "x",
-        effect: {
-          kind: "enhanceHand",
-        },
-      },
-      {
-        kind: "delayedEffect",
-        delay: 1,
-        id: "y",
-        effect: {
-          kind: "drawCards",
-          amount: 1,
-        },
-      },
-    ];
-    const { updates } = activateModifierEffectsOnTurnStart(lesson, 1, {
-      getRandom: Math.random,
-      idGenerator: createIdGenerator(),
-    });
-    expect(
-      updates.filter((e) => e.kind === "cards.enhancement.effect"),
-    ).toStrictEqual([
-      {
-        kind: "cards.enhancement.effect",
-        cardIds: ["a", "b"],
         reason: expect.any(Object),
       },
     ]);
@@ -3607,115 +3612,28 @@ describe("decreaseEachModifierDurationOverTime", () => {
     );
   });
 });
-// 基本的には activateMemoryEffect 側でテストする
-describe("activateMemoryEffectsOnLessonStart", () => {
+// 計算内容は calculatePerformingScoreEffect のテストで検証する
+describe("obtainPositiveImpressionScoreOnTurnEnd", () => {
   const testCases: Array<{
-    args: Parameters<typeof activateMemoryEffectsOnLessonStart>;
-    expected: ReturnType<typeof activateMemoryEffectsOnLessonStart>;
+    args: Parameters<typeof obtainPositiveImpressionScoreOnTurnEnd>;
+    expected: ReturnType<typeof obtainPositiveImpressionScoreOnTurnEnd>;
     name: string;
   }> = [
     {
-      name: "設定がない時、発動しない",
-      args: [
-        createLessonForTest(),
-        1,
-        { getRandom: () => 0, idGenerator: createIdGenerator() },
-      ],
+      name: "好印象がない時、更新を返さない",
+      args: [createLessonForTest(), 1],
       expected: {
         updates: [],
-        nextHistoryResultIndex: 1,
-      },
-    },
-    {
-      name: "100%発動する設定がある時、発動する",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.memoryEffects = [
-            { kind: "focus", value: 1, probability: 100 },
-          ];
-          return lesson;
-        })(),
-        1,
-        { getRandom: () => 0, idGenerator: createIdGenerator() },
-      ],
-      expected: {
-        updates: [
-          {
-            kind: "modifiers.addition",
-            actual: { kind: "focus", amount: 1, id: expect.any(String) },
-            max: { kind: "focus", amount: 1, id: expect.any(String) },
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(activateMemoryEffectsOnLessonStart(...args)).toStrictEqual(expected);
-  });
-});
-describe("consumeRemainingCardUsageCount", () => {
-  const testCases: Array<{
-    args: Parameters<typeof consumeRemainingCardUsageCount>;
-    expected: ReturnType<typeof consumeRemainingCardUsageCount>;
-    name: string;
-  }> = [
-    {
-      name: "スキルカード使用数追加がない時、アクションポイントを減らす",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 1;
-          return lesson;
-        })(),
-        1,
-      ],
-      expected: {
-        updates: [
-          {
-            kind: "actionPoints",
-            amount: -1,
-            reason: expect.any(Object),
-          },
-        ],
         nextHistoryResultIndex: 2,
       },
     },
     {
-      name: "スキルカード使用数追加もアクションポイントもない時、アクションポイントを0変更する",
+      name: "好印象がある時、スコアを獲得する",
       args: [
         (() => {
           const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 0;
-          return lesson;
-        })(),
-        1,
-      ],
-      expected: {
-        updates: [
-          {
-            kind: "actionPoints",
-            amount: 0,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
-    },
-    {
-      name: "スキルカード使用数追加とアクションポイントがある時、スキルカード使用数追加を減らす",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 1;
           lesson.idol.modifiers = [
-            {
-              kind: "additionalCardUsageCount",
-              amount: 1,
-              id: "x",
-            },
+            { kind: "positiveImpression", amount: 1, id: "x" },
           ];
           return lesson;
         })(),
@@ -3723,21 +3641,37 @@ describe("consumeRemainingCardUsageCount", () => {
       ],
       expected: {
         updates: [
-          {
-            kind: "modifiers.update",
-            propertyNameKind: "amount",
-            id: "x",
-            actual: -1,
-            max: -1,
-            reason: expect.any(Object),
-          },
+          { kind: "score", actual: 1, max: 1, reason: expect.any(Object) },
+        ],
+        nextHistoryResultIndex: 2,
+      },
+    },
+    {
+      name: "スコアボーナスの設定を反映する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "positiveImpression", amount: 1, id: "x" },
+          ];
+          lesson.turns = ["vocal"];
+          lesson.idol.scoreBonus = { vocal: 300, visual: 200, dance: 100 };
+          return lesson;
+        })(),
+        1,
+      ],
+      expected: {
+        updates: [
+          { kind: "score", actual: 3, max: 3, reason: expect.any(Object) },
         ],
         nextHistoryResultIndex: 2,
       },
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(consumeRemainingCardUsageCount(...args)).toStrictEqual(expected);
+    expect(obtainPositiveImpressionScoreOnTurnEnd(...args)).toStrictEqual(
+      expected,
+    );
   });
 });
 describe("useCard preview:false", () => {
@@ -3747,7 +3681,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -3770,7 +3704,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
         ],
@@ -3796,7 +3730,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -3831,7 +3765,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("genkinaaisatsu"),
+            data: getCardDataByConstId("genkinaaisatsu"),
             enhanced: false,
           },
         ],
@@ -3861,14 +3795,14 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("adorenarinzenkai"),
+            data: getCardDataByConstId("adorenarinzenkai"),
             enhanced: false,
           },
         ],
         producerItems: [
           {
             id: "p",
-            data: getProducerItemDataById("saikonihappinominamoto"),
+            data: getProducerItemDataByConstId("saikonihappinominamoto"),
             enhanced: false,
           },
         ],
@@ -3931,17 +3865,17 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("fanshichamu"),
+            data: getCardDataByConstId("fanshichamu"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
           {
             id: "c",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -4015,17 +3949,17 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("enshutsukeikaku"),
+            data: getCardDataByConstId("enshutsukeikaku"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "c",
-            data: getCardDataById("shinkokyu"),
+            data: getCardDataByConstId("shinkokyu"),
             enhanced: false,
           },
         ],
@@ -4093,12 +4027,12 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("kagayakukimihe"),
+            data: getCardDataByConstId("kagayakukimihe"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("hyogennokihon"),
+            data: getCardDataByConstId("hyogennokihon"),
             enhanced: false,
           },
         ],
@@ -4164,7 +4098,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("hiyaku"),
+              data: getCardDataByConstId("hiyaku"),
               enhanced: false,
             },
           ],
@@ -4185,7 +4119,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("jumbiundo"),
+              data: getCardDataByConstId("jumbiundo"),
               enhanced: false,
             },
           ],
@@ -4240,12 +4174,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("aidorusengen"),
+              data: getCardDataByConstId("aidorusengen"),
               enhanced: false,
             },
             ...["b", "c"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4275,12 +4209,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("aidorusengen"),
+              data: getCardDataByConstId("aidorusengen"),
               enhanced: false,
             },
             ...["b", "c", "d"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4317,12 +4251,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("aidorusengen"),
+              data: getCardDataByConstId("aidorusengen"),
               enhanced: false,
             },
             ...["b", "c", "d", "e", "f", "g"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4351,17 +4285,17 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("teipatei"),
+              data: getCardDataByConstId("teipatei"),
               enhanced: false,
             },
             ...["b", "c", "d"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
             ...["e"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: true,
             })),
           ],
@@ -4391,12 +4325,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikirinaoshi"),
+              data: getCardDataByConstId("shikirinaoshi"),
               enhanced: false,
             },
             ...["b", "c", "d", "e", "f"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4429,12 +4363,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikirinaoshi"),
+              data: getCardDataByConstId("shikirinaoshi"),
               enhanced: false,
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4463,12 +4397,12 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikirinaoshi"),
+              data: getCardDataByConstId("shikirinaoshi"),
               enhanced: false,
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             })),
           ],
@@ -4492,7 +4426,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("furumainokihon"),
+              data: getCardDataByConstId("furumainokihon"),
               enhanced: false,
             },
           ],
@@ -4528,7 +4462,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("furumainokihon"),
+              data: getCardDataByConstId("furumainokihon"),
               enhanced: false,
             },
           ],
@@ -4561,7 +4495,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("enshutsukeikaku"),
+              data: getCardDataByConstId("enshutsukeikaku"),
               enhanced: false,
             },
           ],
@@ -4613,7 +4547,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -4645,7 +4579,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -4675,7 +4609,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("apirunokihon"),
+              data: getCardDataByConstId("apirunokihon"),
               enhanced: false,
             },
           ],
@@ -4704,7 +4638,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("shikosakugo"),
+              data: getCardDataByConstId("shikosakugo"),
               enhanced: false,
             },
           ],
@@ -4737,7 +4671,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("pozunokihon"),
+              data: getCardDataByConstId("pozunokihon"),
               enhanced: false,
             },
           ],
@@ -4774,7 +4708,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("kaika"),
+              data: getCardDataByConstId("kaika"),
               enhanced: false,
             },
           ],
@@ -4800,7 +4734,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("200sumairu"),
+              data: getCardDataByConstId("200sumairu"),
               enhanced: false,
             },
           ],
@@ -4828,7 +4762,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("kaika"),
+              data: getCardDataByConstId("kaika"),
               enhanced: false,
             },
           ],
@@ -4859,7 +4793,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("genkinaaisatsu"),
+              data: getCardDataByConstId("genkinaaisatsu"),
               enhanced: false,
             },
           ],
@@ -4885,7 +4819,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("hatonoaizu"),
+              data: getCardDataByConstId("hatonoaizu"),
               enhanced: false,
             },
           ],
@@ -4911,7 +4845,7 @@ describe("useCard preview:false", () => {
           deck: [
             {
               id: "a",
-              data: getCardDataById("todoite"),
+              data: getCardDataByConstId("todoite"),
               enhanced: false,
             },
           ],
@@ -4941,14 +4875,14 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("eieio"),
+            data: getCardDataByConstId("eieio"),
             enhanced: false,
           },
         ],
         producerItems: [
           {
             id: "p1",
-            data: getProducerItemDataById("tekunodoggu"),
+            data: getProducerItemDataByConstId("tekunodoggu"),
             enhanced: false,
           },
         ],
@@ -4998,14 +4932,14 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("ishikinokihon"),
+            data: getCardDataByConstId("ishikinokihon"),
             enhanced: false,
           },
         ],
         producerItems: [
           {
             id: "p1",
-            data: getProducerItemDataById("himitsutokkunkade"),
+            data: getProducerItemDataByConstId("himitsutokkunkade"),
             enhanced: false,
           },
         ],
@@ -5054,7 +4988,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("hidamarinoseitokaishitsu"),
+            data: getCardDataByConstId("hidamarinoseitokaishitsu"),
             enhanced: false,
           },
         ],
@@ -5110,12 +5044,12 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -5160,12 +5094,12 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
           {
             id: "b",
-            data: getCardDataById("apirunokihon"),
+            data: getCardDataByConstId("apirunokihon"),
             enhanced: false,
           },
         ],
@@ -5187,7 +5121,7 @@ describe("useCard preview:false", () => {
         deck: [
           {
             id: "a",
-            data: getCardDataById("iji"),
+            data: getCardDataByConstId("iji"),
             enhanced: false,
           },
         ],
@@ -5212,7 +5146,7 @@ describe("useCard preview:true", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         },
       ],
@@ -5247,7 +5181,7 @@ describe("useCard preview:true", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("chosen"),
+          data: getCardDataByConstId("chosen"),
           enhanced: false,
         },
       ],
@@ -5273,7 +5207,7 @@ describe("useCard preview:true", () => {
       deck: [
         {
           id: "a",
-          data: getCardDataById("apirunokihon"),
+          data: getCardDataByConstId("apirunokihon"),
           enhanced: false,
         },
       ],
@@ -5410,139 +5344,190 @@ describe("useDrink", () => {
     expect(useDrink(...args)).toMatchObject(expected);
   });
 });
-describe("activateEffectsOnTurnEnd", () => {
-  describe('Pアイテムの "turnEnd" による効果発動', () => {
-    test("「お気にのスニーカー」を発動する", () => {
-      const lesson = createLessonForTest({
-        producerItems: [
-          {
-            id: "a",
-            data: getProducerItemDataById("okininosunika"),
-          },
-        ],
-      });
-      lesson.idol.vitality = 7;
-      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-      });
-      expect(
-        updates.filter((e) => e.kind === "modifiers.addition"),
-      ).toStrictEqual([
-        {
-          kind: "modifiers.addition",
-          actual: {
-            kind: "positiveImpression",
-            amount: 4,
-            id: expect.any(String),
-          },
-          max: {
-            kind: "positiveImpression",
-            amount: 4,
-            id: expect.any(String),
-          },
-          reason: expect.any(Object),
-        },
-      ]);
-    });
-  });
-  describe("状態修正による効果発動", () => {
-    test("effectActivationOnTurnEnd", () => {
-      const lesson = createLessonForTest();
-      lesson.idol.modifiers = [
-        {
-          kind: "effectActivationOnTurnEnd",
-          effect: {
-            kind: "getModifier",
-            modifier: { kind: "motivation", amount: 1 },
-          },
-          id: "x",
-        },
-      ];
-      const { updates } = activateEffectsOnTurnEnd(lesson, 1, {
-        getRandom: () => 0,
-        idGenerator: createIdGenerator(),
-      });
-      expect(
-        updates.filter((e) => e.kind === "modifiers.addition"),
-      ).toStrictEqual([
-        {
-          kind: "modifiers.addition",
-          actual: {
-            kind: "motivation",
-            amount: 1,
-            id: expect.any(String),
-          },
-          max: {
-            kind: "motivation",
-            amount: 1,
-            id: expect.any(String),
-          },
-          reason: expect.any(Object),
-        },
-      ]);
-    });
-  });
-});
-// 計算内容は calculatePerformingScoreEffect のテストで検証する
-describe("obtainPositiveImpressionScoreOnTurnEnd", () => {
+describe("validateCostConsumution", () => {
   const testCases: Array<{
-    args: Parameters<typeof obtainPositiveImpressionScoreOnTurnEnd>;
-    expected: ReturnType<typeof obtainPositiveImpressionScoreOnTurnEnd>;
+    args: Parameters<typeof validateCostConsumution>;
+    expected: ReturnType<typeof validateCostConsumution>;
     name: string;
   }> = [
     {
-      name: "好印象がない時、更新を返さない",
-      args: [createLessonForTest(), 1],
-      expected: {
-        updates: [],
-        nextHistoryResultIndex: 2,
-      },
+      name: "normalコストに対してlifeが足りる時、スキルカードが使える",
+      args: [
+        {
+          life: 3,
+          vitality: 0,
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        { kind: "normal", value: 3 },
+      ],
+      expected: true,
     },
     {
-      name: "好印象がある時、スコアを獲得する",
+      name: "normalコストに対してvitalityが足りる時、スキルカードが使える",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [
-            { kind: "positiveImpression", amount: 1, id: "x" },
-          ];
-          return lesson;
-        })(),
-        1,
+        {
+          life: 0,
+          vitality: 3,
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        { kind: "normal", value: 3 },
       ],
-      expected: {
-        updates: [
-          { kind: "score", actual: 1, max: 1, reason: expect.any(Object) },
-        ],
-        nextHistoryResultIndex: 2,
-      },
+      expected: true,
     },
     {
-      name: "スコアボーナスの設定を反映する",
+      name: "normalコストに対してlifeとvitalityの合計が足りる時、スキルカードが使える",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.modifiers = [
-            { kind: "positiveImpression", amount: 1, id: "x" },
-          ];
-          lesson.turns = ["vocal"];
-          lesson.idol.scoreBonus = { vocal: 300, visual: 200, dance: 100 };
-          return lesson;
-        })(),
-        1,
+        {
+          life: 1,
+          vitality: 2,
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        { kind: "normal", value: 3 },
       ],
-      expected: {
-        updates: [
-          { kind: "score", actual: 3, max: 3, reason: expect.any(Object) },
-        ],
-        nextHistoryResultIndex: 2,
-      },
+      expected: true,
+    },
+    {
+      name: "normalコストに対してlifeとvitalityの合計が足りない時、スキルカードが使えない",
+      args: [
+        {
+          life: 1,
+          vitality: 2,
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        { kind: "normal", value: 4 },
+      ],
+      expected: false,
+    },
+    {
+      name: "lifeコストを満たす時、スキルカードが使える",
+      args: [
+        {
+          life: 3,
+          vitality: 0,
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        { kind: "life", value: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "lifeコスト満たさない時、スキルカードが使えない",
+      args: [
+        {
+          life: 3,
+          vitality: 10,
+          modifiers: [] as Idol["modifiers"],
+        } as Idol,
+        { kind: "life", value: 4 },
+      ],
+      expected: false,
+    },
+    {
+      name: "focusコストを満たす時、スキルカードが使える",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [{ kind: "focus", amount: 3 }] as Idol["modifiers"],
+        } as Idol,
+        { kind: "focus", value: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "focusコストを満たさない時、スキルカードが使えない",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [{ kind: "focus", amount: 3 }] as Idol["modifiers"],
+        } as Idol,
+        { kind: "focus", value: 4 },
+      ],
+      expected: false,
+    },
+    {
+      name: "goodConditionコストを満たす時、スキルカードが使える",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [
+            { kind: "goodCondition", duration: 3 },
+          ] as Idol["modifiers"],
+        } as Idol,
+        { kind: "goodCondition", value: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "goodConditionコストを満たさない時、スキルカードが使えない",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [
+            { kind: "goodCondition", duration: 3 },
+          ] as Idol["modifiers"],
+        } as Idol,
+        { kind: "goodCondition", value: 4 },
+      ],
+      expected: false,
+    },
+    {
+      name: "motivationコストを満たす時、スキルカードが使える",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [{ kind: "motivation", amount: 3 }] as Idol["modifiers"],
+        } as Idol,
+        { kind: "motivation", value: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "motivationコストを満たさない時、スキルカードが使えない",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [{ kind: "motivation", amount: 3 }] as Idol["modifiers"],
+        } as Idol,
+        { kind: "motivation", value: 4 },
+      ],
+      expected: false,
+    },
+    {
+      name: "positiveImpressionコストを満たす時、スキルカードが使える",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [
+            { kind: "positiveImpression", amount: 3 },
+          ] as Idol["modifiers"],
+        } as Idol,
+        { kind: "positiveImpression", value: 3 },
+      ],
+      expected: true,
+    },
+    {
+      name: "positiveImpressionコストを満たさない時、スキルカードが使えない",
+      args: [
+        {
+          life: 0,
+          vitality: 0,
+          modifiers: [
+            { kind: "positiveImpression", amount: 3 },
+          ] as Idol["modifiers"],
+        } as Idol,
+        { kind: "positiveImpression", value: 4 },
+      ],
+      expected: false,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(obtainPositiveImpressionScoreOnTurnEnd(...args)).toStrictEqual(
-      expected,
-    );
+    expect(validateCostConsumution(...args)).toStrictEqual(expected);
   });
 });

@@ -23,8 +23,36 @@ import type {
   ProducerItemTrigger,
   RangedNumber,
   VitalityUpdateQuery,
+  DrinkData,
+  EffectWithoutCondition,
 } from "./types";
 import { metaModifierDictioanry } from "./data/modifiers";
+
+/**
+ * コストの後に配置する悪い効果かを判定する
+ *
+ * - Ver. 1.2.4 頃に追加された、Pドリンクの「特製ハツボシエキス」の効果説明は以下だった
+ *   次に使用するアクティブスキルカードの効果をもう1回発動（1回・1ターン）
+ *   体力消費2
+ *   消費体力増加1ターン
+ * - 上記テキストを分類すると、以下のようになり、コストの位置が効果リストの間に挟まる形だったのが本家仕様だった
+ *   {効果1}
+ *   {コスト}
+ *   {効果2}
+ * - スキルカードの効果説明欄は、コストは先頭に配置されているので、この仕様は無関係
+ * - 本実装では、コストが最後に来るのだと推測していた
+ *   - なお、処理上、コストは効果リストとは別枠の動きをしているので、少なくとも本実装では、効果の一つとしては分類しない
+ *     - 例えば、通常は効果リストは先頭から後の効果に影響を与えるが、「消費体力減少」の後に「体力消費」が書いてあっても半分にはならない
+ * - コストの後の効果は、悪い効果的なものを置いているようなので、本実装ではテキスト用に効果の良悪を分けて、コスト前後に効果テキストを出し分けることにした
+ * - なお、Pアイテムも同様の仕様の可能性が高いが、上記ケースの効果がないので不明。本実装では一旦考慮しない。
+ *   - スキルカードは、コストが先頭に配置されるので、別仕様だと思われる
+ */
+const isBadEffect = (effect: EffectWithoutCondition): boolean => {
+  return (
+    effect.kind === "getModifier" &&
+    effect.modifier.kind === "doubleLifeConsumption"
+  );
+};
 
 /**
  * 汎用的な数値範囲テキストを生成する
@@ -86,6 +114,7 @@ const globalKeywords = {
   goodCondition: metaModifierDictioanry.goodCondition.label,
   halfLifeConsumption: metaModifierDictioanry.halfLifeConsumption.label,
   increaseRemainingTurns: "ターン追加",
+  lifeConsumption: "体力消費",
   lifeConsumptionReduction:
     metaModifierDictioanry.lifeConsumptionReduction.label,
   mentalSkillCard: "メンタルスキルカード",
@@ -242,7 +271,7 @@ export const generateActionCostText = (
     case "goodCondition":
       return `${kwd("goodCondition")}消費${cost.value}ターン`;
     case "life":
-      return `体力消費${cost.value}`;
+      return `${kwd("lifeConsumption")}${cost.value}`;
     case "motivation":
       return `${kwd("motivation")}消費${cost.value}`;
     case "normal":
@@ -543,7 +572,7 @@ export const generateProducerItemDescription = (params: {
   ];
   if (params.cost !== undefined) {
     const costText = generateActionCostText(params.cost);
-    // 通常コストがどこにも表記がなくなってしまいそうだが、現状、Pアイテムのコストに通常コストは存在しないので考慮しない
+    // 通常コストの時に表記がなくなるが、現状Pアイテムに通常コストは存在しないので考慮しない
     if (costText !== undefined) {
       lines = [...lines, costText];
     }
@@ -551,5 +580,30 @@ export const generateProducerItemDescription = (params: {
   if (params.times !== undefined) {
     lines = [...lines, generateProducerItemTimesText(params.times)];
   }
+  return lines.join("\n");
+};
+
+/**
+ * Pドリンクの効果説明欄のテキストを生成する
+ */
+export const generateDrinkDescription = (params: {
+  cost?: DrinkData["cost"];
+  effects: DrinkData["effects"];
+}): string => {
+  const goodEffectTexts = params.effects
+    .filter((e) => !isBadEffect(e))
+    .map((e) => generateEffectText(e));
+  const badEffectTexts = params.effects
+    .filter((e) => isBadEffect(e))
+    .map((e) => generateEffectText(e));
+  let lines = goodEffectTexts;
+  if (params.cost !== undefined) {
+    const costText = generateActionCostText(params.cost);
+    // 通常コストの時に表記がなくなるが、現状Pドリンクに通常コストは存在しないので考慮しない
+    if (costText !== undefined) {
+      lines = [...lines, costText];
+    }
+  }
+  lines = [...lines, ...badEffectTexts];
   return lines.join("\n");
 };

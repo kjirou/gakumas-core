@@ -834,6 +834,11 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       vitality: 0,
       modifiers: [] as Modifier[],
       score: 0,
+      drinks: [
+        { name: "ホエイプロテイン" },
+        { name: "おしゃれハーブティー" },
+        { name: "ホエイプロテイン" },
+      ],
     } as LessonDisplay);
     gamePlay = useDrink(gamePlay, 2);
     gamePlay = playCard(gamePlay, 1);
@@ -851,6 +856,7 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
         { name: "やる気", representativeValue: 11 },
       ],
       score: 300,
+      drinks: [{ name: "ホエイプロテイン" }, { name: "おしゃれハーブティー" }],
     } as LessonDisplay);
     gamePlay = playCard(gamePlay, 1);
     gamePlay = playCard(gamePlay, 1);

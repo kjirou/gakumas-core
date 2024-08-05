@@ -1758,6 +1758,16 @@ export type ModifierDisplay = ModifierData & {
 };
 
 /**
+ * レッスン画面のPドリンクの表示用情報
+ */
+export type DrinkDisplay = Drink & {
+  description: string;
+  name: string;
+  /** 使用条件を満たすか */
+  usable: boolean;
+};
+
+/**
  * レッスン画面の各ターンの表示用情報
  *
  * - 主に、本家レッスン画面の、左上の現在ターンをタッチした時の詳細情報に使用することを想定している
@@ -1778,6 +1788,7 @@ export type TurnDisplay = {
  */
 export type LessonDisplay = {
   clearScoreThresholds: Lesson["clearScoreThresholds"];
+  drinks: DrinkDisplay[];
   hand: CardInHandDisplay[];
   inventory: {
     hand: CardInInventoryDisplay[];

@@ -254,6 +254,12 @@ export type ModifierData = Readonly<
  */
 export type MetaModifierData = Readonly<{
   kind: ModifierData["kind"];
+  /**
+   * デバフかどうか
+   *
+   * - 「低下状態無効（n回）」の対象か
+   */
+  debuff: boolean;
   label: string;
   /**
    * 代表して表示する値を格納しているプロパティ名

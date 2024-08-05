@@ -211,6 +211,66 @@ describe("activateEffectIf", () => {
       ],
     },
     {
+      name: "getModifier - debuffProtection が付与されていて、デバフを受け取った時、デバフは付与されずに debuffProtection が減少する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            {
+              kind: "debuffProtection",
+              times: 1,
+              id: "m1",
+            },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "getModifier",
+          modifier: { kind: "doubleLifeConsumption", duration: 1 },
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "times",
+          id: "m1",
+          actual: -1,
+          max: -1,
+        },
+      ],
+    },
+    {
+      name: "getModifier - debuffProtection が付与されていて、デバフ以外を受け取った時、それが付与される",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            {
+              kind: "debuffProtection",
+              times: 1,
+              id: "m1",
+            },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "getModifier",
+          modifier: { kind: "focus", amount: 1 },
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.addition",
+          actual: { kind: "focus", amount: 1, id: expect.any(String) },
+          max: { kind: "focus", amount: 1, id: expect.any(String) },
+        },
+      ],
+    },
+    {
       name: "increaseRemainingTurns",
       args: [
         (() => {

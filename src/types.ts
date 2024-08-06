@@ -1513,7 +1513,7 @@ type LessonHistoryRecord =
 export type LessonUpdateQueryReason = Readonly<
   (
     | {
-        /** スキルカード使用 */
+        /** 非推奨、スキルカード使用 */
         kind: "cardUsage";
         cardId: Card["id"];
       }
@@ -1522,10 +1522,15 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "cardUsage.remainingCardUsageCountConsumption";
       }
     | {
-        /** スキルカード使用.効果発動 */
+        /** スキルカード使用.主効果発動 */
         kind: "cardUsage.mainEffectActivation";
         cardId: Card["id"];
         effectIndex: number;
+      }
+    | {
+        /** スキルカード使用.状態修正増加起因の効果発動 */
+        kind: "cardUsage.modifierIncreaseEffectActivation";
+        cardId: Card["id"];
       }
     | {
         /** スキルカード使用プレビュー */
@@ -1579,8 +1584,14 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "turnSkip";
       }
     | {
-        /** ターン開始時トリガーにより発動した効果 */
+        /** 非推奨、ターン開始時トリガーにより発動した効果 */
         kind: "turnStartTrigger";
+      }
+    | {
+        /** ターン開始時処理.応援/トラブル */
+        kind: "turnStart.encouragement";
+        /** lesson.encouragements のインデックス */
+        index: number;
       }
     | {
         /** テストのダミー値としてや開発時に一時的に設定 */

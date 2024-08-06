@@ -1375,9 +1375,10 @@ export const activateEncouragementOnTurnStart = (
   let nextHistoryResultIndex = historyResultIndex;
 
   let encouragementUpdates: LessonUpdateQuery[] = [];
-  const encouragement = lesson.encouragements.find(
+  const encouragementIndex = lesson.encouragements.findIndex(
     (e) => e.turnNumber === lesson.turnNumber,
   );
+  const encouragement = lesson.encouragements[encouragementIndex];
   if (encouragement) {
     const diffs = activateEffectIf(
       newLesson,
@@ -1388,7 +1389,8 @@ export const activateEncouragementOnTurnStart = (
     if (diffs) {
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.encouragement",
+          index: encouragementIndex,
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -2355,7 +2357,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsageTrigger",
+            kind: "cardUsage.modifierIncreaseEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,

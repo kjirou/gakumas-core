@@ -41,6 +41,7 @@ import {
   maxHandSize,
   patchDiffs,
   prepareCardsForLesson,
+  scanIncreasedModifierKinds,
 } from "./models";
 import { shuffleArray, validateNumberInRange } from "./utils";
 
@@ -2363,11 +2364,12 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            increasedModifierKinds: mainEffectActivations
-              .filter((e) => e !== undefined)
-              .reduce((acc, e) => [...acc, ...e], [])
-              .filter((e) => e.kind === "modifiers.addition")
-              .map((e) => e.actual.kind),
+            increasedModifierKinds: scanIncreasedModifierKinds(
+              newLesson.idol.modifiers,
+              mainEffectActivations
+                .filter((e) => e !== undefined)
+                .reduce((acc, e) => [...acc, ...e], []),
+            ),
           },
         );
       newLesson = updatedLesson;

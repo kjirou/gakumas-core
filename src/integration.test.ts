@@ -1454,17 +1454,16 @@ describe("ロジック・やる気の代表として、恒常SSR千奈のプレ�
     // 残りターン数10
     gamePlay = startTurn(gamePlay);
     gamePlay = addLessonSupport(gamePlay, "genkinaaisatsu", 1);
-    // TODO: 状態修正増加トリガーが "modifiers.update" を判別できてなく、発動していない
-    // expect(generateLessonDisplay(gamePlay)).toMatchObject({
-    //   life: 13,
-    //   vitality: 0,
-    //   modifiers: [
-    //     { name: "やる気", representativeValue: 11 },
-    //     { name: "好印象", representativeValue: 5 },
-    //   ],
-    //   score: 5,
-    // } as LessonDisplay);
-    // gamePlay = playCard(gamePlay, 2);
-    // gamePlay = endTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 13,
+      vitality: 0,
+      modifiers: [
+        { name: "やる気", representativeValue: 11 },
+        { name: "好印象", representativeValue: 5 },
+      ],
+      score: 5,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = endTurn(gamePlay);
   });
 });

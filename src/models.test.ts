@@ -13,6 +13,7 @@ import {
   getDisplayedRepresentativeModifierValue,
   getIdolParameterKindOnTurn,
   patchDiffs,
+  scanIncreasedModifierKinds,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
@@ -1125,5 +1126,72 @@ describe("patchDiffs", () => {
       ]);
       expect(lessonMock.idol.vitality).toBe(3);
     });
+  });
+});
+describe("scanIncreasedModifierKinds", () => {
+  const testCases: Array<{
+    args: Parameters<typeof scanIncreasedModifierKinds>;
+    expected: ReturnType<typeof scanIncreasedModifierKinds>;
+    name: string;
+  }> = [
+    {
+      name: "更新差分がない時、空配列を返す",
+      args: [[{ kind: "focus", amount: 1, id: "a" }], []],
+      expected: [],
+    },
+    {
+      name: "追加された状態修正を判別できる",
+      args: [
+        [],
+        [
+          {
+            kind: "modifiers.addition",
+            actual: { kind: "focus", amount: 1, id: "a" },
+            max: { kind: "focus", amount: 1, id: "a" },
+          },
+          {
+            kind: "modifiers.addition",
+            actual: { kind: "goodCondition", duration: 1, id: "b" },
+            max: { kind: "goodCondition", duration: 1, id: "b" },
+          },
+        ],
+      ],
+      expected: ["focus", "goodCondition"],
+    },
+    {
+      name: "増加の更新をされた状態修正を判別できる",
+      args: [
+        [{ kind: "motivation", amount: 1, id: "a" }],
+        [
+          {
+            kind: "modifiers.update",
+            propertyNameKind: "amount",
+            id: "a",
+            actual: 1,
+            max: 1,
+          },
+        ],
+      ],
+      expected: ["motivation"],
+    },
+    {
+      name: "増加していない更新をされた状態修正は、結果に含めない",
+      args: [
+        [{ kind: "motivation", amount: 1, id: "a" }],
+        [
+          {
+            kind: "modifiers.update",
+            propertyNameKind: "amount",
+            id: "a",
+            actual: 0,
+            max: 1,
+          },
+        ],
+      ],
+      expected: [],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(scanIncreasedModifierKinds(...args)).toStrictEqual(expected);
   });
 });

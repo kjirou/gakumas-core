@@ -752,6 +752,29 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
   return newLesson;
 };
 
+/**
+ * 更新差分を走査して、上昇した状態修正種別リストを返す
+ */
+export const scanIncreasedModifierKinds = (
+  beforeModifiers: Modifier[],
+  diffs: LessonUpdateDiff[],
+): Array<ModifierData["kind"]> => {
+  const increasedModifierKinds = new Set<ModifierData["kind"]>();
+  for (const diff of diffs) {
+    if (diff.kind === "modifiers.addition") {
+      increasedModifierKinds.add(diff.actual.kind);
+    } else if (diff.kind === "modifiers.update") {
+      if (diff.actual > 0) {
+        const modifier = beforeModifiers.find((e) => e.id === diff.id);
+        if (modifier !== undefined) {
+          increasedModifierKinds.add(modifier.kind);
+        }
+      }
+    }
+  }
+  return Array.from(increasedModifierKinds);
+};
+
 /** 次のレッスン履歴インデックスを返す */
 export const getNextHistoryResultIndex = (
   updates: LessonUpdateQuery[],

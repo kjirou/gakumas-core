@@ -1294,6 +1294,6 @@ const producerItemsAsConst = [
   },
 ] as const satisfies ProducerItemData[];
 
-export type ProducerItemDataId = (typeof producerItems)[number]["id"];
+export type ProducerItemDataId = (typeof producerItemsAsConst)[number]["id"];
 
 export const producerItems: ProducerItemData[] = producerItemsAsConst;

@@ -20,7 +20,6 @@ import {
   startTurn,
   useDrink,
 } from "./index";
-import { activateEffect } from "./lesson-mutation";
 
 /**
  * スキルカードへレッスンサポートの付与をする、本体は仕様不明瞭なのもあり未実装
@@ -492,7 +491,7 @@ describe("センス・集中の代表として、水着麻央のプレイ動画�
     } as LessonDisplay);
   });
 });
-describe("ロジックの好印象系の代表として、恒常SSRことねのプレイを再現", () => {
+describe("ロジック・好印象の代表として、恒常SSRことねのプレイを再現", () => {
   // この動画: https://youtu.be/bVVUPvtGK68 の再現をする
   test("中間試験まで3週のSPレッスンを再現できる", () => {
     let gamePlay = initializeGamePlay({
@@ -1308,5 +1307,164 @@ describe("ロジックの好印象系の代表として、恒常SSRことねの�
       ],
       score: 20274 + scoreMod,
     } as LessonDisplay);
+  });
+});
+describe("ロジック・やる気の代表として、恒常SSR千奈のプレイを再現", () => {
+  // 再現するプレイ動画: https://www.youtube.com/watch?v=uta5-aj-o64
+  test("最終試験前の追い込みレッスンを再現できる", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-ssr-1",
+      specialTrainingLevel: 6,
+      talentAwakeningLevel: 1,
+      // 最大体力不明、プレイには関係なかった
+      life: 16,
+      idolSpecificCardTestId: "ojosamanoharebutai",
+      cards: [
+        { id: "hombanzenya", testId: "hombanzenya", enhanced: true },
+        { id: "tegakinomesseji", testId: "tegakinomesseji", enhanced: true },
+        { id: "yurufuwaoshaveri", testId: "yurufuwaoshaveri", enhanced: true },
+        { id: "genkinaaisatsu", testId: "genkinaaisatsu", enhanced: true },
+        { id: "apirunokihon", testId: "apirunokihon", enhanced: true },
+        { id: "afureruomoide", testId: "afureruomoide", enhanced: true },
+        { id: "200sumairu", testId: "200sumairu" },
+        { id: "kibuntenkan", testId: "kibuntenkan" },
+        { id: "pozunokihon", testId: "pozunokihon" },
+        { id: "imetore", testId: "imetore", enhanced: true },
+        { id: "watashigasta", testId: "watashigasta", enhanced: true },
+        { id: "genkinaaisatsu", testId: "genkinaaisatsu2", enhanced: true },
+        { id: "genkinaaisatsu", testId: "genkinaaisatsu3", enhanced: true },
+        { id: "rizumikaru", testId: "rizumikaru", enhanced: true },
+        { id: "mosukoshidake", testId: "mosukoshidake" },
+        { id: "ishikinokihon", testId: "ishikinokihon" },
+        { id: "terebishutsuen", testId: "terebishutsuen" },
+        { id: "hyogennokihon", testId: "hyogennokihon" },
+        { id: "genkinaaisatsu", testId: "genkinaaisatsu4", enhanced: true },
+        { id: "kanaetaiyume", testId: "kanaetaiyume", enhanced: true },
+        { id: "eieio", testId: "eieio" },
+        { id: "ishikinokihon", testId: "ishikinokihon2" },
+      ],
+      producerItems: [{ id: "nakanaorinokikkake" }],
+      turns: new Array(11).fill("dance"),
+      clearScoreThresholds: { clear: 165, perfect: 600 },
+      ignoreIdolParameterKindConditionAfterClearing: true,
+      encouragements: [
+        {
+          turnNumber: 2,
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+        },
+        {
+          turnNumber: 4,
+          effect: {
+            kind: "generateTroubleCard",
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              range: { max: 6 },
+            },
+          },
+        },
+        {
+          turnNumber: 6,
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              range: { min: 13 },
+            },
+          },
+        },
+        {
+          turnNumber: 7,
+          effect: {
+            kind: "drainLife",
+            value: 4,
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              range: { max: 23 },
+            },
+          },
+        },
+      ],
+      // 動画にこれが発動する時点が含まれてなかったので、状況から推測
+      memoryEffects: [
+        { kind: "motivation", value: 1, probability: 100 },
+        { kind: "halfLifeConsumption", value: 1, probability: 100 },
+      ],
+    });
+    gamePlay.initialLesson.deck = [
+      // 残りターン数11
+      "hombanzenya", // 使用
+      "tegakinomesseji",
+      "yurufuwaoshaveri",
+      // 残りターン数10
+      "genkinaaisatsu", // レッスンサポート1発動
+      "apirunokihon",
+      "afureruomoide", // 使用
+      // 残りターン数9
+      "ojosamanoharebutai",
+      "200sumairu", // レッスンサポート1発動、使用
+      "kibuntenkan",
+      // 残りターン数8
+      "pozunokihon",
+      "imetore", // 使用2
+      "watashigasta", // 使用1
+      "genkinaaisatsu2", // カードを引いた分
+      // 残りターン数7(+1)
+      "genkinaaisatsu3",
+      "rizumikaru", // 使用
+      "mosukoshidake",
+      // 残りターン数6(+1)
+      "ishikinokihon",
+      "terebishutsuen", // 使用
+      "hyogennokihon",
+      // 残りターン数5(+1)
+      "genkinaaisatsu4",
+      "kanaetaiyume", // 使用
+      "eieio",
+      // 残りターン数4(+1)
+      "ishikinokihon",
+      "genkinaaisatsu", // このカードから山札再構築後、レッスンサポート1発動、使用、使用でクリア達成
+      "genkinaaisatsu2",
+      // 残りターン数3(+1)、Pアイテム「仲直りのきっかけ」発動
+      "genkinaaisatsu3", // 使用2、使用でパーフェクト達成
+      "ojosamanoharebutai", // 使用1
+      "kibuntenkan",
+    ];
+
+    // 残りターン数11
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      life: 16,
+      vitality: 0,
+      modifiers: [
+        { name: "やる気", representativeValue: 1 },
+        { name: "消費体力減少", representativeValue: 1 },
+      ],
+      score: 0,
+    } as LessonDisplay);
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+
+    // 残りターン数10
+    gamePlay = startTurn(gamePlay);
+    gamePlay = addLessonSupport(gamePlay, "genkinaaisatsu", 1);
+    // TODO: 状態修正増加トリガーが "modifiers.update" を判別できてなく、発動していない
+    // expect(generateLessonDisplay(gamePlay)).toMatchObject({
+    //   life: 13,
+    //   vitality: 0,
+    //   modifiers: [
+    //     { name: "やる気", representativeValue: 11 },
+    //     { name: "好印象", representativeValue: 5 },
+    //   ],
+    //   score: 5,
+    // } as LessonDisplay);
+    // gamePlay = playCard(gamePlay, 2);
+    // gamePlay = endTurn(gamePlay);
   });
 });

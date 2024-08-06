@@ -6,7 +6,10 @@ import {
   getCardDataByConstId,
 } from "./data/cards";
 import { type DrinkDataId, getDrinkDataByConstId } from "./data/drinks";
-import { getProducerItemDataByConstId } from "./data/producer-items";
+import {
+  getProducerItemDataByConstId,
+  ProducerItemDataId,
+} from "./data/producer-items";
 import {
   generateActionCostText,
   generateCardDescription,
@@ -1100,7 +1103,7 @@ describe("generateProducerItemTriggerAndConditionText", () => {
 describe("generateProducerItemDescription", () => {
   const testCases: Array<{
     expected: ReturnType<typeof generateProducerItemDescription>;
-    producerItemId: ProducerItemData["id"];
+    producerItemId: ProducerItemDataId;
   }> = [
     {
       producerItemId: "itsumonomeikupochi",

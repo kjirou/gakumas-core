@@ -1294,6 +1294,7 @@ export type Lesson = {
    *
    * - 本家仕様には、不具合だと思われる、妙な仕様がある
    *   - それは「山札が0枚の時にターン終了し、ターン開始時の手札を引いた時、前ターンの最後に使用したスキルカードと使わなかった手札は、山札の再構築に含まれず次の捨札になる」というもの
+   *   - 仕様確認動画: https://www.youtube.com/shorts/5kTuyk0m270
    * - これを再現するために、この条件に合致する使用されたスキルカードを保持する
    *   - 次のターン開始処理の手札を引く時に参照して、山札の再構築の候補から外して、直接捨札へ配置する
    * - 補足:
@@ -1512,7 +1513,7 @@ type LessonHistoryRecord =
 export type LessonUpdateQueryReason = Readonly<
   (
     | {
-        /** スキルカード使用 */
+        /** 非推奨、スキルカード使用 */
         kind: "cardUsage";
         cardId: Card["id"];
       }
@@ -1521,10 +1522,15 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "cardUsage.remainingCardUsageCountConsumption";
       }
     | {
-        /** スキルカード使用.効果発動 */
+        /** スキルカード使用.主効果発動 */
         kind: "cardUsage.mainEffectActivation";
         cardId: Card["id"];
         effectIndex: number;
+      }
+    | {
+        /** スキルカード使用.状態修正増加起因の効果発動 */
+        kind: "cardUsage.modifierIncreaseEffectActivation";
+        cardId: Card["id"];
       }
     | {
         /** スキルカード使用プレビュー */
@@ -1578,8 +1584,14 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "turnSkip";
       }
     | {
-        /** ターン開始時トリガーにより発動した効果 */
+        /** 非推奨、ターン開始時トリガーにより発動した効果 */
         kind: "turnStartTrigger";
+      }
+    | {
+        /** ターン開始時処理.応援/トラブル */
+        kind: "turnStart.encouragement";
+        /** lesson.encouragements のインデックス */
+        index: number;
       }
     | {
         /** テストのダミー値としてや開発時に一時的に設定 */

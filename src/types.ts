@@ -1693,6 +1693,7 @@ export type CardInHandDisplay = {
   enhancements: CardEnhancement[];
   /** スキルカードの名称、末尾に強化数分の"+"が付く */
   name: string;
+  rarity: CardData["rarity"];
   /** 使用条件を満たすか */
   playable: boolean;
   /** スコア、レッスンのスコア条件を考慮しない最大値 */

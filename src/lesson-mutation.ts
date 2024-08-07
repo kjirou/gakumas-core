@@ -43,7 +43,7 @@ import {
   prepareCardsForLesson,
   scanIncreasedModifierKinds,
 } from "./models";
-import { shuffleArray, validateNumberInRange } from "./utils";
+import { getRandomInteger, shuffleArray, validateNumberInRange } from "./utils";
 
 /** 主に型都合のユーティリティ処理 */
 const createLessonUpdateQueryFromDiff = (
@@ -796,7 +796,11 @@ export const activateEffect = <
       const candidates = filterGeneratableCardsData(
         lesson.idol.original.data.producePlan.kind,
       );
-      const cardData = candidates[getRandom() * candidates.length];
+      const cardData =
+        candidates[getRandomInteger(getRandom, candidates.length - 1)];
+      if (!cardData) {
+        throw new Error("Unexpected empty card data");
+      }
       const cardInProduction: CardInProduction = {
         id: idGenerator(),
         data: cardData,
@@ -828,8 +832,8 @@ export const activateEffect = <
       };
       const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];
       const deck = [...lesson.deck];
-      // 例: deck が ["a", "b", "c"] なら、0以上~4未満の端数切り捨てのインデックス、つまり 0,1,2,3 のいずれかに挿入する
-      const index = Math.floor(getRandom() * (deck.length + 1));
+      // 例: deck が ["a", "b", "c"] なら、0,1,2,3 のいずれかに挿入する
+      const index = getRandomInteger(getRandom, deck.length);
       deck.splice(index, 0, additionalCard.id);
       diffs.push({
         kind: "cards.addition",

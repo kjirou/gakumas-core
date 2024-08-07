@@ -424,16 +424,16 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   // - Pアイテム起因のターン開始処理でスコアパーフェクトを満たした場合、手札を引かないことを、SSR広のPアイテムで確認した
   //
   if (!isScoreSatisfyingPerfect(lesson)) {
-    const drawCardsOnLessonStartResult = drawCardsOnTurnStart(
+    const drawCardsOnTurnStartResult = drawCardsOnTurnStart(
       lesson,
       historyResultIndex,
       {
         getRandom: gamePlay.getRandom,
       },
     );
-    updates = [...updates, ...drawCardsOnLessonStartResult.updates];
-    historyResultIndex = drawCardsOnLessonStartResult.nextHistoryResultIndex;
-    lesson = patchDiffs(lesson, drawCardsOnLessonStartResult.updates);
+    updates = [...updates, ...drawCardsOnTurnStartResult.updates];
+    historyResultIndex = drawCardsOnTurnStartResult.nextHistoryResultIndex;
+    lesson = patchDiffs(lesson, drawCardsOnTurnStartResult.updates);
   }
 
   //

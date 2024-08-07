@@ -54,7 +54,9 @@ const createLessonUpdateQueryFromDiff = (
 /**
  * 山札から指定数のスキルカードを引く
  *
- * - 山札がなくなった場合は、捨札をシャッフルして山札にする
+ * - 山札がなくなった場合は、捨札をシャッフルして、山札へ再構築する
+ *   - 捨札も含めて足りない場合は、その数のカードは引けない
+ *     - おそらく、本家にそのような状況は無いが、シミュレーターなので、各札がない時も考慮する
  */
 export const drawCardsFromDeck = (
   deck: Lesson["deck"],
@@ -74,9 +76,14 @@ export const drawCardsFromDeck = (
   for (let i = 0; i < count; i++) {
     // 捨札を加えても引く数に足りない状況は考慮しない
     if (newDeck.length === 0) {
-      newDeck = shuffleArray(newDiscardPile, getRandom);
-      newDiscardPile = [];
-      deckRebuilt = true;
+      if (newDiscardPile.length === 0) {
+        deckRebuilt = true;
+        break;
+      } else {
+        newDeck = shuffleArray(newDiscardPile, getRandom);
+        newDiscardPile = [];
+        deckRebuilt = true;
+      }
     }
     const drawnCard = newDeck.shift();
     if (!drawnCard) {
@@ -1633,6 +1640,9 @@ export const activateModifierEffectsOnTurnStart = (
 
 /**
  * ターン開始時に手札を引く
+ *
+ * - 本実装では、山札と捨札を合計しても引く数に足りない状況も、正しい状況として扱う
+ *   - おそらく、本家では存在しない状況
  */
 export const drawCardsOnTurnStart = (
   lesson: Lesson,

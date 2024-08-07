@@ -3308,8 +3308,30 @@ describe("drawCardsFromDeck", () => {
       "5",
     ]);
   });
+  test("山札と捨札の合計が2枚の時、3枚引くと2枚のみ引く", () => {
+    const deck = ["1"];
+    const discardPile = ["2"];
+    const { drawnCards, deckRebuilt } = drawCardsFromDeck(
+      deck,
+      3,
+      discardPile,
+      Math.random,
+    );
+    expect(drawnCards).toHaveLength(2);
+    expect(deckRebuilt).toBe(true);
+  });
+  test("山札と捨札のどちらも0枚の時、1枚引くと1枚も引けない", () => {
+    const { drawnCards, deckRebuilt } = drawCardsFromDeck(
+      [],
+      1,
+      [],
+      Math.random,
+    );
+    expect(drawnCards).toHaveLength(0);
+    expect(deckRebuilt).toBe(true);
+  });
 });
-describe("drawCardsOnLessonStart", () => {
+describe("drawCardsOnTurnStart", () => {
   test("山札に引く数が残っている時、山札はその分減り、捨札に変化はない / 1ターン目でレッスン開始時手札がない時、その更新は発行されない", () => {
     const lesson = createLessonForTest({
       deck: [
@@ -3389,6 +3411,19 @@ describe("drawCardsOnLessonStart", () => {
         reason: expect.any(Object),
       },
     ]);
+  });
+  test("山札も捨札も0枚の時、手札0枚になる", () => {
+    const lesson = createLessonForTest({
+      deck: [],
+    });
+    lesson.hand = [];
+    lesson.deck = [];
+    lesson.discardPile = [];
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    const newLesson = patchDiffs(lesson, updates);
+    expect(newLesson.hand).toHaveLength(0);
   });
   test("1ターン目でレッスン開始時手札が1枚ある時、更新は2回発行され、手札は最終的にその札を含む3枚になる", () => {
     const lesson = createLessonForTest({

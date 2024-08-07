@@ -1278,7 +1278,12 @@ export type Lesson = {
    * - 1ターン番号に対しては、1つの設定のみ
    */
   encouragements: Encouragement[];
-  /** 手札、原文でも「手札」、最大5枚 */
+  /**
+   * 手札
+   *
+   * - 原文でも「手札」
+   * - 最大5枚
+   */
   hand: Array<Card["id"]>;
   idol: Idol;
   /**

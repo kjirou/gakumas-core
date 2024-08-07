@@ -3268,7 +3268,7 @@ describe("drawCardsFromDeck", () => {
       drawnCards,
       deck: newDeck,
       deckRebuilt,
-    } = drawCardsFromDeck(deck, 1, [], Math.random);
+    } = drawCardsFromDeck(deck, 1, [], () => 0);
     expect(drawnCards).toHaveLength(1);
     expect(newDeck).toHaveLength(2);
     expect(deckRebuilt).toBe(false);
@@ -3281,7 +3281,7 @@ describe("drawCardsFromDeck", () => {
       deck: newDeck,
       deckRebuilt,
       discardPile: newDiscardPile,
-    } = drawCardsFromDeck(deck, 1, discardPile, Math.random);
+    } = drawCardsFromDeck(deck, 1, discardPile, () => 0);
     expect(drawnCards).toHaveLength(1);
     expect(newDeck).toHaveLength(2);
     expect(deckRebuilt).toBe(false);
@@ -3295,7 +3295,7 @@ describe("drawCardsFromDeck", () => {
       deck: newDeck,
       deckRebuilt,
       discardPile: newDiscardPile,
-    } = drawCardsFromDeck(deck, 2, discardPile, Math.random);
+    } = drawCardsFromDeck(deck, 2, discardPile, () => 0);
     expect(drawnCards).toHaveLength(2);
     expect(newDeck).toHaveLength(3);
     expect(deckRebuilt).toBe(true);
@@ -3315,18 +3315,13 @@ describe("drawCardsFromDeck", () => {
       deck,
       3,
       discardPile,
-      Math.random,
+      () => 0,
     );
     expect(drawnCards).toHaveLength(2);
     expect(deckRebuilt).toBe(true);
   });
   test("山札と捨札のどちらも0枚の時、1枚引くと1枚も引けない", () => {
-    const { drawnCards, deckRebuilt } = drawCardsFromDeck(
-      [],
-      1,
-      [],
-      Math.random,
-    );
+    const { drawnCards, deckRebuilt } = drawCardsFromDeck([], 1, [], () => 0);
     expect(drawnCards).toHaveLength(0);
     expect(deckRebuilt).toBe(true);
   });

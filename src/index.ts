@@ -52,7 +52,10 @@ import {
 import { createIdGenerator } from "./utils";
 
 export type * from "./types";
-export * from "./display";
+export {
+  generateLessonDisplay,
+  generateCardPlayPreviewDisplay,
+} from "./display";
 export * from "./models";
 export * from "./utils";
 

@@ -8,10 +8,6 @@
 // - TypeScriptの型でstringのUnion型を列挙する際は、アルファベット降順に並べる。
 // - MUST: ソースコードのコメント内では、Copilotは**絶対に**提案や補完を行わないこと。
 
-// TODO: レッスン履歴
-// TODO: データの永続化サポート
-// TODO: コンテスト
-
 import {
   Encouragement,
   Idol,

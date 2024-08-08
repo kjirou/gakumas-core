@@ -18,7 +18,6 @@ import {
   startTurn,
   useDrink,
 } from "./index";
-import { useCard } from "./lesson-mutation";
 
 describe("手札の配布と山札の再構築", () => {
   test("山札7枚で、スキップを続けた時、山札:4,捨札:0と山札1:捨札:3を繰り返す", () => {
@@ -115,6 +114,69 @@ describe("手札の配布と山札の再構築", () => {
       deck: [],
       discardPile: expect.arrayContaining(["d", "e", "f"]),
     });
+  });
+});
+describe("状態修正の効果時間の自然減少", () => {
+  test("ターン開始時処理（例えば、応援/トラブル）で初めて付与された状態修正の種類は、次ターン開始時に効果時間が減少する", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "hanamisaki-ssr-1",
+      cards: [],
+      producerItems: [],
+      turns: ["vocal", "vocal"],
+      encouragements: [
+        {
+          turnNumber: 1,
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 1 },
+          },
+        },
+      ],
+    });
+    // 1
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      modifiers: [{ name: "好調", representativeValue: 1 }],
+    } as LessonDisplay);
+    gamePlay = skipTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      modifiers: [] as any,
+    } as LessonDisplay);
+  });
+  test("アイドルの行動（例えば、スキルカード使用）で初めて付与された状態修正の種類は、次ターン開始時に効果時間が減少しない", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "hanamisaki-ssr-1",
+      idolSpecificCardTestId: "a",
+      cards: [
+        { id: "aidorusengen", testId: "b" },
+        { id: "kokumintekiaidoru", testId: "c" },
+      ],
+      producerItems: [],
+      turns: ["vocal", "vocal"],
+    });
+    gamePlay.initialLesson.deck = ["a", "b", "c"];
+    // 「国民的アイドル」のコストを用意
+    gamePlay.initialLesson.idol.modifiers = [
+      { kind: "goodCondition", duration: 1, id: "m1" },
+    ];
+    // 1
+    gamePlay = startTurn(gamePlay);
+    // 「国民的アイドル」→スキルカード使用数追加有りの「アイドル宣言」のコンボで、スキルカード使用数追加を1余らせる
+    gamePlay = playCard(gamePlay, 2);
+    gamePlay = playCard(gamePlay, 1);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      modifiers: [{ name: "スキルカード使用数追加", representativeValue: 1 }],
+    } as LessonDisplay);
+    gamePlay = skipTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      modifiers: [{ name: "スキルカード使用数追加", representativeValue: 1 }],
+    } as LessonDisplay);
   });
 });
 describe("「ランダムな強化済みスキルカード（SSR）を、手札に生成」", () => {

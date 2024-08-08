@@ -277,29 +277,6 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   }
 
   //
-  // スキルカード使用数追加の状態修正を削除
-  //
-  const additionalCardUsageCount = lesson.idol.modifiers.find(
-    (e) => e.kind === "additionalCardUsageCount",
-  );
-  if (additionalCardUsageCount) {
-    const additionalCardUsageCountUpdates: LessonUpdateQuery[] = [
-      {
-        kind: "modifiers.removal",
-        id: additionalCardUsageCount.id,
-        reason: {
-          kind: "turnEndTrigger",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        },
-      },
-    ];
-    updates = [...updates, ...additionalCardUsageCountUpdates];
-    historyResultIndex++;
-    lesson = patchDiffs(lesson, additionalCardUsageCountUpdates);
-  }
-
-  //
   // ターン経過に伴い、状態修正の効果時間を減少
   //
   if (lesson.idol.modifierIdsAtTurnStart.length > 0) {

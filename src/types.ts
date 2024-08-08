@@ -1612,18 +1612,40 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "turnSkip";
       }
     | {
-        /** 非推奨、ターン開始時トリガーにより発動した効果 */
-        kind: "turnStartTrigger";
-      }
-    | {
         /** ターン開始 */
         kind: "turnStart";
+      }
+    | {
+        /** ターン開始.手札を引く */
+        kind: "turnStart.drawingHand";
       }
     | {
         /** ターン開始.応援/トラブル */
         kind: "turnStart.encouragement";
         /** lesson.encouragements のインデックス */
         index: number;
+      }
+    | {
+        /** ターン開始.メモリーのアビリティ */
+        kind: "turnStart.memoryEffect";
+        /** lesson.memoryEffects のインデックス */
+        index: number;
+      }
+    | {
+        /** ターン開始.状態修正.遅延効果発動 */
+        kind: "turnStart.modifier.delayedEffectActivation";
+      }
+    | {
+        /** ターン開始.状態修正.ターン経過による効果時間減少 */
+        kind: "turnStart.modifier.durationDecreaseOverTime";
+      }
+    | {
+        /** ターン開始.Pアイテム.効果発動 */
+        kind: "turnStart.producerItem.effectActivation";
+      }
+    | {
+        /** ターン開始.Pアイテム.2ターン毎の効果発動 */
+        kind: "turnStart.producerItem.effectActivationEveryTwoTurns";
       }
     | {
         /** テストのダミー値としてや開発時に一時的に設定 */

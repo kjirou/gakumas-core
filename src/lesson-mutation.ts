@@ -1451,7 +1451,7 @@ export const activateProducerItemEffectsOnTurnStart = (
       );
       const innerUpdates = diff.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.producerItem.effectActivation",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1483,7 +1483,7 @@ export const activateProducerItemEffectsOnTurnStart = (
       );
       const innerUpdates = diff.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.producerItem.effectActivationEveryTwoTurns",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1541,7 +1541,7 @@ export const activateModifierEffectsOnTurnStart = (
       );
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.modifier.delayedEffectActivation",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1578,7 +1578,7 @@ export const activateModifierEffectsOnTurnStart = (
         );
         const innerUpdates = diffs.map((diff) =>
           createLessonUpdateQueryFromDiff(diff, {
-            kind: "turnStartTrigger",
+            kind: "turnStart.modifier.delayedEffectActivation",
             historyTurnNumber: lesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           }),
@@ -1613,7 +1613,7 @@ export const activateModifierEffectsOnTurnStart = (
         );
         const innerUpdates = diffs.map((diff) =>
           createLessonUpdateQueryFromDiff(diff, {
-            kind: "turnStartTrigger",
+            kind: "turnStart.modifier.delayedEffectActivation",
             historyTurnNumber: lesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           }),
@@ -1686,7 +1686,7 @@ export const drawCardsOnTurnStart = (
           kind: "cardPlacement",
           deck: [...innateCardIds, ...restCardids],
           reason: {
-            kind: "turnStartTrigger",
+            kind: "turnStart",
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           },
@@ -1719,7 +1719,7 @@ export const drawCardsOnTurnStart = (
           (e) => !handWhenEmptyDeck.includes(e),
         ),
         reason: {
-          kind: "turnStartTrigger",
+          kind: "turnStart",
           historyTurnNumber: newLesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         },
@@ -1749,7 +1749,7 @@ export const drawCardsOnTurnStart = (
           .map((e) => e.id),
       },
       {
-        kind: "turnStartTrigger",
+        kind: "turnStart",
         historyTurnNumber: newLesson.turnNumber,
         historyResultIndex: nextHistoryResultIndex,
       },
@@ -1773,7 +1773,7 @@ export const drawCardsOnTurnStart = (
   );
   drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
     createLessonUpdateQueryFromDiff(diff, {
-      kind: "turnStartTrigger",
+      kind: "turnStart.drawingHand",
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     }),
@@ -1803,7 +1803,7 @@ export const drawCardsOnTurnStart = (
         kind: "cardPlacement",
         discardPile: handWhenEmptyDeck,
         reason: {
-          kind: "turnStartTrigger",
+          kind: "turnStart",
           historyTurnNumber: newLesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         },
@@ -1840,8 +1840,8 @@ export const decreaseEachModifierDurationOverTime = (
   let modifierUpdates: LessonUpdateQuery[] = [];
   for (const modifierId of newLesson.idol.modifierIdsAtTurnStart) {
     const modifier = newLesson.idol.modifiers.find((e) => e.id === modifierId);
-    const reason = {
-      kind: "turnStartTrigger",
+    const reason: LessonUpdateQueryReason = {
+      kind: "turnStart.modifier.durationDecreaseOverTime",
       historyTurnNumber: lesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     } as const;
@@ -1925,7 +1925,7 @@ export const activateMemoryEffectsOnLessonStart = (
   let nextHistoryResultIndex = historyResultIndex;
 
   let memoryEffectUpdates: LessonUpdateQuery[] = [];
-  for (const memoryEffect of newLesson.memoryEffects) {
+  for (const [index, memoryEffect] of newLesson.memoryEffects.entries()) {
     const innerUpdates = activateMemoryEffect(
       newLesson,
       memoryEffect,
@@ -1933,7 +1933,8 @@ export const activateMemoryEffectsOnLessonStart = (
       params.idGenerator,
     ).map((diff) =>
       createLessonUpdateQueryFromDiff(diff, {
-        kind: "turnStartTrigger",
+        kind: "turnStart.memoryEffect",
+        index,
         historyTurnNumber: lesson.turnNumber,
         historyResultIndex: nextHistoryResultIndex,
       }),

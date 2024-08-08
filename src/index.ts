@@ -331,7 +331,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
   const increaseTurnNumberUpdate: LessonUpdateQuery = {
     kind: "turnNumberIncrease",
     reason: {
-      kind: "turnStartTrigger",
+      kind: "turnStart",
       historyTurnNumber: lesson.turnNumber,
       historyResultIndex,
     },

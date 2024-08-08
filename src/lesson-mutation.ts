@@ -2148,29 +2148,30 @@ export const useCard = (
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
-    const reason = {
-      kind: "cardUsage",
-      cardId,
-      historyTurnNumber: newLesson.turnNumber,
-      historyResultIndex: nextHistoryResultIndex,
-    } as const;
     usedCardPlacementUpdates = [
-      {
-        ...createCardPlacementDiff(
-          {
-            hand: lesson.hand,
-            discardPile: lesson.discardPile,
-            removedCardPile: lesson.removedCardPile,
-          },
-          {
-            hand: newLesson.hand.filter((id) => id !== cardId),
-            ...(cardContent.usableOncePerLesson
-              ? { removedCardPile: [...newLesson.removedCardPile, cardId] }
-              : { discardPile: [...newLesson.discardPile, cardId] }),
-          },
-        ),
-        reason,
-      },
+      createLessonUpdateQueryFromDiff(
+        {
+          ...createCardPlacementDiff(
+            {
+              hand: lesson.hand,
+              discardPile: lesson.discardPile,
+              removedCardPile: lesson.removedCardPile,
+            },
+            {
+              hand: newLesson.hand.filter((id) => id !== cardId),
+              ...(cardContent.usableOncePerLesson
+                ? { removedCardPile: [...newLesson.removedCardPile, cardId] }
+                : { discardPile: [...newLesson.discardPile, cardId] }),
+            },
+          ),
+        },
+        {
+          kind: "cardUsage.cardConsumption",
+          cardId,
+          historyTurnNumber: newLesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        },
+      ),
     ];
     // 山札0枚時の特殊仕様の対象スキルカードの保持
     // a) 山札が0枚の時である
@@ -2184,11 +2185,18 @@ export const useCard = (
     ) {
       usedCardPlacementUpdates = [
         ...usedCardPlacementUpdates,
-        {
-          kind: "handWhenEmptyDeck",
-          cardIds: beforeHand,
-          reason,
-        },
+        createLessonUpdateQueryFromDiff(
+          {
+            kind: "handWhenEmptyDeck",
+            cardIds: beforeHand,
+          },
+          {
+            kind: "cardUsage",
+            cardId,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+        ),
       ];
     }
     newLesson = patchDiffs(newLesson, usedCardPlacementUpdates);
@@ -2201,15 +2209,14 @@ export const useCard = (
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
     calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
-  ).map((diff) => ({
-    ...diff,
-    reason: {
-      kind: "cardUsage",
+  ).map((diff) =>
+    createLessonUpdateQueryFromDiff(diff, {
+      kind: "cardUsage.costConsumption",
       cardId: card.id,
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
-    },
-  }));
+    }),
+  );
   newLesson = patchDiffs(newLesson, costConsumptionUpdates);
   nextHistoryResultIndex++;
 
@@ -2418,26 +2425,30 @@ export const useCard = (
     (e) => e.kind === "additionalCardUsageCount",
   );
   if (newLesson.idol.actionPoints === 0 && additionalCardUsageCount) {
-    const reason = {
+    const reason: LessonUpdateQueryReason = {
       kind: "cardUsage",
       cardId: card.id,
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     } as const;
     recoveringActionPointsUpdates = [
-      {
-        kind: "actionPoints",
-        amount: 1,
+      createLessonUpdateQueryFromDiff(
+        {
+          kind: "actionPoints",
+          amount: 1,
+        },
         reason,
-      },
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "amount",
-        id: additionalCardUsageCount.id,
-        actual: -1,
-        max: -1,
+      ),
+      createLessonUpdateQueryFromDiff(
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: additionalCardUsageCount.id,
+          actual: -1,
+          max: -1,
+        },
         reason,
-      },
+      ),
     ];
     newLesson = patchDiffs(newLesson, recoveringActionPointsUpdates);
     nextHistoryResultIndex++;

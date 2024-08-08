@@ -1519,13 +1519,19 @@ type LessonHistoryRecord =
 export type LessonUpdateQueryReason = Readonly<
   (
     | {
-        /** 非推奨、スキルカード使用 */
+        /** スキルカード使用 */
         kind: "cardUsage";
         cardId: Card["id"];
       }
     | {
-        /** スキルカード使用.残りスキルカード使用数消費 */
-        kind: "cardUsage.remainingCardUsageCountConsumption";
+        /** スキルカード使用.手札消費 */
+        kind: "cardUsage.cardConsumption";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.コスト消費 */
+        kind: "cardUsage.costConsumption";
+        cardId: Card["id"];
       }
     | {
         /** スキルカード使用.主効果発動 */
@@ -1537,6 +1543,10 @@ export type LessonUpdateQueryReason = Readonly<
         /** スキルカード使用.状態修正増加起因の効果発動 */
         kind: "cardUsage.modifierIncreaseEffectActivation";
         cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.残りスキルカード使用数消費 */
+        kind: "cardUsage.remainingCardUsageCountConsumption";
       }
     | {
         /** スキルカード使用プレビュー */

@@ -2258,7 +2258,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsageTrigger",
+            kind: "cardUsage.producerItem.beforeCardEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
@@ -2298,7 +2298,7 @@ export const useCard = (
           const innerUpdates = [
             ...diffs.map((diff) =>
               createLessonUpdateQueryFromDiff(diff, {
-                kind: "cardUsageTrigger",
+                kind: "cardUsage.modifier.beforeCardEffectActivation",
                 cardId: card.id,
                 historyTurnNumber: newLesson.turnNumber,
                 historyResultIndex: nextHistoryResultIndex,
@@ -2366,7 +2366,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsageTrigger",
+            kind: "cardUsage.producerItem.afterCardEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
@@ -2391,7 +2391,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsage.modifierIncreaseEffectActivation",
+            kind: "cardUsage.producerItem.modifierIncreaseEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,

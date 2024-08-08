@@ -1540,18 +1540,28 @@ export type LessonUpdateQueryReason = Readonly<
         effectIndex: number;
       }
     | {
-        /** スキルカード使用.状態修正増加起因の効果発動 */
-        kind: "cardUsage.modifierIncreaseEffectActivation";
+        /** スキルカード使用.状態修正.主効果発動前の効果発動, TODO: 状態修正情報を含める */
+        kind: "cardUsage.modifier.beforeCardEffectActivation";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.Pアイテム.主効果発動後の効果発動, TODO: Pアイテム情報を含める */
+        kind: "cardUsage.producerItem.afterCardEffectActivation";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.Pアイテム.主効果発動前の効果発動, TODO: Pアイテム情報を含める */
+        kind: "cardUsage.producerItem.beforeCardEffectActivation";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.Pアイテム.状態修正増加起因の効果発動, TODO: Pアイテム情報と状態修正情報を含める */
+        kind: "cardUsage.producerItem.modifierIncreaseEffectActivation";
         cardId: Card["id"];
       }
     | {
         /** スキルカード使用.残りスキルカード使用数消費 */
         kind: "cardUsage.remainingCardUsageCountConsumption";
-      }
-    | {
-        /** スキルカード使用時トリガーにより発動した効果 */
-        kind: "cardUsageTrigger";
-        cardId: Card["id"];
       }
     | {
         /** Pドリンク使用.消費 */

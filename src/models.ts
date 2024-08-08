@@ -50,6 +50,9 @@ export const handSizeOnLessonStart = 3;
 /** 手札の最大枚数 */
 export const maxHandSize = 5;
 
+/** ターンスキップにより回復する体力の値 */
+export const lifeRecoveredBySkippingTurn = 2;
+
 export const isDelayedEffectModifierType = (
   modifier: Modifier,
 ): modifier is Extract<Modifier, { kind: "delayedEffect" }> =>

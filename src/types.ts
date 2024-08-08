@@ -1822,6 +1822,8 @@ export type LessonDisplay = {
     removedCardPile: CardInInventoryDisplay[];
   };
   life: Idol["life"];
+  /** ターンスキップ時に回復できる体力の量 */
+  lifeRecoveredBySkippingTurn: number;
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
   remainingTurns: number;

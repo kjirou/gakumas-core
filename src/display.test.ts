@@ -721,6 +721,32 @@ describe("generateLessonDisplay", () => {
       } as LessonDisplay,
     },
     {
+      name: "lifeRecoveredBySkippingTurn - 体力が最大から3下がっている時、2になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          gamePlay.initialLesson.idol.life =
+            gamePlay.initialLesson.idol.original.maxLife - 3;
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        lifeRecoveredBySkippingTurn: 2,
+      } as LessonDisplay,
+    },
+    {
+      name: "lifeRecoveredBySkippingTurn - 体力が最大の時、0になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        lifeRecoveredBySkippingTurn: 0,
+      } as LessonDisplay,
+    },
+    {
       name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
       args: [
         (() => {

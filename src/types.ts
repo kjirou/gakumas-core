@@ -1549,10 +1549,6 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "cardUsage.remainingCardUsageCountConsumption";
       }
     | {
-        /** スキルカード使用プレビュー */
-        kind: "cardUsagePreview";
-      }
-    | {
         /** スキルカード使用時トリガーにより発動した効果 */
         kind: "cardUsageTrigger";
         cardId: Card["id"];

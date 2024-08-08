@@ -342,7 +342,7 @@ export const createGamePlay = (params: {
       memoryEffects,
       turns: params.turns,
       removedCardPile: [],
-      playedCardsOnEmptyDeck: [],
+      handWhenEmptyDeck: [],
       score: 0,
       turnNumber: 0,
       turnEnded: false,
@@ -561,6 +561,13 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
+      case "handWhenEmptyDeck": {
+        newLesson = {
+          ...newLesson,
+          handWhenEmptyDeck: update.cardIds,
+        };
+        break;
+      }
       case "life": {
         newLesson = {
           ...newLesson,
@@ -681,13 +688,6 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
             ...newLesson.idol,
             modifierIdsAtTurnStart: update.modifierIdsAtTurnStart,
           },
-        };
-        break;
-      }
-      case "playedCardsOnEmptyDeck": {
-        newLesson = {
-          ...newLesson,
-          playedCardsOnEmptyDeck: update.cardIds,
         };
         break;
       }

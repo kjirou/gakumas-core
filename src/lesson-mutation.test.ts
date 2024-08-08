@@ -3268,7 +3268,7 @@ describe("drawCardsFromDeck", () => {
       drawnCards,
       deck: newDeck,
       deckRebuilt,
-    } = drawCardsFromDeck(deck, 1, [], Math.random);
+    } = drawCardsFromDeck(deck, 1, [], () => 0);
     expect(drawnCards).toHaveLength(1);
     expect(newDeck).toHaveLength(2);
     expect(deckRebuilt).toBe(false);
@@ -3281,7 +3281,7 @@ describe("drawCardsFromDeck", () => {
       deck: newDeck,
       deckRebuilt,
       discardPile: newDiscardPile,
-    } = drawCardsFromDeck(deck, 1, discardPile, Math.random);
+    } = drawCardsFromDeck(deck, 1, discardPile, () => 0);
     expect(drawnCards).toHaveLength(1);
     expect(newDeck).toHaveLength(2);
     expect(deckRebuilt).toBe(false);
@@ -3295,7 +3295,7 @@ describe("drawCardsFromDeck", () => {
       deck: newDeck,
       deckRebuilt,
       discardPile: newDiscardPile,
-    } = drawCardsFromDeck(deck, 2, discardPile, Math.random);
+    } = drawCardsFromDeck(deck, 2, discardPile, () => 0);
     expect(drawnCards).toHaveLength(2);
     expect(newDeck).toHaveLength(3);
     expect(deckRebuilt).toBe(true);
@@ -3308,8 +3308,25 @@ describe("drawCardsFromDeck", () => {
       "5",
     ]);
   });
+  test("山札と捨札の合計が2枚の時、3枚引くと2枚のみ引く", () => {
+    const deck = ["1"];
+    const discardPile = ["2"];
+    const { drawnCards, deckRebuilt } = drawCardsFromDeck(
+      deck,
+      3,
+      discardPile,
+      () => 0,
+    );
+    expect(drawnCards).toHaveLength(2);
+    expect(deckRebuilt).toBe(true);
+  });
+  test("山札と捨札のどちらも0枚の時、1枚引くと1枚も引けない", () => {
+    const { drawnCards, deckRebuilt } = drawCardsFromDeck([], 1, [], () => 0);
+    expect(drawnCards).toHaveLength(0);
+    expect(deckRebuilt).toBe(true);
+  });
 });
-describe("drawCardsOnLessonStart", () => {
+describe("drawCardsOnTurnStart", () => {
   test("山札に引く数が残っている時、山札はその分減り、捨札に変化はない / 1ターン目でレッスン開始時手札がない時、その更新は発行されない", () => {
     const lesson = createLessonForTest({
       deck: [
@@ -3370,7 +3387,7 @@ describe("drawCardsOnLessonStart", () => {
     lesson.hand = [];
     lesson.deck = [];
     lesson.discardPile = ["a", "b", "c", "d", "e"];
-    lesson.playedCardsOnEmptyDeck = ["e"];
+    lesson.handWhenEmptyDeck = ["e"];
     lesson.turnNumber = 2;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
@@ -3380,15 +3397,28 @@ describe("drawCardsOnLessonStart", () => {
     expect(newLesson.deck).toHaveLength(1);
     expect(newLesson.discardPile).toStrictEqual(["e"]);
     expect(newLesson.removedCardPile).toHaveLength(0);
-    expect(
-      updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
-    ).toStrictEqual([
-      {
-        kind: "playedCardsOnEmptyDeck",
-        cardIds: [],
-        reason: expect.any(Object),
-      },
-    ]);
+    expect(updates.filter((e) => e.kind === "handWhenEmptyDeck")).toStrictEqual(
+      [
+        {
+          kind: "handWhenEmptyDeck",
+          cardIds: [],
+          reason: expect.any(Object),
+        },
+      ],
+    );
+  });
+  test("山札も捨札も0枚の時、手札0枚になる", () => {
+    const lesson = createLessonForTest({
+      deck: [],
+    });
+    lesson.hand = [];
+    lesson.deck = [];
+    lesson.discardPile = [];
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: Math.random,
+    });
+    const newLesson = patchDiffs(lesson, updates);
+    expect(newLesson.hand).toHaveLength(0);
   });
   test("1ターン目でレッスン開始時手札が1枚ある時、更新は2回発行され、手札は最終的にその札を含む3枚になる", () => {
     const lesson = createLessonForTest({
@@ -4229,7 +4259,7 @@ describe("useCard preview:false", () => {
       });
     });
     describe("drawCards", () => {
-      test("「アイドル宣言」を、山札が足りる・手札最大枚数を超えない状況で使った時、手札が2枚増え、捨札は不変で、除外が1枚増える / playedCardsOnEmptyDeck の更新を発行しない", () => {
+      test("「アイドル宣言」を、山札が足りる・手札最大枚数を超えない状況で使った時、手札が2枚増え、捨札は不変で、除外が1枚増える / handWhenEmptyDeck の更新を発行しない", () => {
         const lesson = createLessonForTest({
           deck: [
             {
@@ -4261,10 +4291,10 @@ describe("useCard preview:false", () => {
         expect(update.discardPile).toBeUndefined();
         expect(update.removedCardPile).toBeUndefined();
         expect(
-          updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+          updates.filter((e) => e.kind === "handWhenEmptyDeck"),
         ).toStrictEqual([]);
       });
-      test("「アイドル宣言」を、山札が足りない状況で使った時、山札と捨札は再構築される / playedCardsOnEmptyDeck を空にする更新を発行する", () => {
+      test("「アイドル宣言」を、山札が足りない状況で使った時、山札と捨札は再構築される / handWhenEmptyDeck を空にする更新を発行する", () => {
         const lesson = createLessonForTest({
           deck: [
             {
@@ -4297,10 +4327,10 @@ describe("useCard preview:false", () => {
         expect(update.discardPile).toHaveLength(0);
         expect(update.removedCardPile).toBeUndefined();
         expect(
-          updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+          updates.filter((e) => e.kind === "handWhenEmptyDeck"),
         ).toStrictEqual([
           {
-            kind: "playedCardsOnEmptyDeck",
+            kind: "handWhenEmptyDeck",
             cardIds: [],
             reason: expect.any(Object),
           },
@@ -4418,7 +4448,7 @@ describe("useCard preview:false", () => {
         expect(update.discardPile).toContain("f");
         expect(update.removedCardPile).toBeUndefined();
       });
-      test("「仕切り直し」で山札の再構築が発生した時、playedCardsOnEmptyDeckを空にする更新を発行する", () => {
+      test("「仕切り直し」で山札の再構築が発生した時、handWhenEmptyDeckを空にする更新を発行する", () => {
         const lesson = createLessonForTest({
           deck: [
             {
@@ -4443,16 +4473,16 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         expect(
-          updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+          updates.filter((e) => e.kind === "handWhenEmptyDeck"),
         ).toStrictEqual([
           {
-            kind: "playedCardsOnEmptyDeck",
+            kind: "handWhenEmptyDeck",
             cardIds: [],
             reason: expect.any(Object),
           },
         ]);
       });
-      test("「仕切り直し」で山札の再構築が発生しない時、playedCardsOnEmptyDeckの更新を発行しない", () => {
+      test("「仕切り直し」で山札の再構築が発生しない時、handWhenEmptyDeckの更新を発行しない", () => {
         const lesson = createLessonForTest({
           deck: [
             {
@@ -4476,7 +4506,7 @@ describe("useCard preview:false", () => {
           preview: false,
         });
         expect(
-          updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+          updates.filter((e) => e.kind === "handWhenEmptyDeck"),
         ).toStrictEqual([]);
       });
     });
@@ -5098,8 +5128,8 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
-  describe("playedCardsOnEmptyDeckへの影響", () => {
-    test("山札が0枚で、捨札になるスキルカードを使う時、playedCardsOnEmptyDeckへそれを追加する", () => {
+  describe("handWhenEmptyDeckへの影響", () => {
+    test("山札が0枚で、捨札になるスキルカードを使う時、handWhenEmptyDeckへそれを含めた手札を追加する", () => {
       const lesson = createLessonForTest({
         deck: [
           {
@@ -5123,15 +5153,15 @@ describe("useCard preview:false", () => {
         preview: false,
       });
       expect(
-        updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+        updates.filter((e) => e.kind === "handWhenEmptyDeck"),
       ).toStrictEqual([
         {
-          kind: "playedCardsOnEmptyDeck",
-          cardIds: ["a"],
+          kind: "handWhenEmptyDeck",
+          cardIds: ["a", "b"],
           reason: expect.any(Object),
         },
       ]);
-      // さらに追加できるか確認
+      // 同じターンで2枚目のスキルカードを使用した時には、handWhenEmptyDeck を保存しないか
       const newLesson = patchDiffs(lesson, updates);
       const { updates: updates2 } = useCard(newLesson, 1, {
         selectedCardInHandIndex: 0,
@@ -5140,16 +5170,10 @@ describe("useCard preview:false", () => {
         preview: false,
       });
       expect(
-        updates2.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
-      ).toStrictEqual([
-        {
-          kind: "playedCardsOnEmptyDeck",
-          cardIds: ["a", "b"],
-          reason: expect.any(Object),
-        },
-      ]);
+        updates2.filter((e) => e.kind === "handWhenEmptyDeck"),
+      ).toStrictEqual([]);
     });
-    test("山札が0枚ではなく、捨札になるスキルカードを使う時、playedCardsOnEmptyDeckへそれを追加しない", () => {
+    test("山札が0枚ではなく、捨札になるスキルカードを使う時、handWhenEmptyDeckへそれを追加しない", () => {
       const lesson = createLessonForTest({
         deck: [
           {
@@ -5173,10 +5197,10 @@ describe("useCard preview:false", () => {
         preview: false,
       });
       expect(
-        updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+        updates.filter((e) => e.kind === "handWhenEmptyDeck"),
       ).toStrictEqual([]);
     });
-    test("山札が0枚で、除外になるスキルカードを使う時、playedCardsOnEmptyDeckへそれを追加しない", () => {
+    test("山札が0枚で、除外になるスキルカードを使う時、handWhenEmptyDeckへそれを追加しない", () => {
       const lesson = createLessonForTest({
         deck: [
           {
@@ -5195,7 +5219,7 @@ describe("useCard preview:false", () => {
         preview: false,
       });
       expect(
-        updates.filter((e) => e.kind === "playedCardsOnEmptyDeck"),
+        updates.filter((e) => e.kind === "handWhenEmptyDeck"),
       ).toStrictEqual([]);
     });
   });

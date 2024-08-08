@@ -248,7 +248,7 @@ describe("createGamePlay", () => {
         deck: expect.any(Array),
         discardPile: [],
         removedCardPile: [],
-        playedCardsOnEmptyDeck: [],
+        handWhenEmptyDeck: [],
         score: 0,
         turnNumber: 0,
         turnEnded: false,
@@ -1020,18 +1020,18 @@ describe("patchDiffs", () => {
       expect(lessonMock.idol.life).toBe(3);
     });
   });
-  describe("playedCardsOnEmptyDeck", () => {
+  describe("handWhenEmptyDeck", () => {
     test("it works", () => {
       let lessonMock = {
-        playedCardsOnEmptyDeck: ["1"],
+        handWhenEmptyDeck: ["1"],
       } as Lesson;
       lessonMock = patchDiffs(lessonMock, [
         {
-          kind: "playedCardsOnEmptyDeck",
+          kind: "handWhenEmptyDeck",
           cardIds: ["2"],
         },
       ]);
-      expect(lessonMock.playedCardsOnEmptyDeck).toStrictEqual(["2"]);
+      expect(lessonMock.handWhenEmptyDeck).toStrictEqual(["2"]);
     });
   });
   describe("producerItem.activationCount", () => {

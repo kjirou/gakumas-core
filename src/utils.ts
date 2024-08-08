@@ -4,6 +4,9 @@
 
 import { GetRandom, IdGenerator, RangedNumber } from "./types";
 
+export const getRandomInteger = (getRandom: GetRandom, max: number): number =>
+  Math.floor(getRandom() * (max + 1));
+
 /**
  * Shuffle an array with the Fisher–Yates algorithm.
  *

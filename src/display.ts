@@ -141,6 +141,7 @@ export const generateCardInHandDisplay = (
     enhancements: card.enhancements,
     name: generateCardName(card),
     playable: canPlayCard(lesson, cardContent.cost, cardContent.condition),
+    rarity: card.original.data.rarity,
     scores,
     vitality,
   };
@@ -259,6 +260,7 @@ export const generateEncouragementDisplays = (
 /**
  * レッスン表示用情報を生成する
  *
+ * - TODO: 手札プレビュー生成のため、効果発動処理を実行しており、そのために getRandom と idGenerator の状態が変わっている
  * - TODO: ターン詳細の「3位以上で合格」が未実装
  * - TODO: レッスン履歴が未実装
  */

@@ -1350,7 +1350,9 @@ export const activateEffectsOnLessonStart = (
       );
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "lessonStartTrigger",
+          kind: "lessonStart.producerItemEffectActivation",
+          producerItemId: producerItem.id,
+          producerItemDataId: producerItem.original.data.id,
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),

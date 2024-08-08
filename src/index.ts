@@ -47,11 +47,19 @@ import {
   createGamePlay,
   getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
+  lifeRecoveredBySkippingTurn,
   patchDiffs,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
 export type * from "./types";
+export * from "./data/card-sets";
+export * from "./data/cards";
+export * from "./data/characters";
+export * from "./data/drinks";
+export * from "./data/idols";
+export * from "./data/modifiers";
+export * from "./data/producer-items";
 export {
   generateLessonDisplay,
   generateCardPlayPreviewDisplay,
@@ -658,8 +666,12 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
   const recoveringLifeUpdates: LessonUpdateQuery[] = [
     {
       kind: "life",
-      actual: Math.min(2, lesson.idol.original.maxLife - lesson.idol.life) + 0,
-      max: 2,
+      actual:
+        Math.min(
+          lifeRecoveredBySkippingTurn,
+          lesson.idol.original.maxLife - lesson.idol.life,
+        ) + 0,
+      max: lifeRecoveredBySkippingTurn,
       reason: {
         kind: "turnSkip",
         historyTurnNumber: lesson.turnNumber,

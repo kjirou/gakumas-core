@@ -39,6 +39,7 @@ import {
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
   getRemainingProducerItemTimes,
+  lifeRecoveredBySkippingTurn,
   patchDiffs,
 } from "./models";
 import {
@@ -318,6 +319,10 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
       ),
     },
     life: lesson.idol.life,
+    lifeRecoveredBySkippingTurn: Math.min(
+      lifeRecoveredBySkippingTurn,
+      lesson.idol.original.maxLife - lesson.idol.life,
+    ),
     modifiers,
     producerItems: generateProducerItemDisplays(lesson),
     remainingTurns: calculateRemainingTurns(lesson),

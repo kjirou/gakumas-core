@@ -121,6 +121,7 @@ const newGamePlay = endTrun(gamePlay);
 - `skipTurn`: ターンをスキップする。
 - `startTurn`: ターン開始処理を実行する。
 - `useDrink`: Pドリンクを使用する。
+- 各種データ定義: `cards` や `getCardDataById` のような API 群。 [`src/data`](./src/data/) 内を参照。
 
 ## :writing_hand: 主なTODO
 

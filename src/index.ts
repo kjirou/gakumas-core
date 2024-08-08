@@ -52,6 +52,13 @@ import {
 import { createIdGenerator } from "./utils";
 
 export type * from "./types";
+export * from "./data/card-sets";
+export * from "./data/cards";
+export * from "./data/characters";
+export * from "./data/drinks";
+export * from "./data/idols";
+export * from "./data/modifiers";
+export * from "./data/producer-items";
 export {
   generateLessonDisplay,
   generateCardPlayPreviewDisplay,

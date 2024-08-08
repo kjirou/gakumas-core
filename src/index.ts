@@ -278,7 +278,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
         kind: "turnEnded",
         value: false,
         reason: {
-          kind: "turnEndTrigger",
+          kind: "turnStart",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex,
         },
@@ -474,7 +474,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
       kind: "modifierIdsAtTurnStart",
       modifierIdsAtTurnStart: lesson.idol.modifiers.map((e) => e.id),
       reason: {
-        kind: "turnEndTrigger",
+        kind: "turnStart",
         historyTurnNumber: lesson.turnNumber,
         historyResultIndex,
       },
@@ -751,7 +751,7 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
           hand: [],
           discardPile: [...lesson.discardPile, ...lesson.hand],
           reason: {
-            kind: "turnEndTrigger",
+            kind: "turnEnd.discardingHand",
             historyTurnNumber: lesson.turnNumber,
             historyResultIndex,
           },
@@ -787,7 +787,7 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
       kind: "turnEnded",
       value: true,
       reason: {
-        kind: "turnEndTrigger",
+        kind: "turnEnd",
         historyTurnNumber: lesson.turnNumber,
         historyResultIndex,
       },

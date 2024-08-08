@@ -2493,7 +2493,7 @@ export const activateEffectsOnTurnEnd = (
       );
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnEndTrigger",
+          kind: "turnEnd.producerItemEffectActivation",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -2526,7 +2526,7 @@ export const activateEffectsOnTurnEnd = (
         if (diffs) {
           innerUpdates = diffs.map((diff) =>
             createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnEndTrigger",
+              kind: "turnEnd.modifierEffectActivation",
               historyTurnNumber: lesson.turnNumber,
               historyResultIndex: nextHistoryResultIndex,
             }),
@@ -2588,7 +2588,7 @@ export const obtainPositiveImpressionScoreOnTurnEnd = (
       ...updates,
       ...diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnEndTrigger",
+          kind: "turnEnd.scoreIncreaseDueToPositiveImpression",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex,
         }),

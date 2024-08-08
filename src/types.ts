@@ -1540,22 +1540,22 @@ export type LessonUpdateQueryReason = Readonly<
         effectIndex: number;
       }
     | {
-        /** スキルカード使用.状態修正.主効果発動前の効果発動, TODO: 状態修正情報を含める */
+        /** スキルカード使用.状態修正.主効果発動前の効果発動 */
         kind: "cardUsage.modifier.beforeCardEffectActivation";
         cardId: Card["id"];
       }
     | {
-        /** スキルカード使用.Pアイテム.主効果発動後の効果発動, TODO: Pアイテム情報を含める */
+        /** スキルカード使用.Pアイテム.主効果発動後の効果発動 */
         kind: "cardUsage.producerItem.afterCardEffectActivation";
         cardId: Card["id"];
       }
     | {
-        /** スキルカード使用.Pアイテム.主効果発動前の効果発動, TODO: Pアイテム情報を含める */
+        /** スキルカード使用.Pアイテム.主効果発動前の効果発動 */
         kind: "cardUsage.producerItem.beforeCardEffectActivation";
         cardId: Card["id"];
       }
     | {
-        /** スキルカード使用.Pアイテム.状態修正増加起因の効果発動, TODO: Pアイテム情報と状態修正情報を含める */
+        /** スキルカード使用.Pアイテム.状態修正増加起因の効果発動 */
         kind: "cardUsage.producerItem.modifierIncreaseEffectActivation";
         cardId: Card["id"];
       }
@@ -1584,12 +1584,28 @@ export type LessonUpdateQueryReason = Readonly<
         producerItemDataId: ProducerItemData["id"];
       }
     | {
-        /**
-         * ターン終了時トリガーにより発動した効果
-         *
-         * - 好調や好印象などのターン経過毎の減少もこれで表現する
-         */
-        kind: "turnEndTrigger";
+        /** ターン終了 */
+        kind: "turnEnd";
+      }
+    | {
+        /** ターン終了.手札を捨てる */
+        kind: "turnEnd.discardingHand";
+      }
+    | {
+        /** ターン終了.状態修正の効果発動 */
+        kind: "turnEnd.modifierEffectActivation";
+      }
+    | {
+        /** ターン終了.Pアイテムの効果発動 */
+        kind: "turnEnd.producerItemEffectActivation";
+      }
+    | {
+        /** ターン終了.好印象によるパラメータ/スコア増加 */
+        kind: "turnEnd.scoreIncreaseDueToPositiveImpression";
+      }
+    | {
+        /** ターン終了.好印象によるパラメータ/スコア増加 */
+        kind: "turnEnd.scoreIncreaseDueToPositiveImpression";
       }
     | {
         /** ターンのスキップ */
@@ -1600,7 +1616,11 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "turnStartTrigger";
       }
     | {
-        /** ターン開始時処理.応援/トラブル */
+        /** ターン開始 */
+        kind: "turnStart";
+      }
+    | {
+        /** ターン開始.応援/トラブル */
         kind: "turnStart.encouragement";
         /** lesson.encouragements のインデックス */
         index: number;

@@ -39,9 +39,9 @@ const gamePlay = initializeGamePlay({
 ゲームのUIを描画するための情報の生成例です。生成した変数の中に、ターン状況・手札・Pアイテム・バフ/デバフ・所持スキルカードなどの画面を描画するために必要な情報がまとまっています。
 
 ```ts
-import { createGamePlay } from "gakumas-core";
+import { generateLessonDisplay } from "gakumas-core";
 
-const lessonDisplay = createLessonDisplay(gamePlay);
+const lessonDisplay = generateLessonDisplay(gamePlay);
 ```
 
 ターン開始処理の例です。
@@ -86,7 +86,7 @@ const newGamePlay = playCard(gamePlay, 0);
 
 // ターンが終了したかの判定です。
 // 主に、スキルカード使用数追加がない状況でスキルカードを使用すると真になります。
-const turnEnded = hasActionEnded(gamePlay);
+const actionEnded = hasActionEnded(gamePlay);
 
 // ...他はターン開始処理と同じなので略...
 ```
@@ -111,6 +111,8 @@ const newGamePlay = endTrun(gamePlay);
 - `diffUpdates`: 2つのゲームプレイを比較して、間の更新差分を抽出する。
 - `endTurn`: ターン終了処理を実行する。
 - `generateCardPlayPreviewDisplay`: スキルカード選択時のプレビュー用の表示情報を生成する。
+- `generateLessonDisplay`: 画面を描画するための表示情報を生成する。
+- `getLesson`: 現在のレッスンの状態を返す。
 - `hasActionEnded`: アイドルの手番が終了しているかを判定する。
 - `initializeGamePlay`: ゲームプレイを初期化する。
 - `isLessonEnded`: レッスンが終了しているかを判定する。

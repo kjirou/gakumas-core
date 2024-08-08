@@ -1578,18 +1578,10 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "drinkUsage.effectActivation";
       }
     | {
-        /** レッスン終了 */
-        kind: "lessonEnd";
-      }
-    | {
         /** レッスン開始.Pアイテム効果発動 */
         kind: "lessonStart.producerItemEffectActivation";
         producerItemId: ProducerItem["id"];
         producerItemDataId: ProducerItemData["id"];
-      }
-    | {
-        /** 状態修正増加トリガーにより発動した効果 */
-        kind: "modifierIncreaseTrigger";
       }
     | {
         /**

@@ -1519,13 +1519,19 @@ type LessonHistoryRecord =
 export type LessonUpdateQueryReason = Readonly<
   (
     | {
-        /** 非推奨、スキルカード使用 */
+        /** スキルカード使用 */
         kind: "cardUsage";
         cardId: Card["id"];
       }
     | {
-        /** スキルカード使用.残りスキルカード使用数消費 */
-        kind: "cardUsage.remainingCardUsageCountConsumption";
+        /** スキルカード使用.手札消費 */
+        kind: "cardUsage.cardConsumption";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.コスト消費 */
+        kind: "cardUsage.costConsumption";
+        cardId: Card["id"];
       }
     | {
         /** スキルカード使用.主効果発動 */
@@ -1534,18 +1540,28 @@ export type LessonUpdateQueryReason = Readonly<
         effectIndex: number;
       }
     | {
-        /** スキルカード使用.状態修正増加起因の効果発動 */
-        kind: "cardUsage.modifierIncreaseEffectActivation";
+        /** スキルカード使用.状態修正.主効果発動前の効果発動 */
+        kind: "cardUsage.modifier.beforeCardEffectActivation";
         cardId: Card["id"];
       }
     | {
-        /** スキルカード使用プレビュー */
-        kind: "cardUsagePreview";
+        /** スキルカード使用.Pアイテム.主効果発動後の効果発動 */
+        kind: "cardUsage.producerItem.afterCardEffectActivation";
+        cardId: Card["id"];
       }
     | {
-        /** スキルカード使用時トリガーにより発動した効果 */
-        kind: "cardUsageTrigger";
+        /** スキルカード使用.Pアイテム.主効果発動前の効果発動 */
+        kind: "cardUsage.producerItem.beforeCardEffectActivation";
         cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.Pアイテム.状態修正増加起因の効果発動 */
+        kind: "cardUsage.producerItem.modifierIncreaseEffectActivation";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.残りスキルカード使用数消費 */
+        kind: "cardUsage.remainingCardUsageCountConsumption";
       }
     | {
         /** Pドリンク使用.消費 */
@@ -1562,42 +1578,74 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "drinkUsage.effectActivation";
       }
     | {
-        /** レッスン終了 */
-        kind: "lessonEnd";
+        /** レッスン開始.Pアイテム効果発動 */
+        kind: "lessonStart.producerItemEffectActivation";
+        producerItemId: ProducerItem["id"];
+        producerItemDataId: ProducerItemData["id"];
       }
     | {
-        /** レッスン生成直後 */
-        kind: "lessonInitialization";
+        /** ターン終了 */
+        kind: "turnEnd";
       }
     | {
-        /** レッスン開始時トリガーにより発動した効果 */
-        kind: "lessonStartTrigger";
+        /** ターン終了.手札を捨てる */
+        kind: "turnEnd.discardingHand";
       }
     | {
-        /** 状態修正増加トリガーにより発動した効果 */
-        kind: "modifierIncreaseTrigger";
+        /** ターン終了.状態修正の効果発動 */
+        kind: "turnEnd.modifierEffectActivation";
       }
     | {
-        /**
-         * ターン終了時トリガーにより発動した効果
-         *
-         * - 好調や好印象などのターン経過毎の減少もこれで表現する
-         */
-        kind: "turnEndTrigger";
+        /** ターン終了.Pアイテムの効果発動 */
+        kind: "turnEnd.producerItemEffectActivation";
+      }
+    | {
+        /** ターン終了.好印象によるパラメータ/スコア増加 */
+        kind: "turnEnd.scoreIncreaseDueToPositiveImpression";
+      }
+    | {
+        /** ターン終了.好印象によるパラメータ/スコア増加 */
+        kind: "turnEnd.scoreIncreaseDueToPositiveImpression";
       }
     | {
         /** ターンのスキップ */
         kind: "turnSkip";
       }
     | {
-        /** 非推奨、ターン開始時トリガーにより発動した効果 */
-        kind: "turnStartTrigger";
+        /** ターン開始 */
+        kind: "turnStart";
       }
     | {
-        /** ターン開始時処理.応援/トラブル */
+        /** ターン開始.手札を引く */
+        kind: "turnStart.drawingHand";
+      }
+    | {
+        /** ターン開始.応援/トラブル */
         kind: "turnStart.encouragement";
         /** lesson.encouragements のインデックス */
         index: number;
+      }
+    | {
+        /** ターン開始.メモリーのアビリティ */
+        kind: "turnStart.memoryEffect";
+        /** lesson.memoryEffects のインデックス */
+        index: number;
+      }
+    | {
+        /** ターン開始.状態修正.遅延効果発動 */
+        kind: "turnStart.modifier.delayedEffectActivation";
+      }
+    | {
+        /** ターン開始.状態修正.ターン経過による効果時間減少 */
+        kind: "turnStart.modifier.durationDecreaseOverTime";
+      }
+    | {
+        /** ターン開始.Pアイテム.効果発動 */
+        kind: "turnStart.producerItem.effectActivation";
+      }
+    | {
+        /** ターン開始.Pアイテム.2ターン毎の効果発動 */
+        kind: "turnStart.producerItem.effectActivationEveryTwoTurns";
       }
     | {
         /** テストのダミー値としてや開発時に一時的に設定 */

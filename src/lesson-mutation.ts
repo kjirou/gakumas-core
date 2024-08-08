@@ -1350,7 +1350,9 @@ export const activateEffectsOnLessonStart = (
       );
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "lessonStartTrigger",
+          kind: "lessonStart.producerItemEffectActivation",
+          producerItemId: producerItem.id,
+          producerItemDataId: producerItem.original.data.id,
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1449,7 +1451,7 @@ export const activateProducerItemEffectsOnTurnStart = (
       );
       const innerUpdates = diff.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.producerItem.effectActivation",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1481,7 +1483,7 @@ export const activateProducerItemEffectsOnTurnStart = (
       );
       const innerUpdates = diff.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.producerItem.effectActivationEveryTwoTurns",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1539,7 +1541,7 @@ export const activateModifierEffectsOnTurnStart = (
       );
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnStartTrigger",
+          kind: "turnStart.modifier.delayedEffectActivation",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -1576,7 +1578,7 @@ export const activateModifierEffectsOnTurnStart = (
         );
         const innerUpdates = diffs.map((diff) =>
           createLessonUpdateQueryFromDiff(diff, {
-            kind: "turnStartTrigger",
+            kind: "turnStart.modifier.delayedEffectActivation",
             historyTurnNumber: lesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           }),
@@ -1611,7 +1613,7 @@ export const activateModifierEffectsOnTurnStart = (
         );
         const innerUpdates = diffs.map((diff) =>
           createLessonUpdateQueryFromDiff(diff, {
-            kind: "turnStartTrigger",
+            kind: "turnStart.modifier.delayedEffectActivation",
             historyTurnNumber: lesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           }),
@@ -1684,7 +1686,7 @@ export const drawCardsOnTurnStart = (
           kind: "cardPlacement",
           deck: [...innateCardIds, ...restCardids],
           reason: {
-            kind: "turnStartTrigger",
+            kind: "turnStart",
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           },
@@ -1717,7 +1719,7 @@ export const drawCardsOnTurnStart = (
           (e) => !handWhenEmptyDeck.includes(e),
         ),
         reason: {
-          kind: "turnStartTrigger",
+          kind: "turnStart",
           historyTurnNumber: newLesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         },
@@ -1747,7 +1749,7 @@ export const drawCardsOnTurnStart = (
           .map((e) => e.id),
       },
       {
-        kind: "turnStartTrigger",
+        kind: "turnStart",
         historyTurnNumber: newLesson.turnNumber,
         historyResultIndex: nextHistoryResultIndex,
       },
@@ -1771,7 +1773,7 @@ export const drawCardsOnTurnStart = (
   );
   drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
     createLessonUpdateQueryFromDiff(diff, {
-      kind: "turnStartTrigger",
+      kind: "turnStart.drawingHand",
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     }),
@@ -1801,7 +1803,7 @@ export const drawCardsOnTurnStart = (
         kind: "cardPlacement",
         discardPile: handWhenEmptyDeck,
         reason: {
-          kind: "turnStartTrigger",
+          kind: "turnStart",
           historyTurnNumber: newLesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         },
@@ -1838,8 +1840,8 @@ export const decreaseEachModifierDurationOverTime = (
   let modifierUpdates: LessonUpdateQuery[] = [];
   for (const modifierId of newLesson.idol.modifierIdsAtTurnStart) {
     const modifier = newLesson.idol.modifiers.find((e) => e.id === modifierId);
-    const reason = {
-      kind: "turnStartTrigger",
+    const reason: LessonUpdateQueryReason = {
+      kind: "turnStart.modifier.durationDecreaseOverTime",
       historyTurnNumber: lesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     } as const;
@@ -1923,7 +1925,7 @@ export const activateMemoryEffectsOnLessonStart = (
   let nextHistoryResultIndex = historyResultIndex;
 
   let memoryEffectUpdates: LessonUpdateQuery[] = [];
-  for (const memoryEffect of newLesson.memoryEffects) {
+  for (const [index, memoryEffect] of newLesson.memoryEffects.entries()) {
     const innerUpdates = activateMemoryEffect(
       newLesson,
       memoryEffect,
@@ -1931,7 +1933,8 @@ export const activateMemoryEffectsOnLessonStart = (
       params.idGenerator,
     ).map((diff) =>
       createLessonUpdateQueryFromDiff(diff, {
-        kind: "turnStartTrigger",
+        kind: "turnStart.memoryEffect",
+        index,
         historyTurnNumber: lesson.turnNumber,
         historyResultIndex: nextHistoryResultIndex,
       }),
@@ -2146,29 +2149,30 @@ export const useCard = (
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
-    const reason = {
-      kind: "cardUsage",
-      cardId,
-      historyTurnNumber: newLesson.turnNumber,
-      historyResultIndex: nextHistoryResultIndex,
-    } as const;
     usedCardPlacementUpdates = [
-      {
-        ...createCardPlacementDiff(
-          {
-            hand: lesson.hand,
-            discardPile: lesson.discardPile,
-            removedCardPile: lesson.removedCardPile,
-          },
-          {
-            hand: newLesson.hand.filter((id) => id !== cardId),
-            ...(cardContent.usableOncePerLesson
-              ? { removedCardPile: [...newLesson.removedCardPile, cardId] }
-              : { discardPile: [...newLesson.discardPile, cardId] }),
-          },
-        ),
-        reason,
-      },
+      createLessonUpdateQueryFromDiff(
+        {
+          ...createCardPlacementDiff(
+            {
+              hand: lesson.hand,
+              discardPile: lesson.discardPile,
+              removedCardPile: lesson.removedCardPile,
+            },
+            {
+              hand: newLesson.hand.filter((id) => id !== cardId),
+              ...(cardContent.usableOncePerLesson
+                ? { removedCardPile: [...newLesson.removedCardPile, cardId] }
+                : { discardPile: [...newLesson.discardPile, cardId] }),
+            },
+          ),
+        },
+        {
+          kind: "cardUsage.cardConsumption",
+          cardId,
+          historyTurnNumber: newLesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        },
+      ),
     ];
     // 山札0枚時の特殊仕様の対象スキルカードの保持
     // a) 山札が0枚の時である
@@ -2182,11 +2186,18 @@ export const useCard = (
     ) {
       usedCardPlacementUpdates = [
         ...usedCardPlacementUpdates,
-        {
-          kind: "handWhenEmptyDeck",
-          cardIds: beforeHand,
-          reason,
-        },
+        createLessonUpdateQueryFromDiff(
+          {
+            kind: "handWhenEmptyDeck",
+            cardIds: beforeHand,
+          },
+          {
+            kind: "cardUsage",
+            cardId,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+        ),
       ];
     }
     newLesson = patchDiffs(newLesson, usedCardPlacementUpdates);
@@ -2199,15 +2210,14 @@ export const useCard = (
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
     calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
-  ).map((diff) => ({
-    ...diff,
-    reason: {
-      kind: "cardUsage",
+  ).map((diff) =>
+    createLessonUpdateQueryFromDiff(diff, {
+      kind: "cardUsage.costConsumption",
       cardId: card.id,
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
-    },
-  }));
+    }),
+  );
   newLesson = patchDiffs(newLesson, costConsumptionUpdates);
   nextHistoryResultIndex++;
 
@@ -2249,7 +2259,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsageTrigger",
+            kind: "cardUsage.producerItem.beforeCardEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
@@ -2289,7 +2299,7 @@ export const useCard = (
           const innerUpdates = [
             ...diffs.map((diff) =>
               createLessonUpdateQueryFromDiff(diff, {
-                kind: "cardUsageTrigger",
+                kind: "cardUsage.modifier.beforeCardEffectActivation",
                 cardId: card.id,
                 historyTurnNumber: newLesson.turnNumber,
                 historyResultIndex: nextHistoryResultIndex,
@@ -2357,7 +2367,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsageTrigger",
+            kind: "cardUsage.producerItem.afterCardEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
@@ -2382,7 +2392,7 @@ export const useCard = (
           params.getRandom,
           params.idGenerator,
           {
-            kind: "cardUsage.modifierIncreaseEffectActivation",
+            kind: "cardUsage.producerItem.modifierIncreaseEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
@@ -2416,26 +2426,30 @@ export const useCard = (
     (e) => e.kind === "additionalCardUsageCount",
   );
   if (newLesson.idol.actionPoints === 0 && additionalCardUsageCount) {
-    const reason = {
+    const reason: LessonUpdateQueryReason = {
       kind: "cardUsage",
       cardId: card.id,
       historyTurnNumber: newLesson.turnNumber,
       historyResultIndex: nextHistoryResultIndex,
     } as const;
     recoveringActionPointsUpdates = [
-      {
-        kind: "actionPoints",
-        amount: 1,
+      createLessonUpdateQueryFromDiff(
+        {
+          kind: "actionPoints",
+          amount: 1,
+        },
         reason,
-      },
-      {
-        kind: "modifiers.update",
-        propertyNameKind: "amount",
-        id: additionalCardUsageCount.id,
-        actual: -1,
-        max: -1,
+      ),
+      createLessonUpdateQueryFromDiff(
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: additionalCardUsageCount.id,
+          actual: -1,
+          max: -1,
+        },
         reason,
-      },
+      ),
     ];
     newLesson = patchDiffs(newLesson, recoveringActionPointsUpdates);
     nextHistoryResultIndex++;
@@ -2480,7 +2494,7 @@ export const activateEffectsOnTurnEnd = (
       );
       const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnEndTrigger",
+          kind: "turnEnd.producerItemEffectActivation",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),
@@ -2513,7 +2527,7 @@ export const activateEffectsOnTurnEnd = (
         if (diffs) {
           innerUpdates = diffs.map((diff) =>
             createLessonUpdateQueryFromDiff(diff, {
-              kind: "turnEndTrigger",
+              kind: "turnEnd.modifierEffectActivation",
               historyTurnNumber: lesson.turnNumber,
               historyResultIndex: nextHistoryResultIndex,
             }),
@@ -2575,7 +2589,7 @@ export const obtainPositiveImpressionScoreOnTurnEnd = (
       ...updates,
       ...diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
-          kind: "turnEndTrigger",
+          kind: "turnEnd.scoreIncreaseDueToPositiveImpression",
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex,
         }),

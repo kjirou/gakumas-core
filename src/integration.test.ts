@@ -177,6 +177,22 @@ describe("状態修正の効果時間の自然減少", () => {
     } as LessonDisplay);
   });
 });
+// SSR清夏だけしか持ってなく、E2Eテストに書いてないので、ここで担保する
+describe("レッスン開始時処理", () => {
+  test("概ね正しく動作する", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "shiunsumika-ssr-1",
+      cards: [],
+      producerItems: [],
+      turns: ["vocal"],
+    });
+    gamePlay = startTurn(gamePlay);
+    expect(generateLessonDisplay(gamePlay)).toMatchObject({
+      producerItems: [{ name: "ゲーセンの戦利品", remainingTimes: 0 }],
+      modifiers: [{ name: "集中", representativeValue: 3 }],
+    } as LessonDisplay);
+  });
+});
 describe("「ランダムな強化済みスキルカード（SSR）を、手札に生成」", () => {
   test("概ね正しく動作する", () => {
     for (let i = 0; i < 1000; i++) {

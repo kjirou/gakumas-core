@@ -315,7 +315,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
       kind: "actionPoints",
       amount: -lesson.idol.actionPoints + 1,
       reason: {
-        kind: "turnSkip",
+        kind: "turnStart",
         historyTurnNumber: lesson.turnNumber,
         historyResultIndex,
       },

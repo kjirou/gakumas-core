@@ -18,7 +18,105 @@ import {
   startTurn,
   useDrink,
 } from "./index";
+import { useCard } from "./lesson-mutation";
 
+describe("手札の配布と山札の再構築", () => {
+  test("山札7枚で、スキップを続けた時、山札:4,捨札:0と山札1:捨札:3を繰り返す", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-r-1",
+      cards: new Array(6).fill({ id: "apirunokihon" }),
+      producerItems: [],
+      turns: ["vocal", "vocal", "vocal"],
+    });
+    // 1
+    gamePlay = startTurn(gamePlay);
+    gamePlay = skipTurn(gamePlay);
+    const display1 = generateLessonDisplay(gamePlay);
+    expect(display1.inventory.deck).toHaveLength(4);
+    expect(display1.inventory.discardPile).toHaveLength(0);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    gamePlay = skipTurn(gamePlay);
+    const display2 = generateLessonDisplay(gamePlay);
+    expect(display2.inventory.deck).toHaveLength(1);
+    expect(display2.inventory.discardPile).toHaveLength(3);
+    gamePlay = endTurn(gamePlay);
+    // 3
+    gamePlay = startTurn(gamePlay);
+    const display3 = generateLessonDisplay(gamePlay);
+    expect(display3.inventory.deck).toHaveLength(4);
+    expect(display3.inventory.discardPile).toHaveLength(0);
+  });
+  test("山札6枚で、スキップを続けた時、山札:3,捨札:0と山札:0,捨札:3を繰り返す / 山札0枚時の特殊仕様は発動しない", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-r-1",
+      cards: new Array(5).fill({ id: "apirunokihon" }),
+      producerItems: [],
+      turns: ["vocal", "vocal", "vocal"],
+    });
+    // 1
+    gamePlay = startTurn(gamePlay);
+    gamePlay = skipTurn(gamePlay);
+    const display1 = generateLessonDisplay(gamePlay);
+    expect(display1.inventory.deck).toHaveLength(3);
+    expect(display1.inventory.discardPile).toHaveLength(0);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    gamePlay = skipTurn(gamePlay);
+    const display2 = generateLessonDisplay(gamePlay);
+    expect(display2.inventory.deck).toHaveLength(0);
+    expect(display2.inventory.discardPile).toHaveLength(3);
+    gamePlay = endTurn(gamePlay);
+    // 3
+    gamePlay = startTurn(gamePlay);
+    const display3 = generateLessonDisplay(gamePlay);
+    expect(display3.inventory.deck).toHaveLength(3);
+    expect(display3.inventory.discardPile).toHaveLength(0);
+  });
+  test("山札6枚で、2ターン目の山札0枚状態でスキルカードを使用した時、山札0枚時の特殊仕様が発動する", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-r-1",
+      idolSpecificCardTestId: "a",
+      cards: [
+        { id: "apirunokihon", testId: "b" },
+        { id: "apirunokihon", testId: "c" },
+        { id: "apirunokihon", testId: "d" },
+        { id: "apirunokihon", testId: "e" },
+        { id: "apirunokihon", testId: "f" },
+      ],
+      producerItems: [],
+      turns: ["vocal", "vocal", "vocal"],
+    });
+    gamePlay.initialLesson.deck = ["a", "b", "c", "d", "e", "f"];
+    // 1
+    gamePlay = startTurn(gamePlay);
+    expect(patchDiffs(gamePlay.initialLesson, gamePlay.updates)).toMatchObject({
+      hand: ["a", "b", "c"],
+      deck: ["d", "e", "f"],
+      discardPile: [],
+    });
+    gamePlay = skipTurn(gamePlay);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    expect(patchDiffs(gamePlay.initialLesson, gamePlay.updates)).toMatchObject({
+      hand: ["d", "e", "f"],
+      deck: [],
+      discardPile: ["a", "b", "c"],
+    });
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+    // 3
+    gamePlay = startTurn(gamePlay);
+    expect(patchDiffs(gamePlay.initialLesson, gamePlay.updates)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: expect.arrayContaining(["d", "e", "f"]),
+    });
+  });
+});
 describe("「ランダムな強化済みスキルカード（SSR）を、手札に生成」", () => {
   test("概ね正しく動作する", () => {
     for (let i = 0; i < 1000; i++) {

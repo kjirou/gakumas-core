@@ -1285,6 +1285,22 @@ export type Lesson = {
    * - 最大5枚
    */
   hand: Array<Card["id"]>;
+  /**
+   * 山札が0枚の時にプレイされたスキルカードIDリスト
+   *
+   * - 本家仕様には、不具合だと思われる、妙な仕様がある
+   *   - それは「山札が0枚の時に、スキルカードを使うと、残りの捨札が次の山札の再構築対象にならない」というもの
+   *    - 仕様確認動画: https://www.youtube.com/watch?v=X8cjsP3B2hw
+   * - これを再現するために、この条件に合致する使用されたスキルカードを保持する
+   *   - 次のターン開始処理の手札を引く時に参照して、山札の再構築の候補から外して、直接捨札へ配置する
+   * - 本実装では、便宜上「山札0枚時の特殊仕様」と命名している
+   * - 補足:
+   *   - ターン最後のスキルカードを、スキルカード使用数追加がある状態で使用し、その後にスキップした場合もこの仕様の影響を受ける
+   *   - 山札0枚時に「仕切り直し」を使った時は、この現象は発生しない
+   *     - 仕様確認動画: https://www.youtube.com/watch?v=OfLUwt2eIDs
+   *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
+   */
+  handWhenEmptyDeck: Array<Card["id"]>;
   idol: Idol;
   /**
    * レッスンクリア以降はパラメータ属性が全属性になるか
@@ -1294,21 +1310,6 @@ export type Lesson = {
    */
   ignoreIdolParameterKindConditionAfterClearing: boolean;
   memoryEffects: MemoryEffect[];
-  /**
-   * 山札が0枚の時にプレイされたスキルカードIDリスト
-   *
-   * - 本家仕様には、不具合だと思われる、妙な仕様がある
-   *   - それは「山札が0枚の時にターン終了し、ターン開始時の手札を引いた時、前ターンの最後に使用したスキルカードと使わなかった手札は、山札の再構築に含まれず次の捨札になる」というもの
-   *   - 仕様確認動画: https://www.youtube.com/shorts/5kTuyk0m270
-   * - これを再現するために、この条件に合致する使用されたスキルカードを保持する
-   *   - 次のターン開始処理の手札を引く時に参照して、山札の再構築の候補から外して、直接捨札へ配置する
-   * - 補足:
-   *   - ターン最後のスキルカードを、スキルカード使用数追加がある状態で使用し、その後にスキップした場合もこの仕様の影響を受ける
-   *   - 山札0枚時に「仕切り直し」を使った時は、この現象は発生しない
-   *     - 仕様確認動画: https://www.youtube.com/watch?v=OfLUwt2eIDs
-   *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
-   */
-  playedCardsOnEmptyDeck: Array<Card["id"]>;
   /** 最終ターン数への変化、現状は「ターン追加」効果により増加する状況しか考慮していない、つまり常に正の数 */
   remainingTurnsChange: number;
   /** 除外されたカード群、原文は「除外」、山札の再生成時に含まれないカード群 */
@@ -1391,6 +1392,10 @@ export type LessonUpdateDiff = Readonly<
       id: Drink["id"];
     }
   | {
+      kind: "handWhenEmptyDeck";
+      cardIds: Lesson["handWhenEmptyDeck"];
+    }
+  | {
       kind: "life";
       /** アイドルの状態へ実際に影響を与える数値。例えば、残り体力1の時に、トラブルの体力減少で3減らされた時は1になる。 */
       actual: number;
@@ -1430,10 +1435,6 @@ export type LessonUpdateDiff = Readonly<
       actual: number;
       id: Modifier["id"];
       max: number;
-    }
-  | {
-      kind: "playedCardsOnEmptyDeck";
-      cardIds: Lesson["playedCardsOnEmptyDeck"];
     }
   | {
       kind: "producerItem.activationCount";

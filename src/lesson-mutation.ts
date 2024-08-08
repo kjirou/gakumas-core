@@ -719,7 +719,7 @@ export const activateEffect = <
       );
       if (deckRebuilt) {
         diffs.push({
-          kind: "playedCardsOnEmptyDeck",
+          kind: "handWhenEmptyDeck",
           cardIds: [],
         });
       }
@@ -778,7 +778,7 @@ export const activateEffect = <
       );
       if (deckRebuilt) {
         diffs.push({
-          kind: "playedCardsOnEmptyDeck",
+          kind: "handWhenEmptyDeck",
           cardIds: [],
         });
       }
@@ -1699,22 +1699,22 @@ export const drawCardsOnTurnStart = (
   // 捨札から、山札0枚時に捨札になったスキルカードを一時取り出す
   //
   // - 山札の再構築時の候補から外すため
-  // - 山札0枚時の特殊仕様によるもの、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
+  // - 山札0枚時の特殊仕様によるもの、詳細は Lesson["handWhenEmptyDeck"] を参照
   //
-  const playedCardsOnEmptyDeck = newLesson.playedCardsOnEmptyDeck;
-  let playedCardsOnEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (playedCardsOnEmptyDeck.length > 0) {
+  const handWhenEmptyDeck = newLesson.handWhenEmptyDeck;
+  let handWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
+  if (handWhenEmptyDeck.length > 0) {
     // 必ず、山札は0枚のはず
     if (newLesson.deck.length > 0) {
       throw new Error(
         `Unexpected state: deck is not empty: ${newLesson.deck.length}`,
       );
     }
-    playedCardsOnEmptyDeckUpdates = [
+    handWhenEmptyDeckUpdates = [
       {
         kind: "cardPlacement",
         discardPile: newLesson.discardPile.filter(
-          (e) => !playedCardsOnEmptyDeck.includes(e),
+          (e) => !handWhenEmptyDeck.includes(e),
         ),
         reason: {
           kind: "turnStartTrigger",
@@ -1723,7 +1723,7 @@ export const drawCardsOnTurnStart = (
         },
       },
     ];
-    newLesson = patchDiffs(newLesson, playedCardsOnEmptyDeckUpdates);
+    newLesson = patchDiffs(newLesson, handWhenEmptyDeckUpdates);
     nextHistoryResultIndex++;
   }
 
@@ -1782,8 +1782,8 @@ export const drawCardsOnTurnStart = (
   //
   // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す
   //
-  let restoringPlayedCardsOnEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (playedCardsOnEmptyDeck.length > 0) {
+  let restoringHandWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
+  if (handWhenEmptyDeck.length > 0) {
     // 必ず、山札は再構築されているはずなので、捨札は空のはず
     if (newLesson.discardPile.length > 0) {
       throw new Error(
@@ -1791,15 +1791,15 @@ export const drawCardsOnTurnStart = (
       );
     }
     // 必ず、"drawCards"の中で山札が再構築されているはずなので、その中でこの値は初期化されているはず
-    if (newLesson.playedCardsOnEmptyDeck.length > 0) {
+    if (newLesson.handWhenEmptyDeck.length > 0) {
       throw new Error(
-        `Unexpected state: playedCardsOnEmptyDeck is not empty: ${newLesson.discardPile.length}`,
+        `Unexpected state: handWhenEmptyDeck is not empty: ${newLesson.discardPile.length}`,
       );
     }
-    restoringPlayedCardsOnEmptyDeckUpdates = [
+    restoringHandWhenEmptyDeckUpdates = [
       {
         kind: "cardPlacement",
-        discardPile: playedCardsOnEmptyDeck,
+        discardPile: handWhenEmptyDeck,
         reason: {
           kind: "turnStartTrigger",
           historyTurnNumber: newLesson.turnNumber,
@@ -1807,17 +1807,17 @@ export const drawCardsOnTurnStart = (
         },
       },
     ];
-    newLesson = patchDiffs(newLesson, restoringPlayedCardsOnEmptyDeckUpdates);
+    newLesson = patchDiffs(newLesson, restoringHandWhenEmptyDeckUpdates);
     nextHistoryResultIndex++;
   }
 
   return {
     updates: [
       ...moveInnateCardsUpdates,
-      ...playedCardsOnEmptyDeckUpdates,
+      ...handWhenEmptyDeckUpdates,
       ...removeLessonSupportUpdates,
       ...drawCardsEffectUpdates,
-      ...restoringPlayedCardsOnEmptyDeckUpdates,
+      ...restoringHandWhenEmptyDeckUpdates,
     ],
     nextHistoryResultIndex,
   };
@@ -2120,6 +2120,7 @@ export const useCard = (
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 
+  const beforeHand = newLesson.hand;
   const doubleEffect = findPrioritizedDoubleEffectModifier(
     card.original.data.cardSummaryKind,
     newLesson.idol.modifiers,
@@ -2141,7 +2142,7 @@ export const useCard = (
   // 手札の消費
   //
   // - 「レッスン中1回」がないものは捨札、あるものは除外へ移動する
-  // - 加えて、山札0枚時の特殊仕様のためのフラグを保存する、詳細は Lesson["playedCardsOnEmptyDeck"] を参照
+  // - 加えて、山札0枚時の特殊仕様のための手札情報を保存する、詳細は Lesson["handWhenEmptyDeck"] を参照
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
@@ -2169,12 +2170,21 @@ export const useCard = (
         reason,
       },
     ];
-    if (newLesson.deck.length === 0 && !cardContent.usableOncePerLesson) {
+    // 山札0枚時の特殊仕様の対象スキルカードの保持
+    // a) 山札が0枚の時である
+    // b) 除外になるスキルカードではない
+    // c) 既にこのターンに保持していない
+    //    - 2枚目のスキルカード使用時は手札が減ってしまうので、減る前の状態を保存するのが正しい
+    if (
+      newLesson.deck.length === 0 &&
+      !cardContent.usableOncePerLesson &&
+      newLesson.handWhenEmptyDeck.length === 0
+    ) {
       usedCardPlacementUpdates = [
         ...usedCardPlacementUpdates,
         {
-          kind: "playedCardsOnEmptyDeck",
-          cardIds: [...newLesson.playedCardsOnEmptyDeck, cardId],
+          kind: "handWhenEmptyDeck",
+          cardIds: beforeHand,
           reason,
         },
       ];

@@ -86,7 +86,7 @@ const newGamePlay = playCard(gamePlay, 0);
 
 // ターンが終了したかの判定です。
 // 主に、スキルカード使用数追加がない状況でスキルカードを使用すると真になります。
-const turnEnded = hasActionEnded(gamePlay);
+const actionEnded = hasActionEnded(gamePlay);
 
 // ...他はターン開始処理と同じなので略...
 ```
@@ -111,6 +111,7 @@ const newGamePlay = endTrun(gamePlay);
 - `diffUpdates`: 2つのゲームプレイを比較して、間の更新差分を抽出する。
 - `endTurn`: ターン終了処理を実行する。
 - `generateCardPlayPreviewDisplay`: スキルカード選択時のプレビュー用の表示情報を生成する。
+- `getLesson`: 現在のレッスンの状態を返す。
 - `hasActionEnded`: アイドルの手番が終了しているかを判定する。
 - `initializeGamePlay`: ゲームプレイを初期化する。
 - `isLessonEnded`: レッスンが終了しているかを判定する。

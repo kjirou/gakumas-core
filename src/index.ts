@@ -190,10 +190,16 @@ export const initializeGamePlay = (params: {
 };
 
 /**
+ * 現在のレッスンの状態を返す
+ */
+export const getLesson = (gamePlay: GamePlay): Lesson =>
+  patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+
+/**
  * そのターンのアイドルの行動が終了しているかを返す
  */
 export const hasActionEnded = (gamePlay: GamePlay): boolean => {
-  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  const lesson = getLesson(gamePlay);
   return lesson.idol.actionPoints === 0;
 };
 
@@ -206,7 +212,7 @@ export const hasActionEnded = (gamePlay: GamePlay): boolean => {
  *   - `endTurn`
  */
 export const isLessonEnded = (gamePlay: GamePlay): boolean => {
-  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  const lesson = getLesson(gamePlay);
   return (
     isScoreSatisfyingPerfect(lesson) ||
     (calculateRemainingTurns(lesson) === 1 &&
@@ -223,7 +229,7 @@ export const isLessonEnded = (gamePlay: GamePlay): boolean => {
 export const startTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  let lesson = getLesson(gamePlay);
 
   if (
     (lesson.turnNumber !== 0 && lesson.turnEnded === false) ||
@@ -484,7 +490,7 @@ export const playCard = (
 ): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  let lesson = getLesson(gamePlay);
 
   if (lesson.turnEnded) {
     throw new Error("ターンが正常に開始していない");
@@ -581,7 +587,7 @@ export const playCard = (
 export const useDrink = (gamePlay: GamePlay, drinkIndex: number): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  let lesson = getLesson(gamePlay);
 
   if (lesson.turnEnded) {
     throw new Error("ターンが正常に開始していない");
@@ -615,7 +621,7 @@ export const useDrink = (gamePlay: GamePlay, drinkIndex: number): GamePlay => {
 export const skipTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  let lesson = getLesson(gamePlay);
 
   if (lesson.turnEnded) {
     throw new Error("ターンが正常に開始していない");
@@ -674,7 +680,7 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
 export const endTurn = (gamePlay: GamePlay): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
-  let lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  let lesson = getLesson(gamePlay);
 
   if (lesson.turnEnded) {
     throw new Error("ターンが正常に開始していない");

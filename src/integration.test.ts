@@ -2,17 +2,15 @@
  * 公開APIの組み合わせを検証するテスト
  *
  * - e2e.test.ts の検証を前提として、再現できない・再現しにくい状況を検証する
+ * - なるべく公開APIを使う
  */
 
 import {
   type LessonDisplay,
   endTurn,
   generateLessonDisplay,
-  getNextHistoryResultIndex,
+  getLesson,
   initializeGamePlay,
-  isLessonEnded,
-  hasActionEnded,
-  patchDiffs,
   playCard,
   skipTurn,
   startTurn,
@@ -91,7 +89,7 @@ describe("手札の配布と山札の再構築", () => {
     gamePlay.initialLesson.deck = ["a", "b", "c", "d", "e", "f"];
     // 1
     gamePlay = startTurn(gamePlay);
-    expect(patchDiffs(gamePlay.initialLesson, gamePlay.updates)).toMatchObject({
+    expect(getLesson(gamePlay)).toMatchObject({
       hand: ["a", "b", "c"],
       deck: ["d", "e", "f"],
       discardPile: [],
@@ -100,7 +98,7 @@ describe("手札の配布と山札の再構築", () => {
     gamePlay = endTurn(gamePlay);
     // 2
     gamePlay = startTurn(gamePlay);
-    expect(patchDiffs(gamePlay.initialLesson, gamePlay.updates)).toMatchObject({
+    expect(getLesson(gamePlay)).toMatchObject({
       hand: ["d", "e", "f"],
       deck: [],
       discardPile: ["a", "b", "c"],
@@ -109,7 +107,7 @@ describe("手札の配布と山札の再構築", () => {
     gamePlay = endTurn(gamePlay);
     // 3
     gamePlay = startTurn(gamePlay);
-    expect(patchDiffs(gamePlay.initialLesson, gamePlay.updates)).toMatchObject({
+    expect(getLesson(gamePlay)).toMatchObject({
       hand: expect.arrayContaining(["a", "b", "c"]),
       deck: [],
       discardPile: expect.arrayContaining(["d", "e", "f"]),

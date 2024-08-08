@@ -1566,10 +1566,6 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "lessonEnd";
       }
     | {
-        /** レッスン生成直後 */
-        kind: "lessonInitialization";
-      }
-    | {
         /** レッスン開始.Pアイテム効果発動 */
         kind: "lessonStart.producerItemEffectActivation";
         producerItemId: ProducerItem["id"];

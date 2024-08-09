@@ -2,7 +2,8 @@
   "name": "gakumas-core",
   "version": "0.0.0",
   "description": "Core engine of \"学園アイドルマスター\"",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "prettier:check": "prettier --check .",
@@ -10,12 +11,21 @@
     "test": "jest",
     "tsc": "tsc"
   },
-  "keywords": [],
+  "keywords": [
+    "gakumas",
+    "game"
+  ],
   "author": "kjirou",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=18"
   },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist",
+    "package.json"
+  ],
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.12",

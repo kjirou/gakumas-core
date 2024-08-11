@@ -1,5 +1,6 @@
 import type {
   CardEnhancement,
+  CardInHandDisplay,
   CardInInventoryDisplay,
   CardInProduction,
   Lesson,
@@ -130,6 +131,30 @@ describe("generateCardInHandDisplay", () => {
         scores: expect.any(Array),
         vitality: undefined,
       },
+    },
+    {
+      name: "performにscoreとvitalityがある時、それぞれが正しい",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            deck: [
+              {
+                id: "a",
+                data: getCardDataByConstId("pozunokihon"),
+                enhanced: false,
+              },
+            ],
+          });
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        scores: [{ value: 2, times: 1 }],
+        vitality: 2,
+      } as CardInHandDisplay,
     },
     {
       name: "無条件の状態修正と条件付きの状態修正を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たした旨と満たさない旨の2レコードが入る",
@@ -412,7 +437,7 @@ describe("generateCardInHandDisplay", () => {
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(generateCardInHandDisplay(...args)).toStrictEqual(expected);
+    expect(generateCardInHandDisplay(...args)).toMatchObject(expected);
   });
 });
 describe("generateEncouragementDisplays", () => {

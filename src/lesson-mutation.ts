@@ -299,7 +299,7 @@ export const canPlayCard = (
 };
 
 /**
- * 各効果が適用できるかを判定する
+ * 効果が発動できるかを判定する
  */
 export const canActivateEffect = (
   lesson: Lesson,
@@ -370,11 +370,9 @@ export const canActivateEffect = (
 };
 
 /**
- * Pアイテムが作動できるかを判定する
+ * Pアイテムの効果が発動できるかを判定する
  *
- * - Pアイテムの場合は、作動すれば、全ての効果の発動と反映も確定する
- *   - というよりは、スキルカード側では「効果発動するが反映されない」という状況があるが、Pアイテム側では「効果反映までできるか」が作動条件に含まれているので、結果としてそうなる
- * - 体力消費があるPアイテムは、体力が足りない時も発動できる
+ * - 体力消費のコストがあるPアイテムは、体力が足りない時も発動できる
  *   - 仕様確認Issue: https://github.com/kjirou/gakumas-core/issues/46
  *   - 体力減少という類似効果もあるが、こちらは不明。一旦は体力消費と同じように、足りなくても発動している。
  *
@@ -382,7 +380,7 @@ export const canActivateEffect = (
  * @param options.cardSummaryKind 一部のトリガーでのみ有効、直前で使用したスキルカード概要種別を指定する
  * @param options.increasedModifierKinds 一部のトリガーでのみ有効、直前で使用したスキルカードにより上昇した状態修正の種別リストを指定する
  */
-export const canTriggerProducerItem = (
+export const canActivateProducerItem = (
   lesson: Lesson,
   producerItem: ProducerItem,
   callFrom: ProducerItemTrigger["kind"],
@@ -1286,7 +1284,7 @@ export const activateEffectsEachProducerItemsAccordingToCardUsage = (
   let updates: LessonUpdateQuery[] = [];
   let newLesson = lesson;
   const targetProducerItems = lesson.idol.producerItems.filter((producerItem) =>
-    canTriggerProducerItem(
+    canActivateProducerItem(
       lesson,
       producerItem,
       producerItemTriggerKind,
@@ -1343,7 +1341,7 @@ export const activateEffectsOnLessonStart = (
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (canTriggerProducerItem(newLesson, producerItem, "lessonStart")) {
+    if (canActivateProducerItem(newLesson, producerItem, "lessonStart")) {
       const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
@@ -1444,7 +1442,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (canTriggerProducerItem(newLesson, producerItem, "turnStart")) {
+    if (canActivateProducerItem(newLesson, producerItem, "turnStart")) {
       const diff = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
@@ -1475,7 +1473,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
     if (
-      canTriggerProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
+      canActivateProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
     ) {
       const diff = activateEffectsOfProducerItem(
         newLesson,
@@ -2487,7 +2485,7 @@ export const activateEffectsOnTurnEnd = (
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (canTriggerProducerItem(newLesson, producerItem, "turnEnd")) {
+    if (canActivateProducerItem(newLesson, producerItem, "turnEnd")) {
       const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,

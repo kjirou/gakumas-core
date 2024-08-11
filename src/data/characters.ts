@@ -15,6 +15,9 @@ export const getCharacterDataById = (
   return character;
 };
 
+export const getCharacterDataByConstId = (id: CharacterDataId): CharacterData =>
+  getCharacterDataById(id);
+
 /**
  * アイドル個性の定義
  *
@@ -27,7 +30,7 @@ export const getCharacterDataById = (
  *   - プロパティの定義順は、 id を先頭にして、他はアルファベット順
  * - TODO: eslint
  */
-export const characters: CharacterData[] = [
+const charactersAsConst = [
   {
     id: "hanamisaki",
     firstName: "咲季",
@@ -88,4 +91,8 @@ export const characters: CharacterData[] = [
     lastName: "姫崎",
     maxLife: 30,
   },
-];
+] as const satisfies CharacterData[];
+
+export type CharacterDataId = (typeof charactersAsConst)[number]["id"];
+
+export const characters: CharacterData[] = charactersAsConst;

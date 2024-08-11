@@ -30,7 +30,7 @@ export const getDefaultCardSetData = (
   }
 };
 
-const cardSetsAsConst = [
+export const cardSetsAsConst = [
   {
     id: "defaultLogicMotivation",
     cardDataIds: [

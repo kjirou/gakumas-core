@@ -103,7 +103,7 @@ export const compareDeckOrder = (a: CardData, b: CardData) => {
  *       - kind > *Kind > それ以外をアルファベット順
  * - TODO: eslint
  */
-const cardsAsConst = [
+export const cardsAsConst = [
   {
     id: "apirunokihon",
     name: "アピールの基本",

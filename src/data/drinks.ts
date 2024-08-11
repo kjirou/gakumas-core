@@ -26,7 +26,7 @@ export const getDrinkDataByConstId = (id: DrinkDataId): DrinkData =>
  *   - プロパティの定義順は、スキルカードに合わせる
  * - TODO: eslint
  */
-const drinksAsConst = [
+export const drinksAsConst = [
   {
     // 読み方不明
     id: "hatsuboshimizu",

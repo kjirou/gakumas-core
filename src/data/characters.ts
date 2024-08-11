@@ -30,7 +30,7 @@ export const getCharacterDataByConstId = (id: CharacterDataId): CharacterData =>
  *   - プロパティの定義順は、 id を先頭にして、他はアルファベット順
  * - TODO: eslint
  */
-const charactersAsConst = [
+export const charactersAsConst = [
   {
     id: "hanamisaki",
     firstName: "咲季",

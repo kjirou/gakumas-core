@@ -24,7 +24,7 @@ export const getIdolDataByConstId = (id: IdolDataId): IdolData =>
  * - TODO: eslint
  * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
-const idolsAsConst = [
+export const idolsAsConst = [
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",

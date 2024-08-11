@@ -32,7 +32,7 @@ const gamePlay = initializeGamePlay({
   cards: [{ id: "apirunokihon" }, { id: "genkinaaisatsu", enhanced: true }],
   producerItems: [{ id: "masukottohikonin" }],
   turns: ["dance", "dance", "dance", "dance", "dance", "dance", "dance"],
-  clearScoreThresholds: { clear: 100, perfect: 100 },
+  clearScoreThresholds: { clear: 100, perfect: 200 },
 });
 ```
 

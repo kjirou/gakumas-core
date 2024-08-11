@@ -12,6 +12,12 @@ export const getCardSetDataById = (id: CardSetData["id"]): CardSetData => {
   return cardSet;
 };
 
+export const getCardSetDataByConstId = (id: CardSetDataId): CardSetData =>
+  getCardSetDataById(id);
+
+export const isCardSetDataIdType = (id: string): id is CardSetDataId =>
+  cardSets.some((e) => e.id === id);
+
 /** 初期スキルカードセットを返す */
 export const getDefaultCardSetData = (
   proeducePlan: ProducePlan,
@@ -27,7 +33,7 @@ export const getDefaultCardSetData = (
   }
 };
 
-export const cardSets: CardSetData[] = [
+export const cardSetsAsConst = [
   {
     id: "defaultLogicMotivation",
     cardDataIds: [
@@ -80,4 +86,8 @@ export const cardSets: CardSetData[] = [
       "pozunokihon",
     ],
   },
-];
+] as const satisfies CardSetData[];
+
+export type CardSetDataId = (typeof cardSetsAsConst)[number]["id"];
+
+export const cardSets: CardSetData[] = cardSetsAsConst;

@@ -14,6 +14,9 @@ export const getDrinkDataById = (id: DrinkData["id"]): DrinkData => {
 export const getDrinkDataByConstId = (id: DrinkDataId): DrinkData =>
   getDrinkDataById(id);
 
+export const isDrinkDataIdType = (id: string): id is DrinkDataId =>
+  drinks.some((e) => e.id === id);
+
 /**
  * Pドリンクの定義
  *
@@ -26,7 +29,7 @@ export const getDrinkDataByConstId = (id: DrinkDataId): DrinkData =>
  *   - プロパティの定義順は、スキルカードに合わせる
  * - TODO: eslint
  */
-const drinksAsConst = [
+export const drinksAsConst = [
   {
     // 読み方不明
     id: "hatsuboshimizu",

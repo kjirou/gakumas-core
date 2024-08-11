@@ -14,6 +14,9 @@ export const getIdolDataById = (id: IdolData["id"]): IdolData => {
 export const getIdolDataByConstId = (id: IdolDataId): IdolData =>
   getIdolDataById(id);
 
+export const isIdolDataIdType = (id: string): id is IdolDataId =>
+  idols.some((e) => e.id === id);
+
 /**
  * プロデュースアイドルの定義
  *
@@ -24,7 +27,7 @@ export const getIdolDataByConstId = (id: IdolDataId): IdolData =>
  * - TODO: eslint
  * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
-const idolsAsConst = [
+export const idolsAsConst = [
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",

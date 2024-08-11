@@ -14,6 +14,9 @@ export const getCardDataById = (id: CardData["id"]): CardData => {
 export const getCardDataByConstId = (id: CardDataId): CardData =>
   getCardDataById(id);
 
+export const isCardDataIdType = (id: string): id is CardDataId =>
+  cards.some((e) => e.id === id);
+
 /** 「ランダムな強化済みスキルカード（SSR）を、手札に生成」用の候補を返す */
 export const filterGeneratableCardsData = (
   producePlanKind: ProducePlan["kind"],
@@ -103,7 +106,7 @@ export const compareDeckOrder = (a: CardData, b: CardData) => {
  *       - kind > *Kind > それ以外をアルファベット順
  * - TODO: eslint
  */
-const cardsAsConst = [
+export const cardsAsConst = [
   {
     id: "apirunokihon",
     name: "アピールの基本",

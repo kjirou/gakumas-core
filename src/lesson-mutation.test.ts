@@ -2722,6 +2722,25 @@ describe("canTriggerProducerItem", () => {
       expected: false,
     },
     {
+      name: "体力消費に対して体力が不足している時も、true を返す",
+      args: [
+        { turns: ["vocal"], turnNumber: 1, idol: { life: 0 } } as Lesson,
+        {
+          activationCount: 0,
+          original: {
+            data: {
+              base: {
+                trigger: { kind: "turnStart" },
+                cost: { kind: "life", value: 1 },
+              },
+            },
+          },
+        } as ProducerItem,
+        "turnStart",
+      ],
+      expected: true,
+    },
+    {
       name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,

@@ -18,6 +18,9 @@ export const getCharacterDataById = (
 export const getCharacterDataByConstId = (id: CharacterDataId): CharacterData =>
   getCharacterDataById(id);
 
+export const isCharacterDataIdType = (id: string): id is CharacterDataId =>
+  characters.some((e) => e.id === id);
+
 /**
  * アイドル個性の定義
  *

@@ -19,6 +19,10 @@ export const getProducerItemDataByConstId = (
   id: ProducerItemDataId,
 ): ProducerItemData => getProducerItemDataById(id);
 
+export const isProducerItemDataIdType = (
+  id: string,
+): id is ProducerItemDataId => producerItems.some((e) => e.id === id);
+
 /**
  * Pアイテムデータの定義
  *

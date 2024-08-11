@@ -14,6 +14,9 @@ export const getDrinkDataById = (id: DrinkData["id"]): DrinkData => {
 export const getDrinkDataByConstId = (id: DrinkDataId): DrinkData =>
   getDrinkDataById(id);
 
+export const isDrinkDataIdType = (id: string): id is DrinkDataId =>
+  drinks.some((e) => e.id === id);
+
 /**
  * Pドリンクの定義
  *

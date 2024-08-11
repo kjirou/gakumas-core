@@ -14,6 +14,9 @@ export const getIdolDataById = (id: IdolData["id"]): IdolData => {
 export const getIdolDataByConstId = (id: IdolDataId): IdolData =>
   getIdolDataById(id);
 
+export const isIdolDataIdType = (id: string): id is IdolDataId =>
+  idols.some((e) => e.id === id);
+
 /**
  * プロデュースアイドルの定義
  *

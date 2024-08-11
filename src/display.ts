@@ -110,14 +110,16 @@ export const generateCardInHandDisplay = (
   );
   let scores: CardInHandDisplay["scores"] = [];
   for (const effectActivation of effectActivations) {
+    // score と vitality が同時に含まれていることがあるのに注意
     if (effectActivation) {
-      if (effectActivation.length > 0 && effectActivation[0].kind === "score") {
+      const scoreDiffs = effectActivation.filter((e) => e.kind === "score");
+      if (scoreDiffs.length > 0) {
         scores = [
           ...scores,
           {
-            value: effectActivation[0].max,
             // 1回の効果発動で複数回スコアが上がる時は、全てのスコアの値は同じになる前提
-            times: effectActivation.length,
+            value: scoreDiffs[0].max,
+            times: scoreDiffs.length,
           },
         ];
       }

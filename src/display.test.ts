@@ -178,12 +178,12 @@ describe("generateCardInHandDisplay", () => {
           {
             effect: expect.any(Object),
             kind: "modifier-goodCondition",
-            applyable: true,
+            activatable: true,
           },
           {
             effect: expect.any(Object),
             kind: "modifier-focus",
-            applyable: false,
+            activatable: false,
           },
         ],
         enhancements: expect.any(Array),
@@ -216,7 +216,7 @@ describe("generateCardInHandDisplay", () => {
           {
             effect: expect.any(Object),
             kind: "perform-score",
-            applyable: false,
+            activatable: false,
           },
         ],
         enhancements: expect.any(Array),
@@ -253,7 +253,7 @@ describe("generateCardInHandDisplay", () => {
           {
             effect: expect.any(Object),
             kind: "perform-score",
-            applyable: true,
+            activatable: true,
           },
         ],
         enhancements: expect.any(Array),
@@ -289,7 +289,7 @@ describe("generateCardInHandDisplay", () => {
           {
             effect: expect.any(Object),
             kind: "perform-vitality",
-            applyable: false,
+            activatable: false,
           },
         ],
         enhancements: expect.any(Array),
@@ -326,7 +326,7 @@ describe("generateCardInHandDisplay", () => {
           {
             effect: expect.any(Object),
             kind: "perform-vitality",
-            applyable: true,
+            activatable: true,
           },
         ],
         enhancements: expect.any(Array),
@@ -589,7 +589,7 @@ describe("generateCardInInventoryDisplays", () => {
       expected: [{ effects: [] as any }] as CardInInventoryDisplay[],
     },
     {
-      name: "効果リストの applyable は常に true である",
+      name: "効果リストの activatable は常に true である",
       args: [
         prepareCardsForLesson([
           {
@@ -606,8 +606,8 @@ describe("generateCardInInventoryDisplays", () => {
         ["a", "b"],
       ],
       expected: [
-        { effects: [{ applyable: true }] },
-        { effects: [{ applyable: true }] },
+        { effects: [{ activatable: true }] },
+        { effects: [{ activatable: true }] },
       ] as CardInInventoryDisplay[],
     },
   ];

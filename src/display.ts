@@ -53,13 +53,13 @@ import {
 
 const generateEffectDisplay = (
   effect: Effect,
-  applyable: boolean,
+  activatable: boolean,
 ): CardEffectDisplay | undefined => {
   if (effect.kind === "getModifier") {
     return {
       effect,
       kind: `modifier-${effect.modifier.kind}`,
-      applyable,
+      activatable,
     };
   } else if (effect.kind === "perform") {
     if (effect.condition) {
@@ -67,13 +67,13 @@ const generateEffectDisplay = (
         return {
           effect,
           kind: "perform-score",
-          applyable,
+          activatable,
         };
       } else if (effect.vitality) {
         return {
           effect,
           kind: "perform-vitality",
-          applyable,
+          activatable,
         };
       }
     }
@@ -82,7 +82,7 @@ const generateEffectDisplay = (
   return {
     effect,
     kind: effect.kind,
-    applyable,
+    activatable: activatable,
   };
 };
 
@@ -132,8 +132,8 @@ export const generateCardInHandDisplay = (
   }
   let effectDisplays: CardInHandDisplay["effects"] = [];
   for (const [effectIndex, effect] of cardContent.effects.entries()) {
-    const applyable = effectActivations[effectIndex] !== undefined;
-    const effectDisplay = generateEffectDisplay(effect, applyable);
+    const activatable = effectActivations[effectIndex] !== undefined;
+    const effectDisplay = generateEffectDisplay(effect, activatable);
     if (effectDisplay) {
       effectDisplays = [...effectDisplays, effectDisplay];
     }

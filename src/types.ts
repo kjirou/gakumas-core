@@ -1722,12 +1722,12 @@ export type EncouragementDisplay = Encouragement & {
  */
 export type CardEffectDisplay = {
   /**
-   * 効果適用条件を満たすか
+   * 効果発動条件を満たすか
    *
    * - 満たさない場合、本家UIだと、メインの手札表示内に限り、右にx印が付く
    *   - なお、所持スキルカードダイアログ内の手札には付かない
    */
-  applyable: boolean;
+  activatable: boolean;
   effect: Effect;
   kind:
     | Exclude<Effect, { kind: "getModifier" } | { kind: "perform" }>["kind"]
@@ -1783,7 +1783,7 @@ export type CardPlayPreviewDisplay = {
  */
 export type CardInInventoryDisplay = Card & {
   description: string;
-  /** この中の applyable は常に true */
+  /** この中の activatable は常に true */
   effects: CardEffectDisplay[];
   name: string;
 };

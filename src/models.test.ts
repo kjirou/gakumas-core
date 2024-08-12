@@ -3,8 +3,8 @@ import { getCardDataByConstId } from "./data/cards";
 import { getIdolDataByConstId } from "./data/idols";
 import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
-  calculateActualActionCost,
   calculateClearScoreProgress,
+  calculateModifierEffectedActionCost,
   createActualTurns,
   createIdolInProduction,
   createGamePlay,
@@ -17,10 +17,63 @@ import {
 } from "./models";
 import { createIdGenerator } from "./utils";
 
-describe("calculateActualActionCost", () => {
+describe("calculateClearScoreProgress", () => {
   const testCases: Array<{
-    args: Parameters<typeof calculateActualActionCost>;
-    expected: ReturnType<typeof calculateActualActionCost>;
+    args: Parameters<typeof calculateClearScoreProgress>;
+    expected: ReturnType<typeof calculateClearScoreProgress>;
+  }> = [
+    {
+      args: [0, { clear: 100 }],
+      expected: {
+        necessaryClearScore: 100,
+        necessaryPerfectScore: undefined,
+        remainingClearScore: 100,
+        remainingPerfectScore: undefined,
+        clearScoreProgressPercentage: 0,
+      },
+    },
+    {
+      args: [10, { clear: 1000 }],
+      expected: {
+        necessaryClearScore: 1000,
+        necessaryPerfectScore: undefined,
+        remainingClearScore: 990,
+        remainingPerfectScore: undefined,
+        clearScoreProgressPercentage: 1,
+      },
+    },
+    {
+      args: [9, { clear: 1000 }],
+      expected: {
+        necessaryClearScore: 1000,
+        necessaryPerfectScore: undefined,
+        remainingClearScore: 991,
+        remainingPerfectScore: undefined,
+        clearScoreProgressPercentage: 0,
+      },
+    },
+    {
+      args: [50, { clear: 100, perfect: 300 }],
+      expected: {
+        necessaryClearScore: 100,
+        necessaryPerfectScore: 300,
+        remainingClearScore: 50,
+        remainingPerfectScore: 250,
+        clearScoreProgressPercentage: 50,
+      },
+    },
+  ];
+  test.each(testCases)(
+    "$args.0, $args.1 => $expected",
+    ({ args, expected }) => {
+      expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
+    },
+  );
+});
+describe("calculateModifierEffectedActionCost", () => {
+  const testCases: Array<{
+    args: Parameters<typeof calculateModifierEffectedActionCost>;
+    expected: ReturnType<typeof calculateModifierEffectedActionCost>;
   }> = [
     {
       args: [{ kind: "normal", value: 1 }, []],
@@ -124,60 +177,9 @@ describe("calculateActualActionCost", () => {
   test.each(testCases)(
     "$args.0, [$args.1.0, $args.1.1, $args.1.2] => $expected",
     ({ args, expected }) => {
-      expect(calculateActualActionCost(...args)).toStrictEqual(expected);
-    },
-  );
-});
-describe("calculateClearScoreProgress", () => {
-  const testCases: Array<{
-    args: Parameters<typeof calculateClearScoreProgress>;
-    expected: ReturnType<typeof calculateClearScoreProgress>;
-  }> = [
-    {
-      args: [0, { clear: 100 }],
-      expected: {
-        necessaryClearScore: 100,
-        necessaryPerfectScore: undefined,
-        remainingClearScore: 100,
-        remainingPerfectScore: undefined,
-        clearScoreProgressPercentage: 0,
-      },
-    },
-    {
-      args: [10, { clear: 1000 }],
-      expected: {
-        necessaryClearScore: 1000,
-        necessaryPerfectScore: undefined,
-        remainingClearScore: 990,
-        remainingPerfectScore: undefined,
-        clearScoreProgressPercentage: 1,
-      },
-    },
-    {
-      args: [9, { clear: 1000 }],
-      expected: {
-        necessaryClearScore: 1000,
-        necessaryPerfectScore: undefined,
-        remainingClearScore: 991,
-        remainingPerfectScore: undefined,
-        clearScoreProgressPercentage: 0,
-      },
-    },
-    {
-      args: [50, { clear: 100, perfect: 300 }],
-      expected: {
-        necessaryClearScore: 100,
-        necessaryPerfectScore: 300,
-        remainingClearScore: 50,
-        remainingPerfectScore: 250,
-        clearScoreProgressPercentage: 50,
-      },
-    },
-  ];
-  test.each(testCases)(
-    "$args.0, $args.1 => $expected",
-    ({ args, expected }) => {
-      expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
+      expect(calculateModifierEffectedActionCost(...args)).toStrictEqual(
+        expected,
+      );
     },
   );
 });

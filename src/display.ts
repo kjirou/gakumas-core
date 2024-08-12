@@ -33,7 +33,7 @@ import {
   validateCostConsumution,
 } from "./lesson-mutation";
 import {
-  calculateActualActionCost,
+  calculateModifierEffectedActionCost,
   calculateRemainingTurns,
   createActualTurns,
   getCardContentData,
@@ -141,7 +141,10 @@ export const generateCardInHandDisplay = (
     }
   }
   return {
-    cost: calculateActualActionCost(cardContent.cost, lesson.idol.modifiers),
+    cost: calculateModifierEffectedActionCost(
+      cardContent.cost,
+      lesson.idol.modifiers,
+    ),
     effects: effectDisplays,
     enhancements: card.enhancements,
     name: generateCardName(card),

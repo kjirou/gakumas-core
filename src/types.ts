@@ -1706,6 +1706,20 @@ export type GamePlay = {
 };
 
 /**
+ * レッスンのライフサイクル上の次フェーズ
+ *
+ * - "turnStart": startTurn を実行するべき
+ * - "playable": プレイヤーの入力を待つべき
+ * - "turnEnd": endTurn を実行するべき
+ * - "lessonEnd": ゲームは終了している
+ */
+export type NextLifecyclePhase =
+  | "lessonEnd"
+  | "playerInput"
+  | "turnEnd"
+  | "turnStart";
+
+/**
  * 応援/トラブルの表示用情報
  *
  * - 主に、本家アイドルの道の各ステージ画面にある、右上の応援/トラブル詳細のリストに使用することを想定している

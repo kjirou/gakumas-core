@@ -19,6 +19,7 @@ import {
   ProducerItemInProduction,
   IdolInProduction,
   Drink,
+  NextLifecyclePhase,
 } from "./types";
 import { type CardDataId, getCardDataByConstId } from "./data/cards";
 import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
@@ -230,6 +231,27 @@ export const isLessonEnded = (gamePlay: GamePlay): boolean => {
       hasActionEnded(gamePlay) &&
       lesson.turnEnded)
   );
+};
+
+/**
+ * 次に行うべきフェーズを返す
+ *
+ * - 各フェーズの処理、例えば、`startTurn`、`playCard`、`endTurn` などの終了後に呼び出して、次に行うことを判定する
+ * - 各フェーズの処理の実行中に呼び出すと、正常に判定できない
+ */
+export const getNextPhase = (gamePlay: GamePlay): NextLifecyclePhase => {
+  const lesson = getLesson(gamePlay);
+  if (isLessonEnded(gamePlay)) {
+    return "lessonEnd";
+  } else if (hasActionEnded(gamePlay)) {
+    return lesson.turnNumber === 0 && !lesson.turnEnded
+      ? "turnStart"
+      : lesson.turnEnded
+        ? "turnStart"
+        : "turnEnd";
+  } else {
+    return "playerInput";
+  }
 };
 
 /**

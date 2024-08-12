@@ -3,8 +3,39 @@ import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataById } from "./data/drinks";
 import { getIdolDataByConstId } from "./data/idols";
 import { getProducerItemDataByConstId } from "./data/producer-items";
-import { initializeGamePlay } from "./index";
+import {
+  endTurn,
+  getNextPhase,
+  initializeGamePlay,
+  skipTurn,
+  startTurn,
+} from "./index";
 
+describe("getNextPhase", () => {
+  test("概ね正しく動く", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-ssr-1",
+      cards: [],
+      producerItems: [],
+      turns: ["vocal", "vocal"],
+    });
+    // 0, 1
+    expect(getNextPhase(gamePlay)).toBe("turnStart");
+    gamePlay = startTurn(gamePlay);
+    expect(getNextPhase(gamePlay)).toBe("playerInput");
+    gamePlay = skipTurn(gamePlay);
+    expect(getNextPhase(gamePlay)).toBe("turnEnd");
+    gamePlay = endTurn(gamePlay);
+    // 2
+    expect(getNextPhase(gamePlay)).toBe("turnStart");
+    gamePlay = startTurn(gamePlay);
+    expect(getNextPhase(gamePlay)).toBe("playerInput");
+    gamePlay = skipTurn(gamePlay);
+    expect(getNextPhase(gamePlay)).toBe("turnEnd");
+    gamePlay = endTurn(gamePlay);
+    expect(getNextPhase(gamePlay)).toBe("lessonEnd");
+  });
+});
 describe("initializeGamePlay", () => {
   const testCases: Array<{
     args: Parameters<typeof initializeGamePlay>;

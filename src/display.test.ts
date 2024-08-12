@@ -693,6 +693,11 @@ describe("generateCardPlayPreviewDisplay", () => {
               representativeValue: 3,
               change: { kind: "addition", representativeValueDelta: 3 },
             },
+            {
+              name: "スキルカード使用数追加",
+              representativeValue: 0,
+              change: { kind: "addition", representativeValueDelta: 1 },
+            },
           ],
         },
       } as CardPlayPreviewDisplay,
@@ -1233,6 +1238,25 @@ describe("generateModifierDisplays", () => {
         },
         {
           name: "スキルカード使用数追加",
+          change: { kind: "addition", representativeValueDelta: 1 },
+        },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "前の状態修正リストが存在し、スキルカード使用数追加の増加差分がある時、その表示値は1を引く",
+      args: [
+        {
+          beforeModifiers: [],
+          modifiers: [
+            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
+          ],
+          recommendedModifierKind: "focus",
+        },
+      ],
+      expected: [
+        {
+          name: "スキルカード使用数追加",
+          representativeValue: 0,
           change: { kind: "addition", representativeValueDelta: 1 },
         },
       ] as ModifierDisplay[],

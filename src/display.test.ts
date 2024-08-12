@@ -20,20 +20,7 @@ import {
 } from "./display";
 import { prepareCardsForLesson } from "./models";
 import { createIdGenerator } from "./utils";
-import { createGamePlayForTest } from "./test-utils";
-
-const createLessonForTest = (
-  options: {
-    deck?: CardInProduction[];
-    producerItems?: ProducerItemInProduction[];
-  } = {},
-): Lesson => {
-  const gamePlay = createGamePlayForTest({
-    deck: options.deck,
-    producerItems: options.producerItems,
-  });
-  return gamePlay.initialLesson;
-};
+import { createGamePlayForTest, createLessonForTest } from "./test-utils";
 
 describe("generateCardInHandDisplay", () => {
   const testCases: Array<{

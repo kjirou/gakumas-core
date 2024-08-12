@@ -1128,6 +1128,53 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "kaerujirushinosempuki",
+    name: "カエル印の扇風機",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 12 },
+      },
+      cost: { kind: "life", value: 2 },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "motivation",
+          percentage: 270,
+        },
+      ],
+      times: 4,
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "active",
+      },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 12 },
+      },
+      cost: { kind: "life", value: 2 },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "motivation",
+          percentage: 340,
+        },
+      ],
+      times: 4,
+      trigger: {
+        kind: "afterCardEffectActivation",
+        cardSummaryKind: "active",
+      },
+    },
+  },
+  {
     id: "etainoshirenaimono",
     name: "得体の知れないモノ",
     producerItemPossessionKind: "free",

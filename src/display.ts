@@ -30,7 +30,6 @@ import {
   activateEffectsOnCardPlay,
   canPlayCard,
   useCard,
-  validateCostConsumution,
 } from "./lesson-mutation";
 import {
   calculateModifierEffectedActionCost,
@@ -305,9 +304,6 @@ const generateDrinkDisplays = (lesson: Lesson): DrinkDisplay[] => {
         cost: drink.data.cost,
         effects: drink.data.effects,
       }),
-      usable: drink.data.cost
-        ? validateCostConsumution(lesson.idol, drink.data.cost)
-        : true,
     };
   });
 };

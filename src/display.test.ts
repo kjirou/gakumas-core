@@ -768,7 +768,6 @@ describe("generateLessonDisplay", () => {
           {
             name: "初星水",
             description: "パラメータ+10",
-            usable: true,
           },
           {
             name: "ブーストエキス",
@@ -777,7 +776,6 @@ describe("generateLessonDisplay", () => {
               "{{消費体力減少}}3ターン",
               "{{体力消費}}2",
             ].join("\n"),
-            usable: true,
           },
         ],
       } as LessonDisplay,

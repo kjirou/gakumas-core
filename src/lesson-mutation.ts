@@ -170,6 +170,8 @@ export const createCardPlacementDiff = (
 
 /**
  * アイドルがコスト分のリソースを持つかを検証する
+ *
+ * - 現状、この判定が必要になるのは、スキルカード使用時のみである
  */
 export const validateCostConsumution = (
   idol: Idol,
@@ -1983,13 +1985,6 @@ export const useDrink = (
   const drink = newLesson.idol.drinks[params.drinkIndex];
   if (!drink) {
     throw new Error(`Drink not found: drinkIndex=${params.drinkIndex}`);
-  }
-
-  if (
-    drink.data.cost &&
-    !validateCostConsumution(lesson.idol, drink.data.cost)
-  ) {
-    throw new Error(`Can not use the drink: ${drink.data.id}`);
   }
 
   //

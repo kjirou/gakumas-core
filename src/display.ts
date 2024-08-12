@@ -259,6 +259,8 @@ const generateModifierDisplay = (
 /**
  * 状態修正リストの表示用情報を生成する
  *
+ * - 本実装は、アイドルの「おすすめ効果」の状態修正種別を先頭へ表示することは行なっているが、本家UIのように、おすすめ効果の状態修正がなくても表示することは行なっていない
+ *
  * @param params.beforeModifiers 前の状態修正リストと比較して、状態修正内に差分情報を生成する
  */
 export const generateModifierDisplays = (params: {

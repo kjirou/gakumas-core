@@ -2020,10 +2020,7 @@ export const useDrink = (
   if (drink.data.cost) {
     costConsumptionUpdates = calculateCostConsumption(
       newLesson.idol,
-      calculateModifierEffectedActionCost(
-        drink.data.cost,
-        newLesson.idol.modifiers,
-      ),
+      drink.data.cost,
     ).map((diff) =>
       createLessonUpdateQueryFromDiff(diff, {
         kind: "drinkUsage.costConsumption",

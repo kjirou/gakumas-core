@@ -1,12 +1,18 @@
 import type {
+  Card,
   CardInProduction,
-  IdolData,
   Lesson,
   GamePlay,
+  LessonUpdateQuery,
   ProducerItemInProduction,
 } from "./types";
 import { type IdolDataId } from "./data/idols";
-import { createIdolInProduction, createGamePlay } from "./models";
+import {
+  createIdolInProduction,
+  createGamePlay,
+  getNextHistoryResultIndex,
+  patchDiffs,
+} from "./models";
 import { createIdGenerator } from "./utils";
 
 export const createGamePlayForTest = (
@@ -48,4 +54,33 @@ export const createLessonForTest = (
 ): Lesson => {
   const gamePlay = createGamePlayForTest(options);
   return gamePlay.initialLesson;
+};
+
+/**
+ * スキルカードへレッスンサポートの付与をする
+ *
+ * - 本体は未実装
+ */
+export const addLessonSupport = (
+  gamePlay: GamePlay,
+  cardId: Card["id"],
+  count: number,
+): GamePlay => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  if (lesson.cards.find((card) => card.id === cardId) === undefined) {
+    throw new Error(`Card not found: ${cardId}`);
+  }
+  const update: LessonUpdateQuery = {
+    kind: "cards.enhancement.lessonSupport",
+    targets: [{ cardId, supportCardIds: new Array<{}>(count).fill({}) }],
+    reason: {
+      kind: "unknown",
+      historyTurnNumber: lesson.turnNumber,
+      historyResultIndex: getNextHistoryResultIndex(gamePlay.updates),
+    },
+  };
+  return {
+    ...gamePlay,
+    updates: [...gamePlay.updates, update],
+  };
 };

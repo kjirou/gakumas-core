@@ -355,7 +355,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
  *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
  *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
  *
- * TODO: getRandom と idGenerator が実行されることでそれらの内部状態に変化してしまう。今の所実害はないが、可能なら複製して渡したい。
+ * TODO: getRandom と idGenerator が実行されることでそれらの内部状態が変化してしまう。今の所実害はないが、可能なら複製して渡したい。
  *
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */

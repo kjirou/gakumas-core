@@ -2422,37 +2422,39 @@ export const useCard = (
   // - スキルカード使用プレビューでこの状況を再現する必要があるので、本処理は useCard 内に含める必要がある
   //
   let recoveringActionPointsUpdates: LessonUpdateQuery[] = [];
-  const additionalCardUsageCount = newLesson.idol.modifiers.find(
-    (e) => e.kind === "additionalCardUsageCount",
-  );
-  if (newLesson.idol.actionPoints === 0 && additionalCardUsageCount) {
-    const reason: LessonUpdateQueryReason = {
-      kind: "cardUsage",
-      cardId: card.id,
-      historyTurnNumber: newLesson.turnNumber,
-      historyResultIndex: nextHistoryResultIndex,
-    } as const;
-    recoveringActionPointsUpdates = [
-      createLessonUpdateQueryFromDiff(
-        {
-          kind: "actionPoints",
-          amount: 1,
-        },
-        reason,
-      ),
-      createLessonUpdateQueryFromDiff(
-        {
-          kind: "modifiers.update",
-          propertyNameKind: "amount",
-          id: additionalCardUsageCount.id,
-          actual: -1,
-          max: -1,
-        },
-        reason,
-      ),
-    ];
-    newLesson = patchDiffs(newLesson, recoveringActionPointsUpdates);
-    nextHistoryResultIndex++;
+  if (!params.preview) {
+    const additionalCardUsageCount = newLesson.idol.modifiers.find(
+      (e) => e.kind === "additionalCardUsageCount",
+    );
+    if (newLesson.idol.actionPoints === 0 && additionalCardUsageCount) {
+      const reason: LessonUpdateQueryReason = {
+        kind: "cardUsage",
+        cardId: card.id,
+        historyTurnNumber: newLesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      } as const;
+      recoveringActionPointsUpdates = [
+        createLessonUpdateQueryFromDiff(
+          {
+            kind: "actionPoints",
+            amount: 1,
+          },
+          reason,
+        ),
+        createLessonUpdateQueryFromDiff(
+          {
+            kind: "modifiers.update",
+            propertyNameKind: "amount",
+            id: additionalCardUsageCount.id,
+            actual: -1,
+            max: -1,
+          },
+          reason,
+        ),
+      ];
+      newLesson = patchDiffs(newLesson, recoveringActionPointsUpdates);
+      nextHistoryResultIndex++;
+    }
   }
 
   return {

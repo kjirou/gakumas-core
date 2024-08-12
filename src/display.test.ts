@@ -2,11 +2,10 @@ import type {
   CardEnhancement,
   CardInHandDisplay,
   CardInInventoryDisplay,
-  CardInProduction,
-  Lesson,
+  CardPlayPreviewDisplay,
   LessonDisplay,
   Modifier,
-  ProducerItemInProduction,
+  ModifierDisplay,
 } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
@@ -17,23 +16,11 @@ import {
   generateCardPlayPreviewDisplay,
   generateEncouragementDisplays,
   generateLessonDisplay,
+  generateModifierDisplays,
 } from "./display";
 import { prepareCardsForLesson } from "./models";
 import { createIdGenerator } from "./utils";
-import { createGamePlayForTest } from "./test-utils";
-
-const createLessonForTest = (
-  options: {
-    deck?: CardInProduction[];
-    producerItems?: ProducerItemInProduction[];
-  } = {},
-): Lesson => {
-  const gamePlay = createGamePlayForTest({
-    deck: options.deck,
-    producerItems: options.producerItems,
-  });
-  return gamePlay.initialLesson;
-};
+import { createGamePlayForTest, createLessonForTest } from "./test-utils";
 
 describe("generateCardInHandDisplay", () => {
   const testCases: Array<{
@@ -440,43 +427,6 @@ describe("generateCardInHandDisplay", () => {
     expect(generateCardInHandDisplay(...args)).toMatchObject(expected);
   });
 });
-describe("generateEncouragementDisplays", () => {
-  const testCases: Array<{
-    args: Parameters<typeof generateEncouragementDisplays>;
-    expected: ReturnType<typeof generateEncouragementDisplays>;
-    name: string;
-  }> = [
-    {
-      name: "descriptionの条件と効果の間に読点がない",
-      args: [
-        [
-          {
-            turnNumber: 1,
-            effect: {
-              kind: "perform",
-              vitality: { value: 1 },
-              condition: {
-                kind: "countModifier",
-                modifierKind: "focus",
-                range: { min: 3 },
-              },
-            },
-          },
-        ],
-      ],
-      expected: [
-        {
-          turnNumber: 1,
-          effect: expect.any(Object),
-          description: "{{集中}}が3以上の場合{{元気}}+1",
-        },
-      ],
-    },
-  ];
-  test.each(testCases)("$name", ({ args, expected }) => {
-    expect(generateEncouragementDisplays(...args)).toStrictEqual(expected);
-  });
-});
 describe("generateCardInInventoryDisplays", () => {
   const testCases: Array<{
     args: Parameters<typeof generateCardInInventoryDisplays>;
@@ -613,6 +563,185 @@ describe("generateCardInInventoryDisplays", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(generateCardInInventoryDisplays(...args)).toMatchObject(expected);
+  });
+});
+describe("generateCardPlayPreviewDisplay", () => {
+  const testCases: Array<{
+    args: Parameters<typeof generateCardPlayPreviewDisplay>;
+    expected: ReturnType<typeof generateCardPlayPreviewDisplay>;
+    name: string;
+  }> = [
+    {
+      name: "概ね動作する",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("jonetsutan"),
+                enhanced: true,
+              },
+            ],
+            producerItems: [
+              {
+                id: "p1",
+                data: getProducerItemDataByConstId("itsumonomeikupochi"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          gamePlay.initialLesson.idol.life = 10;
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+          ];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        card: {
+          name: "情熱ターン+",
+          description: ["パラメータ+18", "{{集中}}+4"].join("\n"),
+          // スキルカードのプレビューには、消費体力減少効果は反映されていない
+          cost: { kind: "normal", value: 6 },
+        },
+        lessonDelta: {
+          life: {
+            after: 7,
+            delta: -3,
+          },
+          score: {
+            after: 18,
+            delta: 18,
+          },
+          vitality: {
+            after: 0,
+            delta: 0,
+          },
+        },
+        // 「いつものメイクポーチ」は、本来発動するはずだが、プレビューなので発動していない
+        updates: [
+          // 差分には、消費体力減少効果が反映されている
+          {
+            kind: "life",
+            actual: -3,
+            max: -3,
+            reason: expect.any(Object),
+          },
+          {
+            kind: "score",
+            actual: 18,
+            max: 18,
+            reason: expect.any(Object),
+          },
+          {
+            kind: "modifiers.addition",
+            actual: {
+              kind: "focus",
+              amount: 4,
+              id: expect.any(String),
+            },
+            max: {
+              kind: "focus",
+              amount: 4,
+              id: expect.any(String),
+            },
+            reason: expect.any(Object),
+          },
+        ],
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "lessonDelta.modifiers - 概ね正しく動く",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("shupurehikoru"),
+                enhanced: true,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "focus", amount: 4, id: "m1" },
+            { kind: "halfLifeConsumption", duration: 1, id: "m2" },
+          ];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        lessonDelta: {
+          modifires: [
+            {
+              name: "集中",
+              representativeValue: 2,
+              change: { kind: "update", representativeValueDelta: -2 },
+            },
+            {
+              name: "消費体力減少",
+              representativeValue: 1,
+              change: undefined,
+            },
+            {
+              name: "好調",
+              representativeValue: 3,
+              change: { kind: "addition", representativeValueDelta: 3 },
+            },
+            {
+              name: "スキルカード使用数追加",
+              representativeValue: 0,
+              change: { kind: "addition", representativeValueDelta: 1 },
+            },
+          ],
+        },
+      } as CardPlayPreviewDisplay,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(generateCardPlayPreviewDisplay(...args)).toMatchObject(expected);
+  });
+});
+describe("generateEncouragementDisplays", () => {
+  const testCases: Array<{
+    args: Parameters<typeof generateEncouragementDisplays>;
+    expected: ReturnType<typeof generateEncouragementDisplays>;
+    name: string;
+  }> = [
+    {
+      name: "descriptionの条件と効果の間に読点がない",
+      args: [
+        [
+          {
+            turnNumber: 1,
+            effect: {
+              kind: "perform",
+              vitality: { value: 1 },
+              condition: {
+                kind: "countModifier",
+                modifierKind: "focus",
+                range: { min: 3 },
+              },
+            },
+          },
+        ],
+      ],
+      expected: [
+        {
+          turnNumber: 1,
+          effect: expect.any(Object),
+          description: "{{集中}}が3以上の場合{{元気}}+1",
+        },
+      ],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(generateEncouragementDisplays(...args)).toStrictEqual(expected);
   });
 });
 describe("generateLessonDisplay", () => {
@@ -772,7 +901,7 @@ describe("generateLessonDisplay", () => {
       } as LessonDisplay,
     },
     {
-      name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
+      name: "modifiers - 状態修正が存在する時、それを含む配列を返す / 状態修正は更新差分情報を含まない",
       args: [
         (() => {
           const gamePlay = createGamePlayForTest();
@@ -792,6 +921,7 @@ describe("generateLessonDisplay", () => {
             description: expect.any(String),
             representativeValue: 1,
             representativeValueText: "1",
+            change: undefined,
           },
         ],
       } as LessonDisplay,
@@ -949,83 +1079,191 @@ describe("generateLessonDisplay", () => {
     expect(generateLessonDisplay(...args)).toMatchObject(expected);
   });
 });
-
-describe("generateCardPlayPreviewDisplay", () => {
+describe("generateModifierDisplays", () => {
   const testCases: Array<{
-    args: Parameters<typeof generateCardPlayPreviewDisplay>;
-    expected: ReturnType<typeof generateCardPlayPreviewDisplay>;
+    args: Parameters<typeof generateModifierDisplays>;
+    expected: ReturnType<typeof generateModifierDisplays>;
     name: string;
   }> = [
     {
+      name: "状態修正が空なら空配列を返す",
+      args: [
+        {
+          modifiers: [] as Modifier[],
+          recommendedModifierKind: "goodCondition",
+        },
+      ],
+      expected: [] as ModifierDisplay[],
+    },
+    {
       name: "概ね動作する",
       args: [
-        (() => {
-          const gamePlay = createGamePlayForTest({
-            deck: [
-              {
-                id: "c1",
-                data: getCardDataByConstId("jonetsutan"),
-                enhanced: true,
-              },
-            ],
-            producerItems: [
-              {
-                id: "p1",
-                data: getProducerItemDataByConstId("itsumonomeikupochi"),
-                enhanced: false,
-              },
-            ],
-          });
-          gamePlay.initialLesson.hand = ["c1"];
-          gamePlay.initialLesson.idol.modifiers = [
-            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
-          ];
-          return gamePlay;
-        })(),
-        0,
-      ],
-      expected: {
-        card: {
-          name: "情熱ターン+",
-          description: ["パラメータ+18", "{{集中}}+4"].join("\n"),
-          // スキルカードのプレビューには、消費体力減少効果は反映されていない
-          cost: { kind: "normal", value: 6 },
+        {
+          modifiers: [
+            { kind: "focus", amount: 2, id: "m1" },
+            { kind: "additionalCardUsageCount", amount: 1, id: "m2" },
+          ],
+          recommendedModifierKind: "goodCondition",
         },
-        // 「いつものメイクポーチ」は、本来発動するはずだが、プレビューなので発動していない
-        lesson: expect.any(Object),
-        updates: [
-          // 差分には、消費体力減少効果が反映されている
-          {
-            kind: "life",
-            actual: -3,
-            max: -3,
-            reason: expect.any(Object),
+      ],
+      expected: [
+        {
+          name: "集中",
+          representativeValue: 2,
+          representativeValueText: "2",
+          change: undefined,
+        },
+        {
+          name: "スキルカード使用数追加",
+          representativeValue: 1,
+          representativeValueText: "1",
+          change: undefined,
+        },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "おすすめ効果が先頭へ移動する",
+      args: [
+        {
+          modifiers: [
+            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
+            { kind: "focus", amount: 2, id: "m2" },
+          ],
+          recommendedModifierKind: "focus",
+        },
+      ],
+      expected: [
+        { name: "集中" },
+        { name: "スキルカード使用数追加" },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "前の状態修正リストが存在し、現在そこにない項目がある時、追加の差分情報を含めて返せる",
+      args: [
+        {
+          beforeModifiers: [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+          ],
+          modifiers: [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+            { kind: "goodCondition", duration: 1, id: "m2" },
+          ],
+          recommendedModifierKind: "motivation",
+        },
+      ],
+      expected: [
+        { name: "消費体力減少", change: undefined },
+        {
+          name: "好調",
+          change: {
+            kind: "addition",
+            representativeValueDelta: 1,
           },
-          {
-            kind: "score",
-            actual: 18,
-            max: 18,
-            reason: expect.any(Object),
+        },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "前の状態修正リストが存在し、現在そこと値が異なる項目がある時、更新の差分情報を含めて返せる",
+      args: [
+        {
+          beforeModifiers: [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+          ],
+          modifiers: [{ kind: "halfLifeConsumption", duration: 3, id: "m1" }],
+          recommendedModifierKind: "motivation",
+        },
+      ],
+      expected: [
+        {
+          name: "消費体力減少",
+          change: {
+            kind: "update",
+            representativeValueDelta: 2,
           },
-          {
-            kind: "modifiers.addition",
-            actual: {
-              kind: "focus",
-              amount: 4,
-              id: expect.any(String),
-            },
-            max: {
-              kind: "focus",
-              amount: 4,
-              id: expect.any(String),
-            },
-            reason: expect.any(Object),
-          },
-        ],
-      },
+        },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "前の状態修正リストが存在し、現在そこにない項目がある時、その差分情報は残らない",
+      args: [
+        {
+          beforeModifiers: [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+            { kind: "focus", amount: 2, id: "m2" },
+            { kind: "doubleEffect", id: "m3" },
+          ],
+          modifiers: [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+            { kind: "doubleEffect", id: "m3" },
+          ],
+          recommendedModifierKind: "motivation",
+        },
+      ],
+      expected: [
+        {
+          name: "消費体力減少",
+          change: undefined,
+        },
+        {
+          name: "スキルカード追加発動",
+          change: undefined,
+        },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "前の状態修正リストが存在し、追加・更新・削除・不変を含む時、正しく動作する",
+      args: [
+        {
+          beforeModifiers: [
+            { kind: "goodCondition", duration: 1, id: "m1" },
+            { kind: "halfLifeConsumption", duration: 1, id: "m2" },
+            { kind: "focus", amount: 2, id: "m3" },
+            { kind: "doubleEffect", id: "m4" },
+          ],
+          modifiers: [
+            { kind: "halfLifeConsumption", duration: 1, id: "m2" },
+            { kind: "focus", amount: 7, id: "m3" },
+            { kind: "additionalCardUsageCount", amount: 1, id: "m5" },
+          ],
+          recommendedModifierKind: "motivation",
+        },
+      ],
+      expected: [
+        {
+          name: "消費体力減少",
+          change: undefined,
+        },
+        {
+          name: "集中",
+          change: { kind: "update", representativeValueDelta: 5 },
+        },
+        {
+          name: "スキルカード使用数追加",
+          change: { kind: "addition", representativeValueDelta: 1 },
+        },
+      ] as ModifierDisplay[],
+    },
+    {
+      name: "前の状態修正リストが存在し、スキルカード使用数追加の増加差分がある時、その表示値は1を引く",
+      args: [
+        {
+          beforeModifiers: [],
+          modifiers: [
+            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
+          ],
+          recommendedModifierKind: "focus",
+        },
+      ],
+      expected: [
+        {
+          name: "スキルカード使用数追加",
+          representativeValue: 0,
+          change: { kind: "addition", representativeValueDelta: 1 },
+        },
+      ] as ModifierDisplay[],
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
-    expect(generateCardPlayPreviewDisplay(...args)).toStrictEqual(expected);
+    expect(generateModifierDisplays(...args)).toMatchObject(expected);
   });
 });

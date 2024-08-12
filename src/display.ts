@@ -21,6 +21,8 @@ import type {
   LessonUpdateDiff,
   ProducerItemDisplay,
   TurnDisplay,
+  Modifier,
+  ProducePlan,
 } from "./types";
 import { compareDeckOrder } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -208,25 +210,85 @@ export const generateProducerItemDisplays = (
   });
 };
 
-const generateModifierDisplays = (lesson: Lesson): ModifierDisplay[] => {
-  let modifiers = lesson.idol.modifiers.map((modifier) => {
-    const representativeValue =
-      getDisplayedRepresentativeModifierValue(modifier);
-    return {
-      ...modifier,
-      name: metaModifierDictioanry[modifier.kind].label,
-      description: "",
-      representativeValue,
-      representativeValueText:
-        representativeValue !== undefined
-          ? representativeValue.toString()
-          : undefined,
+/**
+ * 状態修正の表示用情報を生成する
+ *
+ * - 「スキルカード使用数追加」が増加差分として存在する場合、表示値から 1 を減算する
+ *   - 本家UIの仕様で、スキルカード使用数追加効果のあるスキルカードを使った時、そのアイコンが出現し、現在値:0 / 増加:+1 という表示になるため
+ *     - よく考えると謎の表示だが、さておき、大枠として「このスキルカードを使ってもターンは終了しない」ということを伝えるのには役立っている
+ *     - 本実装でも、その表示を踏襲することにする
+ *   - プレビュー時にスキルカード使用数追加の減少をしていないので、ここで増えた状態で渡されるため、この加工が可能になっている
+ *
+ * @param beforeModifier false は前の状態修正との差分計算を行わない。 undefined は前の状態修正と比較はするが対象がないことを意味する、つまり追加の意味になる。
+ */
+const generateModifierDisplay = (
+  modifier: Modifier,
+  beforeModifier: Modifier | undefined | false,
+) => {
+  let representativeValue = getDisplayedRepresentativeModifierValue(modifier);
+  let change: ModifierDisplay["change"] = undefined;
+  if (beforeModifier) {
+    const beforeModifierRepresentativeValue =
+      getDisplayedRepresentativeModifierValue(beforeModifier);
+    if (
+      representativeValue !== undefined &&
+      beforeModifierRepresentativeValue !== undefined &&
+      representativeValue !== beforeModifierRepresentativeValue
+    ) {
+      change = {
+        kind: "update",
+        representativeValueDelta:
+          representativeValue - beforeModifierRepresentativeValue,
+      };
+    }
+  } else if (beforeModifier === undefined) {
+    change = {
+      kind: "addition",
+      representativeValueDelta: representativeValue,
     };
+  }
+  if (
+    modifier.kind === "additionalCardUsageCount" &&
+    representativeValue !== undefined &&
+    change
+  ) {
+    representativeValue -= 1;
+  }
+  return {
+    ...modifier,
+    change,
+    name: metaModifierDictioanry[modifier.kind].label,
+    // TODO: 状態修正の詳細の説明文を生成する
+    description: "",
+    representativeValue,
+    representativeValueText:
+      representativeValue !== undefined
+        ? representativeValue.toString()
+        : undefined,
+  };
+};
+
+/**
+ * 状態修正リストの表示用情報を生成する
+ *
+ * - 本実装は、アイドルの「おすすめ効果」の状態修正種別を先頭へ表示することは行なっているが、本家UIのように、おすすめ効果の状態修正がなくても表示することは行なっていない
+ *
+ * @param params.beforeModifiers 前の状態修正リストと比較して、状態修正内に差分情報を生成する
+ */
+export const generateModifierDisplays = (params: {
+  beforeModifiers?: Modifier[];
+  modifiers: Modifier[];
+  recommendedModifierKind: ProducePlan["recommendedModifierKind"];
+}): ModifierDisplay[] => {
+  let modifiers = params.modifiers.map((modifier) => {
+    const beforeModifier =
+      params.beforeModifiers === undefined
+        ? false
+        : params.beforeModifiers.find((e) => e.id === modifier.id);
+    return generateModifierDisplay(modifier, beforeModifier);
   });
-  const recommendedModifierKind =
-    lesson.idol.original.data.producePlan.recommendedModifierKind;
-  modifiers = modifiers.slice().sort((a, b) => {
-    return a.kind === recommendedModifierKind ? -1 : 0;
+  modifiers = modifiers.slice().sort((a) => {
+    return a.kind === params.recommendedModifierKind ? -1 : 0;
   });
   return modifiers;
 };
@@ -269,7 +331,11 @@ export const generateEncouragementDisplays = (
  */
 export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  const modifiers = generateModifierDisplays(lesson);
+  const modifiers = generateModifierDisplays({
+    modifiers: lesson.idol.modifiers,
+    recommendedModifierKind:
+      lesson.idol.original.data.producePlan.recommendedModifierKind,
+  });
   const encouragements = generateEncouragementDisplays(
     gamePlay.initialLesson.encouragements,
   );
@@ -355,7 +421,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
  *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
  *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
  *
- * TODO: getRandom と idGenerator が実行されることでそれらの内部状態に変化してしまう。今の所実害はないが、可能なら複製して渡したい。
+ * TODO: getRandom と idGenerator が実行されることでそれらの内部状態が変化してしまう。今の所実害はないが、可能なら複製して渡したい。
  *
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
  */
@@ -363,22 +429,23 @@ export const generateCardPlayPreviewDisplay = (
   gamePlay: GamePlay,
   selectedCardInHandIndex: number,
 ): CardPlayPreviewDisplay => {
-  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  const cardId = lesson.hand[selectedCardInHandIndex];
+  const beforeLesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  const cardId = beforeLesson.hand[selectedCardInHandIndex];
   if (cardId === undefined) {
     throw new Error("Invalid card index");
   }
-  const card = lesson.cards.find((e) => e.id === cardId);
+  const card = beforeLesson.cards.find((e) => e.id === cardId);
   if (card === undefined) {
     throw new Error("Invalid card ID");
   }
   const cardContent = getCardContentData(card);
-  const { updates } = useCard(lesson, 1, {
+  const { updates } = useCard(beforeLesson, 1, {
     getRandom: gamePlay.getRandom,
     idGenerator: gamePlay.idGenerator,
     selectedCardInHandIndex,
     preview: true,
   });
+  const afterLesson = patchDiffs(beforeLesson, updates);
   const description = generateCardDescription({
     cost: cardContent.cost,
     condition: cardContent.condition,
@@ -393,7 +460,26 @@ export const generateCardPlayPreviewDisplay = (
       description,
       name: generateCardName(card),
     },
-    lesson: patchDiffs(lesson, updates),
+    lessonDelta: {
+      life: {
+        after: afterLesson.idol.life,
+        delta: afterLesson.idol.life - beforeLesson.idol.life,
+      },
+      modifires: generateModifierDisplays({
+        beforeModifiers: beforeLesson.idol.modifiers,
+        modifiers: afterLesson.idol.modifiers,
+        recommendedModifierKind:
+          beforeLesson.idol.original.data.producePlan.recommendedModifierKind,
+      }),
+      score: {
+        after: afterLesson.score,
+        delta: afterLesson.score - beforeLesson.score,
+      },
+      vitality: {
+        after: afterLesson.idol.vitality,
+        delta: afterLesson.idol.vitality - beforeLesson.idol.vitality,
+      },
+    },
     updates,
   };
 };

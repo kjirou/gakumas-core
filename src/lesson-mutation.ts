@@ -1443,13 +1443,13 @@ export const activateProducerItemEffectsOnTurnStart = (
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
     if (canActivateProducerItem(newLesson, producerItem, "turnStart")) {
-      const diff = activateEffectsOfProducerItem(
+      const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
         params.getRandom,
         params.idGenerator,
       );
-      const innerUpdates = diff.map((diff) =>
+      const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
           kind: "turnStart.producerItem.effectActivation",
           historyTurnNumber: lesson.turnNumber,
@@ -1475,13 +1475,13 @@ export const activateProducerItemEffectsOnTurnStart = (
     if (
       canActivateProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
     ) {
-      const diff = activateEffectsOfProducerItem(
+      const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
         params.getRandom,
         params.idGenerator,
       );
-      const innerUpdates = diff.map((diff) =>
+      const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
           kind: "turnStart.producerItem.effectActivationEveryTwoTurns",
           historyTurnNumber: lesson.turnNumber,

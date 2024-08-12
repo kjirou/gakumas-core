@@ -901,7 +901,7 @@ describe("generateLessonDisplay", () => {
       } as LessonDisplay,
     },
     {
-      name: "modifiers - 状態修正が存在する時、それを含む配列を返す",
+      name: "modifiers - 状態修正が存在する時、それを含む配列を返す / 状態修正は更新差分情報を含まない",
       args: [
         (() => {
           const gamePlay = createGamePlayForTest();
@@ -921,6 +921,7 @@ describe("generateLessonDisplay", () => {
             description: expect.any(String),
             representativeValue: 1,
             representativeValueText: "1",
+            change: undefined,
           },
         ],
       } as LessonDisplay,

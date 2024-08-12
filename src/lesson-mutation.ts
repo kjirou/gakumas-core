@@ -1248,7 +1248,7 @@ export const activateEffectsOfProducerItem = (
   const producerItemContent = getProducerItemContentData(producerItem);
   diffs = producerItemContent.effects
     .map((effect) => activateEffect(lesson, effect, getRandom, idGenerator))
-    .reduce((acc, e) => [...acc, ...e], []);
+    .flat();
   diffs = [
     ...diffs,
     {

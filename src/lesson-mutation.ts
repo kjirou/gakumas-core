@@ -25,7 +25,7 @@ import type {
 import { filterGeneratableCardsData, getCardDataByConstId } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 import {
-  calculateActualActionCost,
+  calculateModifierEffectedActionCost,
   calculateClearScoreProgress,
   calculateRemainingTurns,
   getCardContentData,
@@ -170,12 +170,14 @@ export const createCardPlacementDiff = (
 
 /**
  * アイドルがコスト分のリソースを持つかを検証する
+ *
+ * - 現状、この判定が必要になるのは、スキルカード使用時のみである
  */
 export const validateCostConsumution = (
   idol: Idol,
   cost: ActionCost,
 ): boolean => {
-  const actualCost = calculateActualActionCost(cost, idol.modifiers);
+  const actualCost = calculateModifierEffectedActionCost(cost, idol.modifiers);
   const actualCostKind = actualCost.kind;
   switch (actualCostKind) {
     case "focus": {
@@ -1237,6 +1239,8 @@ export const activateEffectsOnCardPlay = (
  * Pアイテムの効果リストを発動する
  *
  * - スキルカードとは異なり、プレビューがないので、EffectActivations の形式でなくても良い
+ * - コスト消費時点は、見た感じは、効果発動後だった
+ *   - 参考動画: https://www.youtube.com/live/ebXmhK2aa_s?si=lH56MFYv6Vgp3TGW&t=3737
  */
 export const activateEffectsOfProducerItem = (
   lesson: Lesson,
@@ -1244,11 +1248,22 @@ export const activateEffectsOfProducerItem = (
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): LessonUpdateDiff[] => {
+  let newLesson = lesson;
   let diffs: LessonUpdateDiff[] = [];
   const producerItemContent = getProducerItemContentData(producerItem);
-  diffs = producerItemContent.effects
-    .map((effect) => activateEffect(lesson, effect, getRandom, idGenerator))
-    .reduce((acc, e) => [...acc, ...e], []);
+  for (const effect of producerItemContent.effects) {
+    const innerDiffs = activateEffect(lesson, effect, getRandom, idGenerator);
+    diffs = [...diffs, ...innerDiffs];
+    newLesson = patchDiffs(newLesson, innerDiffs);
+  }
+  if (producerItemContent.cost) {
+    const innerDiffs = calculateCostConsumption(
+      newLesson.idol,
+      producerItemContent.cost,
+    );
+    diffs = [...diffs, ...innerDiffs];
+    newLesson = patchDiffs(newLesson, innerDiffs);
+  }
   diffs = [
     ...diffs,
     {
@@ -1443,13 +1458,13 @@ export const activateProducerItemEffectsOnTurnStart = (
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
     if (canActivateProducerItem(newLesson, producerItem, "turnStart")) {
-      const diff = activateEffectsOfProducerItem(
+      const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
         params.getRandom,
         params.idGenerator,
       );
-      const innerUpdates = diff.map((diff) =>
+      const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
           kind: "turnStart.producerItem.effectActivation",
           historyTurnNumber: lesson.turnNumber,
@@ -1475,13 +1490,13 @@ export const activateProducerItemEffectsOnTurnStart = (
     if (
       canActivateProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
     ) {
-      const diff = activateEffectsOfProducerItem(
+      const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
         params.getRandom,
         params.idGenerator,
       );
-      const innerUpdates = diff.map((diff) =>
+      const innerUpdates = diffs.map((diff) =>
         createLessonUpdateQueryFromDiff(diff, {
           kind: "turnStart.producerItem.effectActivationEveryTwoTurns",
           historyTurnNumber: lesson.turnNumber,
@@ -1972,13 +1987,6 @@ export const useDrink = (
     throw new Error(`Drink not found: drinkIndex=${params.drinkIndex}`);
   }
 
-  if (
-    drink.data.cost &&
-    !validateCostConsumution(lesson.idol, drink.data.cost)
-  ) {
-    throw new Error(`Can not use the drink: ${drink.data.id}`);
-  }
-
   //
   // Pドリンクの消費
   //
@@ -2007,7 +2015,7 @@ export const useDrink = (
   if (drink.data.cost) {
     costConsumptionUpdates = calculateCostConsumption(
       newLesson.idol,
-      calculateActualActionCost(drink.data.cost, newLesson.idol.modifiers),
+      drink.data.cost,
     ).map((diff) =>
       createLessonUpdateQueryFromDiff(diff, {
         kind: "drinkUsage.costConsumption",
@@ -2209,7 +2217,10 @@ export const useCard = (
   //
   const costConsumptionUpdates: LessonUpdateQuery[] = calculateCostConsumption(
     newLesson.idol,
-    calculateActualActionCost(cardContent.cost, newLesson.idol.modifiers),
+    calculateModifierEffectedActionCost(
+      cardContent.cost,
+      newLesson.idol.modifiers,
+    ),
   ).map((diff) =>
     createLessonUpdateQueryFromDiff(diff, {
       kind: "cardUsage.costConsumption",

@@ -384,8 +384,16 @@ export const getIdolParameterKindOnTurn = (
 export const calculateRemainingTurns = (lesson: Lesson): number =>
   createActualTurns(lesson).length - lesson.turnNumber + 1;
 
-/** 「消費体力減少」・「消費体力削減」・「消費体力増加」を反映したコストを返す */
-export const calculateActualActionCost = (
+/**
+ * 状態修正による補正を適用したコストへ変換して返す
+ *
+ * - 現状では、「消費体力減少」「消費体力増加」「消費体力削減」を反映したコストを返す
+ * - スキルカード使用時のみこの影響を受ける、その他のPアイテム・Pドリンク・トラブルなどは影響を受けない
+ *   - Pアイテムの「消費体力減少」「消費体力削減」が影響を受けないことのみ仕様確認済み、他はそこからの推測
+ *     - 仕様確認Issue: https://github.com/kjirou/gakumas-core/issues/141
+ *     - 仕様確認Issue: https://github.com/kjirou/gakumas-core/issues/144
+ */
+export const calculateModifierEffectedActionCost = (
   cost: ActionCost,
   modifiers: ModifierData[],
 ): ActionCost => {

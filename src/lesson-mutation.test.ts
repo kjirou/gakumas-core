@@ -721,6 +721,59 @@ describe("activateEffectsOfProducerItem", () => {
         },
       ],
     },
+    {
+      name: "コスト設定がある時、消費する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ producerItems: [] });
+          return lesson;
+        })(),
+        {
+          id: "a",
+          original: {
+            id: "a",
+            data: getProducerItemDataByConstId("kaerujirushinosempuki"),
+            enhanced: false,
+          },
+          activationCount: 0,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        expect.any(Object),
+        { kind: "life", actual: -2, max: -2 },
+        expect.any(Object),
+      ],
+    },
+    {
+      name: "コスト消費は、消費体力減少の影響を受けない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({ producerItems: [] });
+          lesson.idol.modifiers = [
+            { kind: "halfLifeConsumption", duration: 1, id: "m1" },
+          ];
+          return lesson;
+        })(),
+        {
+          id: "a",
+          original: {
+            id: "a",
+            data: getProducerItemDataByConstId("kaerujirushinosempuki"),
+            enhanced: false,
+          },
+          activationCount: 0,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        expect.any(Object),
+        { kind: "life", actual: -2, max: -2 },
+        expect.any(Object),
+      ],
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(activateEffectsOfProducerItem(...args)).toStrictEqual(expected);

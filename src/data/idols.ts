@@ -281,6 +281,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "shiunsumika-ssr-2",
+    characterId: "shiunsumika",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "motivation",
+    },
+    rarity: "ssr",
+    specificCardId: "hirusagarinosoyokaze",
+    specificProducerItemId: "kaerujirushinosempuki",
+    title: "キミとセミブルー",
+  },
+  {
     id: "shiunsumika-ssr-1",
     characterId: "shiunsumika",
     producePlan: {

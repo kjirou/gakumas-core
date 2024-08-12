@@ -1879,8 +1879,6 @@ export type ProducerItemDisplay = ProducerItem & {
 export type DrinkDisplay = Drink & {
   description: string;
   name: string;
-  /** 使用条件を満たすか */
-  usable: boolean;
 };
 
 /**

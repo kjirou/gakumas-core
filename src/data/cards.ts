@@ -6749,6 +6749,63 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hirusagarinosoyokaze",
+    name: "昼下がりのそよ風",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 7 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              range: { min: 3 },
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 8 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 5 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              range: { min: 3 },
+            },
+          },
+        ],
+      },
+      {
+        effects: [
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 9 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 6 },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "motivation",
+              range: { min: 3 },
+            },
+          },
+        ],
+      },
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "hanamoyukisetsu",
     name: "花萌ゆ季節",
     cardPossessionKind: "free",

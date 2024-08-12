@@ -1729,6 +1729,51 @@ export type EncouragementDisplay = Encouragement & {
 };
 
 /**
+ * レッスン画面の状態修正の表示用情報
+ *
+ * - 主に、本家レッスン画面の、左上のアイコンリストをタッチした時の詳細情報に使用することを想定している
+ * - TODO: 本家だと、1つ目に必ず「おすすめ効果」がある、おすすめ効果は状態修正を付与していなくても表示される
+ */
+export type ModifierDisplay = ModifierData & {
+  /**
+   * どのような変化の結果、今の値になったか
+   *
+   * - 現状は、スキルカード使用時のプレビュー結果を計算する generateCardPlayPreviewDisplay でのみ格納される値
+   * - 本家UIだと、状態修正をコストとして消費した結果0になった時も、0で状態修正アイコンが残るが、本実装はそれに準拠せず、アイコンを消している
+   *   - 単に実装をしてみたら複雑になりすぎたという理由であり、かつ、その状況になる場合は稀であるため許容範囲だと判断した
+   */
+  change:
+    | {
+        kind: "addition" | "update";
+        /** 差分を数値で表現できる時は値が入る */
+        representativeValueDelta: number | undefined;
+      }
+    | undefined;
+  /**
+   * 効果の1行説明
+   *
+   * - 例えば、「好調」なら「スコア上昇量を50%増加 nターン」など
+   * - TODO: 未実装
+   */
+  description: string;
+  id: Modifier["id"];
+  name: string;
+  /** この状態修正が持つ代表的な数値 */
+  representativeValue: number | undefined;
+  /**
+   * この状態修正が持つ代表的な数値をテキストにしたもの
+   *
+   * - 例えば、「好調」なら"1ターン"、「やる気」なら"1"、という感じ
+   *   - TODO: 現状は"1ターン"ではなく"1"という数値文字列だけにしている。仕様確認が必要なのと、テキスト生成をいじる必要があるので若干手間。なくても意味は通じるので優先度は低い。
+   * - 本家UIの状態修正アイコン一覧の横に付与されている値に相当
+   * - TODO: アイコン横の上下に2つ表示されるパターンがあった
+   *   - 「入道雲と、きみ」がそれに該当し、下には"1"、上には"1ターン"が表示されている
+   *     - 参考動画: https://www.youtube.com/watch?v=0OTOCFB8_zo&t=246s
+   */
+  representativeValueText: string | undefined;
+};
+
+/**
  * レッスン画面のスキルカード効果の表示用情報
  *
  * - 本家UIでは、スキルカード左下の縦並びのアイコンリストで表現している内容
@@ -1786,8 +1831,23 @@ export type CardPlayPreviewDisplay = {
     description: string;
     name: string;
   };
-  /** プレビューで選択したスキルカードの効果反映後のレッスン */
-  lesson: Lesson;
+  /** レッスン画面へ生じる変化値群 */
+  lessonDelta: {
+    life: {
+      after: LessonDisplay["life"];
+      delta: number;
+    };
+    /** プレビュー結果反映後の差分情報を含む、状態修正表示情報リスト */
+    modifires: ModifierDisplay[];
+    score: {
+      after: LessonDisplay["score"];
+      delta: number;
+    };
+    vitality: {
+      after: LessonDisplay["vitality"];
+      delta: number;
+    };
+  };
   /** プレビューで選択したスキルカードの効果の更新クエリリスト */
   updates: LessonUpdateQuery[];
 };
@@ -1812,36 +1872,6 @@ export type ProducerItemDisplay = ProducerItem & {
   name: string;
   /** 残り発動回数 */
   remainingTimes: number | undefined;
-};
-
-/**
- * レッスン画面の状態修正の表示用情報
- *
- * - 主に、本家レッスン画面の、左上のアイコンリストをタッチした時の詳細情報に使用することを想定している
- * - TODO: 本家だと、1つ目に必ず「おすすめ効果」がある、おすすめ効果は状態修正を付与していなくても表示される
- */
-export type ModifierDisplay = ModifierData & {
-  /**
-   * 効果の1行説明
-   *
-   * - 例えば、「好調」なら「スコア上昇量を50%増加 nターン」など
-   * - TODO: 未実装
-   */
-  description: string;
-  id: Modifier["id"];
-  name: string;
-  representativeValue: number | undefined;
-  /**
-   * この状態修正が持つ代表的な数値をテキストにしたもの
-   *
-   * - 例えば、「好調」なら"1ターン"、「やる気」なら"1"、という感じ
-   *   - TODO: 現状は"1ターン"ではなく"1"という数値文字列だけにしている。仕様確認が必要なのと、テキスト生成をいじる必要があるので若干手間。なくても意味は通じるので優先度は低い。
-   * - 本家UIの状態修正アイコン一覧の横に付与されている値に相当
-   * - TODO: アイコン横の上下に2つ表示されるパターンがあった
-   *   - 「入道雲と、きみ」がそれに該当し、下には"1"、上には"1ターン"が表示されている
-   *     - 参考動画: https://www.youtube.com/watch?v=0OTOCFB8_zo&t=246s
-   */
-  representativeValueText: string | undefined;
 };
 
 /**

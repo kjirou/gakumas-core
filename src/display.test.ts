@@ -607,6 +607,7 @@ describe("generateCardPlayPreviewDisplay", () => {
           // スキルカードのプレビューには、消費体力減少効果は反映されていない
           cost: { kind: "normal", value: 6 },
         },
+        hasActionEnded: true,
         lessonDelta: {
           life: {
             after: 7,
@@ -654,6 +655,50 @@ describe("generateCardPlayPreviewDisplay", () => {
       } as CardPlayPreviewDisplay,
     },
     {
+      name: "hasActionEnded - スキルカード使用によりアイドルの行動が終了する時、true になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("apirunokihon"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        hasActionEnded: true,
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "hasActionEnded - スキルカード使用によりアイドルの行動が終了しない時、false になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("hidamarinoseitokaishitsu"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        hasActionEnded: false,
+      } as CardPlayPreviewDisplay,
+    },
+    {
       name: "lessonDelta.modifiers - 概ね正しく動く",
       args: [
         (() => {
@@ -693,10 +738,62 @@ describe("generateCardPlayPreviewDisplay", () => {
               representativeValue: 3,
               change: { kind: "addition", representativeValueDelta: 3 },
             },
+          ],
+        },
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "lessonDelta.modifiers - スキルカード使用数追加が付与されていなく、1追加のスキルカードのプレビューをする時、本家UIと異なり「スキルカード使用数追加 0(+1)」を返さない",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("aidorusengen"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        lessonDelta: {
+          modifires: [] as Modifier[],
+        },
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "lessonDelta.modifiers - スキルカード使用数追加が1付与されていて、1追加のスキルカードのプレビューをする時、現在値:1/差分:なしの表示になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("aidorusengen"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
+          ];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        lessonDelta: {
+          modifires: [
             {
               name: "スキルカード使用数追加",
-              representativeValue: 0,
-              change: { kind: "addition", representativeValueDelta: 1 },
+              representativeValue: 1,
+              change: undefined,
             },
           ],
         },
@@ -1237,25 +1334,6 @@ describe("generateModifierDisplays", () => {
         },
         {
           name: "スキルカード使用数追加",
-          change: { kind: "addition", representativeValueDelta: 1 },
-        },
-      ] as ModifierDisplay[],
-    },
-    {
-      name: "前の状態修正リストが存在し、スキルカード使用数追加の増加差分がある時、その表示値は1を引く",
-      args: [
-        {
-          beforeModifiers: [],
-          modifiers: [
-            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
-          ],
-          recommendedModifierKind: "focus",
-        },
-      ],
-      expected: [
-        {
-          name: "スキルカード使用数追加",
-          representativeValue: 0,
           change: { kind: "addition", representativeValueDelta: 1 },
         },
       ] as ModifierDisplay[],

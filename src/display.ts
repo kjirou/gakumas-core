@@ -215,12 +215,6 @@ export const generateProducerItemDisplays = (
 /**
  * 状態修正の表示用情報を生成する
  *
- * - 「スキルカード使用数追加」が増加差分として存在する場合、表示値から 1 を減算する
- *   - 本家UIの仕様で、スキルカード使用数追加効果のあるスキルカードを使った時、そのアイコンが出現し、現在値:0 / 増加:+1 という表示になるため
- *     - よく考えると謎の表示だが、さておき、大枠として「このスキルカードを使ってもターンは終了しない」ということを伝えるのには役立っている
- *     - 本実装でも、その表示を踏襲することにする
- *   - プレビュー時にスキルカード使用数追加の減少をしていないので、ここで増えた状態で渡されるため、この加工が可能になっている
- *
  * @param beforeModifier false は前の状態修正との差分計算を行わない。 undefined は前の状態修正と比較はするが対象がないことを意味する、つまり追加の意味になる。
  */
 const generateModifierDisplay = (
@@ -248,13 +242,6 @@ const generateModifierDisplay = (
       kind: "addition",
       representativeValueDelta: representativeValue,
     };
-  }
-  if (
-    modifier.kind === "additionalCardUsageCount" &&
-    representativeValue !== undefined &&
-    change
-  ) {
-    representativeValue -= 1;
   }
   return {
     ...modifier,
@@ -405,21 +392,6 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
 /**
  * スキルカード使用のプレビューを表示するための情報を返す
  *
- * - 本家のプレビュー仕様
- *   - 体力・元気の差分
- *     - 効果反映後の値に変わり、その近くに差分アイコンが +n/-n で表示される
- *     - 差分は実際に変化した値を表示する、例えば、結果的に値の変更がない場合は何も表示されない
- *   - 状態修正の差分
- *     - 新規: スキルカード追加使用など一部のものを除いて、左側の状態修正リストの末尾へ追加
- *     - 既存: 差分がある状態修正アイコンに差分適用後の値を表示し、その右に差分アイコンを表示する
- *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
- *   - スキルカード詳細ポップアップ
- *     - 全ての項目が、各効果による変化前のデータ定義時の値、強化段階のみ反映される
- *       - 例えば、「消費体力減少」が付与されていても、コストは半分にならない
- *   - プレビュー時には、選択したスキルカードの効果のみ反映される
- *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
- *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
- *
  * TODO: getRandom と idGenerator が実行されることでそれらの内部状態が変化してしまう。今の所実害はないが、可能なら複製して渡したい。
  *
  * @param selectedCardInHandIndex 選択する手札のインデックス、使用条件を満たさない手札も選択可能
@@ -459,6 +431,7 @@ export const generateCardPlayPreviewDisplay = (
       description,
       name: generateCardName(card),
     },
+    hasActionEnded: afterLesson.idol.actionPoints === 0,
     lessonDelta: {
       life: {
         after: afterLesson.idol.life,

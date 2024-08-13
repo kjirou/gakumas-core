@@ -219,7 +219,7 @@ const initializeSaishushikenGamePlay = (turns: Lesson["turns"]) => {
       { id: "kawaiishigusa", testId: "kawaiishigusa", enhanced: true },
       { id: "apirunokihon", testId: "apirunokihon", enhanced: true },
       { id: "pozunokihon", testId: "pozunokihon" },
-      { id: "watashigasta", testId: "watashigasta", enhanced: true },
+      { id: "watashigasuta", testId: "watashigasuta", enhanced: true },
       {
         id: "hoshikuzusenseshon",
         testId: "hoshikuzusenseshon",
@@ -307,7 +307,7 @@ test("最終試験その1を再現する", () => {
       { id: "kawaiishigusa", testId: "kawaiishigusa", enhanced: true },
       { id: "apirunokihon", testId: "apirunokihon", enhanced: true },
       { id: "pozunokihon", testId: "pozunokihon" },
-      { id: "watashigasta", testId: "watashigasta", enhanced: true },
+      { id: "watashigasuta", testId: "watashigasuta", enhanced: true },
       {
         id: "hoshikuzusenseshon",
         testId: "hoshikuzusenseshon",
@@ -404,7 +404,7 @@ test("最終試験その1を再現する", () => {
     "hagemashi", // 使用
     // 残りターン数7
     "tebyoshi",
-    "watashigasta", // 使用1
+    "watashigasuta", // 使用1
     "fureai",
     "damedamekukkingu", // 「私がスター」で引く分、使用2
     // 残りターン数6(+1)
@@ -669,7 +669,7 @@ test("最終試験その2を再現する", () => {
       { id: "kawaiishigusa", testId: "kawaiishigusa", enhanced: true },
       { id: "apirunokihon", testId: "apirunokihon", enhanced: true },
       { id: "pozunokihon", testId: "pozunokihon" },
-      { id: "watashigasta", testId: "watashigasta", enhanced: true },
+      { id: "watashigasuta", testId: "watashigasuta", enhanced: true },
       {
         id: "hoshikuzusenseshon",
         testId: "hoshikuzusenseshon",
@@ -771,7 +771,7 @@ test("最終試験その2を再現する", () => {
     // 残りターン数6
     "apirunokihon",
     "hoshikuzusenseshon", // 使用2
-    "watashigasta", // 使用1
+    "watashigasuta", // 使用1
     "tebyoshi2", // 「私がスター」で引く分
     "hyogennokihon2", // 「星屑センセーション」で引く分、使用
     // 残りターン数5(+1)

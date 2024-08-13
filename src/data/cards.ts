@@ -5822,7 +5822,7 @@ export const cardsAsConst = [
     ],
   },
   {
-    id: "watashigasta",
+    id: "watashigasuta",
     name: "私がスター",
     cardPossessionKind: "logic",
     cardProviderKind: "others",

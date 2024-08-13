@@ -1,6 +1,6 @@
 # gakumas-core
 
-Core engine of "学園アイドルマスター"
+Core engine of Gakuen iDOLM@STER!(学園アイドルマスター)
 
 ## :cat: 特徴
 

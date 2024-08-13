@@ -777,7 +777,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       } as CardPlayPreviewDisplay,
     },
     {
-      name: "lessonDelta.modifiers - スキルカード使用数追加が1付与されていて、1追加のスキルカードのプレビューをする時、現在値:1/差分:なしの表示になる",
+      name: "lessonDelta.modifiers - スキルカード使用数追加が1付与されていて、1追加のスキルカードのプレビューをする時、現在値:1/差分:追加+1の表示になる",
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
@@ -804,7 +804,7 @@ describe("generateCardPlayPreviewDisplay", () => {
             {
               name: "スキルカード使用数追加",
               representativeValue: 1,
-              change: undefined,
+              change: { kind: "addition", representativeValueDelta: 1 },
             },
           ],
         },

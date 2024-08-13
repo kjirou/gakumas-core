@@ -3130,76 +3130,43 @@ describe("consumeRemainingCardUsageCount", () => {
   }> = [
     {
       name: "スキルカード使用数追加がない時、アクションポイントを減らす",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 1;
-          return lesson;
-        })(),
-        1,
+      args: [{ modifiers: [] as Modifier[], actionPoints: 1 } as Idol],
+      expected: [
+        {
+          kind: "actionPoints",
+          amount: -1,
+        },
       ],
-      expected: {
-        updates: [
-          {
-            kind: "actionPoints",
-            amount: -1,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
     },
     {
       name: "スキルカード使用数追加もアクションポイントもない時、アクションポイントを0変更する",
-      args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 0;
-          return lesson;
-        })(),
-        1,
+      args: [{ modifiers: [] as Modifier[], actionPoints: 0 } as Idol],
+      expected: [
+        {
+          kind: "actionPoints",
+          amount: 0,
+        },
       ],
-      expected: {
-        updates: [
-          {
-            kind: "actionPoints",
-            amount: 0,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
     },
     {
-      name: "スキルカード使用数追加とアクションポイントがある時、スキルカード使用数追加を減らす",
+      name: "スキルカード使用数追加とアクションポイントがある時、スキルカード使用数追加を1減らす",
       args: [
-        (() => {
-          const lesson = createLessonForTest();
-          lesson.idol.actionPoints = 1;
-          lesson.idol.modifiers = [
-            {
-              kind: "additionalCardUsageCount",
-              amount: 1,
-              id: "x",
-            },
-          ];
-          return lesson;
-        })(),
-        1,
+        {
+          modifiers: [
+            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
+          ],
+          actionPoints: 1,
+        } as Idol,
       ],
-      expected: {
-        updates: [
-          {
-            kind: "modifiers.update",
-            propertyNameKind: "amount",
-            id: "x",
-            actual: -1,
-            max: -1,
-            reason: expect.any(Object),
-          },
-        ],
-        nextHistoryResultIndex: 2,
-      },
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m1",
+          actual: -1,
+          max: -1,
+        },
+      ],
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {

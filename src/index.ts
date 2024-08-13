@@ -35,7 +35,6 @@ import {
   activateModifierEffectsOnTurnStart,
   activateProducerItemEffectsOnTurnStart,
   activateMemoryEffectsOnLessonStart,
-  consumeRemainingCardUsageCount,
   decreaseEachModifierDurationOverTime,
   drawCardsOnTurnStart,
   obtainPositiveImpressionScoreOnTurnEnd,
@@ -532,18 +531,6 @@ export const playCard = (
   } else if (isLessonEnded(gamePlay)) {
     throw new Error("レッスンが終了している");
   }
-
-  //
-  // スキルカード使用数またはアクションポイントを減らす
-  //
-  const consumeRemainingCardUsageCountResult = consumeRemainingCardUsageCount(
-    lesson,
-    historyResultIndex,
-  );
-  updates = [...updates, ...consumeRemainingCardUsageCountResult.updates];
-  historyResultIndex =
-    consumeRemainingCardUsageCountResult.nextHistoryResultIndex;
-  lesson = patchDiffs(lesson, consumeRemainingCardUsageCountResult.updates);
 
   //
   // ------------------

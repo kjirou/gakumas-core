@@ -669,6 +669,38 @@ const createNewModifierDiff = (
 };
 
 /**
+ * 残りスキルカード使用数を1回分減らす
+ *
+ * - 「スキルカード使用数追加」を先に消費し、それがなければアクションポイントを消費する
+ * - 足りない状況で実行したら、アクションポイントの0修正を返す
+ */
+export const consumeRemainingCardUsageCount = (
+  idol: Idol,
+): LessonUpdateDiff[] => {
+  const additionalCardUsageCount = idol.modifiers.find(
+    (e) => e.kind === "additionalCardUsageCount",
+  );
+  if (additionalCardUsageCount) {
+    return [
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "amount",
+        id: additionalCardUsageCount.id,
+        actual: -1,
+        max: -1,
+      },
+    ];
+  } else {
+    return [
+      {
+        kind: "actionPoints",
+        amount: Math.max(-1, -idol.actionPoints) + 0,
+      },
+    ];
+  }
+};
+
+/**
  * 効果を発動する
  */
 export const activateEffect = <
@@ -2062,49 +2094,6 @@ export const useDrink = (
 };
 
 /**
- * スキルカード使用数を1消費する
- *
- * - 「スキルカード使用数追加」を先に消費し、それがなければアクションポイントを消費する
- * - 足りない状況で実行したら、0を返す
- */
-export const consumeRemainingCardUsageCount = (
-  lesson: Lesson,
-  historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
-): LessonMutationResult => {
-  const additionalCardUsageCount = lesson.idol.modifiers.find(
-    (e) => e.kind === "additionalCardUsageCount",
-  );
-  let diff: LessonUpdateDiff | undefined;
-  if (additionalCardUsageCount) {
-    diff = {
-      kind: "modifiers.update",
-      propertyNameKind: "amount",
-      id: additionalCardUsageCount.id,
-      actual: -1,
-      max: -1,
-    };
-  } else {
-    diff = {
-      kind: "actionPoints",
-      amount: Math.max(-1, -lesson.idol.actionPoints) + 0,
-    };
-  }
-  return {
-    updates: [
-      {
-        ...diff,
-        reason: {
-          kind: "cardUsage.remainingCardUsageCountConsumption",
-          historyTurnNumber: lesson.turnNumber,
-          historyResultIndex,
-        },
-      },
-    ],
-    nextHistoryResultIndex: historyResultIndex + 1,
-  };
-};
-
-/**
  * スキルカードを使用する
  */
 export const useCard = (
@@ -2148,6 +2137,21 @@ export const useCard = (
   ) {
     throw new Error(`Can not use the card: ${card.original.data.name}`);
   }
+
+  //
+  // 残りスキルカード使用数（アクションポイント or スキルカード使用追加数）を1減らす
+  //
+  const consumeRemainingCardUsageCountUpdates = consumeRemainingCardUsageCount(
+    newLesson.idol,
+  ).map((diff) =>
+    createLessonUpdateQueryFromDiff(diff, {
+      kind: "cardUsage.remainingCardUsageCountConsumption",
+      historyTurnNumber: newLesson.turnNumber,
+      historyResultIndex: nextHistoryResultIndex,
+    }),
+  );
+  newLesson = patchDiffs(newLesson, consumeRemainingCardUsageCountUpdates);
+  nextHistoryResultIndex++;
 
   //
   // 手札の消費
@@ -2469,6 +2473,7 @@ export const useCard = (
   return {
     nextHistoryResultIndex,
     updates: [
+      ...consumeRemainingCardUsageCountUpdates,
       ...usedCardPlacementUpdates,
       ...costConsumptionUpdates,
       ...effectActivationUpdates,

@@ -215,12 +215,6 @@ export const generateProducerItemDisplays = (
 /**
  * 状態修正の表示用情報を生成する
  *
- * - 「スキルカード使用数追加」が増加差分として存在する場合、表示値から 1 を減算する
- *   - 本家UIの仕様で、スキルカード使用数追加効果のあるスキルカードを使った時、そのアイコンが出現し、現在値:0 / 増加:+1 という表示になるため
- *     - よく考えると謎の表示だが、さておき、大枠として「このスキルカードを使ってもターンは終了しない」ということを伝えるのには役立っている
- *     - 本実装でも、その表示を踏襲することにする
- *   - プレビュー時にスキルカード使用数追加の減少をしていないので、ここで増えた状態で渡されるため、この加工が可能になっている
- *
  * @param beforeModifier false は前の状態修正との差分計算を行わない。 undefined は前の状態修正と比較はするが対象がないことを意味する、つまり追加の意味になる。
  */
 const generateModifierDisplay = (
@@ -248,13 +242,6 @@ const generateModifierDisplay = (
       kind: "addition",
       representativeValueDelta: representativeValue,
     };
-  }
-  if (
-    modifier.kind === "additionalCardUsageCount" &&
-    representativeValue !== undefined &&
-    change
-  ) {
-    representativeValue -= 1;
   }
   return {
     ...modifier,

@@ -1,6 +1,6 @@
 {
   "name": "gakumas-core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Core engine of \"学園アイドルマスター\"",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

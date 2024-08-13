@@ -1821,37 +1821,6 @@ export type CardInHandDisplay = {
 };
 
 /**
- * レッスン画面のスキルカード使用プレビューの表示用情報
- */
-export type CardPlayPreviewDisplay = {
-  /** プレビューで選択したスキルカードの情報、本家UIだとポップアップになっている部分 */
-  card: {
-    cost: ActionCost;
-    description: string;
-    name: string;
-  };
-  /** レッスン画面へ生じる変化値群 */
-  lessonDelta: {
-    life: {
-      after: LessonDisplay["life"];
-      delta: number;
-    };
-    /** プレビュー結果反映後の差分情報を含む、状態修正表示情報リスト */
-    modifires: ModifierDisplay[];
-    score: {
-      after: LessonDisplay["score"];
-      delta: number;
-    };
-    vitality: {
-      after: LessonDisplay["vitality"];
-      delta: number;
-    };
-  };
-  /** プレビューで選択したスキルカードの効果の更新クエリリスト */
-  updates: LessonUpdateQuery[];
-};
-
-/**
  * レッスン画面の所持スキルカードダイアログ内の各スキルカードの表示用情報
  */
 export type CardInInventoryDisplay = Card & {
@@ -1923,4 +1892,62 @@ export type LessonDisplay = {
   /** ターン追加を反映した長さのターンリスト */
   turns: TurnDisplay[];
   vitality: Idol["vitality"];
+};
+
+/**
+ * レッスン画面のスキルカード使用プレビューの表示用情報
+ *
+ * - 本家UIのプレビュー仕様
+ *   - 体力・元気の差分
+ *     - 効果反映後の値に変わり、その近くに差分アイコンが +n/-n で表示される
+ *     - 差分は実際に変化した値を表示する、例えば、結果的に値の変更がない場合は何も表示されない
+ *   - 状態修正の差分
+ *     - 新規: スキルカード追加使用など一部のものを除いて、左側の状態修正リストの末尾へ追加
+ *       - 差分適用の結果、0 になっても表示される。例えば、下記で説明する「スキルカード使用数追加 0(+1)」のケース。
+ *     - 既存: 差分がある状態修正アイコンに差分適用後の値を表示し、その右に差分アイコンを表示する
+ *       - 差分適用の結果、0 になっても表示される
+ *     - スキルカード追加使用、次に使用するスキルカードの効果をもう1回発動、など、差分アイコンが表示されないものもある
+ *     - スキルカード使用数追加が存在しない状態で、それを1追加する（そして即座に消費する）差分の場合、以下のような表示になる
+ *       - 「スキルカード使用数追加 0(+1)」のように、現在値は 0 だが、差分は +1 という表示になる
+ *       - 本実装だと、現在値が 0 の状態修正はプレビューでも削除されるので、再現するのが非常に困難だった。よって、この表示にはしない。
+ *         - 本家は、プレビューでは 0 の状態修正は削除せず、その結果としてこの表示ができるように見える
+ *   - スキルカード詳細ポップアップ
+ *     - 全ての項目が、各効果による変化前のデータ定義時の値、強化段階のみ反映される
+ *       - 例えば、「消費体力減少」が付与されていても、コストは半分にならない
+ *   - プレビュー時には、選択したスキルカードの効果のみ反映される
+ *     - 例えば、「ワクワクが止まらない」の状態修正が付与されている時に、メンタルスキルカードを選択しても、その分は反映されない
+ *       - 参考動画: https://youtu.be/7hbRaIYE_ZI?si=Jd5JYrOVCJZZPp7i&t=214
+ */
+export type CardPlayPreviewDisplay = {
+  /** プレビューで選択したスキルカードの情報、本家UIだとポップアップになっている部分 */
+  card: {
+    cost: ActionCost;
+    description: string;
+    name: string;
+  };
+  /**
+   * スキルカード使用後にアイドルの行動が終了するか
+   *
+   * - 本家UIの「スキルカード使用数追加 0(+1)」表示の変わりに、直接アイドルの行動が終了するか否かを表示するために使う
+   */
+  hasActionEnded: boolean;
+  /** レッスン画面へ生じる変化値群 */
+  lessonDelta: {
+    life: {
+      after: LessonDisplay["life"];
+      delta: number;
+    };
+    /** プレビュー結果反映後の差分情報を含む、状態修正表示情報リスト */
+    modifires: ModifierDisplay[];
+    score: {
+      after: LessonDisplay["score"];
+      delta: number;
+    };
+    vitality: {
+      after: LessonDisplay["vitality"];
+      delta: number;
+    };
+  };
+  /** プレビューで選択したスキルカードの効果の更新クエリリスト */
+  updates: LessonUpdateQuery[];
 };

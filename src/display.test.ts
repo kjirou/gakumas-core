@@ -607,6 +607,7 @@ describe("generateCardPlayPreviewDisplay", () => {
           // スキルカードのプレビューには、消費体力減少効果は反映されていない
           cost: { kind: "normal", value: 6 },
         },
+        hasActionEnded: true,
         lessonDelta: {
           life: {
             after: 7,
@@ -651,6 +652,50 @@ describe("generateCardPlayPreviewDisplay", () => {
             reason: expect.any(Object),
           },
         ],
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "hasActionEnded - スキルカード使用によりアイドルの行動が終了する時、true になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("apirunokihon"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        hasActionEnded: true,
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "hasActionEnded - スキルカード使用によりアイドルの行動が終了しない時、false になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("hidamarinoseitokaishitsu"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        hasActionEnded: false,
       } as CardPlayPreviewDisplay,
     },
     {
@@ -718,6 +763,39 @@ describe("generateCardPlayPreviewDisplay", () => {
       expected: {
         lessonDelta: {
           modifires: [] as Modifier[],
+        },
+      } as CardPlayPreviewDisplay,
+    },
+    {
+      name: "lessonDelta.modifiers - スキルカード使用数追加が1付与されていて、1追加のスキルカードのプレビューをする時、現在値:1/差分:なしの表示になる",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest({
+            deck: [
+              {
+                id: "c1",
+                data: getCardDataByConstId("aidorusengen"),
+                enhanced: false,
+              },
+            ],
+          });
+          gamePlay.initialLesson.hand = ["c1"];
+          gamePlay.initialLesson.idol.modifiers = [
+            { kind: "additionalCardUsageCount", amount: 1, id: "m1" },
+          ];
+          return gamePlay;
+        })(),
+        0,
+      ],
+      expected: {
+        lessonDelta: {
+          modifires: [
+            {
+              name: "スキルカード使用数追加",
+              representativeValue: 1,
+              change: undefined,
+            },
+          ],
         },
       } as CardPlayPreviewDisplay,
     },

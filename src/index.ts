@@ -43,7 +43,7 @@ import {
   useDrink as useDrinkMutation,
 } from "./lesson-mutation";
 import {
-  calculateRemainingTurns,
+  createCurrentTurnDetails,
   createIdolInProduction,
   createGamePlay,
   getNextHistoryResultIndex,
@@ -227,7 +227,7 @@ export const isLessonEnded = (gamePlay: GamePlay): boolean => {
   const lesson = getLesson(gamePlay);
   return (
     isScoreSatisfyingPerfect(lesson) ||
-    (calculateRemainingTurns(lesson) === 1 &&
+    (createCurrentTurnDetails(lesson).remainingTurns === 1 &&
       hasActionEnded(gamePlay) &&
       lesson.turnEnded)
   );

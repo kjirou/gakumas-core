@@ -381,9 +381,6 @@ export const getIdolParameterKindOnTurn = (
   return lesson.turnNumber === 0 ? turns[0] : turns[lesson.turnNumber - 1];
 };
 
-export const calculateRemainingTurns = (lesson: Lesson): number =>
-  createActualTurns(lesson).length - lesson.turnNumber + 1;
-
 export const createCurrentTurnDetails = (
   lesson: Lesson,
 ): CurrentTurnDetails => {

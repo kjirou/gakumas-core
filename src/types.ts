@@ -1338,6 +1338,26 @@ export type Lesson = {
 };
 
 /**
+ * 現在のターンの詳細情報
+ *
+ * - 各種残りターン数は、最後のターンの時は 1 になる
+ */
+export type CurrentTurnDetails = {
+  /** ターン追加効果により増加したターン数 */
+  additionalTurns: number;
+  idolParameterKind: IdolParameterKind;
+  /** レッスン定義上のターン数 */
+  originalTurns: number;
+  /** 残りターン数の総数、本家UIにこの表示はない */
+  remainingTurns: number;
+  /** 残りターン数の内、ターン追加効果由来の分 */
+  remainingAdditionalTurns: number;
+  /** 残りターン数の内、レッスン定義由来の分 */
+  remainingOriginalTurns: number;
+  turnNumber: Lesson["turnNumber"];
+};
+
+/**
  * レッスン更新差分
  *
  * - レッスンの状態の変化を表現したもの
@@ -1871,6 +1891,7 @@ export type TurnDisplay = {
  */
 export type LessonDisplay = {
   clearScoreThresholds: Lesson["clearScoreThresholds"];
+  currentTurn: CurrentTurnDetails;
   drinks: DrinkDisplay[];
   hand: CardInHandDisplay[];
   inventory: {
@@ -1884,11 +1905,8 @@ export type LessonDisplay = {
   lifeRecoveredBySkippingTurn: number;
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
-  remainingTurns: number;
-  remainingTurnsChange: Lesson["remainingTurnsChange"];
   score: Lesson["score"];
   scoreBonus: number | undefined;
-  turnNumber: number;
   /** ターン追加を反映した長さのターンリスト */
   turns: TurnDisplay[];
   vitality: Idol["vitality"];

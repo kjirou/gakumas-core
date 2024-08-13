@@ -35,6 +35,7 @@ import {
   calculateModifierEffectedActionCost,
   calculateRemainingTurns,
   createActualTurns,
+  createCurrentTurnDetails,
   getCardContentData,
   getDisplayedRepresentativeModifierValue,
   getIdolParameterKindOnTurn,
@@ -358,6 +359,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   });
   return {
     clearScoreThresholds: lesson.clearScoreThresholds,
+    currentTurn: createCurrentTurnDetails(lesson),
     drinks: generateDrinkDisplays(lesson),
     hand,
     inventory: {
@@ -379,11 +381,8 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
     ),
     modifiers,
     producerItems: generateProducerItemDisplays(lesson),
-    remainingTurns: calculateRemainingTurns(lesson),
-    remainingTurnsChange: lesson.remainingTurnsChange,
     score: lesson.score,
     scoreBonus,
-    turnNumber: lesson.turnNumber,
     turns,
     vitality: lesson.idol.vitality,
   };

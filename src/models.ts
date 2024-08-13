@@ -41,6 +41,7 @@ import {
   ProducerItemContentData,
   ProducerItemInProduction,
   CharacterData,
+  CurrentTurnDetails,
 } from "./types";
 import { shuffleArray } from "./utils";
 
@@ -380,9 +381,28 @@ export const getIdolParameterKindOnTurn = (
   return lesson.turnNumber === 0 ? turns[0] : turns[lesson.turnNumber - 1];
 };
 
-/** 残りターン数を計算する、最終ターンは1 */
 export const calculateRemainingTurns = (lesson: Lesson): number =>
   createActualTurns(lesson).length - lesson.turnNumber + 1;
+
+export const createCurrentTurnDetails = (
+  lesson: Lesson,
+): CurrentTurnDetails => {
+  const pastTurns = lesson.turnNumber - 1;
+  const originalTurns = lesson.turns.length;
+  const remainingOriginalTurns = Math.max(originalTurns - pastTurns, 0);
+  const additionalTurns = lesson.remainingTurnsChange;
+  const remainingAdditionalTurns =
+    additionalTurns - Math.max(pastTurns - originalTurns, 0);
+  return {
+    additionalTurns,
+    idolParameterKind: getIdolParameterKindOnTurn(lesson),
+    originalTurns,
+    remainingTurns: remainingOriginalTurns + remainingAdditionalTurns,
+    remainingAdditionalTurns,
+    remainingOriginalTurns,
+    turnNumber: lesson.turnNumber,
+  };
+};
 
 /**
  * 状態修正による補正を適用したコストへ変換して返す

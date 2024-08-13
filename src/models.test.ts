@@ -1,9 +1,16 @@
-import { Card, Lesson, LessonUpdateQuery, Modifier } from "./types";
+import {
+  Card,
+  CurrentTurnDetails,
+  Lesson,
+  LessonUpdateQuery,
+  Modifier,
+} from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getIdolDataByConstId } from "./data/idols";
 import { getProducerItemDataByConstId } from "./data/producer-items";
 import {
   calculateClearScoreProgress,
+  createCurrentTurnDetails,
   calculateModifierEffectedActionCost,
   createActualTurns,
   createIdolInProduction,
@@ -69,6 +76,128 @@ describe("calculateClearScoreProgress", () => {
       expect(calculateClearScoreProgress(...args)).toStrictEqual(expected);
     },
   );
+});
+describe("createCurrentTurnDetails", () => {
+  const testCases: Array<{
+    args: Parameters<typeof createCurrentTurnDetails>;
+    expected: ReturnType<typeof createCurrentTurnDetails>;
+    name: string;
+  }> = [
+    {
+      name: "1ターン目の時、概ね正しく動く",
+      args: [
+        {
+          turns: ["vocal", "dance", "visual"],
+          turnNumber: 1,
+          remainingTurnsChange: 0,
+        } as Lesson,
+      ],
+      expected: {
+        turnNumber: 1,
+        originalTurns: 3,
+        additionalTurns: 0,
+        remainingOriginalTurns: 3,
+        remainingAdditionalTurns: 0,
+        remainingTurns: 3,
+        idolParameterKind: "vocal",
+      },
+    },
+    {
+      name: "最終ターンの時、概ね正しく動く",
+      args: [
+        {
+          turns: ["vocal", "dance", "visual"],
+          turnNumber: 3,
+          remainingTurnsChange: 0,
+        } as Lesson,
+      ],
+      expected: {
+        turnNumber: 3,
+        originalTurns: 3,
+        additionalTurns: 0,
+        remainingOriginalTurns: 1,
+        remainingAdditionalTurns: 0,
+        remainingTurns: 1,
+        idolParameterKind: "visual",
+      },
+    },
+    {
+      name: "ターン追加がある1ターン目の時、概ね正しく動く",
+      args: [
+        {
+          turns: ["vocal", "dance", "visual"],
+          turnNumber: 1,
+          remainingTurnsChange: 4,
+        } as Lesson,
+      ],
+      expected: {
+        turnNumber: 1,
+        originalTurns: 3,
+        additionalTurns: 4,
+        remainingOriginalTurns: 3,
+        remainingAdditionalTurns: 4,
+        remainingTurns: 7,
+        idolParameterKind: "vocal",
+      },
+    },
+    {
+      name: "ターン追加がある最終ターンの時、概ね正しく動く",
+      args: [
+        {
+          turns: ["vocal", "dance", "visual"],
+          turnNumber: 7,
+          remainingTurnsChange: 4,
+        } as Lesson,
+      ],
+      expected: {
+        turnNumber: 7,
+        originalTurns: 3,
+        additionalTurns: 4,
+        remainingOriginalTurns: 0,
+        remainingAdditionalTurns: 1,
+        remainingTurns: 1,
+        idolParameterKind: "visual",
+      },
+    },
+    {
+      name: "ターン追加分への切り替え直後の時、概ね正しく動く",
+      args: [
+        {
+          turns: ["vocal", "dance", "visual"],
+          turnNumber: 4,
+          remainingTurnsChange: 4,
+        } as Lesson,
+      ],
+      expected: {
+        turnNumber: 4,
+        originalTurns: 3,
+        additionalTurns: 4,
+        remainingOriginalTurns: 0,
+        remainingAdditionalTurns: 4,
+        remainingTurns: 4,
+        idolParameterKind: "visual",
+      },
+    },
+    {
+      name: "ターン追加分を1ターン経過した時ま時、残り追加ターン数が減る",
+      args: [
+        {
+          turns: ["vocal", "dance", "visual"],
+          turnNumber: 6,
+          remainingTurnsChange: 4,
+        } as Lesson,
+      ],
+      expected: {
+        additionalTurns: 4,
+        remainingOriginalTurns: 0,
+        remainingAdditionalTurns: 2,
+        remainingTurns: 2,
+      } as CurrentTurnDetails,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(createCurrentTurnDetails(...args)).toMatchObject(expected);
+  });
 });
 describe("calculateModifierEffectedActionCost", () => {
   const testCases: Array<{

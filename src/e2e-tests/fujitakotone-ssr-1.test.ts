@@ -517,8 +517,11 @@ test("最終試験その1を再現する", () => {
       { name: "やる気", representativeValue: 12 },
     ],
     score: 2459,
-    remainingTurns: 7,
-    remainingTurnsChange: 0,
+    currentTurn: {
+      remainingTurns: 7,
+      additionalTurns: 0,
+      remainingAdditionalTurns: 0,
+    },
   } as LessonDisplay);
   gamePlay = playCard(gamePlay, 1);
   gamePlay = playCard(gamePlay, 2);
@@ -534,8 +537,11 @@ test("最終試験その1を再現する", () => {
       { name: "やる気", representativeValue: 15 },
     ],
     score: 3057,
-    remainingTurns: 7,
-    remainingTurnsChange: 1,
+    currentTurn: {
+      remainingTurns: 7,
+      additionalTurns: 1,
+      remainingAdditionalTurns: 1,
+    },
   } as LessonDisplay);
   gamePlay = playCard(gamePlay, 0);
   gamePlay = playCard(gamePlay, 0);

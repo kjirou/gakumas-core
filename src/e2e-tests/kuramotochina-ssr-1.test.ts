@@ -43,7 +43,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
       { id: "kibuntenkan", testId: "kibuntenkan" },
       { id: "pozunokihon", testId: "pozunokihon" },
       { id: "imetore", testId: "imetore", enhanced: true },
-      { id: "watashigasta", testId: "watashigasta", enhanced: true },
+      { id: "watashigasuta", testId: "watashigasuta", enhanced: true },
       { id: "genkinaaisatsu", testId: "genkinaaisatsu2", enhanced: true },
       { id: "genkinaaisatsu", testId: "genkinaaisatsu3", enhanced: true },
       { id: "rizumikaru", testId: "rizumikaru", enhanced: true },
@@ -127,7 +127,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
     // 残りターン数8
     "pozunokihon",
     "imetore", // 使用2
-    "watashigasta", // 使用1
+    "watashigasuta", // 使用1
     "genkinaaisatsu2", // カードを引いた分
     // 残りターン数7(+1)
     "genkinaaisatsu3",
@@ -321,7 +321,7 @@ test("最終試験を再現する", () => {
       { id: "todoite", testId: "todoite" },
       { id: "afureruomoide", testId: "afureruomoide", enhanced: true },
       { id: "200sumairu", testId: "200sumairu" },
-      { id: "watashigasta", testId: "watashigasta", enhanced: true },
+      { id: "watashigasuta", testId: "watashigasuta", enhanced: true },
       { id: "eieio", testId: "eieio" },
       { id: "yurufuwaoshaveri", testId: "yurufuwaoshaveri", enhanced: true },
       { id: "rizumikaru", testId: "rizumikaru", enhanced: true },
@@ -407,7 +407,7 @@ test("最終試験を再現する", () => {
     "ojosamanoharebutai",
     // 残りターン数5
     "200sumairu", // 使用
-    "watashigasta", // 好印象0で使えない
+    "watashigasuta", // 好印象0で使えない
     "eieio",
     // 残りターン数4
     "yurufuwaoshaveri",
@@ -420,7 +420,7 @@ test("最終試験を再現する", () => {
     // 残りターン数2、「私がスター」の後に「烏龍茶」x2を使用
     "pozunokihon",
     "genkinaaisatsu", // 使用2
-    "watashigasta", // 使用1
+    "watashigasuta", // 使用1
     "mosukoshidake", // カードを引いた分
     // 残りターン数1(+1)、「ミックススムージー」使用
     "genkinaaisatsu2",

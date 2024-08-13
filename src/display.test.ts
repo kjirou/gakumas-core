@@ -591,6 +591,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               },
             ],
           });
+          gamePlay.initialLesson.idol.actionPoints = 1;
           gamePlay.initialLesson.hand = ["c1"];
           gamePlay.initialLesson.idol.life = 10;
           gamePlay.initialLesson.idol.modifiers = [
@@ -624,6 +625,11 @@ describe("generateCardPlayPreviewDisplay", () => {
         },
         // 「いつものメイクポーチ」は、本来発動するはずだが、プレビューなので発動していない
         updates: [
+          {
+            kind: "actionPoints",
+            amount: -1,
+            reason: expect.any(Object),
+          },
           // 差分には、消費体力減少効果が反映されている
           {
             kind: "life",
@@ -667,6 +673,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               },
             ],
           });
+          gamePlay.initialLesson.idol.actionPoints = 1;
           gamePlay.initialLesson.hand = ["c1"];
           return gamePlay;
         })(),
@@ -689,6 +696,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               },
             ],
           });
+          gamePlay.initialLesson.idol.actionPoints = 1;
           gamePlay.initialLesson.hand = ["c1"];
           return gamePlay;
         })(),
@@ -711,6 +719,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               },
             ],
           });
+          gamePlay.initialLesson.idol.actionPoints = 1;
           gamePlay.initialLesson.hand = ["c1"];
           gamePlay.initialLesson.idol.modifiers = [
             { kind: "focus", amount: 4, id: "m1" },
@@ -755,6 +764,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               },
             ],
           });
+          gamePlay.initialLesson.idol.actionPoints = 1;
           gamePlay.initialLesson.hand = ["c1"];
           return gamePlay;
         })(),
@@ -779,6 +789,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               },
             ],
           });
+          gamePlay.initialLesson.idol.actionPoints = 1;
           gamePlay.initialLesson.hand = ["c1"];
           gamePlay.initialLesson.idol.modifiers = [
             { kind: "additionalCardUsageCount", amount: 1, id: "m1" },

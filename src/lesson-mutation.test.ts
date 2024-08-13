@@ -5155,6 +5155,7 @@ describe("useCard preview:false", () => {
           },
         ],
       });
+      lesson.idol.actionPoints = 1;
       lesson.hand = ["a"];
       const { updates } = useCard(lesson, 1, {
         selectedCardInHandIndex: 0,
@@ -5162,19 +5163,19 @@ describe("useCard preview:false", () => {
         idGenerator: createIdGenerator(),
         preview: false,
       });
-      expect(updates.filter((e) => e.kind === "actionPoints")).toStrictEqual([
-        {
-          kind: "actionPoints",
-          amount: 1,
-          reason: expect.any(Object),
-        },
-      ]);
       expect(
         updates.filter(
           (e) =>
-            e.kind === "modifiers.addition" || e.kind === "modifiers.update",
+            e.kind === "actionPoints" ||
+            e.kind === "modifiers.addition" ||
+            e.kind === "modifiers.update",
         ),
       ).toStrictEqual([
+        {
+          kind: "actionPoints",
+          amount: -1,
+          reason: expect.any(Object),
+        },
         {
           kind: "modifiers.addition",
           actual: {
@@ -5187,6 +5188,11 @@ describe("useCard preview:false", () => {
             amount: 1,
             id: expect.any(String),
           },
+          reason: expect.any(Object),
+        },
+        {
+          kind: "actionPoints",
+          amount: 1,
           reason: expect.any(Object),
         },
         {

@@ -27,7 +27,7 @@ import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateModifierEffectedActionCost,
   calculateClearScoreProgress,
-  calculateRemainingTurns,
+  createCurrentTurnDetails,
   getCardContentData,
   getIdolParameterKindOnTurn,
   getProducerItemContentData,
@@ -347,7 +347,7 @@ export const canActivateEffect = (
       return validateNumberInRange(targetValue, condition.range);
     }
     case "countReminingTurns": {
-      return calculateRemainingTurns(lesson) <= condition.max;
+      return createCurrentTurnDetails(lesson).remainingTurns <= condition.max;
     }
     case "countVitality": {
       return validateNumberInRange(lesson.idol.vitality, condition.range);

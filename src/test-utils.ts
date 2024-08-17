@@ -4,16 +4,13 @@ import type {
   GamePlay,
   LessonUpdateQuery,
   ProducerItem,
+  GetRandom,
 } from "./types";
 import { type IdolDataId } from "./data/idols";
-import {
-  createGamePlay,
-  getNextHistoryResultIndex,
-  patchDiffs,
-} from "./models";
+import { createLesson, getNextHistoryResultIndex, patchDiffs } from "./models";
 import { createIdGenerator } from "./utils";
 
-export const createGamePlayForTest = (
+export const createLessonForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     cards?: Card[];
@@ -21,11 +18,11 @@ export const createGamePlayForTest = (
     producerItems?: ProducerItem[];
     turns?: Lesson["turns"];
   } = {},
-): GamePlay => {
+): Lesson => {
   // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
   const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
   const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
-  return createGamePlay({
+  return createLesson({
     cards: options.cards ?? [],
     clearScoreThresholds: options.clearScoreThresholds,
     idGenerator: createIdGenerator(),
@@ -35,11 +32,17 @@ export const createGamePlayForTest = (
   });
 };
 
-export const createLessonForTest = (
-  options: Parameters<typeof createGamePlayForTest>[0] = {},
-): Lesson => {
-  const gamePlay = createGamePlayForTest(options);
-  return gamePlay.initialLesson;
+export const createGamePlayForTest = (
+  options: Parameters<typeof createLessonForTest>[0] & {
+    getRandom?: GetRandom;
+  } = {},
+): GamePlay => {
+  return {
+    getRandom: options.getRandom ?? (() => 0),
+    idGenerator: createIdGenerator(),
+    initialLesson: createLessonForTest(options),
+    updates: [],
+  };
 };
 
 /**

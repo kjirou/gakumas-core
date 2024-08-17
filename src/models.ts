@@ -201,12 +201,12 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
 };
 
 /**
- * ゲームプレイのインスタンスを作成する
+ * レッスンを生成する
  *
  * - initializeGamePlay と比べると、ユニットテストの時にここから呼び出すことが多い
  *   - そのため、 idGenerator や getRandom を使う処理は、可能な限り initializeGamePlay へ移動するのが好ましい
  */
-export const createGamePlay = (params: {
+export const createLesson = (params: {
   cards: Card[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   drinks?: Drink[];
@@ -221,7 +221,7 @@ export const createGamePlay = (params: {
   producerItems: ProducerItem[];
   scoreBonus?: Idol["scoreBonus"];
   turns: Lesson["turns"];
-}): GamePlay => {
+}): Lesson => {
   const getRandom = params.getRandom ? params.getRandom : Math.random;
   const idolData = getIdolDataById(params.idolDataId);
   const characterData = getCharacterDataById(idolData.characterId);
@@ -236,42 +236,37 @@ export const createGamePlay = (params: {
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
   const memoryEffects = params.memoryEffects ?? [];
   return {
-    getRandom,
-    idGenerator: params.idGenerator,
-    initialLesson: {
-      cards: params.cards,
-      clearScoreThresholds,
-      deck: shuffleArray(
-        params.cards.map((card) => card.id),
-        getRandom,
-      ),
-      discardPile: [],
-      encouragements,
-      hand: [],
-      idol: {
-        actionPoints: 0,
-        data: idolData,
-        drinks: params.drinks ?? [],
-        life,
-        maxLife,
-        modifierIdsAtTurnStart: [],
-        modifiers: [],
-        producerItems: params.producerItems,
-        scoreBonus: params.scoreBonus,
-        totalCardUsageCount: 0,
-        vitality: 0,
-      },
-      ignoreIdolParameterKindConditionAfterClearing,
-      memoryEffects,
-      turns: params.turns,
-      removedCardPile: [],
-      handWhenEmptyDeck: [],
-      score: 0,
-      turnNumber: 0,
-      turnEnded: false,
-      remainingTurnsChange: 0,
+    cards: params.cards,
+    clearScoreThresholds,
+    deck: shuffleArray(
+      params.cards.map((card) => card.id),
+      getRandom,
+    ),
+    discardPile: [],
+    encouragements,
+    hand: [],
+    idol: {
+      actionPoints: 0,
+      data: idolData,
+      drinks: params.drinks ?? [],
+      life,
+      maxLife,
+      modifierIdsAtTurnStart: [],
+      modifiers: [],
+      producerItems: params.producerItems,
+      scoreBonus: params.scoreBonus,
+      totalCardUsageCount: 0,
+      vitality: 0,
     },
-    updates: [],
+    ignoreIdolParameterKindConditionAfterClearing,
+    memoryEffects,
+    turns: params.turns,
+    removedCardPile: [],
+    handWhenEmptyDeck: [],
+    score: 0,
+    turnNumber: 0,
+    turnEnded: false,
+    remainingTurnsChange: 0,
   };
 };
 

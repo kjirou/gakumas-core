@@ -48,7 +48,7 @@ import {
 } from "./lesson-mutation";
 import {
   createCurrentTurnDetails,
-  createGamePlay,
+  createLesson,
   getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
   lifeRecoveredBySkippingTurn,
@@ -157,6 +157,7 @@ export const initializeGamePlay = (params: {
   turns: Lesson["turns"];
 }): GamePlay => {
   const idGenerator = createIdGenerator();
+  const getRandom = Math.random;
   const idolData = getIdolDataById(params.idolDataId);
   const specialTrainingLevel = params.specialTrainingLevel ?? 0;
   const talentAwakeningLevel = params.talentAwakeningLevel ?? 0;
@@ -208,21 +209,26 @@ export const initializeGamePlay = (params: {
       data: getDrinkDataById(drinkSetting.id),
     };
   });
-  return createGamePlay({
-    cards,
-    clearScoreThresholds: params.clearScoreThresholds,
-    drinks,
-    encouragements: params.encouragements,
+  return {
+    getRandom,
     idGenerator,
-    idolDataId: params.idolDataId,
-    ignoreIdolParameterKindConditionAfterClearing,
-    life: params.life,
-    maxLife: params.maxLife,
-    memoryEffects: params.memoryEffects,
-    producerItems,
-    scoreBonus: params.scoreBonus,
-    turns: params.turns,
-  });
+    initialLesson: createLesson({
+      cards,
+      clearScoreThresholds: params.clearScoreThresholds,
+      drinks,
+      encouragements: params.encouragements,
+      idGenerator,
+      idolDataId: params.idolDataId,
+      ignoreIdolParameterKindConditionAfterClearing,
+      life: params.life,
+      maxLife: params.maxLife,
+      memoryEffects: params.memoryEffects,
+      producerItems,
+      scoreBonus: params.scoreBonus,
+      turns: params.turns,
+    }),
+    updates: [],
+  };
 };
 
 /**

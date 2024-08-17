@@ -779,7 +779,7 @@ export type CardInProduction = Readonly<{
   data: CardData;
   enhanced: boolean;
   /**
-   * IdolInProduction["cards"] 内で一意のID
+   * Idol["cards"] 内で一意のID
    *
    * - 本番では、常に IdGenerator で生成する
    * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
@@ -1036,7 +1036,7 @@ export type ProducerItemInProduction = Readonly<{
   data: ProducerItemData;
   enhanced?: boolean;
   /**
-   * IdolInProduction["producerItems"] 内で一意のID
+   * Idol["producerItems"] 内で一意のID
    *
    * - 本番では、常に IdGenerator で生成する
    * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
@@ -1139,28 +1139,6 @@ export type IdolData = Readonly<{
 }>;
 
 /**
- * プロデュース中のプロデュースアイドル
- *
- * - プロデュース開始時に生成され、プロデュース終了時に破棄される
- */
-export type IdolInProduction = Readonly<{
-  data: IdolData;
-  deck: CardInProduction[];
-  // NOTE: まだ使わないので一旦コメントアウト
-  // idolParameters: IdolParameters;
-  life: number;
-  maxLife: number;
-  /**
-   * Pアイテムリスト
-   *
-   * - 上からプロデュース中に取得した順になる
-   *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
-   *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
-   */
-  producerItems: ProducerItemInProduction[];
-}>;
-
-/**
  * レッスン中のプロデュースアイドル
  *
  * - レッスン開始前に生成され、レッスン終了時に破棄される
@@ -1177,6 +1155,7 @@ export type Idol = {
    *   - 「ターン終了フラグ」も考えたが、コンテストで複数のアイドルがいる状況を考えると、アイドル側に持たせた方が良さそう
    */
   actionPoints: number;
+  data: IdolData;
   /**
    * Pドリンクリスト
    *
@@ -1184,6 +1163,7 @@ export type Idol = {
    */
   drinks: Drink[];
   life: number;
+  maxLife: number;
   /**
    * ターン開始時に付与されている状態修正IDリスト
    *
@@ -1192,13 +1172,14 @@ export type Idol = {
    */
   modifierIdsAtTurnStart: Array<Modifier["id"]>;
   modifiers: Modifier[];
-  original: IdolInProduction;
   /**
    * Pアイテムリスト
    *
-   * - 上からプロデュース中に取得した順になり、かつレッスン中に使える可能性のあるもののみに絞り込まれる
+   * - 上からプロデュース中に取得した順になる
    *   - 参考動画: https://www.youtube.com/live/DDZaGs2xkNo?si=5bPmJB51PRPnODv_&t=2245
    *     - たくさんPアイテムを取得しているプレイなのでわかりやすい
+   * - 本家では、レッスン中に使える可能性があるものだけ表示されているが、本実装では一旦は考慮しない
+   *   - 主にシミュレーター用途で、その際は設定画面込みでそちらで調整できるから
    */
   producerItems: ProducerItem[];
   /**

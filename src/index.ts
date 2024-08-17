@@ -17,7 +17,6 @@ import {
   MemoryEffect,
   CardInProduction,
   ProducerItemInProduction,
-  IdolInProduction,
   Drink,
   NextLifecyclePhase,
 } from "./types";
@@ -43,7 +42,6 @@ import {
 } from "./lesson-mutation";
 import {
   createCurrentTurnDetails,
-  createIdolInProduction,
   createGamePlay,
   getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
@@ -136,8 +134,8 @@ export const initializeGamePlay = (params: {
   idolDataId: IdolDataId;
   idolSpecificCardTestId?: CardInProduction["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
-  life?: IdolInProduction["life"];
-  maxLife?: IdolInProduction["maxLife"];
+  life?: Idol["life"];
+  maxLife?: Idol["maxLife"];
   memoryEffects?: MemoryEffect[];
   producerItems: Array<{
     enhanced?: ProducerItemInProduction["enhanced"];
@@ -176,26 +174,22 @@ export const initializeGamePlay = (params: {
       data: getDrinkDataById(drinkSetting.id),
     };
   });
-  const idolInProduction = createIdolInProduction({
+  return createGamePlay({
     additionalCards,
     additionalProducerItems,
-    idGenerator,
-    idolDataId: params.idolDataId,
-    life: params.life,
-    maxLife: params.maxLife,
-    specialTrainingLevel,
-    specificCardId: params.idolSpecificCardTestId,
-    talentAwakeningLevel,
-  });
-  return createGamePlay({
     clearScoreThresholds: params.clearScoreThresholds,
     drinks,
     encouragements: params.encouragements,
     idGenerator,
-    idolInProduction,
+    idolDataId: params.idolDataId,
+    idolSpecificCardTestId: params.idolSpecificCardTestId,
     ignoreIdolParameterKindConditionAfterClearing,
+    life: params.life,
+    maxLife: params.maxLife,
     memoryEffects: params.memoryEffects,
     scoreBonus: params.scoreBonus,
+    specialTrainingLevel,
+    talentAwakeningLevel,
     turns: params.turns,
   });
 };
@@ -678,7 +672,7 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
       actual:
         Math.min(
           lifeRecoveredBySkippingTurn,
-          lesson.idol.original.maxLife - lesson.idol.life,
+          lesson.idol.maxLife - lesson.idol.life,
         ) + 0,
       max: lifeRecoveredBySkippingTurn,
       reason: {

@@ -59,9 +59,7 @@ describe("initializeGamePlay", () => {
       expected: {
         initialLesson: {
           idol: {
-            original: {
-              data: getIdolDataByConstId("kuramotochina-ssr-1"),
-            },
+            data: getIdolDataByConstId("kuramotochina-ssr-1"),
             producerItems: [
               {
                 original: {
@@ -150,9 +148,7 @@ describe("initializeGamePlay", () => {
       expected: {
         initialLesson: {
           idol: {
-            original: {
-              maxLife: 28,
-            },
+            maxLife: 28,
           },
         },
       } as GamePlay,
@@ -171,9 +167,7 @@ describe("initializeGamePlay", () => {
       expected: {
         initialLesson: {
           idol: {
-            original: {
-              maxLife: 100,
-            },
+            maxLife: 100,
           },
         },
       } as GamePlay,

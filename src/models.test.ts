@@ -13,7 +13,6 @@ import {
   createCurrentTurnDetails,
   calculateModifierEffectedActionCost,
   createActualTurns,
-  createIdolInProduction,
   createGamePlay,
   diffUpdates,
   findPrioritizedDoubleEffectModifier,
@@ -338,9 +337,10 @@ describe("createActualTurns", () => {
   );
 });
 describe("createGamePlay", () => {
-  test("it creates a lesson game play", () => {
+  test("it works", () => {
     const idGenerator = createIdGenerator();
-    const idolInProduction = createIdolInProduction({
+    const gamePlay = createGamePlay({
+      idGenerator: createIdGenerator(),
       idolDataId: "hanamisaki-r-1",
       producerItems: [
         {
@@ -350,11 +350,6 @@ describe("createGamePlay", () => {
       ],
       specialTrainingLevel: 1,
       talentAwakeningLevel: 1,
-      idGenerator,
-    });
-    const gamePlay = createGamePlay({
-      idGenerator,
-      idolInProduction,
       turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });
     expect(gamePlay).toStrictEqual({
@@ -363,8 +358,9 @@ describe("createGamePlay", () => {
       initialLesson: {
         clearScoreThresholds: undefined,
         idol: {
-          original: idolInProduction,
+          data: getIdolDataByConstId("hanamisaki-r-1"),
           life: 32,
+          maxLife: 32,
           vitality: 0,
           producerItems: expect.any(Array),
           modifiers: [],
@@ -390,36 +386,6 @@ describe("createGamePlay", () => {
         ignoreIdolParameterKindConditionAfterClearing: false,
       },
       updates: [],
-    });
-  });
-});
-describe("createIdolInProduction", () => {
-  test("it creates an idol in production", () => {
-    const idGenerator = createIdGenerator();
-    const idolInProduction = createIdolInProduction({
-      idolDataId: "hanamisaki-r-1",
-      specialTrainingLevel: 1,
-      talentAwakeningLevel: 1,
-      idGenerator,
-    });
-    expect(idolInProduction).toStrictEqual({
-      deck: [
-        {
-          id: expect.any(String),
-          data: getCardDataByConstId("shinshinkiei"),
-          enhanced: false,
-        },
-      ],
-      data: getIdolDataByConstId("hanamisaki-r-1"),
-      life: 32,
-      maxLife: 32,
-      producerItems: [
-        {
-          id: expect.any(String),
-          data: getProducerItemDataByConstId("bakuonraion"),
-          enhanced: false,
-        },
-      ],
     });
   });
 });

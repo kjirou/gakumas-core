@@ -320,7 +320,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
   const modifiers = generateModifierDisplays({
     modifiers: lesson.idol.modifiers,
     recommendedModifierKind:
-      lesson.idol.original.data.producePlan.recommendedModifierKind,
+      lesson.idol.data.producePlan.recommendedModifierKind,
   });
   const encouragements = generateEncouragementDisplays(
     gamePlay.initialLesson.encouragements,
@@ -376,7 +376,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
     life: lesson.idol.life,
     lifeRecoveredBySkippingTurn: Math.min(
       lifeRecoveredBySkippingTurn,
-      lesson.idol.original.maxLife - lesson.idol.life,
+      lesson.idol.maxLife - lesson.idol.life,
     ),
     modifiers,
     producerItems: generateProducerItemDisplays(lesson),
@@ -439,7 +439,7 @@ export const generateCardPlayPreviewDisplay = (
         beforeModifiers: beforeLesson.idol.modifiers,
         modifiers: afterLesson.idol.modifiers,
         recommendedModifierKind:
-          beforeLesson.idol.original.data.producePlan.recommendedModifierKind,
+          beforeLesson.idol.data.producePlan.recommendedModifierKind,
       }),
       score: {
         after: afterLesson.score,

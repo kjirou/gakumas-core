@@ -17,7 +17,6 @@ import {
   MemoryEffect,
   CardInProduction,
   ProducerItemInProduction,
-  IdolInProduction,
   Drink,
   NextLifecyclePhase,
 } from "./types";
@@ -135,8 +134,8 @@ export const initializeGamePlay = (params: {
   idolDataId: IdolDataId;
   idolSpecificCardTestId?: CardInProduction["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
-  life?: IdolInProduction["life"];
-  maxLife?: IdolInProduction["maxLife"];
+  life?: Idol["life"];
+  maxLife?: Idol["maxLife"];
   memoryEffects?: MemoryEffect[];
   producerItems: Array<{
     enhanced?: ProducerItemInProduction["enhanced"];

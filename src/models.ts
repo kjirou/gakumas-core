@@ -25,8 +25,6 @@ import {
   GetRandom,
   IdGenerator,
   Idol,
-  IdolData,
-  IdolInProduction,
   IdolParameterKind,
   Lesson,
   GamePlay,

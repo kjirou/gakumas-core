@@ -1008,23 +1008,6 @@ export type ProducerItemData = Readonly<{
 }>;
 
 /**
- * プロデュース中のPアイテム
- *
- * - プロデュース開始時に生成され、プロデュース終了時に破棄される
- */
-export type ProducerItemInProduction = Readonly<{
-  data: ProducerItemData;
-  enhanced?: boolean;
-  /**
-   * Idol["producerItems"] 内で一意のID
-   *
-   * - 本番では、常に IdGenerator で生成する
-   * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
-   */
-  id: string;
-}>;
-
-/**
  * レッスン中のPアイテム
  *
  * - レッスン開始前に生成され、レッスン終了時に破棄される
@@ -1032,15 +1015,14 @@ export type ProducerItemInProduction = Readonly<{
 export type ProducerItem = {
   /** 発動した回数 */
   activationCount: number;
+  data: ProducerItemData;
+  enhanced: boolean;
   /**
    * PアイテムID
    *
    * - 1レッスン内で一意
-   * - ProducerItemInProduction["id"] を複製する
-   *   - テストコード内で IdGenerator を渡さないで良いようにするため
    */
   id: string;
-  original: ProducerItemInProduction;
 };
 
 /**

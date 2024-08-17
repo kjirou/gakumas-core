@@ -36,7 +36,6 @@ import {
   ProducePlan,
   ProducerItem,
   ProducerItemContentData,
-  ProducerItemInProduction,
   CharacterData,
   CurrentTurnDetails,
 } from "./types";
@@ -86,10 +85,9 @@ export const getCardContentData = (card: Card): CardContentData => {
 export const getProducerItemContentData = (
   producerItem: ProducerItem,
 ): ProducerItemContentData => {
-  return producerItem.original.data.enhanced !== undefined &&
-    producerItem.original.enhanced
-    ? producerItem.original.data.enhanced
-    : producerItem.original.data.base;
+  return producerItem.data.enhanced !== undefined && producerItem.enhanced
+    ? producerItem.data.enhanced
+    : producerItem.data.base;
 };
 
 /** Pアイテムの残り発動回数を返す */
@@ -163,18 +161,6 @@ export const createDefaultCardSet = (
   });
 };
 
-export const prepareProducerItemsForLesson = (
-  producerItemsInProduction: ProducerItemInProduction[],
-): ProducerItem[] => {
-  return producerItemsInProduction.map((producerItemInProduction) => {
-    return {
-      activationCount: 0,
-      id: producerItemInProduction.id,
-      original: producerItemInProduction,
-    };
-  });
-};
-
 /**
  * レッスンのクリアに対するスコア進捗を計算する
  */
@@ -227,7 +213,7 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  */
 export const createGamePlay = (params: {
   additionalCards?: Card[];
-  additionalProducerItems?: ProducerItemInProduction[];
+  additionalProducerItems?: ProducerItem[];
   cards?: Card[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   drinks?: Drink[];
@@ -240,7 +226,7 @@ export const createGamePlay = (params: {
   life?: Idol["life"];
   maxLife?: CharacterData["maxLife"];
   memoryEffects?: MemoryEffect[];
-  producerItems?: ProducerItemInProduction[];
+  producerItems?: ProducerItem[];
   scoreBonus?: Idol["scoreBonus"];
   specialTrainingLevel: number;
   talentAwakeningLevel: number;
@@ -266,17 +252,15 @@ export const createGamePlay = (params: {
       },
       ...(params.additionalCards ?? []),
     ].sort((a, b) => compareDeckOrder(a.data, b.data));
-  const producerItemsInProduction = params.producerItems ?? [
+  const producerItems: ProducerItem[] = params.producerItems ?? [
     {
       id: params.idGenerator(),
       data: specificProducerItemData,
       enhanced: params.talentAwakeningLevel >= 2,
+      activationCount: 0,
     },
     ...(params.additionalProducerItems ?? []),
   ];
-  const producerItems = prepareProducerItemsForLesson(
-    producerItemsInProduction,
-  );
   const maxLife = params.maxLife ?? characterData.maxLife;
   const life = params.life ? Math.min(params.life, maxLife) : maxLife;
   const clearScoreThresholds =

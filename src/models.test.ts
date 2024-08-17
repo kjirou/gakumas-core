@@ -346,6 +346,8 @@ describe("createGamePlay", () => {
         {
           id: idGenerator(),
           data: getProducerItemDataByConstId("hatsuboshitecho"),
+          enhanced: false,
+          activationCount: 0,
         },
       ],
       specialTrainingLevel: 1,

@@ -194,9 +194,7 @@ export const generateProducerItemDisplays = (
 ): ProducerItemDisplay[] => {
   return lesson.idol.producerItems.map((producerItem) => {
     const producerItemContent = getProducerItemContentData(producerItem);
-    const name =
-      producerItem.original.data.name +
-      (producerItem.original.enhanced ? "+" : "");
+    const name = producerItem.data.name + (producerItem.enhanced ? "+" : "");
     return {
       ...producerItem,
       name,

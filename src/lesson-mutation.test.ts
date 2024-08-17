@@ -362,6 +362,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           id: "a",
           data: getProducerItemDataByConstId("itsumonomeikupochi"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -420,6 +421,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           id: "a",
           data: getProducerItemDataByConstId("saikonihappinominamoto"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -486,10 +488,13 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           id: "a",
           data: getProducerItemDataByConstId("saikonihappinominamoto"),
           enhanced: false,
+          activationCount: 0,
         },
         {
           id: "b",
           data: getProducerItemDataByConstId("kumoriwonuguttataoru"),
+          enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -553,6 +558,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           id: "a",
           data: getProducerItemDataByConstId("biggudorimuchokimbako"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -623,6 +629,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           id: "a",
           data: getProducerItemDataByConstId("himitsutokkunkade"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -690,11 +697,8 @@ describe("activateEffectsOfProducerItem", () => {
         })(),
         {
           id: "a",
-          original: {
-            id: "a",
-            data: getProducerItemDataByConstId("gesennosenrihin"),
-            enhanced: false,
-          },
+          data: getProducerItemDataByConstId("gesennosenrihin"),
+          enhanced: false,
           activationCount: 0,
         },
         () => 0,
@@ -722,11 +726,8 @@ describe("activateEffectsOfProducerItem", () => {
         })(),
         {
           id: "a",
-          original: {
-            id: "a",
-            data: getProducerItemDataByConstId("kaerujirushinosempuki"),
-            enhanced: false,
-          },
+          data: getProducerItemDataByConstId("kaerujirushinosempuki"),
+          enhanced: false,
           activationCount: 0,
         },
         () => 0,
@@ -750,11 +751,8 @@ describe("activateEffectsOfProducerItem", () => {
         })(),
         {
           id: "a",
-          original: {
-            id: "a",
-            data: getProducerItemDataByConstId("kaerujirushinosempuki"),
-            enhanced: false,
-          },
+          data: getProducerItemDataByConstId("kaerujirushinosempuki"),
+          enhanced: false,
           activationCount: 0,
         },
         () => 0,
@@ -857,6 +855,7 @@ describe("activateEffectsOnLessonStart", () => {
               id: "a",
               data: getProducerItemDataByConstId("gesennosenrihin"),
               enhanced: false,
+              activationCount: 0,
             },
           ],
         }),
@@ -897,6 +896,8 @@ describe("activateEffectsOnTurnEnd", () => {
           {
             id: "a",
             data: getProducerItemDataByConstId("okininosunika"),
+            enhanced: false,
+            activationCount: 0,
           },
         ],
       });
@@ -1527,6 +1528,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
           id: "a",
           data: getProducerItemDataByConstId("bakuonraion"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -1552,6 +1554,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
           id: "a",
           data: getProducerItemDataByConstId("bakuonraion"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -1568,6 +1571,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
           id: "a",
           data: getProducerItemDataByConstId("shibainuposhetto"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -1592,6 +1596,7 @@ describe("activateProducerItemEffectsOnTurnStart", () => {
           id: "a",
           data: getProducerItemDataByConstId("shibainuposhetto"),
           enhanced: false,
+          activationCount: 0,
         },
       ],
     });
@@ -2732,9 +2737,7 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" } } },
-          },
+          data: { base: { trigger: { kind: "turnStart" } } },
         } as ProducerItem,
         "turnStart",
       ],
@@ -2746,9 +2749,7 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" } } },
-          },
+          data: { base: { trigger: { kind: "turnStart" } } },
         } as ProducerItem,
         "turnEnd",
       ],
@@ -2760,12 +2761,10 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1, idol: { life: 0 } } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart" },
-                cost: { kind: "life", value: 1 },
-              },
+          data: {
+            base: {
+              trigger: { kind: "turnStart" },
+              cost: { kind: "life", value: 1 },
             },
           },
         } as ProducerItem,
@@ -2779,11 +2778,9 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "vocal" },
-              },
+          data: {
+            base: {
+              trigger: { kind: "turnStart", idolParameterKind: "vocal" },
             },
           },
         } as ProducerItem,
@@ -2797,11 +2794,9 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "dance" },
-              },
+          data: {
+            base: {
+              trigger: { kind: "turnStart", idolParameterKind: "dance" },
             },
           },
         } as ProducerItem,
@@ -2821,11 +2816,9 @@ describe("canActivateProducerItem", () => {
         } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "dance" },
-              },
+          data: {
+            base: {
+              trigger: { kind: "turnStart", idolParameterKind: "dance" },
             },
           },
         } as ProducerItem,
@@ -2845,11 +2838,9 @@ describe("canActivateProducerItem", () => {
         } as Lesson,
         {
           activationCount: 0,
-          original: {
-            data: {
-              base: {
-                trigger: { kind: "turnStart", idolParameterKind: "dance" },
-              },
+          data: {
+            base: {
+              trigger: { kind: "turnStart", idolParameterKind: "dance" },
             },
           },
         } as ProducerItem,
@@ -2863,9 +2854,7 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 1,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
-          },
+          data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
         } as ProducerItem,
         "turnStart",
       ],
@@ -2877,9 +2866,7 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 2,
-          original: {
-            data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
-          },
+          data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
         } as ProducerItem,
         "turnStart",
       ],
@@ -2890,10 +2877,8 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 2 } as Lesson,
         {
-          original: {
-            data: {
-              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-            },
+          data: {
+            base: { trigger: { kind: "turnStartEveryTwoTurns" } },
           },
         } as ProducerItem,
         "turnStartEveryTwoTurns",
@@ -2905,10 +2890,8 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-            },
+          data: {
+            base: { trigger: { kind: "turnStartEveryTwoTurns" } },
           },
         } as ProducerItem,
         "turnStartEveryTwoTurns",
@@ -2920,10 +2903,8 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 0 } as Lesson,
         {
-          original: {
-            data: {
-              base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-            },
+          data: {
+            base: { trigger: { kind: "turnStartEveryTwoTurns" } },
           },
         } as ProducerItem,
         "turnStartEveryTwoTurns",
@@ -2935,14 +2916,12 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDataId: "a",
-                  cardSummaryKind: "active",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "beforeCardEffectActivation",
+                cardDataId: "a",
+                cardSummaryKind: "active",
               },
             },
           },
@@ -2960,14 +2939,12 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDataId: "a",
-                  cardSummaryKind: "active",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "beforeCardEffectActivation",
+                cardDataId: "a",
+                cardSummaryKind: "active",
               },
             },
           },
@@ -2985,14 +2962,12 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "beforeCardEffectActivation",
-                  cardDataId: "a",
-                  cardSummaryKind: "active",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "beforeCardEffectActivation",
+                cardDataId: "a",
+                cardSummaryKind: "active",
               },
             },
           },
@@ -3010,13 +2985,11 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "afterCardEffectActivation",
-                  cardSummaryKind: "active",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "afterCardEffectActivation",
+                cardSummaryKind: "active",
               },
             },
           },
@@ -3033,13 +3006,11 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "afterCardEffectActivation",
-                  cardSummaryKind: "active",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "afterCardEffectActivation",
+                cardSummaryKind: "active",
               },
             },
           },
@@ -3056,13 +3027,11 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "modifierIncrease",
-                  modifierKind: "focus",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "modifierIncrease",
+                modifierKind: "focus",
               },
             },
           },
@@ -3079,13 +3048,11 @@ describe("canActivateProducerItem", () => {
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
-          original: {
-            data: {
-              base: {
-                trigger: {
-                  kind: "modifierIncrease",
-                  modifierKind: "focus",
-                },
+          data: {
+            base: {
+              trigger: {
+                kind: "modifierIncrease",
+                modifierKind: "focus",
               },
             },
           },
@@ -3913,6 +3880,7 @@ describe("useCard preview:false", () => {
             id: "p",
             data: getProducerItemDataByConstId("saikonihappinominamoto"),
             enhanced: false,
+            activationCount: 0,
           },
         ],
       });
@@ -4993,6 +4961,7 @@ describe("useCard preview:false", () => {
             id: "p1",
             data: getProducerItemDataByConstId("tekunodoggu"),
             enhanced: false,
+            activationCount: 0,
           },
         ],
       });
@@ -5050,6 +5019,7 @@ describe("useCard preview:false", () => {
             id: "p1",
             data: getProducerItemDataByConstId("himitsutokkunkade"),
             enhanced: false,
+            activationCount: 0,
           },
         ],
       });

@@ -3,7 +3,7 @@ import type {
   Lesson,
   GamePlay,
   LessonUpdateQuery,
-  ProducerItemInProduction,
+  ProducerItem,
 } from "./types";
 import { type IdolDataId } from "./data/idols";
 import {
@@ -18,7 +18,7 @@ export const createGamePlayForTest = (
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
     cards?: Card[];
     idolDataId?: IdolDataId;
-    producerItems?: ProducerItemInProduction[];
+    producerItems?: ProducerItem[];
     specialTrainingLevel?: number | undefined;
     talentAwakeningLevel?: number | undefined;
     turns?: Lesson["turns"];

@@ -15,10 +15,10 @@ import {
   GamePlay,
   LessonUpdateQuery,
   MemoryEffect,
-  ProducerItemInProduction,
   Drink,
   NextLifecyclePhase,
   Card,
+  ProducerItem,
 } from "./types";
 import { type CardDataId, getCardDataByConstId } from "./data/cards";
 import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
@@ -138,7 +138,7 @@ export const initializeGamePlay = (params: {
   maxLife?: Idol["maxLife"];
   memoryEffects?: MemoryEffect[];
   producerItems: Array<{
-    enhanced?: ProducerItemInProduction["enhanced"];
+    enhanced?: ProducerItem["enhanced"];
     id: ProducerItemDataId;
   }>;
   scoreBonus?: Idol["scoreBonus"];
@@ -158,14 +158,16 @@ export const initializeGamePlay = (params: {
       enhancements: cardSetting.enhanced ? [{ kind: "original" }] : [],
     };
   });
-  const additionalProducerItems: ProducerItemInProduction[] =
-    params.producerItems.map((producerItemSetting) => {
+  const additionalProducerItems: ProducerItem[] = params.producerItems.map(
+    (producerItemSetting) => {
       return {
         id: idGenerator(),
         data: getProducerItemDataByConstId(producerItemSetting.id),
         enhanced: producerItemSetting.enhanced ?? false,
+        activationCount: 0,
       };
-    });
+    },
+  );
   const drinks: Drink[] = (params.drinks ?? []).map((drinkSetting) => {
     return {
       id: idGenerator(),

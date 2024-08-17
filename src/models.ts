@@ -9,7 +9,7 @@ import {
 } from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
-import { getIdolDataById } from "./data/idols";
+import { getIdolDataById, IdolDataId } from "./data/idols";
 import { metaModifierDictioanry } from "./data/modifiers";
 import { getProducerItemDataById } from "./data/producer-items";
 import {
@@ -166,64 +166,6 @@ export const createDefaultCardSet = (
   });
 };
 
-/**
- * プロデュースアイドルを生成する
- *
- * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
- * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
- * @param params.deck 。テスト用、山札全体を明示的に指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.specificCardId テスト用、アイドル固有スキルカードの内部IDを指定する
- * @param params.producerItems テスト用、Pアイテム全体を指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.specialTrainingLevel 特訓段階
- * @param params.talentAwakeningLevel 才能開花段階
- */
-export const createIdolInProduction = (params: {
-  additionalCards?: CardInProduction[];
-  additionalProducerItems?: ProducerItemInProduction[];
-  deck?: CardInProduction[];
-  idGenerator: IdGenerator;
-  idolDataId: IdolData["id"];
-  life?: IdolInProduction["life"];
-  maxLife?: CharacterData["maxLife"];
-  producerItems?: ProducerItemInProduction[];
-  specificCardId?: CardInProduction["id"];
-  specialTrainingLevel: number;
-  talentAwakeningLevel: number;
-}): IdolInProduction => {
-  const idolData = getIdolDataById(params.idolDataId);
-  const characterData = getCharacterDataById(idolData.characterId);
-  const specificCardData = getCardDataById(idolData.specificCardId);
-  const specificProducerItemData = getProducerItemDataById(
-    idolData.specificProducerItemId,
-  );
-  const deck =
-    params.deck ??
-    [
-      {
-        id: params.specificCardId ?? params.idGenerator(),
-        data: specificCardData,
-        enhanced: params.specialTrainingLevel >= 3,
-      },
-      ...(params.additionalCards ?? []),
-    ].sort((a, b) => compareDeckOrder(a.data, b.data));
-  const producerItems = params.producerItems ?? [
-    {
-      id: params.idGenerator(),
-      data: specificProducerItemData,
-      enhanced: params.talentAwakeningLevel >= 2,
-    },
-    ...(params.additionalProducerItems ?? []),
-  ];
-  const maxLife = params.maxLife ?? characterData.maxLife;
-  return {
-    deck,
-    data: idolData,
-    life: params.life ? Math.min(params.life, maxLife) : maxLife,
-    maxLife,
-    producerItems,
-  };
-};
-
 export const prepareCardsForLesson = (
   cardsInProduction: CardInProduction[],
 ): Card[] => {
@@ -290,26 +232,71 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
 /**
  * ゲームプレイのインスタンスを作成する
  *
+ * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
+ * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
+ * @param params.cards テスト用、山札全体を明示的に指定する、アイドル固有を生成しないなど本来の処理を通さない
  * @param params.idGenerator createIdolInProduction で使用した関数と同じものを渡す
+ * @param params.idolSpecificCardTestId テスト用、内部的なIDを指定する
+ * @param params.producerItems テスト用、Pアイテム全体を指定する、アイドル固有を生成しないなど本来の処理を通さない
+ * @param params.specialTrainingLevel 特訓段階、0 から 6
+ * @param params.talentAwakeningLevel 才能開花段階、0 から 4
  */
 export const createGamePlay = (params: {
+  additionalCards?: CardInProduction[];
+  additionalProducerItems?: ProducerItemInProduction[];
+  cards?: CardInProduction[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   drinks?: Drink[];
   encouragements?: Encouragement[];
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
-  idolInProduction: IdolInProduction;
+  idolDataId: IdolDataId;
+  idolSpecificCardTestId?: CardInProduction["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
+  life?: Idol["life"];
+  maxLife?: CharacterData["maxLife"];
   memoryEffects?: MemoryEffect[];
+  producerItems?: ProducerItemInProduction[];
   scoreBonus?: Idol["scoreBonus"];
+  specialTrainingLevel: number;
+  talentAwakeningLevel: number;
   turns: Lesson["turns"];
 }): GamePlay => {
+  const getRandom = params.getRandom ? params.getRandom : Math.random;
+  const idolData = getIdolDataById(params.idolDataId);
+  const characterData = getCharacterDataById(idolData.characterId);
+  const specificCardData = getCardDataById(idolData.specificCardId);
+  const specificProducerItemData = getProducerItemDataById(
+    idolData.specificProducerItemId,
+  );
+  const cardsInProduction =
+    params.cards ??
+    [
+      {
+        id: params.idolSpecificCardTestId ?? params.idGenerator(),
+        data: specificCardData,
+        enhanced: params.specialTrainingLevel >= 3,
+      },
+      ...(params.additionalCards ?? []),
+    ].sort((a, b) => compareDeckOrder(a.data, b.data));
+  const cards = prepareCardsForLesson(cardsInProduction);
+  const producerItemsInProduction = params.producerItems ?? [
+    {
+      id: params.idGenerator(),
+      data: specificProducerItemData,
+      enhanced: params.talentAwakeningLevel >= 2,
+    },
+    ...(params.additionalProducerItems ?? []),
+  ];
+  const producerItems = prepareProducerItemsForLesson(
+    producerItemsInProduction,
+  );
+  const maxLife = params.maxLife ?? characterData.maxLife;
+  const life = params.life ? Math.min(params.life, maxLife) : maxLife;
   const clearScoreThresholds =
     params.clearScoreThresholds !== undefined
       ? params.clearScoreThresholds
       : undefined;
-  const getRandom = params.getRandom ? params.getRandom : Math.random;
-  const cards = prepareCardsForLesson(params.idolInProduction.deck);
   const encouragements = params.encouragements ?? [];
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
@@ -330,14 +317,15 @@ export const createGamePlay = (params: {
       idol: {
         actionPoints: 0,
         drinks: params.drinks ?? [],
-        life: params.idolInProduction.life,
+        life,
         modifierIdsAtTurnStart: [],
         modifiers: [],
-        original: params.idolInProduction,
-        // TODO: そのレッスン中に使用できる可能性があるPアイテムのみへ絞り込む
-        producerItems: prepareProducerItemsForLesson(
-          params.idolInProduction.producerItems,
-        ),
+        // TODO: IdolInProduction 概念の名残なので、解体する
+        original: {
+          data: idolData,
+          maxLife,
+        },
+        producerItems,
         scoreBonus: params.scoreBonus,
         totalCardUsageCount: 0,
         vitality: 0,

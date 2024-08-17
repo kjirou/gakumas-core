@@ -8,7 +8,6 @@ import type {
 } from "./types";
 import { type IdolDataId } from "./data/idols";
 import {
-  createIdolInProduction,
   createGamePlay,
   getNextHistoryResultIndex,
   patchDiffs,
@@ -26,26 +25,20 @@ export const createGamePlayForTest = (
     turns?: Lesson["turns"];
   } = {},
 ): GamePlay => {
-  const clearScoreThresholds = options.clearScoreThresholds;
   // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
   const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
   const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
   const specialTrainingLevel = options.specialTrainingLevel ?? 1;
   const talentAwakeningLevel = options.talentAwakeningLevel ?? 1;
-  const idGenerator = createIdGenerator();
-  const idolInProduction = createIdolInProduction({
-    idGenerator,
+  return createGamePlay({
+    clearScoreThresholds: options.clearScoreThresholds,
+    idGenerator: createIdGenerator(),
     idolDataId,
+    turns,
     specialTrainingLevel,
     talentAwakeningLevel,
-    ...(options.deck ? { deck: options.deck } : {}),
+    ...(options.deck ? { cards: options.deck } : {}),
     ...(options.producerItems ? { producerItems: options.producerItems } : {}),
-  });
-  return createGamePlay({
-    clearScoreThresholds,
-    idGenerator,
-    idolInProduction,
-    turns,
   });
 };
 

@@ -43,7 +43,6 @@ import {
 } from "./lesson-mutation";
 import {
   createCurrentTurnDetails,
-  createIdolInProduction,
   createGamePlay,
   getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
@@ -176,26 +175,22 @@ export const initializeGamePlay = (params: {
       data: getDrinkDataById(drinkSetting.id),
     };
   });
-  const idolInProduction = createIdolInProduction({
+  return createGamePlay({
     additionalCards,
     additionalProducerItems,
-    idGenerator,
-    idolDataId: params.idolDataId,
-    life: params.life,
-    maxLife: params.maxLife,
-    specialTrainingLevel,
-    specificCardId: params.idolSpecificCardTestId,
-    talentAwakeningLevel,
-  });
-  return createGamePlay({
     clearScoreThresholds: params.clearScoreThresholds,
     drinks,
     encouragements: params.encouragements,
     idGenerator,
-    idolInProduction,
+    idolDataId: params.idolDataId,
+    idolSpecificCardTestId: params.idolSpecificCardTestId,
     ignoreIdolParameterKindConditionAfterClearing,
+    life: params.life,
+    maxLife: params.maxLife,
     memoryEffects: params.memoryEffects,
     scoreBonus: params.scoreBonus,
+    specialTrainingLevel,
+    talentAwakeningLevel,
     turns: params.turns,
   });
 };

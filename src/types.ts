@@ -1192,7 +1192,10 @@ export type Idol = {
    */
   modifierIdsAtTurnStart: Array<Modifier["id"]>;
   modifiers: Modifier[];
-  original: IdolInProduction;
+  original: {
+    data: IdolData;
+    maxLife: number;
+  };
   /**
    * Pアイテムリスト
    *

@@ -32,7 +32,7 @@ describe("generateCardInHandDisplay", () => {
       name: "基本的なスキルカードを要約できる",
       args: [
         createLessonForTest({
-          deck: [
+          cards: [
             {
               id: "a",
               data: getCardDataByConstId("apirunokihon"),
@@ -60,7 +60,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("apirunokihon"),
@@ -93,7 +93,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("apirunokihon"),
@@ -124,7 +124,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("pozunokihon"),
@@ -147,7 +147,7 @@ describe("generateCardInHandDisplay", () => {
       name: "無条件の状態修正と条件付きの状態修正を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たした旨と満たさない旨の2レコードが入る",
       args: [
         createLessonForTest({
-          deck: [
+          cards: [
             {
               id: "a",
               data: getCardDataByConstId("rakkanteki"),
@@ -185,7 +185,7 @@ describe("generateCardInHandDisplay", () => {
       name: "無条件のスコアと条件付きのスコアを持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たさない旨の内容が入り、scoresには無条件のスコアのみ入る",
       args: [
         createLessonForTest({
-          deck: [
+          cards: [
             {
               id: "a",
               data: getCardDataByConstId("hiyaku"),
@@ -219,7 +219,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("hiyaku"),
@@ -258,7 +258,7 @@ describe("generateCardInHandDisplay", () => {
       name: "無条件の元気と条件付きの元気を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たさない旨の内容が入り、vitalityには無条件の値のみ入る",
       args: [
         createLessonForTest({
-          deck: [
+          cards: [
             {
               id: "a",
               data: getCardDataByConstId("honkinoshumi"),
@@ -292,7 +292,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("honkinoshumi"),
@@ -329,7 +329,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("apirunokihon"),
@@ -365,7 +365,7 @@ describe("generateCardInHandDisplay", () => {
       name: "スキルカード使用条件を満たさない時も、スコアの算出を行う",
       args: [
         createLessonForTest({
-          deck: [
+          cards: [
             {
               id: "a",
               data: getCardDataByConstId("chosen"),
@@ -393,7 +393,7 @@ describe("generateCardInHandDisplay", () => {
       args: [
         (() => {
           const lesson = createLessonForTest({
-            deck: [
+            cards: [
               {
                 id: "a",
                 data: getCardDataByConstId("wammoasuteppu"),
@@ -576,7 +576,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("jonetsutan"),
@@ -665,7 +665,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("apirunokihon"),
@@ -688,7 +688,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("hidamarinoseitokaishitsu"),
@@ -711,7 +711,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("shupurehikoru"),
@@ -756,7 +756,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("aidorusengen"),
@@ -781,7 +781,7 @@ describe("generateCardPlayPreviewDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("aidorusengen"),
@@ -893,7 +893,7 @@ describe("generateLessonDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("apirunokihon"),
@@ -941,7 +941,7 @@ describe("generateLessonDisplay", () => {
       args: [
         (() => {
           const gamePlay = createGamePlayForTest({
-            deck: [
+            cards: [
               {
                 id: "c1",
                 data: getCardDataByConstId("apirunokihon"),

@@ -17,7 +17,7 @@ import { createIdGenerator } from "./utils";
 export const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
-    deck?: CardInProduction[];
+    cards?: CardInProduction[];
     idolDataId?: IdolDataId;
     producerItems?: ProducerItemInProduction[];
     specialTrainingLevel?: number | undefined;
@@ -37,7 +37,7 @@ export const createGamePlayForTest = (
     turns,
     specialTrainingLevel,
     talentAwakeningLevel,
-    ...(options.deck ? { cards: options.deck } : {}),
+    ...(options.cards ? { cards: options.cards } : {}),
     ...(options.producerItems ? { producerItems: options.producerItems } : {}),
   });
 };

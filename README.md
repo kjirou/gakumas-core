@@ -56,14 +56,15 @@ import { getNextPhase } from "gakumas-core";
 const nextPhase = getNextPhase(gamePlay);
 ```
 
-戻り値は、以下の値のいずれかです。
+戻り値は、以下の値のいずれかです。UIでの使用を想定した、それぞれの意味を付記します。
 
+- `"lessonStart"`: ユーザーの操作によりゲームを開始し、 `startTurn` によりターン開始処理を行うべきです。
 - `"turnStart"`: `startTurn` によりターン開始処理を行うべきです。
 - `"playerInput"`: ユーザーの操作により、`playCard` によるスキルカードの使用や `skipTurn` によるターンのスキップを行うべきです。
 - `"turnEnd"`: `endTurn` によりターン終了処理を行うべきです。
 - `"lessonEnd"`: 既にレッスンが終了しています。操作を禁止する、画面をゲーム終了後に遷移する、などの処理が必要でしょう。
 
-基本的には、 `"turnStart"` -> `"playerInput"` -> `"turnEnd"` -> `"turnStart"` -> ... の遷移を繰り返します。
+基本的には、 `"turnStart"`（0ターン目は `"lessonStart"`） -> `"playerInput"` -> `"turnEnd"` -> `"turnStart"` -> ... の遷移を繰り返します。
 
 そして、いずれのフェーズからも、 `"lessonEnd"` へ移行する可能性があります。一例ですが、具体的には以下のような状況です。
 

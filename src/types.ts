@@ -1728,13 +1728,16 @@ export type GamePlay = {
 /**
  * レッスンのライフサイクル上の次フェーズ
  *
- * - "turnStart": startTurn を実行するべき
- * - "playable": プレイヤーの入力を待つべき
- * - "turnEnd": endTurn を実行するべき
- * - "lessonEnd": ゲームは終了している
+ * - 一例だが、 UI では以下のような対応をすることを想定している
+ *   - "turnStart": プレイヤーの入力を待たず、 startTurn を実行するべき
+ *   - "playable": プレイヤーの入力を待って、 playCard または skipTurn を実行するべき
+ *   - "turnEnd": プレイヤーの入力を待たず、 endTurn を実行するべき
+ *   - "lessonEnd": ゲームは終了しているので、ゲームに関する操作を禁止したり、結果画面へ遷移するべき
+ *   - "lessonStart": プレイヤーの入力を待って、 startTurn を実行するべき
  */
 export type NextLifecyclePhase =
   | "lessonEnd"
+  | "lessonStart"
   | "playerInput"
   | "turnEnd"
   | "turnStart";

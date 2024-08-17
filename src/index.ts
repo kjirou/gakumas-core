@@ -244,7 +244,7 @@ export const getNextPhase = (gamePlay: GamePlay): NextLifecyclePhase => {
     return "lessonEnd";
   } else if (hasActionEnded(gamePlay)) {
     return lesson.turnNumber === 0 && !lesson.turnEnded
-      ? "turnStart"
+      ? "lessonStart"
       : lesson.turnEnded
         ? "turnStart"
         : "turnEnd";

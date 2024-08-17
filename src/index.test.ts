@@ -19,9 +19,10 @@ describe("getNextPhase", () => {
       producerItems: [],
       turns: ["vocal", "vocal"],
     });
-    // 0, 1
-    expect(getNextPhase(gamePlay)).toBe("turnStart");
+    // 0
+    expect(getNextPhase(gamePlay)).toBe("lessonStart");
     gamePlay = startTurn(gamePlay);
+    // 1
     expect(getNextPhase(gamePlay)).toBe("playerInput");
     gamePlay = skipTurn(gamePlay);
     expect(getNextPhase(gamePlay)).toBe("turnEnd");

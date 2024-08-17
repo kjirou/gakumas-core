@@ -48,8 +48,8 @@ export const idolsAsConst = [
       recommendedModifierKind: "goodCondition",
     },
     rarity: "sr",
-    specificCardId: "zettainimakenai",
-    specificProducerItemId: "tomonitatakautaoru",
+    specificCardId: "ichibanhayuzuranai",
+    specificProducerItemId: "sakinokanzenshokureshipi",
     title: "わたしが一番！",
   },
   {

@@ -18,7 +18,6 @@ import {
   generateLessonDisplay,
   generateModifierDisplays,
 } from "./display";
-import { prepareCardsForLesson } from "./models";
 import { createIdGenerator } from "./utils";
 import { createGamePlayForTest, createLessonForTest } from "./test-utils";
 
@@ -36,7 +35,7 @@ describe("generateCardInHandDisplay", () => {
             {
               id: "a",
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         }),
@@ -64,7 +63,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("apirunokihon"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -97,7 +96,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("apirunokihon"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -128,7 +127,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("pozunokihon"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -151,7 +150,7 @@ describe("generateCardInHandDisplay", () => {
             {
               id: "a",
               data: getCardDataByConstId("rakkanteki"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         }),
@@ -189,7 +188,7 @@ describe("generateCardInHandDisplay", () => {
             {
               id: "a",
               data: getCardDataByConstId("hiyaku"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         }),
@@ -223,7 +222,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("hiyaku"),
-                enhanced: true,
+                enhancements: [],
               },
             ],
           });
@@ -262,7 +261,7 @@ describe("generateCardInHandDisplay", () => {
             {
               id: "a",
               data: getCardDataByConstId("honkinoshumi"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         }),
@@ -296,7 +295,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("honkinoshumi"),
-                enhanced: true,
+                enhancements: [{ kind: "original" }],
               },
             ],
           });
@@ -333,7 +332,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("apirunokihon"),
-                enhanced: true,
+                enhancements: [{ kind: "original" }],
               },
             ],
           });
@@ -369,7 +368,7 @@ describe("generateCardInHandDisplay", () => {
             {
               id: "a",
               data: getCardDataByConstId("chosen"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         }),
@@ -397,7 +396,7 @@ describe("generateCardInHandDisplay", () => {
               {
                 id: "a",
                 data: getCardDataByConstId("wammoasuteppu"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -436,18 +435,18 @@ describe("generateCardInInventoryDisplays", () => {
     {
       name: "標準ソートで整列する",
       args: [
-        prepareCardsForLesson([
+        [
           {
             id: "a",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("hyogennokihon"),
-            enhanced: false,
+            enhancements: [],
           },
-        ]),
+        ],
         ["b", "a"],
       ],
       expected: [{ id: "a" }, { id: "b" }] as CardInInventoryDisplay[],
@@ -455,13 +454,13 @@ describe("generateCardInInventoryDisplays", () => {
     {
       name: "レッスンサポートの強化を反映する",
       args: [
-        prepareCardsForLesson([
+        [
           {
             id: "a",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: true,
+            enhancements: [{ kind: "original" } as const],
           },
-        ]).map((card) => ({
+        ].map((card) => ({
           ...card,
           enhancements: [
             ...card.enhancements,
@@ -478,13 +477,13 @@ describe("generateCardInInventoryDisplays", () => {
     {
       name: "状態修正効果がある時、効果リストへ追加する",
       args: [
-        prepareCardsForLesson([
+        [
           {
             id: "a",
             data: getCardDataByConstId("damedamekukkingu"),
-            enhanced: false,
+            enhancements: [],
           },
-        ]),
+        ],
         ["a"],
       ],
       expected: [
@@ -500,18 +499,18 @@ describe("generateCardInInventoryDisplays", () => {
     {
       name: "条件付きのパラメータ増加と元気がある時、効果リストへ追加する",
       args: [
-        prepareCardsForLesson([
+        [
           {
             id: "a",
             data: getCardDataByConstId("hiyaku"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("chokougakurekiaidoru"),
-            enhanced: false,
+            enhancements: [],
           },
-        ]),
+        ],
         ["a", "b"],
       ],
       expected: [
@@ -522,18 +521,18 @@ describe("generateCardInInventoryDisplays", () => {
     {
       name: "条件なしのパラメータ増加と元気がある時、効果リストへ追加しない",
       args: [
-        prepareCardsForLesson([
+        [
           {
             id: "a",
             data: getCardDataByConstId("shikosakugo"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("tegakinomesseji"),
-            enhanced: false,
+            enhancements: [],
           },
-        ]),
+        ],
         ["a"],
       ],
       expected: [{ effects: [] as any }] as CardInInventoryDisplay[],
@@ -541,18 +540,18 @@ describe("generateCardInInventoryDisplays", () => {
     {
       name: "効果リストの activatable は常に true である",
       args: [
-        prepareCardsForLesson([
+        [
           {
             id: "a",
             data: getCardDataByConstId("hyojonokihon"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("hiyaku"),
-            enhanced: false,
+            enhancements: [],
           },
-        ]),
+        ],
         ["a", "b"],
       ],
       expected: [
@@ -580,7 +579,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("jonetsutan"),
-                enhanced: true,
+                enhancements: [{ kind: "original" }],
               },
             ],
             producerItems: [
@@ -669,7 +668,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("apirunokihon"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -692,7 +691,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("hidamarinoseitokaishitsu"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -715,7 +714,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("shupurehikoru"),
-                enhanced: true,
+                enhancements: [{ kind: "original" }],
               },
             ],
           });
@@ -760,7 +759,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("aidorusengen"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -785,7 +784,7 @@ describe("generateCardPlayPreviewDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("aidorusengen"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });
@@ -897,12 +896,12 @@ describe("generateLessonDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("apirunokihon"),
-                enhanced: false,
+                enhancements: [],
               },
               {
                 id: "c2",
                 data: getCardDataByConstId("hyogennokihon"),
-                enhanced: true,
+                enhancements: [{ kind: "original" }],
               },
             ],
           });
@@ -945,22 +944,22 @@ describe("generateLessonDisplay", () => {
               {
                 id: "c1",
                 data: getCardDataByConstId("apirunokihon"),
-                enhanced: false,
+                enhancements: [],
               },
               {
                 id: "c2",
                 data: getCardDataByConstId("furumainokihon"),
-                enhanced: false,
+                enhancements: [],
               },
               {
                 id: "c3",
                 data: getCardDataByConstId("hyojonokihon"),
-                enhanced: false,
+                enhancements: [],
               },
               {
                 id: "c4",
                 data: getCardDataByConstId("hyogennokihon"),
-                enhanced: false,
+                enhancements: [],
               },
             ],
           });

@@ -40,9 +40,7 @@ describe("generateCardName", () => {
     {
       args: [
         {
-          original: {
-            data: getCardDataByConstId("apirunokihon"),
-          },
+          data: getCardDataByConstId("apirunokihon"),
           enhancements: [] as any,
         } as Card,
       ],
@@ -51,9 +49,7 @@ describe("generateCardName", () => {
     {
       args: [
         {
-          original: {
-            data: getCardDataByConstId("apirunokihon"),
-          },
+          data: getCardDataByConstId("apirunokihon"),
           enhancements: [{ kind: "original" }],
         } as Card,
       ],
@@ -62,9 +58,7 @@ describe("generateCardName", () => {
     {
       args: [
         {
-          original: {
-            data: getCardDataByConstId("apirunokihon"),
-          },
+          data: getCardDataByConstId("apirunokihon"),
           enhancements: [{ kind: "effect" }, { kind: "lessonSupport" }],
         } as Card,
       ],
@@ -73,9 +67,7 @@ describe("generateCardName", () => {
     {
       args: [
         {
-          original: {
-            data: getCardDataByConstId("apirunokihon"),
-          },
+          data: getCardDataByConstId("apirunokihon"),
           enhancements: [
             { kind: "effect" },
             { kind: "lessonSupport" },

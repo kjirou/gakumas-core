@@ -1,6 +1,5 @@
 import type {
   Card,
-  CardInProduction,
   Lesson,
   GamePlay,
   LessonUpdateQuery,
@@ -17,7 +16,7 @@ import { createIdGenerator } from "./utils";
 export const createGamePlayForTest = (
   options: {
     clearScoreThresholds?: Lesson["clearScoreThresholds"];
-    cards?: CardInProduction[];
+    cards?: Card[];
     idolDataId?: IdolDataId;
     producerItems?: ProducerItemInProduction[];
     specialTrainingLevel?: number | undefined;

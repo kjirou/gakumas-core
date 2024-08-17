@@ -90,14 +90,10 @@ describe("activateEffectIf", () => {
           kind: "cards.addition",
           card: {
             id: expect.any(String),
+            data: expect.objectContaining({
+              rarity: "ssr",
+            }),
             enhancements: [{ kind: "original" }],
-            original: {
-              id: expect.any(String),
-              data: expect.objectContaining({
-                rarity: "ssr",
-              }),
-              enhanced: true,
-            },
           },
         },
         {
@@ -122,14 +118,10 @@ describe("activateEffectIf", () => {
           kind: "cards.addition",
           card: {
             id: expect.any(String),
+            data: expect.objectContaining({
+              id: "nemuke",
+            }),
             enhancements: [],
-            original: {
-              id: expect.any(String),
-              data: expect.objectContaining({
-                id: "nemuke",
-              }),
-              enhanced: false,
-            },
           },
         },
         {
@@ -1246,7 +1238,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         {
           id: "a",
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         },
       ],
     });
@@ -1311,7 +1303,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         {
           id: "a",
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         },
       ],
     });
@@ -1356,7 +1348,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         ...["a", "b"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -1441,7 +1433,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         ...["a", "b"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -1486,7 +1478,7 @@ describe("activateModifierEffectsOnTurnStart", () => {
         ...["a", "b"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3360,7 +3352,7 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c", "d"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3385,7 +3377,7 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c", "d"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3407,7 +3399,7 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c", "d", "e"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3453,12 +3445,12 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
         ...["d"].map((id) => ({
           id,
           data: getCardDataByConstId("shizukanaishi"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3487,17 +3479,17 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataByConstId("shizukanaishi"),
-          enhanced: false,
+          enhancements: [],
         })),
         ...["d"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
         ...["e", "f"].map((id) => ({
           id,
           data: getCardDataByConstId("shizukanaishi"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3523,22 +3515,22 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataByConstId("shizukanaishi"),
-          enhanced: false,
+          enhancements: [],
         })),
         ...["d"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
         ...["e", "f", "g", "h"].map((id) => ({
           id,
           data: getCardDataByConstId("shizukanaishi"),
-          enhanced: false,
+          enhancements: [],
         })),
         ...["i"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3564,7 +3556,7 @@ describe("drawCardsOnTurnStart", () => {
         ...["a", "b", "c"].map((id) => ({
           id,
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         })),
       ],
     });
@@ -3799,7 +3791,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -3822,7 +3814,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("hyogennokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -3848,7 +3840,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -3883,7 +3875,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("genkinaaisatsu"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -3913,7 +3905,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("adorenarinzenkai"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
         producerItems: [
@@ -3983,17 +3975,17 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("fanshichamu"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("hyogennokihon"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "c",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -4067,17 +4059,17 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("enshutsukeikaku"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "c",
             data: getCardDataByConstId("shinkokyu"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -4145,12 +4137,12 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("kagayakukimihe"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("hyogennokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -4216,7 +4208,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("hiyaku"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4237,7 +4229,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("jumbiundo"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4292,12 +4284,12 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("aidorusengen"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
           ],
         });
@@ -4327,12 +4319,12 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("aidorusengen"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c", "d"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
           ],
         });
@@ -4369,12 +4361,12 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("aidorusengen"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c", "d", "e", "f", "g"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
           ],
         });
@@ -4403,17 +4395,17 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("teipatei"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c", "d"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
             ...["e"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: true,
+              enhancements: [{ kind: "original" } as const],
             })),
           ],
         });
@@ -4443,12 +4435,12 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("shikirinaoshi"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c", "d", "e", "f"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
           ],
         });
@@ -4481,12 +4473,12 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("shikirinaoshi"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
           ],
         });
@@ -4515,12 +4507,12 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("shikirinaoshi"),
-              enhanced: false,
+              enhancements: [],
             },
             ...["b", "c", "d", "e"].map((id) => ({
               id,
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             })),
           ],
         });
@@ -4544,7 +4536,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("furumainokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4580,7 +4572,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("furumainokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4613,7 +4605,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("enshutsukeikaku"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4665,7 +4657,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4697,7 +4689,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4727,7 +4719,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("apirunokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4756,7 +4748,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("shikosakugo"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4789,7 +4781,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("pozunokihon"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4826,7 +4818,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("kaika"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4852,7 +4844,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("200sumairu"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4880,7 +4872,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("kaika"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4911,7 +4903,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("genkinaaisatsu"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4937,7 +4929,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("hatonoaizu"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4963,7 +4955,7 @@ describe("useCard preview:false", () => {
             {
               id: "a",
               data: getCardDataByConstId("todoite"),
-              enhanced: false,
+              enhancements: [],
             },
           ],
         });
@@ -4993,7 +4985,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("eieio"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
         producerItems: [
@@ -5050,7 +5042,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("ishikinokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
         producerItems: [
@@ -5106,7 +5098,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("hidamarinoseitokaishitsu"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -5168,12 +5160,12 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -5212,12 +5204,12 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
           {
             id: "b",
             data: getCardDataByConstId("apirunokihon"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -5239,7 +5231,7 @@ describe("useCard preview:false", () => {
           {
             id: "a",
             data: getCardDataByConstId("iji"),
-            enhanced: false,
+            enhancements: [],
           },
         ],
       });
@@ -5264,7 +5256,7 @@ describe("useCard preview:true", () => {
         {
           id: "a",
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         },
       ],
     });
@@ -5299,7 +5291,7 @@ describe("useCard preview:true", () => {
         {
           id: "a",
           data: getCardDataByConstId("chosen"),
-          enhanced: false,
+          enhancements: [],
         },
       ],
     });
@@ -5325,7 +5317,7 @@ describe("useCard preview:true", () => {
         {
           id: "a",
           data: getCardDataByConstId("apirunokihon"),
-          enhanced: false,
+          enhancements: [],
         },
       ],
     });

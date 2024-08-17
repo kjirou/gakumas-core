@@ -18,7 +18,6 @@ import {
   CardContentData,
   CardData,
   CardEnhancement,
-  CardInProduction,
   Drink,
   Effect,
   Encouragement,
@@ -72,7 +71,7 @@ export const isPerformEffectType = (
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
 export const getCardContentData = (card: Card): CardContentData => {
-  const contents = getCardContentDataList(card.original.data);
+  const contents = getCardContentDataList(card.data);
   if (card.enhancements.length === 0) {
     return contents[0];
   } else if (card.enhancements.length === 1) {
@@ -152,26 +151,14 @@ export const getDisplayedRepresentativeModifierValue = <
 export const createDefaultCardSet = (
   producePlan: ProducePlan,
   idGenerator: IdGenerator,
-): CardInProduction[] => {
+): Card[] => {
   const defaultCardSetData = getDefaultCardSetData(producePlan);
   return defaultCardSetData.cardDataIds.map((cardDataId) => {
     const cardData = getCardDataById(cardDataId);
     return {
       id: idGenerator(),
       data: cardData,
-      enhanced: false,
-    };
-  });
-};
-
-export const prepareCardsForLesson = (
-  cardsInProduction: CardInProduction[],
-): Card[] => {
-  return cardsInProduction.map((cardInProduction) => {
-    return {
-      id: cardInProduction.id,
-      original: cardInProduction,
-      enhancements: cardInProduction.enhanced ? [{ kind: "original" }] : [],
+      enhancements: [],
     };
   });
 };
@@ -239,16 +226,16 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  * @param params.talentAwakeningLevel 才能開花段階、0 から 4
  */
 export const createGamePlay = (params: {
-  additionalCards?: CardInProduction[];
+  additionalCards?: Card[];
   additionalProducerItems?: ProducerItemInProduction[];
-  cards?: CardInProduction[];
+  cards?: Card[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   drinks?: Drink[];
   encouragements?: Encouragement[];
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
   idolDataId: IdolDataId;
-  idolSpecificCardTestId?: CardInProduction["id"];
+  idolSpecificCardTestId?: Card["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: Idol["life"];
   maxLife?: CharacterData["maxLife"];
@@ -266,17 +253,19 @@ export const createGamePlay = (params: {
   const specificProducerItemData = getProducerItemDataById(
     idolData.specificProducerItemId,
   );
-  const cardsInProduction =
+  const cards: Card[] =
     params.cards ??
     [
       {
         id: params.idolSpecificCardTestId ?? params.idGenerator(),
         data: specificCardData,
-        enhanced: params.specialTrainingLevel >= 3,
+        enhancements:
+          params.specialTrainingLevel >= 3
+            ? [{ kind: "original" } as const]
+            : [],
       },
       ...(params.additionalCards ?? []),
     ].sort((a, b) => compareDeckOrder(a.data, b.data));
-  const cards = prepareCardsForLesson(cardsInProduction);
   const producerItemsInProduction = params.producerItems ?? [
     {
       id: params.idGenerator(),

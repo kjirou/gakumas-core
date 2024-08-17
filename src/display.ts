@@ -148,7 +148,7 @@ export const generateCardInHandDisplay = (
     enhancements: card.enhancements,
     name: generateCardName(card),
     playable: canPlayCard(lesson, cardContent.cost, cardContent.condition),
-    rarity: card.original.data.rarity,
+    rarity: card.data.rarity,
     scores,
     vitality,
   };
@@ -168,7 +168,7 @@ const generateCardInInventoryDisplay = (card: Card): CardInInventoryDisplay => {
       condition: cardContent.condition,
       effects: cardContent.effects,
       innate: cardContent.innate,
-      nonDuplicative: card.original.data.nonDuplicative,
+      nonDuplicative: card.data.nonDuplicative,
       usableOncePerLesson: cardContent.usableOncePerLesson,
     }),
   };
@@ -186,7 +186,7 @@ export const generateCardInInventoryDisplays = (
       }
       return generateCardInInventoryDisplay(card);
     })
-    .sort((a, b) => compareDeckOrder(a.original.data, b.original.data));
+    .sort((a, b) => compareDeckOrder(a.data, b.data));
 };
 
 export const generateProducerItemDisplays = (
@@ -420,7 +420,7 @@ export const generateCardPlayPreviewDisplay = (
     condition: cardContent.condition,
     effects: cardContent.effects,
     innate: cardContent.innate,
-    nonDuplicative: card.original.data.nonDuplicative,
+    nonDuplicative: card.data.nonDuplicative,
     usableOncePerLesson: cardContent.usableOncePerLesson,
   });
   return {

@@ -15,10 +15,10 @@ import {
   GamePlay,
   LessonUpdateQuery,
   MemoryEffect,
-  CardInProduction,
   ProducerItemInProduction,
   Drink,
   NextLifecyclePhase,
+  Card,
 } from "./types";
 import { type CardDataId, getCardDataByConstId } from "./data/cards";
 import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
@@ -121,10 +121,10 @@ export * from "./utils";
  */
 export const initializeGamePlay = (params: {
   cards: Array<{
-    enhanced?: CardInProduction["enhanced"];
+    enhanced?: boolean;
     id: CardDataId;
     /** テスト用、本来知る必要がない内部的なIDを指定する */
-    testId?: CardInProduction["id"];
+    testId?: Card["id"];
   }>;
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   drinks?: Array<{
@@ -132,7 +132,7 @@ export const initializeGamePlay = (params: {
   }>;
   encouragements?: Encouragement[];
   idolDataId: IdolDataId;
-  idolSpecificCardTestId?: CardInProduction["id"];
+  idolSpecificCardTestId?: Card["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: Idol["life"];
   maxLife?: Idol["maxLife"];
@@ -151,15 +151,13 @@ export const initializeGamePlay = (params: {
   const talentAwakeningLevel = params.talentAwakeningLevel ?? 1;
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
-  const additionalCards: CardInProduction[] = params.cards.map(
-    (cardSetting) => {
-      return {
-        id: cardSetting.testId ?? idGenerator(),
-        data: getCardDataByConstId(cardSetting.id),
-        enhanced: cardSetting.enhanced ?? false,
-      };
-    },
-  );
+  const additionalCards: Card[] = params.cards.map((cardSetting) => {
+    return {
+      id: cardSetting.testId ?? idGenerator(),
+      data: getCardDataByConstId(cardSetting.id),
+      enhancements: cardSetting.enhanced ? [{ kind: "original" }] : [],
+    };
+  });
   const additionalProducerItems: ProducerItemInProduction[] =
     params.producerItems.map((producerItemSetting) => {
       return {

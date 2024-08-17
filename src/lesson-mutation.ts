@@ -1392,7 +1392,7 @@ export const activateEffectsOnLessonStart = (
         createLessonUpdateQueryFromDiff(diff, {
           kind: "lessonStart.producerItemEffectActivation",
           producerItemId: producerItem.id,
-          producerItemDataId: producerItem.original.data.id,
+          producerItemDataId: producerItem.data.id,
           historyTurnNumber: lesson.turnNumber,
           historyResultIndex: nextHistoryResultIndex,
         }),

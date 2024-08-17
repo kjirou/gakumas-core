@@ -62,15 +62,11 @@ describe("initializeGamePlay", () => {
             data: getIdolDataByConstId("kuramotochina-ssr-1"),
             producerItems: [
               {
-                original: {
-                  data: getProducerItemDataByConstId("himitsutokkunkade"),
-                  enhanced: false,
-                },
+                data: getProducerItemDataByConstId("himitsutokkunkade"),
+                enhanced: false,
               },
               {
-                original: {
-                  data: getProducerItemDataByConstId("masukottohikonin"),
-                },
+                data: getProducerItemDataByConstId("masukottohikonin"),
               },
             ],
           },
@@ -109,10 +105,8 @@ describe("initializeGamePlay", () => {
           idol: {
             producerItems: [
               {
-                original: {
-                  data: getProducerItemDataByConstId("himitsutokkunkade"),
-                  enhanced: true,
-                },
+                data: getProducerItemDataByConstId("himitsutokkunkade"),
+                enhanced: true,
               },
             ],
           },

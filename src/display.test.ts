@@ -587,6 +587,7 @@ describe("generateCardPlayPreviewDisplay", () => {
                 id: "p1",
                 data: getProducerItemDataByConstId("itsumonomeikupochi"),
                 enhanced: false,
+                activationCount: 0,
               },
             ],
           });
@@ -1080,6 +1081,7 @@ describe("generateLessonDisplay", () => {
                 id: "p1",
                 data: getProducerItemDataByConstId("saigononatsunoomoide"),
                 enhanced: true,
+                activationCount: 0,
               },
             ],
           });

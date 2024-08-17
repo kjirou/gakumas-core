@@ -147,8 +147,8 @@ export const initializeGamePlay = (params: {
   turns: Lesson["turns"];
 }): GamePlay => {
   const idGenerator = createIdGenerator();
-  const specialTrainingLevel = params.specialTrainingLevel ?? 1;
-  const talentAwakeningLevel = params.talentAwakeningLevel ?? 1;
+  const specialTrainingLevel = params.specialTrainingLevel ?? 0;
+  const talentAwakeningLevel = params.talentAwakeningLevel ?? 0;
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
   const additionalCards: Card[] = params.cards.map((cardSetting) => {

@@ -13,7 +13,7 @@ import {
   createCurrentTurnDetails,
   calculateModifierEffectedActionCost,
   createActualTurns,
-  createGamePlay,
+  createLesson,
   diffUpdates,
   findPrioritizedDoubleEffectModifier,
   getDisplayedRepresentativeModifierValue,
@@ -336,58 +336,57 @@ describe("createActualTurns", () => {
     },
   );
 });
-describe("createGamePlay", () => {
+describe("createLesson", () => {
   test("it works", () => {
-    const idGenerator = createIdGenerator();
-    const gamePlay = createGamePlay({
+    const lesson = createLesson({
+      cards: [
+        {
+          id: "c1",
+          data: getCardDataByConstId("apirunokihon"),
+          enhancements: [],
+        },
+      ],
       idGenerator: createIdGenerator(),
       idolDataId: "hanamisaki-r-1",
       producerItems: [
         {
-          id: idGenerator(),
+          id: "p1",
           data: getProducerItemDataByConstId("hatsuboshitecho"),
           enhanced: false,
           activationCount: 0,
         },
       ],
-      specialTrainingLevel: 1,
-      talentAwakeningLevel: 1,
       turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });
-    expect(gamePlay).toStrictEqual({
-      getRandom: expect.any(Function),
-      idGenerator: expect.any(Function),
-      initialLesson: {
-        clearScoreThresholds: undefined,
-        idol: {
-          data: getIdolDataByConstId("hanamisaki-r-1"),
-          life: 32,
-          maxLife: 32,
-          vitality: 0,
-          producerItems: expect.any(Array),
-          modifiers: [],
-          modifierIdsAtTurnStart: [],
-          totalCardUsageCount: 0,
-          actionPoints: 0,
-          scoreBonus: undefined,
-          drinks: [],
-        },
-        cards: expect.any(Array),
-        hand: [],
-        deck: expect.any(Array),
-        discardPile: [],
-        removedCardPile: [],
-        handWhenEmptyDeck: [],
-        score: 0,
-        turnNumber: 0,
-        turnEnded: false,
-        turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
-        remainingTurnsChange: 0,
-        encouragements: [],
-        memoryEffects: [],
-        ignoreIdolParameterKindConditionAfterClearing: false,
+    expect(lesson).toStrictEqual({
+      clearScoreThresholds: undefined,
+      idol: {
+        data: getIdolDataByConstId("hanamisaki-r-1"),
+        life: 32,
+        maxLife: 32,
+        vitality: 0,
+        producerItems: [expect.any(Object)],
+        modifiers: [],
+        modifierIdsAtTurnStart: [],
+        totalCardUsageCount: 0,
+        actionPoints: 0,
+        scoreBonus: undefined,
+        drinks: [],
       },
-      updates: [],
+      cards: [expect.any(Object)],
+      hand: [],
+      deck: ["c1"],
+      discardPile: [],
+      removedCardPile: [],
+      handWhenEmptyDeck: [],
+      score: 0,
+      turnNumber: 0,
+      turnEnded: false,
+      turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
+      remainingTurnsChange: 0,
+      encouragements: [],
+      memoryEffects: [],
+      ignoreIdolParameterKindConditionAfterClearing: false,
     });
   });
 });

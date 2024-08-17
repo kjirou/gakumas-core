@@ -19,13 +19,20 @@ import {
   NextLifecyclePhase,
   Card,
   ProducerItem,
+  GetRandom,
 } from "./types";
-import { type CardDataId, getCardDataByConstId } from "./data/cards";
+import {
+  type CardDataId,
+  compareDeckOrder,
+  getCardDataByConstId,
+  getCardDataById,
+} from "./data/cards";
 import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
-import { type IdolDataId } from "./data/idols";
+import { type IdolDataId, getIdolDataById } from "./data/idols";
 import {
   type ProducerItemDataId,
   getProducerItemDataByConstId,
+  getProducerItemDataById,
 } from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
@@ -42,13 +49,13 @@ import {
 } from "./lesson-mutation";
 import {
   createCurrentTurnDetails,
-  createGamePlay,
+  createLesson,
   getNextHistoryResultIndex,
   isScoreSatisfyingPerfect,
   lifeRecoveredBySkippingTurn,
   patchDiffs,
 } from "./models";
-import { createIdGenerator } from "./utils";
+import { createIdGenerator, shuffleArray } from "./utils";
 
 export type * from "./types";
 export * from "./data/card-sets";
@@ -74,6 +81,7 @@ export * from "./utils";
  * @param params.clearScoreThresholds クリアスコアとパーフェクトスコア設定、任意でデフォルトは上限なしを意味する undefined
  * @param params.drinks Pドリンク設定、任意、本家と異なり上限数無し
  * @param params.encouragements 応援/トラブル設定、任意
+ * @param params.getRandom テスト用、乱数生成関数を明示的に渡す
  * @param params.idolDataId プロデュースアイドルのID
  * @param params.idolSpecificCardTestId テスト用、本来知る必要がない内部的なIDを指定する
  * @param params.ignoreIdolParameterKindConditionAfterClearing クリア後に、Pアイテムがパラメータ属性を無視して効果を発動するか。追い込みレッスンの設定。
@@ -81,6 +89,9 @@ export * from "./utils";
  * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値
  * @param params.maxLife レッスン開始時のアイドルの最大体力、任意でデフォルトはTrue Endの効果を含むアイドルの最大体力
  * @param params.memoryEffects メモリーのアビリティによる効果設定、任意
+ * @param params.noDeckShuffle true を設定すると、山札をシャッフルせずに cards の順番でスキルカードを引く、任意
+ * @param params.noIdolSpecificCard true を設定すると、アイドル固有スキルカードを使用しない、任意
+ * @param params.noIdolSpecificProducerItem turue を設定すると、アイドル固有Pアイテムを使用しない、任意
  * @param params.producerItems アイドル固有に加えて、追加するPアイテムリスト
  * @param params.scoreBonus スコアボーナス設定、任意でデフォルトは設定なしを意味する undefined
  * @param params.specialTrainingLevel 特訓段階、アイドル固有スキルカードの強化に影響を与えるのみ。任意でデフォルトは1。
@@ -131,12 +142,16 @@ export const initializeGamePlay = (params: {
     id: DrinkDataId;
   }>;
   encouragements?: Encouragement[];
+  getRandom?: GetRandom;
   idolDataId: IdolDataId;
   idolSpecificCardTestId?: Card["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: Idol["life"];
   maxLife?: Idol["maxLife"];
   memoryEffects?: MemoryEffect[];
+  noDeckShuffle?: boolean;
+  noIdolSpecificCard?: boolean;
+  noIdolSpecificProducerItem?: boolean;
   producerItems: Array<{
     enhanced?: ProducerItem["enhanced"];
     id: ProducerItemDataId;
@@ -147,51 +162,88 @@ export const initializeGamePlay = (params: {
   turns: Lesson["turns"];
 }): GamePlay => {
   const idGenerator = createIdGenerator();
-  const specialTrainingLevel = params.specialTrainingLevel ?? 1;
-  const talentAwakeningLevel = params.talentAwakeningLevel ?? 1;
+  const getRandom = params.getRandom ?? Math.random;
+  const idolData = getIdolDataById(params.idolDataId);
+  const specialTrainingLevel = params.specialTrainingLevel ?? 0;
+  const talentAwakeningLevel = params.talentAwakeningLevel ?? 0;
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
-  const additionalCards: Card[] = params.cards.map((cardSetting) => {
-    return {
-      id: cardSetting.testId ?? idGenerator(),
-      data: getCardDataByConstId(cardSetting.id),
-      enhancements: cardSetting.enhanced ? [{ kind: "original" }] : [],
-    };
-  });
-  const additionalProducerItems: ProducerItem[] = params.producerItems.map(
-    (producerItemSetting) => {
+  const unorderedCards: Card[] = [
+    ...(!params.noIdolSpecificCard
+      ? [
+          {
+            id: params.idolSpecificCardTestId ?? idGenerator(),
+            data: getCardDataById(idolData.specificCardId),
+            enhancements:
+              specialTrainingLevel >= 3 ? [{ kind: "original" } as const] : [],
+          } as const,
+        ]
+      : []),
+    ...params.cards.map((cardSetting) => {
+      const card: Card = {
+        id: cardSetting.testId ?? idGenerator(),
+        data: getCardDataByConstId(cardSetting.id),
+        enhancements: cardSetting.enhanced ? [{ kind: "original" }] : [],
+      };
+      return card;
+    }),
+  ];
+  const cards = unorderedCards
+    .slice()
+    .sort((a, b) => compareDeckOrder(a.data, b.data));
+  const deck = params.noDeckShuffle
+    ? unorderedCards.map((e) => e.id)
+    : shuffleArray(
+        cards.map((e) => e.id),
+        getRandom,
+      );
+  const producerItems: ProducerItem[] = [
+    ...(!params.noIdolSpecificProducerItem
+      ? [
+          {
+            id: idGenerator(),
+            data: getProducerItemDataById(idolData.specificProducerItemId),
+            enhanced: talentAwakeningLevel >= 2,
+            activationCount: 0,
+          },
+        ]
+      : []),
+    ...params.producerItems.map((producerItemSetting) => {
       return {
         id: idGenerator(),
         data: getProducerItemDataByConstId(producerItemSetting.id),
         enhanced: producerItemSetting.enhanced ?? false,
         activationCount: 0,
       };
-    },
-  );
+    }),
+  ];
   const drinks: Drink[] = (params.drinks ?? []).map((drinkSetting) => {
     return {
       id: idGenerator(),
       data: getDrinkDataById(drinkSetting.id),
     };
   });
-  return createGamePlay({
-    additionalCards,
-    additionalProducerItems,
-    clearScoreThresholds: params.clearScoreThresholds,
-    drinks,
-    encouragements: params.encouragements,
+  return {
+    getRandom,
     idGenerator,
-    idolDataId: params.idolDataId,
-    idolSpecificCardTestId: params.idolSpecificCardTestId,
-    ignoreIdolParameterKindConditionAfterClearing,
-    life: params.life,
-    maxLife: params.maxLife,
-    memoryEffects: params.memoryEffects,
-    scoreBonus: params.scoreBonus,
-    specialTrainingLevel,
-    talentAwakeningLevel,
-    turns: params.turns,
-  });
+    initialLesson: createLesson({
+      cards,
+      clearScoreThresholds: params.clearScoreThresholds,
+      deck,
+      drinks,
+      encouragements: params.encouragements,
+      idGenerator,
+      idolDataId: params.idolDataId,
+      ignoreIdolParameterKindConditionAfterClearing,
+      life: params.life,
+      maxLife: params.maxLife,
+      memoryEffects: params.memoryEffects,
+      producerItems,
+      scoreBonus: params.scoreBonus,
+      turns: params.turns,
+    }),
+    updates: [],
+  };
 };
 
 /**

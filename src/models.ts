@@ -2,16 +2,11 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import {
-  compareDeckOrder,
-  getCardDataById,
-  getCardContentDataList,
-} from "./data/cards";
+import { getCardDataById, getCardContentDataList } from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById, IdolDataId } from "./data/idols";
 import { metaModifierDictioanry } from "./data/modifiers";
-import { getProducerItemDataById } from "./data/producer-items";
 import {
   ActionCost,
   Card,
@@ -21,12 +16,10 @@ import {
   Drink,
   Effect,
   Encouragement,
-  GetRandom,
   IdGenerator,
   Idol,
   IdolParameterKind,
   Lesson,
-  GamePlay,
   LessonUpdateQuery,
   LessonUpdateDiff,
   LessonUpdateQueryReason,
@@ -39,7 +32,6 @@ import {
   CharacterData,
   CurrentTurnDetails,
 } from "./types";
-import { shuffleArray } from "./utils";
 
 /** ターン開始時の手札数 */
 export const handSizeOnLessonStart = 3;
@@ -201,66 +193,32 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
 };
 
 /**
- * ゲームプレイのインスタンスを作成する
+ * レッスンを生成する
  *
- * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
- * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
- * @param params.cards テスト用、山札全体を明示的に指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.idolSpecificCardTestId テスト用、内部的なIDを指定する
- * @param params.producerItems テスト用、Pアイテム全体を指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.specialTrainingLevel 特訓段階、0 から 6
- * @param params.talentAwakeningLevel 才能開花段階、0 から 4
+ * - idGenerator や getRandom などの、制御が難しかったり副作用がある関数呼び出しは、この中では行わない
+ *   - 処理の大半、主にゲームのロジックそのものの大半は、 lesson インスタンスに依存している
+ *   - それらに対するユニットテストを書きやすくするため
+ *
+ * @param params.deck 未設定の場合は、カードを引く順番は cards の順番になる、現在はテスト用
  */
-export const createGamePlay = (params: {
-  additionalCards?: Card[];
-  additionalProducerItems?: ProducerItem[];
-  cards?: Card[];
+export const createLesson = (params: {
+  cards: Card[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  deck?: Array<Card["id"]>;
   drinks?: Drink[];
   encouragements?: Encouragement[];
-  getRandom?: GetRandom;
   idGenerator: IdGenerator;
   idolDataId: IdolDataId;
-  idolSpecificCardTestId?: Card["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: Idol["life"];
   maxLife?: CharacterData["maxLife"];
   memoryEffects?: MemoryEffect[];
-  producerItems?: ProducerItem[];
+  producerItems: ProducerItem[];
   scoreBonus?: Idol["scoreBonus"];
-  specialTrainingLevel: number;
-  talentAwakeningLevel: number;
   turns: Lesson["turns"];
-}): GamePlay => {
-  const getRandom = params.getRandom ? params.getRandom : Math.random;
+}): Lesson => {
   const idolData = getIdolDataById(params.idolDataId);
   const characterData = getCharacterDataById(idolData.characterId);
-  const specificCardData = getCardDataById(idolData.specificCardId);
-  const specificProducerItemData = getProducerItemDataById(
-    idolData.specificProducerItemId,
-  );
-  const cards: Card[] =
-    params.cards ??
-    [
-      {
-        id: params.idolSpecificCardTestId ?? params.idGenerator(),
-        data: specificCardData,
-        enhancements:
-          params.specialTrainingLevel >= 3
-            ? [{ kind: "original" } as const]
-            : [],
-      },
-      ...(params.additionalCards ?? []),
-    ].sort((a, b) => compareDeckOrder(a.data, b.data));
-  const producerItems: ProducerItem[] = params.producerItems ?? [
-    {
-      id: params.idGenerator(),
-      data: specificProducerItemData,
-      enhanced: params.talentAwakeningLevel >= 2,
-      activationCount: 0,
-    },
-    ...(params.additionalProducerItems ?? []),
-  ];
   const maxLife = params.maxLife ?? characterData.maxLife;
   const life = params.life ? Math.min(params.life, maxLife) : maxLife;
   const clearScoreThresholds =
@@ -272,42 +230,34 @@ export const createGamePlay = (params: {
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
   const memoryEffects = params.memoryEffects ?? [];
   return {
-    getRandom,
-    idGenerator: params.idGenerator,
-    initialLesson: {
-      cards,
-      clearScoreThresholds,
-      deck: shuffleArray(
-        cards.map((card) => card.id),
-        getRandom,
-      ),
-      discardPile: [],
-      encouragements,
-      hand: [],
-      idol: {
-        actionPoints: 0,
-        data: idolData,
-        drinks: params.drinks ?? [],
-        life,
-        maxLife,
-        modifierIdsAtTurnStart: [],
-        modifiers: [],
-        producerItems,
-        scoreBonus: params.scoreBonus,
-        totalCardUsageCount: 0,
-        vitality: 0,
-      },
-      ignoreIdolParameterKindConditionAfterClearing,
-      memoryEffects,
-      turns: params.turns,
-      removedCardPile: [],
-      handWhenEmptyDeck: [],
-      score: 0,
-      turnNumber: 0,
-      turnEnded: false,
-      remainingTurnsChange: 0,
+    cards: params.cards,
+    clearScoreThresholds,
+    deck: params.deck ?? params.cards.map((card) => card.id),
+    discardPile: [],
+    encouragements,
+    hand: [],
+    idol: {
+      actionPoints: 0,
+      data: idolData,
+      drinks: params.drinks ?? [],
+      life,
+      maxLife,
+      modifierIdsAtTurnStart: [],
+      modifiers: [],
+      producerItems: params.producerItems,
+      scoreBonus: params.scoreBonus,
+      totalCardUsageCount: 0,
+      vitality: 0,
     },
-    updates: [],
+    ignoreIdolParameterKindConditionAfterClearing,
+    memoryEffects,
+    turns: params.turns,
+    removedCardPile: [],
+    handWhenEmptyDeck: [],
+    score: 0,
+    turnNumber: 0,
+    turnEnded: false,
+    remainingTurnsChange: 0,
   };
 };
 

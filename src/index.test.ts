@@ -76,22 +76,15 @@ describe("initializeGamePlay", () => {
           },
           cards: [
             {
-              original: {
-                data: getCardDataByConstId("ojosamanoharebutai"),
-                enhanced: false,
-              },
+              data: getCardDataByConstId("ojosamanoharebutai"),
+              enhancements: [],
             },
             {
-              original: {
-                data: getCardDataByConstId("apirunokihon"),
-                enhanced: false,
-              },
+              data: getCardDataByConstId("apirunokihon"),
+              enhancements: [],
             },
             {
-              original: {
-                data: getCardDataByConstId("hyogennokihon"),
-                enhanced: true,
-              },
+              data: getCardDataByConstId("hyogennokihon"),
               enhancements: [{ kind: "original" }],
             },
           ],
@@ -125,10 +118,7 @@ describe("initializeGamePlay", () => {
           },
           cards: [
             {
-              original: {
-                data: getCardDataByConstId("ojosamanoharebutai"),
-                enhanced: true,
-              },
+              data: getCardDataByConstId("ojosamanoharebutai"),
               enhancements: [{ kind: "original" }],
             },
           ],

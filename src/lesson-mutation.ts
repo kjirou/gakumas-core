@@ -2,7 +2,6 @@ import type {
   ActionCost,
   Card,
   CardData,
-  CardInProduction,
   CardSummaryKind,
   CardUsageCondition,
   Effect,
@@ -40,7 +39,6 @@ import {
   isScoreSatisfyingPerfect,
   maxHandSize,
   patchDiffs,
-  prepareCardsForLesson,
   scanIncreasedModifierKinds,
 } from "./models";
 import { getRandomInteger, shuffleArray, validateNumberInRange } from "./utils";
@@ -842,12 +840,11 @@ export const activateEffect = <
       if (!cardData) {
         throw new Error("Unexpected empty card data");
       }
-      const cardInProduction: CardInProduction = {
+      const additionalCard: Card = {
         id: idGenerator(),
         data: cardData,
-        enhanced: true,
+        enhancements: [{ kind: "original" }],
       };
-      const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];
       const { hand, discardPile } = addCardsToHandOrDiscardPile(
         [additionalCard.id],
         lesson.hand,
@@ -866,12 +863,11 @@ export const activateEffect = <
       break;
     }
     case "generateTroubleCard": {
-      const cardInProduction: CardInProduction = {
+      const additionalCard: Card = {
         id: idGenerator(),
         data: getCardDataByConstId("nemuke"),
-        enhanced: false,
+        enhancements: [],
       };
-      const additionalCard: Card = prepareCardsForLesson([cardInProduction])[0];
       const deck = [...lesson.deck];
       // 例: deck が ["a", "b", "c"] なら、0,1,2,3 のいずれかに挿入する
       const index = getRandomInteger(getRandom, deck.length);
@@ -2119,7 +2115,7 @@ export const useCard = (
 
   const beforeHand = newLesson.hand;
   const doubleEffect = findPrioritizedDoubleEffectModifier(
-    card.original.data.cardSummaryKind,
+    card.data.cardSummaryKind,
     newLesson.idol.modifiers,
   );
 
@@ -2132,7 +2128,7 @@ export const useCard = (
     !params.preview &&
     !canPlayCard(lesson, cardContent.cost, cardContent.condition)
   ) {
-    throw new Error(`Can not use the card: ${card.original.data.name}`);
+    throw new Error(`Can not use the card: ${card.data.name}`);
   }
 
   //
@@ -2277,8 +2273,8 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDataId: card.original.data.id,
-            cardSummaryKind: card.original.data.cardSummaryKind,
+            cardDataId: card.data.id,
+            cardSummaryKind: card.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;
@@ -2293,7 +2289,7 @@ export const useCard = (
         (e) =>
           e.kind === "effectActivationBeforeCardEffectActivation" &&
           (e.cardKind === undefined ||
-            e.cardKind === card.original.data.cardSummaryKind),
+            e.cardKind === card.data.cardSummaryKind),
       ) as Array<
         Extract<
           Modifier,
@@ -2385,8 +2381,8 @@ export const useCard = (
             historyResultIndex: nextHistoryResultIndex,
           },
           {
-            cardDataId: card.original.data.id,
-            cardSummaryKind: card.original.data.cardSummaryKind,
+            cardDataId: card.data.id,
+            cardSummaryKind: card.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;

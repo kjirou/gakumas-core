@@ -769,24 +769,6 @@ export type CardData = Readonly<{
   rarity: "c" | "r" | "sr" | "ssr";
 }>;
 
-/**
- * プロデュース中のスキルカード
- *
- * - 所持している、または所持の選択肢として表示するカード
- * - 所持中のスキルカードは、プロデュース開始時に生成され、プロデュース終了時に破棄される
- */
-export type CardInProduction = Readonly<{
-  data: CardData;
-  enhanced: boolean;
-  /**
-   * Idol["cards"] 内で一意のID
-   *
-   * - 本番では、常に IdGenerator で生成する
-   * - テストでは、IdGenerator 生成と被らない任意の値の設定が可能
-   */
-  id: string;
-}>;
-
 export type CardEnhancement = Readonly<
   | {
       /** レッスン中の強化により付与された強化、原文の「レッスン中強化」に相当、"original"や既に"effect"がある場合は付与されない */
@@ -812,6 +794,7 @@ export type CardEnhancement = Readonly<
  * - レッスン開始前に生成され、レッスン終了時に破棄される
  */
 export type Card = {
+  data: CardData;
   /**
    * カード強化状態
    *
@@ -829,12 +812,9 @@ export type Card = {
    * スキルカードID
    *
    * - 1レッスン内で一意
-   * - レッスン前に所持しているスキルカードについては CardInProduction["id"] を複製する
-   *   - テストコード内で IdGenerator を渡さないで良いようにするため
-   * - 一方で、生成したスキルカードは新たにIDを生成して割り振る
+   * - レッスン中に生成したスキルカードは、新たにIDを生成して割り振る
    */
   id: string;
-  original: CardInProduction;
 };
 
 /**
@@ -1094,9 +1074,6 @@ export type DrinkData = Readonly<{
 
 /**
  * Pドリンク
- *
- * - CardData や ProducerItemData だと、間に CardInProduction や ProducerItemInProduction が挟まるが、Drink ではそれは設けない
- *   - 元々、育成ゲーム部分も作ろうと思って 〜InProduction を作っていたが、その後、育成ゲーム部分は作らないことにしたため
  */
 export type Drink = {
   data: DrinkData;

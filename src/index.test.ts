@@ -89,27 +89,6 @@ describe("initializeGamePlay", () => {
       } as GamePlay,
     },
     {
-      name: "アイドル固有のスキルカードとPアイテムを追加しないことができる",
-      args: [
-        {
-          idolDataId: "kuramotochina-ssr-1",
-          cards: [],
-          producerItems: [],
-          turns: ["vocal"],
-          noIdolSpecificCard: true,
-          noIdolSpecificProducerItem: true,
-        },
-      ],
-      expected: {
-        initialLesson: {
-          idol: {
-            producerItems: [] as any,
-          },
-          cards: [] as any,
-        },
-      } as GamePlay,
-    },
-    {
       name: "特訓段階と才能開花段階により、アイドル固有が強化される",
       args: [
         {
@@ -256,6 +235,68 @@ describe("initializeGamePlay", () => {
       expected: {
         initialLesson: {
           memoryEffects: [{ kind: "vitality", value: 1, probability: 100 }],
+        },
+      } as GamePlay,
+    },
+    {
+      name: "noDeckShuffle - 設定がある時、山札をシャッフルしない",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [
+            { id: "apirunokihon", testId: "a" },
+            { id: "apirunokihon", testId: "b" },
+            { id: "apirunokihon", testId: "c" },
+            { id: "apirunokihon", testId: "d" },
+            { id: "apirunokihon", testId: "e" },
+          ],
+          producerItems: [],
+          turns: ["vocal"],
+          noDeckShuffle: true,
+          noIdolSpecificCard: true,
+          // 0 を返すからと言って山札がシャッフルされないわけではない、シャッフルの結果を固定するために 0 にしている
+          getRandom: () => 0,
+        },
+      ],
+      expected: {
+        initialLesson: {
+          deck: ["a", "b", "c", "d", "e"],
+        },
+      } as GamePlay,
+    },
+    {
+      name: "noIdolSpecificCard - 設定がある時、アイドル固有のスキルカードを追加しない",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          noIdolSpecificCard: true,
+        },
+      ],
+      expected: {
+        initialLesson: {
+          cards: [] as any,
+        },
+      } as GamePlay,
+    },
+    {
+      name: "noIdolSpecificProducerItem - 設定がある時、アイドル固有のPアイテムを追加しない",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          noIdolSpecificProducerItem: true,
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            producerItems: [] as any,
+          },
         },
       } as GamePlay,
     },

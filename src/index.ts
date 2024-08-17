@@ -19,6 +19,7 @@ import {
   NextLifecyclePhase,
   Card,
   ProducerItem,
+  GetRandom,
 } from "./types";
 import {
   type CardDataId,
@@ -54,7 +55,7 @@ import {
   lifeRecoveredBySkippingTurn,
   patchDiffs,
 } from "./models";
-import { createIdGenerator } from "./utils";
+import { createIdGenerator, shuffleArray } from "./utils";
 
 export type * from "./types";
 export * from "./data/card-sets";
@@ -80,6 +81,7 @@ export * from "./utils";
  * @param params.clearScoreThresholds クリアスコアとパーフェクトスコア設定、任意でデフォルトは上限なしを意味する undefined
  * @param params.drinks Pドリンク設定、任意、本家と異なり上限数無し
  * @param params.encouragements 応援/トラブル設定、任意
+ * @param params.getRandom テスト用、乱数生成関数を明示的に渡す
  * @param params.idolDataId プロデュースアイドルのID
  * @param params.idolSpecificCardTestId テスト用、本来知る必要がない内部的なIDを指定する
  * @param params.ignoreIdolParameterKindConditionAfterClearing クリア後に、Pアイテムがパラメータ属性を無視して効果を発動するか。追い込みレッスンの設定。
@@ -87,8 +89,9 @@ export * from "./utils";
  * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値
  * @param params.maxLife レッスン開始時のアイドルの最大体力、任意でデフォルトはTrue Endの効果を含むアイドルの最大体力
  * @param params.memoryEffects メモリーのアビリティによる効果設定、任意
- * @param params.noIdolSpecificCard 任意でアイドル固有スキルカードを使用しないなら true
- * @param params.noIdolSpecificProducerItem 任意でアイドル固有Pアイテムを使用しないなら true
+ * @param params.noDeckShuffle true を設定すると、山札をシャッフルせずに cards の順番でスキルカードを引く、任意
+ * @param params.noIdolSpecificCard true を設定すると、アイドル固有スキルカードを使用しない、任意
+ * @param params.noIdolSpecificProducerItem turue を設定すると、アイドル固有Pアイテムを使用しない、任意
  * @param params.producerItems アイドル固有に加えて、追加するPアイテムリスト
  * @param params.scoreBonus スコアボーナス設定、任意でデフォルトは設定なしを意味する undefined
  * @param params.specialTrainingLevel 特訓段階、アイドル固有スキルカードの強化に影響を与えるのみ。任意でデフォルトは1。
@@ -139,12 +142,14 @@ export const initializeGamePlay = (params: {
     id: DrinkDataId;
   }>;
   encouragements?: Encouragement[];
+  getRandom?: GetRandom;
   idolDataId: IdolDataId;
   idolSpecificCardTestId?: Card["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: Idol["life"];
   maxLife?: Idol["maxLife"];
   memoryEffects?: MemoryEffect[];
+  noDeckShuffle?: boolean;
   noIdolSpecificCard?: boolean;
   noIdolSpecificProducerItem?: boolean;
   producerItems: Array<{
@@ -157,13 +162,13 @@ export const initializeGamePlay = (params: {
   turns: Lesson["turns"];
 }): GamePlay => {
   const idGenerator = createIdGenerator();
-  const getRandom = Math.random;
+  const getRandom = params.getRandom ?? Math.random;
   const idolData = getIdolDataById(params.idolDataId);
   const specialTrainingLevel = params.specialTrainingLevel ?? 0;
   const talentAwakeningLevel = params.talentAwakeningLevel ?? 0;
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
-  const cards: Card[] = [
+  const unorderedCards: Card[] = [
     ...(!params.noIdolSpecificCard
       ? [
           {
@@ -182,7 +187,16 @@ export const initializeGamePlay = (params: {
       };
       return card;
     }),
-  ].sort((a, b) => compareDeckOrder(a.data, b.data));
+  ];
+  const cards = unorderedCards
+    .slice()
+    .sort((a, b) => compareDeckOrder(a.data, b.data));
+  const deck = params.noDeckShuffle
+    ? unorderedCards.map((e) => e.id)
+    : shuffleArray(
+        cards.map((e) => e.id),
+        getRandom,
+      );
   const producerItems: ProducerItem[] = [
     ...(!params.noIdolSpecificProducerItem
       ? [
@@ -215,6 +229,7 @@ export const initializeGamePlay = (params: {
     initialLesson: createLesson({
       cards,
       clearScoreThresholds: params.clearScoreThresholds,
+      deck,
       drinks,
       encouragements: params.encouragements,
       idGenerator,

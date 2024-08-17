@@ -2,16 +2,11 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import {
-  compareDeckOrder,
-  getCardDataById,
-  getCardContentDataList,
-} from "./data/cards";
+import { getCardDataById, getCardContentDataList } from "./data/cards";
 import { getDefaultCardSetData } from "./data/card-sets";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById, IdolDataId } from "./data/idols";
 import { metaModifierDictioanry } from "./data/modifiers";
-import { getProducerItemDataById } from "./data/producer-items";
 import {
   ActionCost,
   Card,
@@ -21,12 +16,10 @@ import {
   Drink,
   Effect,
   Encouragement,
-  GetRandom,
   IdGenerator,
   Idol,
   IdolParameterKind,
   Lesson,
-  GamePlay,
   LessonUpdateQuery,
   LessonUpdateDiff,
   LessonUpdateQueryReason,
@@ -39,7 +32,6 @@ import {
   CharacterData,
   CurrentTurnDetails,
 } from "./types";
-import { shuffleArray } from "./utils";
 
 /** ターン開始時の手札数 */
 export const handSizeOnLessonStart = 3;
@@ -203,15 +195,18 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
 /**
  * レッスンを生成する
  *
- * - initializeGamePlay と比べると、ユニットテストの時にここから呼び出すことが多い
- *   - そのため、 idGenerator や getRandom を使う処理は、可能な限り initializeGamePlay へ移動するのが好ましい
+ * - idGenerator や getRandom などの、制御が難しかったり副作用がある関数呼び出しは、この中では行わない
+ *   - 処理の大半、主にゲームのロジックそのものの大半は、 lesson インスタンスに依存している
+ *   - それらに対するユニットテストを書きやすくするため
+ *
+ * @param params.deck 未設定の場合は、カードを引く順番は cards の順番になる、現在はテスト用
  */
 export const createLesson = (params: {
   cards: Card[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
+  deck?: Array<Card["id"]>;
   drinks?: Drink[];
   encouragements?: Encouragement[];
-  getRandom?: GetRandom;
   idGenerator: IdGenerator;
   idolDataId: IdolDataId;
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
@@ -222,7 +217,6 @@ export const createLesson = (params: {
   scoreBonus?: Idol["scoreBonus"];
   turns: Lesson["turns"];
 }): Lesson => {
-  const getRandom = params.getRandom ? params.getRandom : Math.random;
   const idolData = getIdolDataById(params.idolDataId);
   const characterData = getCharacterDataById(idolData.characterId);
   const maxLife = params.maxLife ?? characterData.maxLife;
@@ -238,10 +232,7 @@ export const createLesson = (params: {
   return {
     cards: params.cards,
     clearScoreThresholds,
-    deck: shuffleArray(
-      params.cards.map((card) => card.id),
-      getRandom,
-    ),
+    deck: params.deck ?? params.cards.map((card) => card.id),
     discardPile: [],
     encouragements,
     hand: [],

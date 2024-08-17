@@ -233,7 +233,6 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
  * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
  * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
  * @param params.cards テスト用、山札全体を明示的に指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.idGenerator createIdolInProduction で使用した関数と同じものを渡す
  * @param params.idolSpecificCardTestId テスト用、内部的なIDを指定する
  * @param params.producerItems テスト用、Pアイテム全体を指定する、アイドル固有を生成しないなど本来の処理を通さない
  * @param params.specialTrainingLevel 特訓段階、0 から 6

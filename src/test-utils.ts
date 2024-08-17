@@ -19,25 +19,19 @@ export const createGamePlayForTest = (
     cards?: Card[];
     idolDataId?: IdolDataId;
     producerItems?: ProducerItem[];
-    specialTrainingLevel?: number | undefined;
-    talentAwakeningLevel?: number | undefined;
     turns?: Lesson["turns"];
   } = {},
 ): GamePlay => {
   // R広は、Pアイテムが最終ターンにならないと発動しないので、テストデータとして優秀
   const idolDataId = options.idolDataId ?? "shinosawahiro-r-1";
   const turns = options.turns ?? ["vocal", "vocal", "vocal", "vocal", "vocal"];
-  const specialTrainingLevel = options.specialTrainingLevel ?? 1;
-  const talentAwakeningLevel = options.talentAwakeningLevel ?? 1;
   return createGamePlay({
+    cards: options.cards ?? [],
     clearScoreThresholds: options.clearScoreThresholds,
     idGenerator: createIdGenerator(),
     idolDataId,
+    producerItems: options.producerItems ?? [],
     turns,
-    specialTrainingLevel,
-    talentAwakeningLevel,
-    ...(options.cards ? { cards: options.cards } : {}),
-    ...(options.producerItems ? { producerItems: options.producerItems } : {}),
   });
 };
 

@@ -20,12 +20,18 @@ import {
   Card,
   ProducerItem,
 } from "./types";
-import { type CardDataId, getCardDataByConstId } from "./data/cards";
+import {
+  type CardDataId,
+  compareDeckOrder,
+  getCardDataByConstId,
+  getCardDataById,
+} from "./data/cards";
 import { type DrinkDataId, getDrinkDataById } from "./data/drinks";
-import { type IdolDataId } from "./data/idols";
+import { type IdolDataId, getIdolDataById } from "./data/idols";
 import {
   type ProducerItemDataId,
   getProducerItemDataByConstId,
+  getProducerItemDataById,
 } from "./data/producer-items";
 import {
   activateEffectsOnLessonStart,
@@ -81,6 +87,8 @@ export * from "./utils";
  * @param params.life レッスン開始時のアイドルの体力、任意でデフォルトは最大値
  * @param params.maxLife レッスン開始時のアイドルの最大体力、任意でデフォルトはTrue Endの効果を含むアイドルの最大体力
  * @param params.memoryEffects メモリーのアビリティによる効果設定、任意
+ * @param params.noIdolSpecificCard 任意でアイドル固有スキルカードを使用しないなら true
+ * @param params.noIdolSpecificProducerItem 任意でアイドル固有Pアイテムを使用しないなら true
  * @param params.producerItems アイドル固有に加えて、追加するPアイテムリスト
  * @param params.scoreBonus スコアボーナス設定、任意でデフォルトは設定なしを意味する undefined
  * @param params.specialTrainingLevel 特訓段階、アイドル固有スキルカードの強化に影響を与えるのみ。任意でデフォルトは1。
@@ -137,6 +145,8 @@ export const initializeGamePlay = (params: {
   life?: Idol["life"];
   maxLife?: Idol["maxLife"];
   memoryEffects?: MemoryEffect[];
+  noIdolSpecificCard?: boolean;
+  noIdolSpecificProducerItem?: boolean;
   producerItems: Array<{
     enhanced?: ProducerItem["enhanced"];
     id: ProducerItemDataId;
@@ -147,27 +157,51 @@ export const initializeGamePlay = (params: {
   turns: Lesson["turns"];
 }): GamePlay => {
   const idGenerator = createIdGenerator();
+  const idolData = getIdolDataById(params.idolDataId);
   const specialTrainingLevel = params.specialTrainingLevel ?? 0;
   const talentAwakeningLevel = params.talentAwakeningLevel ?? 0;
   const ignoreIdolParameterKindConditionAfterClearing =
     params.ignoreIdolParameterKindConditionAfterClearing ?? false;
-  const additionalCards: Card[] = params.cards.map((cardSetting) => {
-    return {
-      id: cardSetting.testId ?? idGenerator(),
-      data: getCardDataByConstId(cardSetting.id),
-      enhancements: cardSetting.enhanced ? [{ kind: "original" }] : [],
-    };
-  });
-  const additionalProducerItems: ProducerItem[] = params.producerItems.map(
-    (producerItemSetting) => {
+  const cards: Card[] = [
+    ...(!params.noIdolSpecificCard
+      ? [
+          {
+            id: params.idolSpecificCardTestId ?? idGenerator(),
+            data: getCardDataById(idolData.specificCardId),
+            enhancements:
+              specialTrainingLevel >= 3 ? [{ kind: "original" } as const] : [],
+          } as const,
+        ]
+      : []),
+    ...params.cards.map((cardSetting) => {
+      const card: Card = {
+        id: cardSetting.testId ?? idGenerator(),
+        data: getCardDataByConstId(cardSetting.id),
+        enhancements: cardSetting.enhanced ? [{ kind: "original" }] : [],
+      };
+      return card;
+    }),
+  ].sort((a, b) => compareDeckOrder(a.data, b.data));
+  const producerItems: ProducerItem[] = [
+    ...(!params.noIdolSpecificProducerItem
+      ? [
+          {
+            id: idGenerator(),
+            data: getProducerItemDataById(idolData.specificProducerItemId),
+            enhanced: talentAwakeningLevel >= 2,
+            activationCount: 0,
+          },
+        ]
+      : []),
+    ...params.producerItems.map((producerItemSetting) => {
       return {
         id: idGenerator(),
         data: getProducerItemDataByConstId(producerItemSetting.id),
         enhanced: producerItemSetting.enhanced ?? false,
         activationCount: 0,
       };
-    },
-  );
+    }),
+  ];
   const drinks: Drink[] = (params.drinks ?? []).map((drinkSetting) => {
     return {
       id: idGenerator(),
@@ -175,21 +209,18 @@ export const initializeGamePlay = (params: {
     };
   });
   return createGamePlay({
-    additionalCards,
-    additionalProducerItems,
+    cards,
     clearScoreThresholds: params.clearScoreThresholds,
     drinks,
     encouragements: params.encouragements,
     idGenerator,
     idolDataId: params.idolDataId,
-    idolSpecificCardTestId: params.idolSpecificCardTestId,
     ignoreIdolParameterKindConditionAfterClearing,
     life: params.life,
     maxLife: params.maxLife,
     memoryEffects: params.memoryEffects,
+    producerItems,
     scoreBonus: params.scoreBonus,
-    specialTrainingLevel,
-    talentAwakeningLevel,
     turns: params.turns,
   });
 };

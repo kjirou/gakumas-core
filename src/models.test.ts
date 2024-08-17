@@ -338,20 +338,24 @@ describe("createActualTurns", () => {
 });
 describe("createGamePlay", () => {
   test("it works", () => {
-    const idGenerator = createIdGenerator();
     const gamePlay = createGamePlay({
+      cards: [
+        {
+          id: "c1",
+          data: getCardDataByConstId("apirunokihon"),
+          enhancements: [],
+        },
+      ],
       idGenerator: createIdGenerator(),
       idolDataId: "hanamisaki-r-1",
       producerItems: [
         {
-          id: idGenerator(),
+          id: "p1",
           data: getProducerItemDataByConstId("hatsuboshitecho"),
           enhanced: false,
           activationCount: 0,
         },
       ],
-      specialTrainingLevel: 1,
-      talentAwakeningLevel: 1,
       turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
     });
     expect(gamePlay).toStrictEqual({
@@ -364,7 +368,7 @@ describe("createGamePlay", () => {
           life: 32,
           maxLife: 32,
           vitality: 0,
-          producerItems: expect.any(Array),
+          producerItems: [expect.any(Object)],
           modifiers: [],
           modifierIdsAtTurnStart: [],
           totalCardUsageCount: 0,
@@ -372,9 +376,9 @@ describe("createGamePlay", () => {
           scoreBonus: undefined,
           drinks: [],
         },
-        cards: expect.any(Array),
+        cards: [expect.any(Object)],
         hand: [],
-        deck: expect.any(Array),
+        deck: ["c1"],
         discardPile: [],
         removedCardPile: [],
         handWhenEmptyDeck: [],

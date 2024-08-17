@@ -203,64 +203,28 @@ export const isScoreSatisfyingPerfect = (lesson: Lesson): boolean => {
 /**
  * ゲームプレイのインスタンスを作成する
  *
- * @param params.additionalCards アイドル固有に加えて、追加するスキルカードリスト
- * @param params.additionalProducerItems アイドル固有に加えて、追加するPアイテムリスト
- * @param params.cards テスト用、山札全体を明示的に指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.idolSpecificCardTestId テスト用、内部的なIDを指定する
- * @param params.producerItems テスト用、Pアイテム全体を指定する、アイドル固有を生成しないなど本来の処理を通さない
- * @param params.specialTrainingLevel 特訓段階、0 から 6
- * @param params.talentAwakeningLevel 才能開花段階、0 から 4
+ * - initializeGamePlay と比べると、ユニットテストの時にここから呼び出すことが多い
+ *   - そのため、 idGenerator や getRandom を使う処理は、可能な限り initializeGamePlay へ移動するのが好ましい
  */
 export const createGamePlay = (params: {
-  additionalCards?: Card[];
-  additionalProducerItems?: ProducerItem[];
-  cards?: Card[];
+  cards: Card[];
   clearScoreThresholds?: Lesson["clearScoreThresholds"];
   drinks?: Drink[];
   encouragements?: Encouragement[];
   getRandom?: GetRandom;
   idGenerator: IdGenerator;
   idolDataId: IdolDataId;
-  idolSpecificCardTestId?: Card["id"];
   ignoreIdolParameterKindConditionAfterClearing?: Lesson["ignoreIdolParameterKindConditionAfterClearing"];
   life?: Idol["life"];
   maxLife?: CharacterData["maxLife"];
   memoryEffects?: MemoryEffect[];
-  producerItems?: ProducerItem[];
+  producerItems: ProducerItem[];
   scoreBonus?: Idol["scoreBonus"];
-  specialTrainingLevel: number;
-  talentAwakeningLevel: number;
   turns: Lesson["turns"];
 }): GamePlay => {
   const getRandom = params.getRandom ? params.getRandom : Math.random;
   const idolData = getIdolDataById(params.idolDataId);
   const characterData = getCharacterDataById(idolData.characterId);
-  const specificCardData = getCardDataById(idolData.specificCardId);
-  const specificProducerItemData = getProducerItemDataById(
-    idolData.specificProducerItemId,
-  );
-  const cards: Card[] =
-    params.cards ??
-    [
-      {
-        id: params.idolSpecificCardTestId ?? params.idGenerator(),
-        data: specificCardData,
-        enhancements:
-          params.specialTrainingLevel >= 3
-            ? [{ kind: "original" } as const]
-            : [],
-      },
-      ...(params.additionalCards ?? []),
-    ].sort((a, b) => compareDeckOrder(a.data, b.data));
-  const producerItems: ProducerItem[] = params.producerItems ?? [
-    {
-      id: params.idGenerator(),
-      data: specificProducerItemData,
-      enhanced: params.talentAwakeningLevel >= 2,
-      activationCount: 0,
-    },
-    ...(params.additionalProducerItems ?? []),
-  ];
   const maxLife = params.maxLife ?? characterData.maxLife;
   const life = params.life ? Math.min(params.life, maxLife) : maxLife;
   const clearScoreThresholds =
@@ -275,10 +239,10 @@ export const createGamePlay = (params: {
     getRandom,
     idGenerator: params.idGenerator,
     initialLesson: {
-      cards,
+      cards: params.cards,
       clearScoreThresholds,
       deck: shuffleArray(
-        cards.map((card) => card.id),
+        params.cards.map((card) => card.id),
         getRandom,
       ),
       discardPile: [],
@@ -292,7 +256,7 @@ export const createGamePlay = (params: {
         maxLife,
         modifierIdsAtTurnStart: [],
         modifiers: [],
-        producerItems,
+        producerItems: params.producerItems,
         scoreBonus: params.scoreBonus,
         totalCardUsageCount: 0,
         vitality: 0,

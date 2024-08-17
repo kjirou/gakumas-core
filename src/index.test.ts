@@ -89,6 +89,27 @@ describe("initializeGamePlay", () => {
       } as GamePlay,
     },
     {
+      name: "アイドル固有のスキルカードとPアイテムを追加しないことができる",
+      args: [
+        {
+          idolDataId: "kuramotochina-ssr-1",
+          cards: [],
+          producerItems: [],
+          turns: ["vocal"],
+          noIdolSpecificCard: true,
+          noIdolSpecificProducerItem: true,
+        },
+      ],
+      expected: {
+        initialLesson: {
+          idol: {
+            producerItems: [] as any,
+          },
+          cards: [] as any,
+        },
+      } as GamePlay,
+    },
+    {
       name: "特訓段階と才能開花段階により、アイドル固有が強化される",
       args: [
         {

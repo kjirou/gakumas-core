@@ -1177,6 +1177,7 @@ export type Idol = {
    *   - 「ターン終了フラグ」も考えたが、コンテストで複数のアイドルがいる状況を考えると、アイドル側に持たせた方が良さそう
    */
   actionPoints: number;
+  data: IdolData;
   /**
    * Pドリンクリスト
    *
@@ -1184,6 +1185,7 @@ export type Idol = {
    */
   drinks: Drink[];
   life: number;
+  maxLife: number;
   /**
    * ターン開始時に付与されている状態修正IDリスト
    *
@@ -1192,10 +1194,6 @@ export type Idol = {
    */
   modifierIdsAtTurnStart: Array<Modifier["id"]>;
   modifiers: Modifier[];
-  original: {
-    data: IdolData;
-    maxLife: number;
-  };
   /**
    * Pアイテムリスト
    *

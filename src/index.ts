@@ -673,7 +673,7 @@ export const skipTurn = (gamePlay: GamePlay): GamePlay => {
       actual:
         Math.min(
           lifeRecoveredBySkippingTurn,
-          lesson.idol.original.maxLife - lesson.idol.life,
+          lesson.idol.maxLife - lesson.idol.life,
         ) + 0,
       max: lifeRecoveredBySkippingTurn,
       reason: {

@@ -313,7 +313,7 @@ describe("activateEffectIf", () => {
       args: [
         (() => {
           const lesson = createLessonForTest();
-          lesson.idol.life = lesson.idol.original.maxLife - 1;
+          lesson.idol.life = lesson.idol.maxLife - 1;
           return lesson;
         })(),
         { kind: "recoverLife", value: 2 },
@@ -2361,9 +2361,7 @@ describe("canActivateEffect", () => {
         {
           idol: {
             life: 5,
-            original: {
-              maxLife: 10,
-            },
+            maxLife: 10,
           },
         } as Lesson,
         { kind: "measureIfLifeIsEqualGreaterThanHalf" },
@@ -2376,9 +2374,7 @@ describe("canActivateEffect", () => {
         {
           idol: {
             life: 4,
-            original: {
-              maxLife: 10,
-            },
+            maxLife: 10,
           },
         } as Lesson,
         { kind: "measureIfLifeIsEqualGreaterThanHalf" },
@@ -2531,9 +2527,7 @@ describe("canPlayCard", () => {
         {
           idol: {
             life: 5,
-            original: {
-              maxLife: 10,
-            },
+            maxLife: 10,
             vitality: 0,
             modifiers: [] as Idol["modifiers"],
           },
@@ -2554,9 +2548,7 @@ describe("canPlayCard", () => {
         {
           idol: {
             life: 4,
-            original: {
-              maxLife: 10,
-            },
+            maxLife: 10,
             vitality: 0,
             modifiers: [] as Idol["modifiers"],
           },
@@ -2577,9 +2569,7 @@ describe("canPlayCard", () => {
         {
           idol: {
             life: 5,
-            original: {
-              maxLife: 10,
-            },
+            maxLife: 10,
             vitality: 0,
             modifiers: [] as Idol["modifiers"],
           },
@@ -2600,9 +2590,7 @@ describe("canPlayCard", () => {
         {
           idol: {
             life: 6,
-            original: {
-              maxLife: 10,
-            },
+            maxLife: 10,
             vitality: 0,
             modifiers: [] as Idol["modifiers"],
           },

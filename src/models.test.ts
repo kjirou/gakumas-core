@@ -358,11 +358,9 @@ describe("createGamePlay", () => {
       initialLesson: {
         clearScoreThresholds: undefined,
         idol: {
-          original: {
-            data: getIdolDataByConstId("hanamisaki-r-1"),
-            maxLife: 32,
-          },
+          data: getIdolDataByConstId("hanamisaki-r-1"),
           life: 32,
+          maxLife: 32,
           vitality: 0,
           producerItems: expect.any(Array),
           modifiers: [],

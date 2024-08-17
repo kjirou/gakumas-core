@@ -257,7 +257,7 @@ export const canPlayCard = (
       switch (valueKind) {
         case "life": {
           targetPercentage = Math.floor(
-            (lesson.idol.life * 100) / lesson.idol.original.maxLife,
+            (lesson.idol.life * 100) / lesson.idol.maxLife,
           );
           break;
         }
@@ -360,7 +360,7 @@ export const canActivateEffect = (
     }
     case "measureIfLifeIsEqualGreaterThanHalf": {
       const percentage = Math.floor(
-        (lesson.idol.life * 100) / lesson.idol.original.maxLife,
+        (lesson.idol.life * 100) / lesson.idol.maxLife,
       );
       return percentage >= 50;
     }
@@ -835,7 +835,7 @@ export const activateEffect = <
     // TODO: 手札5枚で生成した場合、現在は捨札に入れているが、本家は山札の先頭へスタックされる、Ref: https://youtu.be/40E2XOr0q2w
     case "generateCard": {
       const candidates = filterGeneratableCardsData(
-        lesson.idol.original.data.producePlan.kind,
+        lesson.idol.data.producePlan.kind,
       );
       const cardData =
         candidates[getRandomInteger(getRandom, candidates.length - 1)];
@@ -1108,10 +1108,7 @@ export const activateEffect = <
     case "recoverLife": {
       diffs.push({
         kind: "life",
-        actual: Math.min(
-          effect.value,
-          lesson.idol.original.maxLife - lesson.idol.life,
-        ),
+        actual: Math.min(effect.value, lesson.idol.maxLife - lesson.idol.life),
         max: effect.value,
       });
       break;

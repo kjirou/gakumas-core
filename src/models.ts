@@ -316,15 +316,12 @@ export const createGamePlay = (params: {
       hand: [],
       idol: {
         actionPoints: 0,
+        data: idolData,
         drinks: params.drinks ?? [],
         life,
+        maxLife,
         modifierIdsAtTurnStart: [],
         modifiers: [],
-        // TODO: IdolInProduction 概念の名残なので、解体する
-        original: {
-          data: idolData,
-          maxLife,
-        },
         producerItems,
         scoreBonus: params.scoreBonus,
         totalCardUsageCount: 0,

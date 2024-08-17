@@ -986,7 +986,7 @@ describe("generateLessonDisplay", () => {
         (() => {
           const gamePlay = createGamePlayForTest();
           gamePlay.initialLesson.idol.life =
-            gamePlay.initialLesson.idol.original.maxLife - 3;
+            gamePlay.initialLesson.idol.maxLife - 3;
           return gamePlay;
         })(),
       ],

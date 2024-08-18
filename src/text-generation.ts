@@ -25,6 +25,7 @@ import type {
   VitalityUpdateQuery,
   DrinkData,
   EffectWithoutCondition,
+  ProducerItem,
 } from "./types";
 import { metaModifierDictioanry } from "./data/modifiers";
 
@@ -443,6 +444,12 @@ export const generateCardDescription = (params: {
   }
   return lines.join("\n");
 };
+
+/**
+ * Pアイテム名を生成する
+ */
+export const generateProducerItemName = (producerItem: ProducerItem): string =>
+  producerItem.data.name + (producerItem.enhanced ? "+" : "");
 
 export const generateProducerItemTriggerAndConditionText = (params: {
   condition?: EffectCondition;

@@ -6,6 +6,7 @@ import type {
   LessonDisplay,
   Modifier,
   ModifierDisplay,
+  ProducerItemDisplay,
 } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { getDrinkDataByConstId } from "./data/drinks";
@@ -17,6 +18,7 @@ import {
   generateEncouragementDisplays,
   generateLessonDisplay,
   generateModifierDisplays,
+  generateProducerItemDisplays,
 } from "./display";
 import { createIdGenerator } from "./utils";
 import { createGamePlayForTest, createLessonForTest } from "./test-utils";
@@ -1353,5 +1355,43 @@ describe("generateModifierDisplays", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(generateModifierDisplays(...args)).toMatchObject(expected);
+  });
+});
+describe("generateProducerItemDisplays", () => {
+  const testCases: Array<{
+    args: Parameters<typeof generateProducerItemDisplays>;
+    expected: ReturnType<typeof generateProducerItemDisplays>;
+    name: string;
+  }> = [
+    {
+      name: "name - 強化状態を反映する",
+      args: [
+        [
+          {
+            id: "p1",
+            data: getProducerItemDataByConstId("saigononatsunoomoide"),
+            enhanced: true,
+            activationCount: 0,
+          },
+          {
+            id: "p2",
+            data: getProducerItemDataByConstId("amakawaramemmeguri"),
+            enhanced: false,
+            activationCount: 0,
+          },
+        ],
+      ],
+      expected: [
+        {
+          name: "最後の夏の思い出+",
+        },
+        {
+          name: "天川ラーメン巡り",
+        },
+      ] as ProducerItemDisplay[],
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(generateProducerItemDisplays(...args)).toMatchObject(expected);
   });
 });

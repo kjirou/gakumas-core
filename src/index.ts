@@ -69,6 +69,7 @@ export {
   generateLessonDisplay,
   generateCardPlayPreviewDisplay,
 } from "./display";
+export * from "./text-generation";
 export * from "./models";
 export * from "./utils";
 

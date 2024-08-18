@@ -136,24 +136,6 @@ export const getDisplayedRepresentativeModifierValue = <
 };
 
 /**
- * 初期スキルカードセットを生成する
- */
-export const createDefaultCardSet = (
-  producePlan: ProducePlan,
-  idGenerator: IdGenerator,
-): Card[] => {
-  const defaultCardSetData = getDefaultCardSetData(producePlan);
-  return defaultCardSetData.cardDataIds.map((cardDataId) => {
-    const cardData = getCardDataById(cardDataId);
-    return {
-      id: idGenerator(),
-      data: cardData,
-      enhancements: [],
-    };
-  });
-};
-
-/**
  * レッスンのクリアに対するスコア進捗を計算する
  */
 export const calculateClearScoreProgress = (

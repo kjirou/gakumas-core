@@ -4812,7 +4812,7 @@ export const cardsAsConst = [
       {
         cost: { kind: "normal", value: 6 },
         effects: [
-          { kind: "perform", vitality: { value: 15 } },
+          { kind: "perform", score: { value: 15 } },
           {
             kind: "perform",
             condition: {
@@ -4827,7 +4827,7 @@ export const cardsAsConst = [
       },
       {
         effects: [
-          { kind: "perform", vitality: { value: 15 } },
+          { kind: "perform", score: { value: 15 } },
           {
             kind: "perform",
             condition: {
@@ -4835,7 +4835,7 @@ export const cardsAsConst = [
               modifierKind: "focus",
               range: { min: 3 },
             },
-            score: { value: 34 },
+            score: { value: 34, focusMultiplier: 1.5 },
           },
         ],
       },

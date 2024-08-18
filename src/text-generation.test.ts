@@ -1,8 +1,7 @@
-import type { Card, CardData, ProducerItemData } from "./types";
+import type { Card, CardEnhancement } from "./types";
 import {
   type CardDataId,
   findCardDataById,
-  getCardContentDataList,
   getCardDataByConstId,
 } from "./data/cards";
 import { type DrinkDataId, getDrinkDataByConstId } from "./data/drinks";
@@ -21,6 +20,7 @@ import {
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
+import { getCardContentData } from "./models";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -656,8 +656,9 @@ describe("generateActionCostText", () => {
   });
 });
 describe("generateCardDescription", () => {
-  const testCases: Array<{
+  const testParameters: Array<{
     cardId: CardDataId;
+    enhancements?: CardEnhancement[];
     expected: ReturnType<typeof generateCardDescription>;
   }> = [
     {
@@ -865,21 +866,46 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "koruresuponsu",
+      expected: [
+        "パラメータ+15",
+        "{{集中}}が3以上の場合、パラメータ+15",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "koruresuponsu",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "パラメータ+15",
+        "{{集中}}が3以上の場合、パラメータ+34（{{集中}}効果を1.5倍適用）",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
-  test.each(testCases)('$cardId => "$expected"', ({ cardId, expected }) => {
-    const card = getCardDataByConstId(cardId);
-    const contents = getCardContentDataList(card);
-    expect(
-      generateCardDescription({
-        cost: contents[0].cost,
-        condition: contents[0].condition,
-        effects: contents[0].effects,
-        innate: contents[0].innate,
-        usableOncePerLesson: contents[0].usableOncePerLesson,
-        nonDuplicative: card.nonDuplicative,
-      }),
-    ).toBe(expected);
-  });
+  test.each(testParameters)(
+    '$cardId => "$expected"',
+    ({ cardId, enhancements, expected }) => {
+      const cardData = getCardDataByConstId(cardId);
+      const card: Card = {
+        id: "a",
+        data: cardData,
+        enhancements: enhancements ?? [],
+      };
+      const content = getCardContentData(card);
+      expect(
+        generateCardDescription({
+          cost: content.cost,
+          condition: content.condition,
+          effects: content.effects,
+          innate: content.innate,
+          usableOncePerLesson: content.usableOncePerLesson,
+          nonDuplicative: cardData.nonDuplicative,
+        }),
+      ).toBe(expected);
+    },
+  );
 });
 describe("generateProducerItemTriggerAndConditionText", () => {
   const testCases: Array<{

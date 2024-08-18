@@ -23,6 +23,7 @@ import type {
   TurnDisplay,
   Modifier,
   ProducePlan,
+  ProducerItem,
 } from "./types";
 import { compareDeckOrder } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -49,6 +50,7 @@ import {
   generateDrinkDescription,
   generateEffectText,
   generateProducerItemDescription,
+  generateProducerItemName,
   idolParameterKindNames,
 } from "./text-generation";
 
@@ -190,11 +192,11 @@ export const generateCardInInventoryDisplays = (
 };
 
 export const generateProducerItemDisplays = (
-  lesson: Lesson,
+  producerItems: ProducerItem[],
 ): ProducerItemDisplay[] => {
-  return lesson.idol.producerItems.map((producerItem) => {
+  return producerItems.map((producerItem) => {
     const producerItemContent = getProducerItemContentData(producerItem);
-    const name = producerItem.data.name + (producerItem.enhanced ? "+" : "");
+    const name = generateProducerItemName(producerItem);
     return {
       ...producerItem,
       name,
@@ -377,7 +379,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
       lesson.idol.maxLife - lesson.idol.life,
     ),
     modifiers,
-    producerItems: generateProducerItemDisplays(lesson),
+    producerItems: generateProducerItemDisplays(lesson.idol.producerItems),
     score: lesson.score,
     scoreBonus,
     turns,

@@ -983,6 +983,21 @@ describe("generateLessonDisplay", () => {
       } as LessonDisplay,
     },
     {
+      name: "life, maxLife",
+      args: [
+        (() => {
+          const gamePlay = createGamePlayForTest();
+          gamePlay.initialLesson.idol.life = 1;
+          gamePlay.initialLesson.idol.maxLife = 2;
+          return gamePlay;
+        })(),
+      ],
+      expected: {
+        life: 1,
+        maxLife: 2,
+      } as LessonDisplay,
+    },
+    {
       name: "lifeRecoveredBySkippingTurn - 体力が最大から3下がっている時、2になる",
       args: [
         (() => {

@@ -378,6 +378,7 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
       lifeRecoveredBySkippingTurn,
       lesson.idol.maxLife - lesson.idol.life,
     ),
+    maxLife: lesson.idol.maxLife,
     modifiers,
     producerItems: generateProducerItemDisplays(lesson.idol.producerItems),
     score: lesson.score,

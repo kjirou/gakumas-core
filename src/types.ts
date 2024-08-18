@@ -1846,6 +1846,7 @@ export type LessonDisplay = {
   life: Idol["life"];
   /** ターンスキップ時に回復できる体力の量 */
   lifeRecoveredBySkippingTurn: number;
+  maxLife: Idol["maxLife"];
   modifiers: ModifierDisplay[];
   producerItems: ProducerItemDisplay[];
   score: Lesson["score"];

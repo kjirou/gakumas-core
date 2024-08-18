@@ -1323,17 +1323,18 @@ export const activateEffectsEachProducerItemsAccordingToCardUsage = (
 } => {
   let updates: LessonUpdateQuery[] = [];
   let newLesson = lesson;
-  const targetProducerItems = lesson.idol.producerItems.filter((producerItem) =>
-    canActivateProducerItem(
-      lesson,
-      producerItem,
-      producerItemTriggerKind,
-      options,
-    ),
+  const targetProducerItems = newLesson.idol.producerItems.filter(
+    (producerItem) =>
+      canActivateProducerItem(
+        newLesson,
+        producerItem,
+        producerItemTriggerKind,
+        options,
+      ),
   );
   for (const producerItem of targetProducerItems) {
     const diffs = activateEffectsOfProducerItem(
-      lesson,
+      newLesson,
       producerItem,
       getRandom,
       idGenerator,

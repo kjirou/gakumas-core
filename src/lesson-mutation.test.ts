@@ -355,6 +355,82 @@ describe("activateEffectIf", () => {
   });
 });
 describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
+  test("2つのPアイテムが同じトリガーで実行された時、効果は正しく累積する", () => {
+    let lesson = createLessonForTest({
+      // 適切なのが見つからなかったので、同じPアイテムを使う
+      producerItems: [
+        {
+          id: "a",
+          data: getProducerItemDataByConstId("tomonitatakautaoru"),
+          enhanced: false,
+          activationCount: 0,
+        },
+        {
+          id: "b",
+          data: getProducerItemDataByConstId("tomonitatakautaoru"),
+          enhanced: false,
+          activationCount: 0,
+        },
+      ],
+    });
+    const dummyReason = {
+      kind: "unknown",
+      historyTurnNumber: 1,
+      historyResultIndex: 1,
+    } as const;
+    const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
+      lesson,
+      "afterCardEffectActivation",
+      () => 0,
+      createIdGenerator(),
+      dummyReason,
+      {
+        cardSummaryKind: "active",
+      },
+    );
+    expect(
+      updates.filter(
+        (e) => e.kind === "modifiers.addition" || e.kind === "modifiers.update",
+      ),
+    ).toStrictEqual<LessonUpdateQuery[]>([
+      {
+        kind: "modifiers.addition",
+        actual: { kind: "goodCondition", duration: 1, id: expect.any(String) },
+        max: { kind: "goodCondition", duration: 1, id: expect.any(String) },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifiers.addition",
+        actual: {
+          kind: "additionalCardUsageCount",
+          amount: 1,
+          id: expect.any(String),
+        },
+        max: {
+          kind: "additionalCardUsageCount",
+          amount: 1,
+          id: expect.any(String),
+        },
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "duration",
+        id: expect.any(String),
+        actual: 1,
+        max: 1,
+        reason: expect.any(Object),
+      },
+      {
+        kind: "modifiers.update",
+        propertyNameKind: "amount",
+        id: expect.any(String),
+        actual: 1,
+        max: 1,
+        reason: expect.any(Object),
+      },
+    ]);
+  });
   test("スキルカード使用時トリガーである、「いつものメイクポーチ」は、アクティブスキルカード使用時、集中を付与する。メンタルスキルカード使用時は付与しない", () => {
     let lesson = createLessonForTest({
       producerItems: [

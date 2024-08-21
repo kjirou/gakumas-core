@@ -7,7 +7,7 @@ export type RangedNumber = Readonly<
   { min: number } | { max: number } | { max: number; min: number }
 >;
 
-type IdolParameters = Readonly<{
+export type IdolParameters = Readonly<{
   dance: number;
   visual: number;
   vocal: number;
@@ -36,19 +36,19 @@ export type ProducePlan = Readonly<
 >;
 
 /** スキルカードの提供元種別、"others" は現状はキャラ固有でもサポカ固有でも無いもの全て */
-type CardProviderKind = "idol" | "others" | "supportCard";
+export type CardProviderKind = "idol" | "others" | "supportCard";
 
 /** Pアイテムの提供元種別、"others" は現状は中間試験後にもらえるもの */
-type ProducerItemProviderKind = "idol" | "others" | "supportCard";
+export type ProducerItemProviderKind = "idol" | "others" | "supportCard";
 
 /** スキルカード所持種別、関連する原文は「プラン不一致」 */
-type CardPossessionKind = ProducePlan["kind"] | "free";
+export type CardPossessionKind = ProducePlan["kind"] | "free";
 
 /** Pアイテム所持種別 */
-type ProducerItemPossessionKind = ProducePlan["kind"] | "free";
+export type ProducerItemPossessionKind = ProducePlan["kind"] | "free";
 
 /** Pドリンク所持種別 */
-type DrinkPossessionKind = ProducePlan["kind"] | "free";
+export type DrinkPossessionKind = ProducePlan["kind"] | "free";
 
 /**
  * スキルカード概要種別

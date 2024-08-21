@@ -1,4 +1,4 @@
-import type { Card, CardEnhancement } from "./types";
+import type { CardEnhancement } from "./types";
 import {
   type CardDataId,
   findCardDataById,
@@ -857,12 +857,7 @@ describe("generateCardDescription", () => {
     '$cardId => "$expected"',
     ({ cardId, enhancements, expected }) => {
       const cardData = getCardDataByConstId(cardId);
-      const card: Card = {
-        id: "a",
-        data: cardData,
-        enhancements: enhancements ?? [],
-      };
-      const content = getCardContentData(card);
+      const content = getCardContentData(cardData, enhancements?.length ?? 0);
       expect(
         generateCardDescription({
           cost: content.cost,

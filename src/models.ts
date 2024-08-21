@@ -2,8 +2,7 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { getCardDataById, getCardContentDataList } from "./data/cards";
-import { getDefaultCardSetData } from "./data/card-sets";
+import { getCardContentDataList } from "./data/cards";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById, IdolDataId } from "./data/idols";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -26,7 +25,6 @@ import {
   MemoryEffect,
   Modifier,
   ModifierData,
-  ProducePlan,
   ProducerItem,
   ProducerItemContentData,
   CharacterData,
@@ -61,13 +59,16 @@ export const isPerformEffectType = (
   effect: Effect,
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
-export const getCardContentData = (card: Card): CardContentData => {
-  const contents = getCardContentDataList(card.data);
-  if (card.enhancements.length === 0) {
+export const getCardContentData = (
+  cardData: CardData,
+  enhancementCount: number,
+): CardContentData => {
+  const contents = getCardContentDataList(cardData);
+  if (enhancementCount === 0) {
     return contents[0];
-  } else if (card.enhancements.length === 1) {
+  } else if (enhancementCount === 1) {
     return contents[1];
-  } else if (card.enhancements.length === 2) {
+  } else if (enhancementCount === 2) {
     return contents[2];
   } else {
     return contents[3];

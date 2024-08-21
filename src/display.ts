@@ -99,7 +99,7 @@ export const generateCardInHandDisplay = (
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   const effectActivations = activateEffectsOnCardPlay(
     lesson,
     cardContent.effects,
@@ -157,7 +157,7 @@ export const generateCardInHandDisplay = (
 };
 
 const generateCardInInventoryDisplay = (card: Card): CardInInventoryDisplay => {
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   const effectDisplays = cardContent.effects
     .map((e) => generateEffectDisplay(e, true))
     .filter((e) => e !== undefined);
@@ -411,7 +411,7 @@ export const generateCardPlayPreviewDisplay = (
   if (card === undefined) {
     throw new Error("Invalid card ID");
   }
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   const { updates } = useCard(beforeLesson, 1, {
     getRandom: gamePlay.getRandom,
     idGenerator: gamePlay.idGenerator,

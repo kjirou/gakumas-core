@@ -1714,7 +1714,7 @@ export const drawCardsOnTurnStart = (
       if (!card) {
         throw new Error(`Card not found in cards: cardId=${deckCardId}`);
       }
-      if (getCardContentData(card).innate) {
+      if (getCardContentData(card.data, card.enhancements.length).innate) {
         innateCardIds = [...innateCardIds, deckCardId];
       } else {
         restCardids = [...restCardids, deckCardId];
@@ -2110,7 +2110,7 @@ export const useCard = (
   if (card === undefined) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 

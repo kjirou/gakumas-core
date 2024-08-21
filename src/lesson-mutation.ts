@@ -390,7 +390,10 @@ export const canActivateProducerItem = (
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
 ): boolean => {
-  const producerItemContent = getProducerItemContentData(producerItem);
+  const producerItemContent = getProducerItemContentData(
+    producerItem.data,
+    producerItem.enhanced,
+  );
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   let isLessonClear = false;
   if (lesson.clearScoreThresholds) {
@@ -1275,7 +1278,10 @@ export const activateEffectsOfProducerItem = (
 ): LessonUpdateDiff[] => {
   let newLesson = lesson;
   let diffs: LessonUpdateDiff[] = [];
-  const producerItemContent = getProducerItemContentData(producerItem);
+  const producerItemContent = getProducerItemContentData(
+    producerItem.data,
+    producerItem.enhanced,
+  );
   for (const effect of producerItemContent.effects) {
     const innerDiffs = activateEffect(lesson, effect, getRandom, idGenerator);
     diffs = [...diffs, ...innerDiffs];
@@ -1714,7 +1720,7 @@ export const drawCardsOnTurnStart = (
       if (!card) {
         throw new Error(`Card not found in cards: cardId=${deckCardId}`);
       }
-      if (getCardContentData(card).innate) {
+      if (getCardContentData(card.data, card.enhancements.length).innate) {
         innateCardIds = [...innateCardIds, deckCardId];
       } else {
         restCardids = [...restCardids, deckCardId];
@@ -2110,7 +2116,7 @@ export const useCard = (
   if (card === undefined) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 

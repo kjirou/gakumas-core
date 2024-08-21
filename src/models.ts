@@ -2,8 +2,7 @@
  * ゲームの知識を前提とした共通処理をまとめたモジュール
  */
 
-import { getCardDataById, getCardContentDataList } from "./data/cards";
-import { getDefaultCardSetData } from "./data/card-sets";
+import { getCardContentDataList } from "./data/cards";
 import { getCharacterDataById } from "./data/characters";
 import { getIdolDataById, IdolDataId } from "./data/idols";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -26,11 +25,11 @@ import {
   MemoryEffect,
   Modifier,
   ModifierData,
-  ProducePlan,
   ProducerItem,
   ProducerItemContentData,
   CharacterData,
   CurrentTurnDetails,
+  ProducerItemData,
 } from "./types";
 
 /** ターン開始時の手札数 */
@@ -61,13 +60,16 @@ export const isPerformEffectType = (
   effect: Effect,
 ): effect is Extract<Effect, { kind: "perform" }> => effect.kind === "perform";
 
-export const getCardContentData = (card: Card): CardContentData => {
-  const contents = getCardContentDataList(card.data);
-  if (card.enhancements.length === 0) {
+export const getCardContentData = (
+  cardData: CardData,
+  enhancementCount: number,
+): CardContentData => {
+  const contents = getCardContentDataList(cardData);
+  if (enhancementCount === 0) {
     return contents[0];
-  } else if (card.enhancements.length === 1) {
+  } else if (enhancementCount === 1) {
     return contents[1];
-  } else if (card.enhancements.length === 2) {
+  } else if (enhancementCount === 2) {
     return contents[2];
   } else {
     return contents[3];
@@ -75,18 +77,22 @@ export const getCardContentData = (card: Card): CardContentData => {
 };
 
 export const getProducerItemContentData = (
-  producerItem: ProducerItem,
+  producerItemData: ProducerItemData,
+  enhanced: boolean,
 ): ProducerItemContentData => {
-  return producerItem.data.enhanced !== undefined && producerItem.enhanced
-    ? producerItem.data.enhanced
-    : producerItem.data.base;
+  return producerItemData.enhanced !== undefined && enhanced
+    ? producerItemData.enhanced
+    : producerItemData.base;
 };
 
 /** Pアイテムの残り発動回数を返す */
 export const getRemainingProducerItemTimes = (
   producerItem: ProducerItem,
 ): number | undefined => {
-  const producerItemContent = getProducerItemContentData(producerItem);
+  const producerItemContent = getProducerItemContentData(
+    producerItem.data,
+    producerItem.enhanced,
+  );
   return producerItemContent.times === undefined
     ? undefined
     : Math.max(producerItemContent.times - producerItem.activationCount, 0);

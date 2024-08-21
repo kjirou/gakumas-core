@@ -99,7 +99,7 @@ export const generateCardInHandDisplay = (
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   const effectActivations = activateEffectsOnCardPlay(
     lesson,
     cardContent.effects,
@@ -148,7 +148,7 @@ export const generateCardInHandDisplay = (
     ),
     effects: effectDisplays,
     enhancements: card.enhancements,
-    name: generateCardName(card),
+    name: generateCardName(card.data.name, card.enhancements.length),
     playable: canPlayCard(lesson, cardContent.cost, cardContent.condition),
     rarity: card.data.rarity,
     scores,
@@ -157,14 +157,14 @@ export const generateCardInHandDisplay = (
 };
 
 const generateCardInInventoryDisplay = (card: Card): CardInInventoryDisplay => {
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   const effectDisplays = cardContent.effects
     .map((e) => generateEffectDisplay(e, true))
     .filter((e) => e !== undefined);
   return {
     ...card,
     effects: effectDisplays,
-    name: generateCardName(card),
+    name: generateCardName(card.data.name, card.enhancements.length),
     description: generateCardDescription({
       cost: cardContent.cost,
       condition: cardContent.condition,
@@ -195,8 +195,14 @@ export const generateProducerItemDisplays = (
   producerItems: ProducerItem[],
 ): ProducerItemDisplay[] => {
   return producerItems.map((producerItem) => {
-    const producerItemContent = getProducerItemContentData(producerItem);
-    const name = generateProducerItemName(producerItem);
+    const producerItemContent = getProducerItemContentData(
+      producerItem.data,
+      producerItem.enhanced,
+    );
+    const name = generateProducerItemName(
+      producerItem.data.name,
+      producerItem.enhanced,
+    );
     return {
       ...producerItem,
       name,
@@ -408,7 +414,7 @@ export const generateCardPlayPreviewDisplay = (
   if (card === undefined) {
     throw new Error("Invalid card ID");
   }
-  const cardContent = getCardContentData(card);
+  const cardContent = getCardContentData(card.data, card.enhancements.length);
   const { updates } = useCard(beforeLesson, 1, {
     getRandom: gamePlay.getRandom,
     idGenerator: gamePlay.idGenerator,
@@ -428,7 +434,7 @@ export const generateCardPlayPreviewDisplay = (
     card: {
       cost: cardContent.cost,
       description,
-      name: generateCardName(card),
+      name: generateCardName(card.data.name, card.enhancements.length),
     },
     hasActionEnded: afterLesson.idol.actionPoints === 0,
     lessonDelta: {

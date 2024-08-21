@@ -2410,7 +2410,6 @@ export const cardsAsConst = [
             percentage: 60,
           },
         ],
-        usableOncePerLesson: true,
       },
       {
         effects: [

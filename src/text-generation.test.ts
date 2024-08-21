@@ -737,6 +737,10 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "raburiuinku",
+      expected: ["{{好印象}}+4", "{{好印象}}の60%分パラメータ上昇"].join("\n"),
+    },
+    {
       cardId: "hoyoryoku",
       expected: [
         "パラメータ+2{{元気}}+1",

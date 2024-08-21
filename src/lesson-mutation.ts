@@ -390,7 +390,10 @@ export const canActivateProducerItem = (
     increasedModifierKinds?: Modifier["kind"][];
   } = {},
 ): boolean => {
-  const producerItemContent = getProducerItemContentData(producerItem);
+  const producerItemContent = getProducerItemContentData(
+    producerItem.data,
+    producerItem.enhanced,
+  );
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   let isLessonClear = false;
   if (lesson.clearScoreThresholds) {
@@ -1275,7 +1278,10 @@ export const activateEffectsOfProducerItem = (
 ): LessonUpdateDiff[] => {
   let newLesson = lesson;
   let diffs: LessonUpdateDiff[] = [];
-  const producerItemContent = getProducerItemContentData(producerItem);
+  const producerItemContent = getProducerItemContentData(
+    producerItem.data,
+    producerItem.enhanced,
+  );
   for (const effect of producerItemContent.effects) {
     const innerDiffs = activateEffect(lesson, effect, getRandom, idGenerator);
     diffs = [...diffs, ...innerDiffs];

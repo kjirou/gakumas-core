@@ -29,6 +29,7 @@ import {
   ProducerItemContentData,
   CharacterData,
   CurrentTurnDetails,
+  ProducerItemData,
 } from "./types";
 
 /** ターン開始時の手札数 */
@@ -76,18 +77,22 @@ export const getCardContentData = (
 };
 
 export const getProducerItemContentData = (
-  producerItem: ProducerItem,
+  producerItemData: ProducerItemData,
+  enhanced: boolean,
 ): ProducerItemContentData => {
-  return producerItem.data.enhanced !== undefined && producerItem.enhanced
-    ? producerItem.data.enhanced
-    : producerItem.data.base;
+  return producerItemData.enhanced !== undefined && enhanced
+    ? producerItemData.enhanced
+    : producerItemData.base;
 };
 
 /** Pアイテムの残り発動回数を返す */
 export const getRemainingProducerItemTimes = (
   producerItem: ProducerItem,
 ): number | undefined => {
-  const producerItemContent = getProducerItemContentData(producerItem);
+  const producerItemContent = getProducerItemContentData(
+    producerItem.data,
+    producerItem.enhanced,
+  );
   return producerItemContent.times === undefined
     ? undefined
     : Math.max(producerItemContent.times - producerItem.activationCount, 0);

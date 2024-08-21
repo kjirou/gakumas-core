@@ -195,7 +195,10 @@ export const generateProducerItemDisplays = (
   producerItems: ProducerItem[],
 ): ProducerItemDisplay[] => {
   return producerItems.map((producerItem) => {
-    const producerItemContent = getProducerItemContentData(producerItem);
+    const producerItemContent = getProducerItemContentData(
+      producerItem.data,
+      producerItem.enhanced,
+    );
     const name = generateProducerItemName(
       producerItem.data.name,
       producerItem.enhanced,

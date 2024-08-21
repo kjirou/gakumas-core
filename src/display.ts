@@ -148,7 +148,7 @@ export const generateCardInHandDisplay = (
     ),
     effects: effectDisplays,
     enhancements: card.enhancements,
-    name: generateCardName(card),
+    name: generateCardName(card.data.name, card.enhancements.length),
     playable: canPlayCard(lesson, cardContent.cost, cardContent.condition),
     rarity: card.data.rarity,
     scores,
@@ -164,7 +164,7 @@ const generateCardInInventoryDisplay = (card: Card): CardInInventoryDisplay => {
   return {
     ...card,
     effects: effectDisplays,
-    name: generateCardName(card),
+    name: generateCardName(card.data.name, card.enhancements.length),
     description: generateCardDescription({
       cost: cardContent.cost,
       condition: cardContent.condition,
@@ -428,7 +428,7 @@ export const generateCardPlayPreviewDisplay = (
     card: {
       cost: cardContent.cost,
       description,
-      name: generateCardName(card),
+      name: generateCardName(card.data.name, card.enhancements.length),
     },
     hasActionEnded: afterLesson.idol.actionPoints === 0,
     lessonDelta: {

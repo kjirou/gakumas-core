@@ -38,52 +38,17 @@ describe("generateCardName", () => {
     expected: ReturnType<typeof generateCardName>;
   }> = [
     {
-      args: [
-        {
-          data: getCardDataByConstId("apirunokihon"),
-          enhancements: [] as any,
-        } as Card,
-      ],
+      args: ["アピールの基本", 0],
       expected: "アピールの基本",
     },
     {
-      args: [
-        {
-          data: getCardDataByConstId("apirunokihon"),
-          enhancements: [{ kind: "original" }],
-        } as Card,
-      ],
-      expected: "アピールの基本+",
-    },
-    {
-      args: [
-        {
-          data: getCardDataByConstId("apirunokihon"),
-          enhancements: [{ kind: "effect" }, { kind: "lessonSupport" }],
-        } as Card,
-      ],
-      expected: "アピールの基本++",
-    },
-    {
-      args: [
-        {
-          data: getCardDataByConstId("apirunokihon"),
-          enhancements: [
-            { kind: "effect" },
-            { kind: "lessonSupport" },
-            { kind: "lessonSupport" },
-          ],
-        } as Card,
-      ],
+      args: ["アピールの基本", 3],
       expected: "アピールの基本+++",
     },
   ];
-  test.each(testCases)(
-    '$args.0.enhancements => "$expected"',
-    ({ args, expected }) => {
-      expect(generateCardName(...args)).toBe(expected);
-    },
-  );
+  test.each(testCases)('$args => "$expected"', ({ args, expected }) => {
+    expect(generateCardName(...args)).toBe(expected);
+  });
 });
 describe("generateEffectText", () => {
   const testCases: Array<{

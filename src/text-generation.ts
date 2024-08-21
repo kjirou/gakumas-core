@@ -155,8 +155,10 @@ const cardKwd = (key: string): string => {
 /**
  * スキルカード名を生成する
  */
-export const generateCardName = (card: Card): string =>
-  card.data.name + "+".repeat(card.enhancements.length);
+export const generateCardName = (
+  name: CardData["name"],
+  enhancementCount: number,
+): string => name + "+".repeat(enhancementCount);
 
 /**
  * 状態修正種別のみからキーワードを生成する

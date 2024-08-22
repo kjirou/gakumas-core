@@ -228,7 +228,7 @@ export const idolsAsConst = [
       recommendedModifierKind: "positiveImpression",
     },
     rarity: "sr",
-    specificCardId: "jumpakunoyose",
+    specificCardId: "jumpakunoyosei",
     specificProducerItemId: "omoiderobo",
     title: "一つ踏み出した先に",
   },

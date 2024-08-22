@@ -3006,7 +3006,7 @@ export const cardsAsConst = [
     ],
   },
   {
-    id: "negainochikari",
+    id: "negainochikara",
     name: "願いの力",
     cardPossessionKind: "sense",
     cardProviderKind: "others",
@@ -3616,6 +3616,7 @@ export const cardsAsConst = [
     cardPossessionKind: "logic",
     cardProviderKind: "others",
     cardSummaryKind: "mental",
+    keywords: ["honbanzenya"],
     necessaryProducerLevel: 20,
     rarity: "sr",
     contents: [
@@ -4185,6 +4186,7 @@ export const cardsAsConst = [
     cardPossessionKind: "logic",
     cardProviderKind: "idol",
     cardSummaryKind: "mental",
+    keywords: ["karafurukyuto"],
     nonDuplicative: true,
     rarity: "sr",
     contents: [
@@ -4268,11 +4270,12 @@ export const cardsAsConst = [
     ],
   },
   {
-    id: "jumpakunoyose",
+    id: "jumpakunoyosei",
     name: "純白の妖精",
     cardPossessionKind: "logic",
     cardProviderKind: "idol",
     cardSummaryKind: "active",
+    keywords: ["junpakunoyosei"],
     nonDuplicative: true,
     rarity: "sr",
     contents: [
@@ -4318,6 +4321,7 @@ export const cardsAsConst = [
     cardPossessionKind: "logic",
     cardProviderKind: "idol",
     cardSummaryKind: "mental",
+    keywords: ["isshokkenmei"],
     nonDuplicative: true,
     rarity: "sr",
     contents: [
@@ -4578,6 +4582,7 @@ export const cardsAsConst = [
     cardPossessionKind: "free",
     cardProviderKind: "supportCard",
     cardSummaryKind: "active",
+    keywords: ["sutorecchidangi"],
     nonDuplicative: true,
     rarity: "sr",
     contents: [
@@ -4804,6 +4809,7 @@ export const cardsAsConst = [
     cardPossessionKind: "sense",
     cardProviderKind: "others",
     cardSummaryKind: "active",
+    keywords: ["koruandoresuponsu"],
     necessaryProducerLevel: 11,
     nonDuplicative: true,
     rarity: "ssr",
@@ -5155,6 +5161,7 @@ export const cardsAsConst = [
     cardPossessionKind: "logic",
     cardProviderKind: "others",
     cardSummaryKind: "active",
+    keywords: ["nihyakupasentosumairu"],
     necessaryProducerLevel: 11,
     nonDuplicative: true,
     rarity: "ssr",
@@ -5785,6 +5792,7 @@ export const cardsAsConst = [
     cardPossessionKind: "sense",
     cardProviderKind: "others",
     cardSummaryKind: "mental",
+    keywords: ["tenshinranman"],
     necessaryProducerLevel: 45,
     nonDuplicative: true,
     rarity: "ssr",
@@ -6341,6 +6349,7 @@ export const cardsAsConst = [
     cardPossessionKind: "sense",
     cardSummaryKind: "active",
     cardProviderKind: "idol",
+    keywords: ["wanmoasuteppu"],
     nonDuplicative: true,
     rarity: "ssr",
     contents: [

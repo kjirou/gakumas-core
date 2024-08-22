@@ -210,6 +210,7 @@ export const producerItemsAsConst = [
   {
     id: "chozetsuammimmasuku",
     name: "超絶安眠マスク",
+    keywords: ["chozetsuanminmasuku"],
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "r",
@@ -364,6 +365,7 @@ export const producerItemsAsConst = [
   {
     id: "dearritorupurinsu",
     name: "Dearリトルプリンス",
+    keywords: ["deiaritorupurinsu"],
     producerItemPossessionKind: "sense",
     producerItemProviderKind: "idol",
     rarity: "sr",
@@ -599,6 +601,7 @@ export const producerItemsAsConst = [
   {
     id: "hatsuboshitshatsu",
     name: "はつぼしTシャツ",
+    keywords: ["hatsuboshiteishatsu"],
     producerItemPossessionKind: "sense",
     producerItemProviderKind: "others",
     rarity: "ssr",
@@ -902,6 +905,7 @@ export const producerItemsAsConst = [
   {
     id: "biggudorimuchokimbako",
     name: "ビッグドリーム貯金箱",
+    keywords: ["biggudorimuchokinbako"],
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "ssr",
@@ -1130,6 +1134,7 @@ export const producerItemsAsConst = [
   {
     id: "kaerujirushinosempuki",
     name: "カエル印の扇風機",
+    keywords: ["kaerushirushinosenpuki"],
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "ssr",
@@ -1310,6 +1315,7 @@ export const producerItemsAsConst = [
   {
     id: "amakawaramemmeguri",
     name: "天川ラーメン巡り",
+    keywords: ["tenkawaramenmeguri"],
     producerItemPossessionKind: "free",
     producerItemProviderKind: "supportCard",
     rarity: "ssr",

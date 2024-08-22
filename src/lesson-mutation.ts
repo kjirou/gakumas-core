@@ -1746,14 +1746,14 @@ export const drawCardsOnTurnStart = (
   }
 
   //
-  // 捨札から、山札0枚時の特殊仕様の対象になったスキルカードリストを取り出す
+  // 捨札から、山札0枚時の特殊仕様の対象になったスキルカードリストを取り出して、一時的に退避しておく
   //
   // - 山札の再構築時の候補から外すため
   // - 山札0枚時の特殊仕様によるもの、詳細は Lesson["handWhenEmptyDeck"] を参照
   //
-  const handWhenEmptyDeck = newLesson.handWhenEmptyDeck;
+  const beforeHandWhenEmptyDeck = newLesson.handWhenEmptyDeck;
   let handWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (handWhenEmptyDeck.length > 0) {
+  if (newLesson.handWhenEmptyDeck.length > 0) {
     // 必ず、山札は0枚のはず
     if (newLesson.deck.length > 0) {
       throw new Error(
@@ -1764,7 +1764,7 @@ export const drawCardsOnTurnStart = (
       {
         kind: "cardPlacement",
         discardPile: newLesson.discardPile.filter(
-          (e) => !handWhenEmptyDeck.includes(e),
+          (e) => !newLesson.handWhenEmptyDeck.includes(e),
         ),
         reason: {
           kind: "turnStart",
@@ -1841,7 +1841,7 @@ export const drawCardsOnTurnStart = (
   // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す
   //
   let restoringHandWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (handWhenEmptyDeck.length > 0) {
+  if (beforeHandWhenEmptyDeck.length > 0) {
     // 必ず、山札は再構築されているはずなので、捨札は空のはず
     if (newLesson.discardPile.length > 0) {
       throw new Error(
@@ -1857,7 +1857,7 @@ export const drawCardsOnTurnStart = (
     restoringHandWhenEmptyDeckUpdates = [
       {
         kind: "cardPlacement",
-        discardPile: handWhenEmptyDeck,
+        discardPile: beforeHandWhenEmptyDeck,
         reason: {
           kind: "turnStart",
           historyTurnNumber: newLesson.turnNumber,

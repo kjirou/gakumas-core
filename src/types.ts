@@ -1005,6 +1005,15 @@ export type ProducerItemData = Readonly<{
   /** 強化済み時の内容 */
   enhanced?: ProducerItemContentData;
   id: string;
+  /**
+   * 検索用キーワード
+   *
+   * - 今の所は、以下の対象へ、気づいたら設定している
+   *   - id が日本語読みのローマ字になってないデータに対して、それを登録する
+   *   - ヘボン式ローマ字だと検索しにくい時に、検索しやすいローマ字表記を登録する
+   *   - 漢字の読みがわからないものに対して、可能性があるパターンを登録する
+   */
+  keywords?: string[];
   name: string;
   producerItemPossessionKind: ProducerItemPossessionKind;
   producerItemProviderKind: ProducerItemProviderKind;

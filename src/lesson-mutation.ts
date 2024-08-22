@@ -38,6 +38,7 @@ import {
   isRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   maxHandSize,
+  numberOfCardsToDrawAtTurnStart,
   patchDiffs,
   scanIncreasedModifierKinds,
 } from "./models";
@@ -1813,7 +1814,13 @@ export const drawCardsOnTurnStart = (
   let drawCardsEffectUpdates: LessonUpdateQuery[] = [];
   const drawCardsEffectDiffs = activateEffect(
     newLesson,
-    { kind: "drawCards", amount: Math.min(Math.max(innateCardCount, 3), 5) },
+    {
+      kind: "drawCards",
+      amount: Math.min(
+        Math.max(innateCardCount, numberOfCardsToDrawAtTurnStart),
+        maxHandSize,
+      ),
+    },
     params.getRandom,
     // "drawCards" に限れば idGenerator は使われない
     () => "",

@@ -32,8 +32,8 @@ import {
   ProducerItemData,
 } from "./types";
 
-/** ターン開始時の手札数 */
-export const handSizeOnLessonStart = 3;
+/** ターン開始時に引く手札の数 */
+export const numberOfCardsToDrawAtTurnStart = 3;
 
 /** 手札の最大枚数 */
 export const maxHandSize = 5;

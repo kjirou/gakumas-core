@@ -1823,7 +1823,9 @@ export const drawCardsOnTurnStart = (
     },
     params.getRandom,
     // "drawCards" に限れば idGenerator は使われない
-    () => "",
+    () => {
+      throw new Error("Unexpected call");
+    },
   );
   drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
     createLessonUpdateQueryFromDiff(diff, {

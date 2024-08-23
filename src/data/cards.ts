@@ -4864,10 +4864,10 @@ export const cardsAsConst = [
     contents: [
       {
         cost: { kind: "normal", value: 7 },
+        condition: { kind: "hasGoodCondition" },
         effects: [
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
             score: { value: 38 },
           },
         ],
@@ -4876,7 +4876,6 @@ export const cardsAsConst = [
         effects: [
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
             score: { value: 54 },
           },
         ],
@@ -4885,7 +4884,6 @@ export const cardsAsConst = [
         effects: [
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
             score: { value: 63 },
           },
         ],
@@ -4894,7 +4892,6 @@ export const cardsAsConst = [
         effects: [
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
             score: { value: 71 },
           },
         ],

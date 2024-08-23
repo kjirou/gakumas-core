@@ -882,6 +882,15 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "hajimetenoramune",
+      expected: [
+        "{{好調}}状態の場合、使用可",
+        "パラメータ+9",
+        "{{好調}}の200%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1202,6 +1211,13 @@ describe("generateProducerItemDescription", () => {
         "{{初めてのご褒美}}使用時、{{好調}}2ターン",
         "{{固定元気}}+5",
         "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "binnonakanokirameki",
+      expected: [
+        "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
+        "（レッスン内3回）",
       ].join("\n"),
     },
   ];

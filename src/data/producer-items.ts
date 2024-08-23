@@ -977,6 +977,43 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "binnonakanokirameki",
+    name: "瓶の中のきらめき",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 3,
+      trigger: { kind: "turnEnd" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 3 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 4,
+      trigger: { kind: "turnEnd" },
+    },
+  },
+  {
     id: "biggudorimuchokimbako",
     name: "ビッグドリーム貯金箱",
     keywords: ["biggudorimuchokinbako"],

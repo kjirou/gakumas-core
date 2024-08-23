@@ -6552,6 +6552,44 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenoramune",
+    name: "はじめてのラムネ",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        condition: { kind: "hasGoodCondition" },
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            percentage: 200,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            percentage: 300,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "yosomihadame",
     name: "よそ見はダメ♪",
     cardPossessionKind: "logic",

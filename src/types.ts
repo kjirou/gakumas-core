@@ -518,7 +518,7 @@ export type EffectWithoutCondition = Readonly<
        * - 割合計算上生じるスコアの端数は切り上げ
        */
       kind: "performLeveragingModifier";
-      modifierKind: "motivation" | "positiveImpression";
+      modifierKind: "goodCondition" | "motivation" | "positiveImpression";
       /** 状態修正値に対するパーセント表記の乗数 */
       percentage: number;
     }

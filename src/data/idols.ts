@@ -244,6 +244,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "katsuragiririya-ssr-2",
+    characterId: "katsuragiririya",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "ssr",
+    specificCardId: "hajimetenoramune",
+    specificProducerItemId: "binnonakanokirameki",
+    title: "冠菊",
+  },
+  {
     id: "katsuragiririya-ssr-1",
     characterId: "katsuragiririya",
     producePlan: {

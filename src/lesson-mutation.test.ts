@@ -349,6 +349,33 @@ describe("activateEffectIf", () => {
         },
       ],
     },
+    {
+      name: "performLeveragingModifier - goodCondition",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 10, id: "m1" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "goodCondition",
+          percentage: 100,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "score",
+          // 通常の好調の効果も反映される
+          actual: 15,
+          max: 15,
+        },
+      ],
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(activateEffectIf(...args)).toStrictEqual(expected);

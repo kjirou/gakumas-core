@@ -292,12 +292,14 @@ export const generateActionCostText = (
 const generateEffectConditionText = (condition: EffectCondition): string => {
   switch (condition.kind) {
     case "countModifier": {
+      const unitText =
+        condition.modifierKind === "goodCondition" ? "ターン" : "";
       const terms: string[] = [];
       if ("min" in condition.range) {
-        terms.push(`${condition.range.min}以上`);
+        terms.push(`${condition.range.min}${unitText}以上`);
       }
       if ("max" in condition.range) {
-        terms.push(`${condition.range.max}以下`);
+        terms.push(`${condition.range.max}${unitText}以下`);
       }
       return `${generateModifierKindText(condition.modifierKind)}が${terms.join("")}の場合`;
     }

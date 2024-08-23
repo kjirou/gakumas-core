@@ -1044,6 +1044,17 @@ export const activateEffect = <
       let score = 0;
       const modifierKind = effect.modifierKind;
       switch (modifierKind) {
+        case "goodCondition": {
+          const goodCondition = lesson.idol.modifiers.find(
+            (e) => e.kind === "goodCondition",
+          );
+          const goodConditionDuration =
+            goodCondition && "duration" in goodCondition
+              ? goodCondition.duration
+              : 0;
+          score = Math.ceil((goodConditionDuration * effect.percentage) / 100);
+          break;
+        }
         case "motivation": {
           const motivation = lesson.idol.modifiers.find(
             (e) => e.kind === "motivation",

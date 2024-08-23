@@ -172,6 +172,18 @@ export const idolsAsConst = [
     title: "カワイイ♡はじめました",
   },
   {
+    id: "fujitakotone-r-2",
+    characterId: "fujitakotone",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenogohobi",
+    specificProducerItemId: "hatsukoenoakashikotone",
+    title: "初声",
+  },
+  {
     id: "fujitakotone-r-1",
     characterId: "fujitakotone",
     producePlan: {

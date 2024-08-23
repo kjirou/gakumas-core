@@ -20,7 +20,7 @@ import {
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
-import { getCardContentData } from "./models";
+import { getCardContentData, getProducerItemContentData } from "./models";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -874,6 +874,14 @@ describe("generateCardDescription", () => {
       cardId: "hajimetenobasho",
       expected: ["{{好印象}}+6", "{{レッスン中1回}}{{重複不可}}"].join("\n"),
     },
+    {
+      cardId: "hajimetenogohobi",
+      expected: [
+        "{{好調}}3ターン",
+        "{{絶好調}}2ターン",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1105,7 +1113,8 @@ describe("generateProducerItemTriggerAndConditionText", () => {
   });
 });
 describe("generateProducerItemDescription", () => {
-  const testCases: Array<{
+  const testParameters: Array<{
+    enhanced?: boolean;
     expected: ReturnType<typeof generateProducerItemDescription>;
     producerItemId: ProducerItemDataId;
   }> = [
@@ -1179,18 +1188,38 @@ describe("generateProducerItemDescription", () => {
         "（レッスン内2回）",
       ].join("\n"),
     },
+    {
+      producerItemId: "hatsukoenoakashikotone",
+      expected: [
+        "{{初めてのご褒美}}使用時、{{好調}}2ターン",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashikotone",
+      enhanced: true,
+      expected: [
+        "{{初めてのご褒美}}使用時、{{好調}}2ターン",
+        "{{固定元気}}+5",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
   ];
-  test.each(testCases)(
+  test.each(testParameters)(
     '$producerItemId => "$expected"',
-    ({ expected, producerItemId }) => {
-      const producerItem = getProducerItemDataByConstId(producerItemId);
+    ({ enhanced, expected, producerItemId }) => {
+      const producerItemData = getProducerItemDataByConstId(producerItemId);
+      const producerItemContent = getProducerItemContentData(
+        producerItemData,
+        enhanced ?? false,
+      );
       expect(
         generateProducerItemDescription({
-          cost: producerItem.base.cost,
-          condition: producerItem.base.condition,
-          effects: producerItem.base.effects,
-          times: producerItem.base.times,
-          trigger: producerItem.base.trigger,
+          cost: producerItemContent.cost,
+          condition: producerItemContent.condition,
+          effects: producerItemContent.effects,
+          times: producerItemContent.times,
+          trigger: producerItemContent.trigger,
         }),
       ).toBe(expected);
     },

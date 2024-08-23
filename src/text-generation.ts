@@ -26,6 +26,7 @@ import type {
   EffectWithoutCondition,
   ProducerItemData,
 } from "./types";
+import { getCardDataByConstId } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 
 /**
@@ -134,8 +135,9 @@ const kwd = (key: keyof typeof globalKeywords) => {
 /** globalKeywords と同じ趣旨で、データ由来のキーワードを分けたもの */
 export const globalDataKeywords = {
   cards: {
-    adorenarinzenkai: "アドレナリン全開",
-    nemuke: "眠気",
+    adorenarinzenkai: getCardDataByConstId("adorenarinzenkai").name,
+    hajimetenogohobi: getCardDataByConstId("hajimetenogohobi").name,
+    nemuke: getCardDataByConstId("nemuke").name,
   },
 } as const satisfies Record<string, Record<string, string>>;
 

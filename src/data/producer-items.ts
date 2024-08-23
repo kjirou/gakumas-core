@@ -171,6 +171,40 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "hatsukoenoakashikotone",
+    name: "初声の証・ことね",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 1,
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardDataId: "hajimetenogohobi",
+      },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+        { kind: "perform", vitality: { fixedValue: true, value: 5 } },
+      ],
+      times: 1,
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardDataId: "hajimetenogohobi",
+      },
+    },
+  },
+  {
     id: "chibidomotezukurimedaru",
     name: "ちびども手作りメダル",
     producerItemPossessionKind: "logic",

@@ -1749,6 +1749,47 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenogohobi",
+    name: "初めてのご褒美",
+    cardPossessionKind: "sense",
+    cardProviderKind: "idol",
+    cardSummaryKind: "mental",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "arubaita",
     name: "アルバイター",
     cardPossessionKind: "logic",

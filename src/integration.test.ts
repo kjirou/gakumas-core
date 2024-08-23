@@ -113,6 +113,44 @@ describe("手札の配布と山札の再構築", () => {
       discardPile: expect.arrayContaining(["d", "e", "f"]),
     });
   });
+  test("山札3枚で、毎ターンスキルカードを使用した時、おそらくは山札0枚時の特殊仕様を発動しつつも、手札は毎ターン3枚引ける", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-r-1",
+      noIdolSpecificCard: true,
+      cards: [
+        { id: "apirunokihon", testId: "a" },
+        { id: "apirunokihon", testId: "b" },
+        { id: "apirunokihon", testId: "c" },
+      ],
+      producerItems: [],
+      turns: ["vocal", "vocal", "vocal"],
+    });
+    // 1
+    gamePlay = startTurn(gamePlay);
+    expect(getLesson(gamePlay)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: [],
+    });
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    expect(getLesson(gamePlay)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: [],
+    });
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+    // 3
+    gamePlay = startTurn(gamePlay);
+    expect(getLesson(gamePlay)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: [],
+    });
+  });
 });
 describe("状態修正の効果時間の自然減少", () => {
   test("ターン開始時処理（例えば、応援/トラブル）で初めて付与された状態修正の種類は、次ターン開始時に効果時間が減少する", () => {

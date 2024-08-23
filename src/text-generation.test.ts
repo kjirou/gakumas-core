@@ -870,6 +870,10 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "hajimetenobasho",
+      expected: ["{{好印象}}+6", "{{レッスン中1回}}{{重複不可}}"].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1165,6 +1169,13 @@ describe("generateProducerItemDescription", () => {
       producerItemId: "yabureshirazunopoi",
       expected: [
         "ターン開始時{{好印象}}が6以上の場合、体力回復4",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashitemari",
+      expected: [
+        "ターン終了時{{好印象}}が6以上の場合、{{好印象}}の100%分パラメータ上昇",
         "（レッスン内2回）",
       ].join("\n"),
     },

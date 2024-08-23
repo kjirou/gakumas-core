@@ -1970,6 +1970,39 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenobasho",
+    name: "初めての場所",
+    cardPossessionKind: "logic",
+    cardProviderKind: "idol",
+    cardSummaryKind: "mental",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "zentoyoyo",
     name: "前途洋々",
     cardPossessionKind: "free",

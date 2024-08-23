@@ -319,6 +319,46 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "hatsukoenoakashitemari",
+    name: "初声の証・手毬",
+    keywords: ["hatsugoenoakashitemari"],
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "positiveImpression",
+          percentage: 100,
+        },
+      ],
+      times: 2,
+      trigger: { kind: "turnEnd" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "positiveImpression",
+          percentage: 100,
+        },
+      ],
+      times: 3,
+      trigger: { kind: "turnEnd" },
+    },
+  },
+  {
     id: "sakinokanzenshokureshipi",
     name: "咲季の完全食レシピ",
     producerItemPossessionKind: "sense",

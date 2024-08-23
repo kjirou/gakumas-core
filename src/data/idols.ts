@@ -112,6 +112,18 @@ export const idolsAsConst = [
     title: "一匹狼",
   },
   {
+    id: "tsukimuratemari-r-2",
+    characterId: "tsukimuratemari",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenobasho",
+    specificProducerItemId: "hatsukoenoakashitemari",
+    title: "初声",
+  },
+  {
     id: "tsukimuratemari-r-1",
     characterId: "tsukimuratemari",
     producePlan: {

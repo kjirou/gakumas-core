@@ -38,6 +38,7 @@ import {
   isRemainingProducerItemTimes,
   isScoreSatisfyingPerfect,
   maxHandSize,
+  numberOfCardsToDrawAtTurnStart,
   patchDiffs,
   scanIncreasedModifierKinds,
 } from "./models";
@@ -1745,14 +1746,14 @@ export const drawCardsOnTurnStart = (
   }
 
   //
-  // 捨札から、山札0枚時に捨札になったスキルカードを一時取り出す
+  // 捨札から、山札0枚時の特殊仕様の対象になったスキルカードリストを取り出して、一時的に退避しておく
   //
   // - 山札の再構築時の候補から外すため
   // - 山札0枚時の特殊仕様によるもの、詳細は Lesson["handWhenEmptyDeck"] を参照
   //
-  const handWhenEmptyDeck = newLesson.handWhenEmptyDeck;
+  const beforeHandWhenEmptyDeck = newLesson.handWhenEmptyDeck;
   let handWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (handWhenEmptyDeck.length > 0) {
+  if (newLesson.handWhenEmptyDeck.length > 0) {
     // 必ず、山札は0枚のはず
     if (newLesson.deck.length > 0) {
       throw new Error(
@@ -1763,7 +1764,7 @@ export const drawCardsOnTurnStart = (
       {
         kind: "cardPlacement",
         discardPile: newLesson.discardPile.filter(
-          (e) => !handWhenEmptyDeck.includes(e),
+          (e) => !newLesson.handWhenEmptyDeck.includes(e),
         ),
         reason: {
           kind: "turnStart",
@@ -1813,10 +1814,18 @@ export const drawCardsOnTurnStart = (
   let drawCardsEffectUpdates: LessonUpdateQuery[] = [];
   const drawCardsEffectDiffs = activateEffect(
     newLesson,
-    { kind: "drawCards", amount: Math.min(Math.max(innateCardCount, 3), 5) },
+    {
+      kind: "drawCards",
+      amount: Math.min(
+        Math.max(innateCardCount, numberOfCardsToDrawAtTurnStart),
+        maxHandSize,
+      ),
+    },
     params.getRandom,
     // "drawCards" に限れば idGenerator は使われない
-    () => "",
+    () => {
+      throw new Error("Unexpected call");
+    },
   );
   drawCardsEffectUpdates = drawCardsEffectDiffs.map((diff) =>
     createLessonUpdateQueryFromDiff(diff, {
@@ -1832,7 +1841,7 @@ export const drawCardsOnTurnStart = (
   // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す
   //
   let restoringHandWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (handWhenEmptyDeck.length > 0) {
+  if (beforeHandWhenEmptyDeck.length > 0) {
     // 必ず、山札は再構築されているはずなので、捨札は空のはず
     if (newLesson.discardPile.length > 0) {
       throw new Error(
@@ -1848,7 +1857,7 @@ export const drawCardsOnTurnStart = (
     restoringHandWhenEmptyDeckUpdates = [
       {
         kind: "cardPlacement",
-        discardPile: handWhenEmptyDeck,
+        discardPile: beforeHandWhenEmptyDeck,
         reason: {
           kind: "turnStart",
           historyTurnNumber: newLesson.turnNumber,
@@ -1860,6 +1869,39 @@ export const drawCardsOnTurnStart = (
     nextHistoryResultIndex++;
   }
 
+  //
+  // 手札が3枚未満なら、足りない数を引くように再度試みる
+  //
+  // - 主に、手札:3,山札:0,捨札:3未満 の状態で、山札0枚時の特殊仕様が発動した時に、 手札:3未満,山札:0,捨札:3 になる状況を想定している
+  // - 上記の状況で、本家がどのように動作するかは不明。現状は確認する方法はおそらく存在しない。
+  // - シミュレーター側で、少数手札で回す時に不便なので、この仕様を入れた
+  //   - Ref. Discord の FB: https://discord.com/channels/1207572227118075934/1239791087254634506/1275121923424256022
+  //
+  let retryingDrawCardsUpdates: LessonUpdateQuery[] = [];
+  if (newLesson.hand.length < numberOfCardsToDrawAtTurnStart) {
+    const diffs = activateEffect(
+      newLesson,
+      {
+        kind: "drawCards",
+        amount: numberOfCardsToDrawAtTurnStart - newLesson.hand.length,
+      },
+      params.getRandom,
+      // "drawCards" に限れば idGenerator は使われない
+      () => {
+        throw new Error("Unexpected call");
+      },
+    );
+    retryingDrawCardsUpdates = diffs.map((diff) =>
+      createLessonUpdateQueryFromDiff(diff, {
+        kind: "turnStart.drawingHand",
+        historyTurnNumber: newLesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      }),
+    );
+    newLesson = patchDiffs(newLesson, retryingDrawCardsUpdates);
+    nextHistoryResultIndex++;
+  }
+
   return {
     updates: [
       ...moveInnateCardsUpdates,
@@ -1867,6 +1909,7 @@ export const drawCardsOnTurnStart = (
       ...removeLessonSupportUpdates,
       ...drawCardsEffectUpdates,
       ...restoringHandWhenEmptyDeckUpdates,
+      ...retryingDrawCardsUpdates,
     ],
     nextHistoryResultIndex,
   };

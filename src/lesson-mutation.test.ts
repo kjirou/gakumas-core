@@ -3482,6 +3482,66 @@ describe("drawCardsOnTurnStart", () => {
     const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(0);
   });
+  test("山札0枚時の特殊仕様 - 山札:0,捨札:3(全て特殊仕様対象) の時、手札3枚を引く", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c"].map((id) => ({
+          id,
+          data: getCardDataByConstId("apirunokihon"),
+          enhancements: [],
+        })),
+      ],
+    });
+    lesson.hand = [];
+    lesson.deck = [];
+    lesson.discardPile = ["a", "b", "c"];
+    lesson.handWhenEmptyDeck = ["a", "b", "c"];
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+    });
+    const newLesson = patchDiffs(lesson, updates);
+    expect(newLesson.hand).toHaveLength(3);
+  });
+  test("山札0枚時の特殊仕様 - 山札:0,捨札:3(特殊仕様対象2枚) の時、手札3枚を引く", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c"].map((id) => ({
+          id,
+          data: getCardDataByConstId("apirunokihon"),
+          enhancements: [],
+        })),
+      ],
+    });
+    lesson.hand = [];
+    lesson.deck = [];
+    lesson.discardPile = ["a", "b", "c"];
+    lesson.handWhenEmptyDeck = ["a", "b"];
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+    });
+    const newLesson = patchDiffs(lesson, updates);
+    expect(newLesson.hand).toHaveLength(3);
+  });
+  test("山札0枚時の特殊仕様 - 山札:0,捨札:6(特殊仕様対象3枚) の時、手札3枚を引く", () => {
+    const lesson = createLessonForTest({
+      cards: [
+        ...["a", "b", "c", "d", "e", "f"].map((id) => ({
+          id,
+          data: getCardDataByConstId("apirunokihon"),
+          enhancements: [],
+        })),
+      ],
+    });
+    lesson.hand = [];
+    lesson.deck = [];
+    lesson.discardPile = ["a", "b", "c", "d", "e", "f"];
+    lesson.handWhenEmptyDeck = ["a", "b", "c"];
+    const { updates } = drawCardsOnTurnStart(lesson, 1, {
+      getRandom: () => 0,
+    });
+    const newLesson = patchDiffs(lesson, updates);
+    expect(newLesson.hand).toHaveLength(3);
+  });
   test("1ターン目でレッスン開始時手札が1枚ある時、更新は2回発行され、手札は最終的にその札を含む3枚になる", () => {
     const lesson = createLessonForTest({
       cards: [

@@ -75,8 +75,9 @@ describe("手札の配布と山札の再構築", () => {
   test("山札6枚で、2ターン目の山札0枚状態でスキルカードを使用した時、山札0枚時の特殊仕様が発動する", () => {
     let gamePlay = initializeGamePlay({
       idolDataId: "kuramotochina-r-1",
-      idolSpecificCardTestId: "a",
+      noIdolSpecificCard: true,
       cards: [
+        { id: "apirunokihon", testId: "a" },
         { id: "apirunokihon", testId: "b" },
         { id: "apirunokihon", testId: "c" },
         { id: "apirunokihon", testId: "d" },
@@ -111,6 +112,44 @@ describe("手札の配布と山札の再構築", () => {
       hand: expect.arrayContaining(["a", "b", "c"]),
       deck: [],
       discardPile: expect.arrayContaining(["d", "e", "f"]),
+    });
+  });
+  test("山札3枚で、毎ターンスキルカードを使用した時、おそらくは山札0枚時の特殊仕様を発動しつつも、手札は毎ターン3枚引ける", () => {
+    let gamePlay = initializeGamePlay({
+      idolDataId: "kuramotochina-r-1",
+      noIdolSpecificCard: true,
+      cards: [
+        { id: "apirunokihon", testId: "a" },
+        { id: "apirunokihon", testId: "b" },
+        { id: "apirunokihon", testId: "c" },
+      ],
+      producerItems: [],
+      turns: ["vocal", "vocal", "vocal"],
+    });
+    // 1
+    gamePlay = startTurn(gamePlay);
+    expect(getLesson(gamePlay)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: [],
+    });
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+    // 2
+    gamePlay = startTurn(gamePlay);
+    expect(getLesson(gamePlay)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: [],
+    });
+    gamePlay = playCard(gamePlay, 0);
+    gamePlay = endTurn(gamePlay);
+    // 3
+    gamePlay = startTurn(gamePlay);
+    expect(getLesson(gamePlay)).toMatchObject({
+      hand: expect.arrayContaining(["a", "b", "c"]),
+      deck: [],
+      discardPile: [],
     });
   });
 });

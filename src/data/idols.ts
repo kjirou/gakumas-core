@@ -400,6 +400,42 @@ export const idolsAsConst = [
     specificProducerItemId: "tekunodoggu",
     title: "学園生活",
   },
+  {
+    id: "himesakirinami-ssr-1",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "focus",
+    },
+    rarity: "ssr",
+    specificCardId: "kyorikan",
+    specificProducerItemId: "toshindainoredeirippu",
+    title: "clumsy trick",
+  },
+  {
+    id: "himesakirinami-sr-1",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "focus",
+    },
+    rarity: "sr",
+    specificCardId: "yorisokimochi",
+    specificProducerItemId: "kimihenosashiire",
+    title: "「私らしさ」のはじまり",
+  },
+  {
+    id: "himesakirinami-r-1",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "focus",
+    },
+    rarity: "r",
+    specificCardId: "hoyoryoku",
+    specificProducerItemId: "itsumonomeikupochi",
+    title: "学園生活",
+  },
 ] as const satisfies IdolData[];
 
 export type IdolDataId = (typeof idolsAsConst)[number]["id"];

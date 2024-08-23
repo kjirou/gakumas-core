@@ -25,9 +25,20 @@ export const isIdolDataIdType = (id: string): id is IdolDataId =>
  *     - なお、これはおそらく「アイドル」＞「Pアイドル育成」＞「アイドル」順、と同じ
  *   - プロパティの定義順は、アルファベット順
  * - TODO: eslint
- * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
 export const idolsAsConst = [
+  {
+    id: "hanamisaki-ssr-3",
+    characterId: "hanamisaki",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "ssr",
+    specificCardId: "kingyosukuideshobu",
+    specificProducerItemId: "yabureshirazunopoi",
+    title: "冠菊",
+  },
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",

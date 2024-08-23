@@ -6811,6 +6811,49 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "kingyosukuideshobu",
+    name: "金魚すくいで勝負",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "life", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "hanamoyukisetsu",
     name: "花萌ゆ季節",
     cardPossessionKind: "free",

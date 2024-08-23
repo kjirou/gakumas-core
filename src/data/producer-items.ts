@@ -1180,6 +1180,47 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "yabureshirazunopoi",
+    name: "敗れ知らずのポイ",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "recoverLife",
+          value: 4,
+        },
+      ],
+      times: 2,
+      trigger: {
+        kind: "turnStart",
+      },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "recoverLife",
+          value: 5,
+        },
+      ],
+      times: 2,
+      trigger: {
+        kind: "turnStart",
+      },
+    },
+  },
+  {
     id: "etainoshirenaimono",
     name: "得体の知れないモノ",
     producerItemPossessionKind: "free",

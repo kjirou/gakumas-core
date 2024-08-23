@@ -860,6 +860,16 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "kingyosukuideshobu",
+      expected: [
+        "{{体力消費}}2",
+        "{{好印象}}+3",
+        "{{スキルカード使用数追加}}+1",
+        "スキルカードを引く",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1149,6 +1159,13 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、{{パラメータ上昇量増加}}50%（1ターン）",
         "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "yabureshirazunopoi",
+      expected: [
+        "ターン開始時{{好印象}}が6以上の場合、体力回復4",
+        "（レッスン内2回）",
       ].join("\n"),
     },
   ];

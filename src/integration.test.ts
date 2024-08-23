@@ -75,8 +75,9 @@ describe("手札の配布と山札の再構築", () => {
   test("山札6枚で、2ターン目の山札0枚状態でスキルカードを使用した時、山札0枚時の特殊仕様が発動する", () => {
     let gamePlay = initializeGamePlay({
       idolDataId: "kuramotochina-r-1",
-      idolSpecificCardTestId: "a",
+      noIdolSpecificCard: true,
       cards: [
+        { id: "apirunokihon", testId: "a" },
         { id: "apirunokihon", testId: "b" },
         { id: "apirunokihon", testId: "c" },
         { id: "apirunokihon", testId: "d" },

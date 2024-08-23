@@ -292,6 +292,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "kuramotochina-ssr-2",
+    characterId: "kuramotochina",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "ssr",
+    specificCardId: "ochakaiheyokoso",
+    specificProducerItemId: "tokimekinoippai",
+    title: "日々、発見的ステップ！",
+  },
+  {
     id: "kuramotochina-ssr-1",
     characterId: "kuramotochina",
     producePlan: {

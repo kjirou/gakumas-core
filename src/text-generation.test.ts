@@ -345,6 +345,12 @@ describe("generateEffectText", () => {
       name: "perform - score - focusMultiplier",
     },
     {
+      args: [{ kind: "perform", score: { boostPerCardUsed: 2, value: 1 } }],
+      expected:
+        "パラメータ+1（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+2）",
+      name: "perform - score - boostPerCardUsed",
+    },
+    {
       args: [{ kind: "perform", score: { times: 2, value: 1 } }],
       expected: "パラメータ+1（2回）",
       name: "perform - score - times",
@@ -891,6 +897,16 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "ochakaiheyokoso",
+      expected: [
+        "{{元気}}+3",
+        "{{絶好調}}2ターン",
+        "{{スキルカード使用数追加}}+1",
+        "スキルカードを引く",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1218,6 +1234,22 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
         "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "tokimekinoippai",
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+3（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+3）",
+        "{{体力消費}}2",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "tokimekinoippai",
+      enhanced: true,
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+5（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+3）",
+        "（レッスン内1回）",
       ].join("\n"),
     },
   ];

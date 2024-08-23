@@ -1952,6 +1952,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1964,6 +1965,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "goodCondition", duration: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1976,6 +1978,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "focus", amount: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1990,6 +1993,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [
             { kind: "mightyPerformance", duration: 1, percentage: 50 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2005,6 +2009,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 1 },
             { kind: "focus", amount: 3 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2020,6 +2025,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 5 },
             { kind: "excellentCondition", duration: 1 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2032,6 +2038,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "excellentCondition", duration: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2047,6 +2054,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 1 },
             { kind: "mightyPerformance", duration: 1, percentage: 50 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2059,6 +2067,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "focus", amount: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2067,10 +2076,24 @@ describe("calculatePerformingScoreEffect", () => {
       expected: [{ kind: "score", actual: 3, max: 3 }],
     },
     {
+      name: "スコアのクエリに使用したスキルカード1枚ごとにの効果が指定されている時、使用回数に比例した分増加する",
+      args: [
+        {
+          modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 2,
+        } as Idol,
+        undefined,
+        undefined,
+        { value: 1, boostPerCardUsed: 3 },
+      ],
+      expected: [{ kind: "score", actual: 7, max: 7 }],
+    },
+    {
       name: "スコアのクエリに回数が指定されている時、状態修正や集中増幅効果などの影響を反映した結果を回数分の結果で返す",
       args: [
         {
           modifiers: [{ kind: "focus", amount: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2086,6 +2109,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         201,
         undefined,
@@ -2098,6 +2122,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         6,
@@ -2110,6 +2135,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         16,
@@ -2130,6 +2156,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 6 },
             { kind: "excellentCondition", duration: 1 },
           ] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2145,6 +2172,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [
             { kind: "goodCondition", duration: 1 },
           ] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         1668,
         undefined,

@@ -347,6 +347,9 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
         effect.score && effect.score.focusMultiplier !== undefined
           ? `（${kwd("focus")}効果を${effect.score.focusMultiplier}倍適用）`
           : "",
+        effect.score && effect.score.boostPerCardUsed !== undefined
+          ? `（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+${effect.score.boostPerCardUsed}）`
+          : "",
         effect.score && effect.score.times !== undefined
           ? `（${effect.score.times}回）`
           : "",

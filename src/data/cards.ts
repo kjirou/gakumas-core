@@ -6590,6 +6590,52 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "ochakaiheyokoso",
+    name: "お茶会へようこそ♪",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "yosomihadame",
     name: "よそ見はダメ♪",
     cardPossessionKind: "logic",

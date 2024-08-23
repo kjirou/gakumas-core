@@ -1014,6 +1014,42 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "tokimekinoippai",
+    name: "ときめきのいっぱい",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countReminingTurns",
+        max: 1,
+      },
+      cost: { kind: "life", value: 2 },
+      effects: [
+        {
+          kind: "perform",
+          score: { boostPerCardUsed: 3, value: 3 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countReminingTurns",
+        max: 1,
+      },
+      effects: [
+        {
+          kind: "perform",
+          score: { boostPerCardUsed: 3, value: 5 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "biggudorimuchokimbako",
     name: "ビッグドリーム貯金箱",
     keywords: ["biggudorimuchokinbako"],

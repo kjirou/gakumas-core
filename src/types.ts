@@ -493,6 +493,8 @@ export type EffectWithoutCondition = Readonly<
        */
       kind: "perform";
       score?: {
+        /** 使用したスキルカード1枚毎の効果量増加 */
+        boostPerCardUsed?: number;
         /**
          * 集中適用倍率
          *

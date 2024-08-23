@@ -836,6 +836,14 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "bazuwado",
+      expected: [
+        "{{好調}}状態の場合、使用可",
+        "パラメータ+38",
+        "{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "koruresuponsu",
       expected: [
         "パラメータ+15",

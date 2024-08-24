@@ -82,7 +82,7 @@ test("中間試験まで6週の通常レッスンを再現する", () => {
 
   // 残りターン数5
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "hyogennokihon", 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 31,
     vitality: 2,
@@ -96,7 +96,7 @@ test("中間試験まで6週の通常レッスンを再現する", () => {
 
   // 残りターン数4
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "apirunokihon2", 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 31,
     vitality: 3,
@@ -108,7 +108,7 @@ test("中間試験まで6週の通常レッスンを再現する", () => {
 
   // 残りターン数3
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "haitatchi", 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 31,
     vitality: 0,
@@ -272,7 +272,7 @@ test("最終試験まで1週の追い込みレッスンを再現する", () => {
 
   // 残りターン数12
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "shizukanaishi", 2);
+  gamePlay = addLessonSupport(gamePlay, 0, 2);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 12,
     vitality: 0,
@@ -315,7 +315,7 @@ test("最終試験まで1週の追い込みレッスンを再現する", () => {
 
   // 残りターン数9
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "miwakunoshisen", 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 9,
     vitality: 15,
@@ -331,7 +331,7 @@ test("最終試験まで1週の追い込みレッスンを再現する", () => {
 
   // 残りターン数8
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "apirunokihon", 1);
+  gamePlay = addLessonSupport(gamePlay, 1, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 9,
     vitality: 12,
@@ -365,7 +365,7 @@ test("最終試験まで1週の追い込みレッスンを再現する", () => {
 
   // 残りターン数6
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "haitatchi2", 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 9,
     vitality: 14,
@@ -383,7 +383,7 @@ test("最終試験まで1週の追い込みレッスンを再現する", () => {
 
   // 残りターン数5
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "hyojonokihon2", 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 9,
     vitality: 15,
@@ -417,7 +417,7 @@ test("最終試験まで1週の追い込みレッスンを再現する", () => {
 
   // 残りターン数3
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "hyojonokihon", 1);
+  gamePlay = addLessonSupport(gamePlay, 1, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 9,
     vitality: 18,

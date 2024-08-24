@@ -6829,8 +6829,9 @@ export const cardsAsConst = [
           { kind: "drawCards", amount: 1 },
         ],
       },
-      // TODO: ++
-      {},
+      {
+        cost: { kind: "normal", value: 2 },
+      },
       // TODO: +++
       {},
     ],

@@ -52,12 +52,13 @@ export const createGamePlayForTest = (
  */
 export const addLessonSupport = (
   gamePlay: GamePlay,
-  cardId: Card["id"],
+  index: number,
   count: number,
 ): GamePlay => {
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
-  if (lesson.cards.find((card) => card.id === cardId) === undefined) {
-    throw new Error(`Card not found: ${cardId}`);
+  const cardId = lesson.hand[index];
+  if (cardId === undefined) {
+    throw new Error(`Card not found: ${index}`);
   }
   const update: LessonUpdateQuery = {
     kind: "cards.enhancement.lessonSupport",

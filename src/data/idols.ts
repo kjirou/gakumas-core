@@ -391,8 +391,8 @@ export const idolsAsConst = [
     id: "shinosawahiro-ssr-2",
     characterId: "shinosawahiro",
     producePlan: {
-      kind: "logic",
-      recommendedModifierKind: "motivation",
+      kind: "sense",
+      recommendedModifierKind: "focus",
     },
     rarity: "ssr",
     specificCardId: "basuniyurarete",

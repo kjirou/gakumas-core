@@ -26,6 +26,7 @@ import type {
   EffectWithoutCondition,
   ProducerItemData,
 } from "./types";
+import { getCardDataByConstId } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 
 /**
@@ -134,8 +135,9 @@ const kwd = (key: keyof typeof globalKeywords) => {
 /** globalKeywords と同じ趣旨で、データ由来のキーワードを分けたもの */
 export const globalDataKeywords = {
   cards: {
-    adorenarinzenkai: "アドレナリン全開",
-    nemuke: "眠気",
+    adorenarinzenkai: getCardDataByConstId("adorenarinzenkai").name,
+    hajimetenogohobi: getCardDataByConstId("hajimetenogohobi").name,
+    nemuke: getCardDataByConstId("nemuke").name,
   },
 } as const satisfies Record<string, Record<string, string>>;
 
@@ -166,13 +168,20 @@ export const generateCardName = (
  * - ModifierやEffectの単位よりさらに細かく生成したい場合に使う
  */
 const generateModifierKindText = (
-  modifierKind: "focus" | "goodCondition" | "motivation" | "positiveImpression",
+  modifierKind:
+    | "focus"
+    | "goodCondition"
+    | "halfLifeConsumption"
+    | "motivation"
+    | "positiveImpression",
 ): string => {
   switch (modifierKind) {
     case "focus":
       return kwd("focus");
     case "goodCondition":
       return kwd("goodCondition");
+    case "halfLifeConsumption":
+      return kwd("halfLifeConsumption");
     case "motivation":
       return kwd("motivation");
     case "positiveImpression":
@@ -290,14 +299,28 @@ export const generateActionCostText = (
 const generateEffectConditionText = (condition: EffectCondition): string => {
   switch (condition.kind) {
     case "countModifier": {
-      const terms: string[] = [];
-      if ("min" in condition.range) {
-        terms.push(`${condition.range.min}以上`);
+      const isDuration =
+        condition.modifierKind === "goodCondition" ||
+        condition.modifierKind === "halfLifeConsumption";
+      const unitText = isDuration ? "ターン" : "";
+      let rangeText = "";
+      if (
+        "min" in condition.range &&
+        !("max" in condition.range) &&
+        isDuration &&
+        condition.range.min === 1
+      ) {
+        rangeText = "状態";
+      } else {
+        rangeText += "が";
+        if ("min" in condition.range) {
+          rangeText += `${condition.range.min}${unitText}以上`;
+        }
+        if ("max" in condition.range) {
+          rangeText += `${condition.range.max}${unitText}以下`;
+        }
       }
-      if ("max" in condition.range) {
-        terms.push(`${condition.range.max}以下`);
-      }
-      return `${generateModifierKindText(condition.modifierKind)}が${terms.join("")}の場合`;
+      return `${generateModifierKindText(condition.modifierKind)}${rangeText}の場合`;
     }
     case "countReminingTurns":
       return condition.max === 1
@@ -342,6 +365,9 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
         effect.score ? `パラメータ+${effect.score.value}` : "",
         effect.score && effect.score.focusMultiplier !== undefined
           ? `（${kwd("focus")}効果を${effect.score.focusMultiplier}倍適用）`
+          : "",
+        effect.score && effect.score.boostPerCardUsed !== undefined
+          ? `（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+${effect.score.boostPerCardUsed}）`
           : "",
         effect.score && effect.score.times !== undefined
           ? `（${effect.score.times}回）`

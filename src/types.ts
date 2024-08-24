@@ -318,6 +318,7 @@ export type EffectCondition = Readonly<
       modifierKind:
         | "focus"
         | "goodCondition"
+        | "halfLifeConsumption"
         | "motivation"
         | "positiveImpression";
       /** 本家には、「a以上」または「a以下」のどちらかのみで、「a以上b以下」の指定はない */
@@ -493,6 +494,8 @@ export type EffectWithoutCondition = Readonly<
        */
       kind: "perform";
       score?: {
+        /** 使用したスキルカード1枚毎の効果量増加 */
+        boostPerCardUsed?: number;
         /**
          * 集中適用倍率
          *
@@ -518,7 +521,7 @@ export type EffectWithoutCondition = Readonly<
        * - 割合計算上生じるスコアの端数は切り上げ
        */
       kind: "performLeveragingModifier";
-      modifierKind: "motivation" | "positiveImpression";
+      modifierKind: "goodCondition" | "motivation" | "positiveImpression";
       /** 状態修正値に対するパーセント表記の乗数 */
       percentage: number;
     }

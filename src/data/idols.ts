@@ -25,9 +25,20 @@ export const isIdolDataIdType = (id: string): id is IdolDataId =>
  *     - なお、これはおそらく「アイドル」＞「Pアイドル育成」＞「アイドル」順、と同じ
  *   - プロパティの定義順は、アルファベット順
  * - TODO: eslint
- * - TODO: 咲季のBoom Boom Pow以降のキャラを追加する
  */
 export const idolsAsConst = [
+  {
+    id: "hanamisaki-ssr-3",
+    characterId: "hanamisaki",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "ssr",
+    specificCardId: "kingyosukuideshobu",
+    specificProducerItemId: "yabureshirazunopoi",
+    title: "冠菊",
+  },
   {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",
@@ -101,6 +112,18 @@ export const idolsAsConst = [
     title: "一匹狼",
   },
   {
+    id: "tsukimuratemari-r-2",
+    characterId: "tsukimuratemari",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenobasho",
+    specificProducerItemId: "hatsukoenoakashitemari",
+    title: "初声",
+  },
+  {
     id: "tsukimuratemari-r-1",
     characterId: "tsukimuratemari",
     producePlan: {
@@ -147,6 +170,18 @@ export const idolsAsConst = [
     specificCardId: "colorfulcute",
     specificProducerItemId: "okininosunika",
     title: "カワイイ♡はじめました",
+  },
+  {
+    id: "fujitakotone-r-2",
+    characterId: "fujitakotone",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenogohobi",
+    specificProducerItemId: "hatsukoenoakashikotone",
+    title: "初声",
   },
   {
     id: "fujitakotone-r-1",
@@ -209,6 +244,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "katsuragiririya-ssr-2",
+    characterId: "katsuragiririya",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "ssr",
+    specificCardId: "hajimetenoramune",
+    specificProducerItemId: "binnonakanokirameki",
+    title: "冠菊",
+  },
+  {
     id: "katsuragiririya-ssr-1",
     characterId: "katsuragiririya",
     producePlan: {
@@ -243,6 +290,18 @@ export const idolsAsConst = [
     specificCardId: "uchikikeishojo",
     specificProducerItemId: "midorinoosoroiburesu",
     title: "学園生活",
+  },
+  {
+    id: "kuramotochina-ssr-2",
+    characterId: "kuramotochina",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "ssr",
+    specificCardId: "ochakaiheyokoso",
+    specificProducerItemId: "tokimekinoippai",
+    title: "日々、発見的ステップ！",
   },
   {
     id: "kuramotochina-ssr-1",
@@ -398,6 +457,54 @@ export const idolsAsConst = [
     rarity: "r",
     specificCardId: "mikannotaiki",
     specificProducerItemId: "tekunodoggu",
+    title: "学園生活",
+  },
+  {
+    id: "himesakirinami-ssr-2",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "ssr",
+    specificCardId: "nyudogumotokimi",
+    specificProducerItemId: "kimitowakeaunatsu",
+    title: "キミとセミブルー",
+  },
+  {
+    id: "himesakirinami-ssr-1",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "focus",
+    },
+    rarity: "ssr",
+    specificCardId: "kyorikan",
+    specificProducerItemId: "toshindainoredeirippu",
+    title: "clumsy trick",
+  },
+  {
+    id: "himesakirinami-sr-1",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "focus",
+    },
+    rarity: "sr",
+    specificCardId: "yorisokimochi",
+    specificProducerItemId: "kimihenosashiire",
+    title: "「私らしさ」のはじまり",
+  },
+  {
+    id: "himesakirinami-r-1",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "focus",
+    },
+    rarity: "r",
+    specificCardId: "hoyoryoku",
+    specificProducerItemId: "itsumonomeikupochi",
     title: "学園生活",
   },
 ] as const satisfies IdolData[];

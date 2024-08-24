@@ -152,7 +152,7 @@ const newGamePlay = endTrun(gamePlay);
 
 ## :writing_hand: 主なTODO
 
-- [ ] 「藤田ことね Yellow Big Bang!」より後のアイドルがほぼ未実装
+- [ ] Boom Boom Powと初声の咲季・コントラスト広・冠菊ことねが未実装
 - [ ] コンテストやアイドルの道だけにある応援/トラブルが未実装
 - [ ] レッスンサポート効果の発動が未実装
   - 発動率など全般的に仕様が不明なため

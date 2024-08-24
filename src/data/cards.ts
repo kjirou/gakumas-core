@@ -1749,6 +1749,47 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenogohobi",
+    name: "初めてのご褒美",
+    cardPossessionKind: "sense",
+    cardProviderKind: "idol",
+    cardSummaryKind: "mental",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 4 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "arubaita",
     name: "アルバイター",
     cardPossessionKind: "logic",
@@ -1961,6 +2002,39 @@ export const cardsAsConst = [
       {
         effects: [
           { kind: "perform", vitality: { boostPerCardUsed: 3, value: 4 } },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "hajimetenobasho",
+    name: "初めての場所",
+    cardPossessionKind: "logic",
+    cardProviderKind: "idol",
+    cardSummaryKind: "mental",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 6 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 8 },
+          },
         ],
       },
       // TODO: ++
@@ -6478,6 +6552,177 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "nyudogumotokimi",
+    name: "入道雲と、きみ",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "doubleEffect",
+              cardSummaryKind: "active",
+              duration: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "doubleEffect",
+              cardSummaryKind: "active",
+              duration: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  // {
+  //   id: "basuniyurarete",
+  //   name: "バスに揺られて",
+  //   cardPossessionKind: "sense",
+  //   cardSummaryKind: "active",
+  //   cardProviderKind: "idol",
+  //   nonDuplicative: true,
+  //   rarity: "ssr",
+  //   contents: [
+  //     {
+  //       cost: { kind: "normal", value: 2 },
+  //       effects: [
+  //         // TODO: パラメータ追加と元気が1効果内なのか2効果なのかが不明、効果説明欄の改行の具合から判別できない
+  //         { kind: "perform", score: { focusMultiplier: 2.3, value: 5 } },
+  //         {
+  //           kind: "perform",
+  //           condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+  //           vitality: { value: 6 },
+  //         },
+  //       ],
+  //       usableOncePerLesson: true,
+  //     },
+  //     {},
+  //     // TODO: ++
+  //     {},
+  //     // TODO: +++
+  //     {},
+  //   ],
+  // },
+  {
+    id: "hajimetenoramune",
+    name: "はじめてのラムネ",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        condition: { kind: "hasGoodCondition" },
+        effects: [
+          { kind: "perform", score: { value: 9 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            percentage: 200,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { value: 12 } },
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            percentage: 300,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "ochakaiheyokoso",
+    name: "お茶会へようこそ♪",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 4 },
+        effects: [
+          { kind: "perform", vitality: { value: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 3 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "yosomihadame",
     name: "よそ見はダメ♪",
     cardPossessionKind: "logic",
@@ -6806,6 +7051,49 @@ export const cardsAsConst = [
           },
         ],
       },
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "kingyosukuideshobu",
+    name: "金魚すくいで勝負",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "life", value: 2 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+          { kind: "drawCards", amount: 1 },
+        ],
+      },
+      // TODO: ++
+      {},
       // TODO: +++
       {},
     ],

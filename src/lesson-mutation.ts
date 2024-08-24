@@ -324,6 +324,13 @@ export const canActivateEffect = (
           targetValue = goodCondition ? goodCondition.duration : 0;
           break;
         }
+        case "halfLifeConsumption": {
+          const halfLifeConsumption = lesson.idol.modifiers.find(
+            (e) => e.kind === "halfLifeConsumption",
+          );
+          targetValue = halfLifeConsumption ? halfLifeConsumption.duration : 0;
+          break;
+        }
         case "motivation": {
           const motivation = lesson.idol.modifiers.find(
             (e) => e.kind === "motivation",
@@ -589,7 +596,9 @@ export const calculatePerformingScoreEffect = (
   const focusMultiplier =
     query.focusMultiplier !== undefined ? query.focusMultiplier : 1;
   const baseScore = Math.ceil(
-    (query.value + focusAmount * focusMultiplier) *
+    (query.value +
+      focusAmount * focusMultiplier +
+      (query.boostPerCardUsed ?? 0) * idol.totalCardUsageCount) *
       ((goodConditionDuration > 0 ? 1.5 : 1.0) +
         (goodConditionDuration > 0 && hasExcellentCondition
           ? goodConditionDuration * 0.1
@@ -1044,6 +1053,17 @@ export const activateEffect = <
       let score = 0;
       const modifierKind = effect.modifierKind;
       switch (modifierKind) {
+        case "goodCondition": {
+          const goodCondition = lesson.idol.modifiers.find(
+            (e) => e.kind === "goodCondition",
+          );
+          const goodConditionDuration =
+            goodCondition && "duration" in goodCondition
+              ? goodCondition.duration
+              : 0;
+          score = Math.ceil((goodConditionDuration * effect.percentage) / 100);
+          break;
+        }
         case "motivation": {
           const motivation = lesson.idol.modifiers.find(
             (e) => e.kind === "motivation",

@@ -349,6 +349,33 @@ describe("activateEffectIf", () => {
         },
       ],
     },
+    {
+      name: "performLeveragingModifier - goodCondition",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 10, id: "m1" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "goodCondition",
+          percentage: 100,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "score",
+          // 通常の好調の効果も反映される
+          actual: 15,
+          max: 15,
+        },
+      ],
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(activateEffectIf(...args)).toStrictEqual(expected);
@@ -1925,6 +1952,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1937,6 +1965,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "goodCondition", duration: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1949,6 +1978,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "focus", amount: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1963,6 +1993,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [
             { kind: "mightyPerformance", duration: 1, percentage: 50 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1978,6 +2009,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 1 },
             { kind: "focus", amount: 3 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -1993,6 +2025,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 5 },
             { kind: "excellentCondition", duration: 1 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2005,6 +2038,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "excellentCondition", duration: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2020,6 +2054,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 1 },
             { kind: "mightyPerformance", duration: 1, percentage: 50 },
           ],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2032,6 +2067,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [{ kind: "focus", amount: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2040,10 +2076,24 @@ describe("calculatePerformingScoreEffect", () => {
       expected: [{ kind: "score", actual: 3, max: 3 }],
     },
     {
+      name: "スコアのクエリに使用したスキルカード1枚ごとにの効果が指定されている時、使用回数に比例した分増加する",
+      args: [
+        {
+          modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 2,
+        } as Idol,
+        undefined,
+        undefined,
+        { value: 1, boostPerCardUsed: 3 },
+      ],
+      expected: [{ kind: "score", actual: 7, max: 7 }],
+    },
+    {
       name: "スコアのクエリに回数が指定されている時、状態修正や集中増幅効果などの影響を反映した結果を回数分の結果で返す",
       args: [
         {
           modifiers: [{ kind: "focus", amount: 1 }],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2059,6 +2109,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         201,
         undefined,
@@ -2071,6 +2122,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         6,
@@ -2083,6 +2135,7 @@ describe("calculatePerformingScoreEffect", () => {
       args: [
         {
           modifiers: [] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         16,
@@ -2103,6 +2156,7 @@ describe("calculatePerformingScoreEffect", () => {
             { kind: "goodCondition", duration: 6 },
             { kind: "excellentCondition", duration: 1 },
           ] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         undefined,
         undefined,
@@ -2118,6 +2172,7 @@ describe("calculatePerformingScoreEffect", () => {
           modifiers: [
             { kind: "goodCondition", duration: 1 },
           ] as Idol["modifiers"],
+          totalCardUsageCount: 0,
         } as Idol,
         1668,
         undefined,
@@ -2281,6 +2336,42 @@ describe("canActivateEffect", () => {
         {
           kind: "countModifier",
           modifierKind: "goodCondition",
+          range: { min: 3 },
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "countModifierのhalfLifeConsumptionを満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "halfLifeConsumption", duration: 3 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "halfLifeConsumption",
+          range: { min: 3 },
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "countModifierのhalfLifeConsumptionを満たさない時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "halfLifeConsumption", duration: 2 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "halfLifeConsumption",
           range: { min: 3 },
         },
       ],

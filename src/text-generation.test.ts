@@ -20,7 +20,7 @@ import {
   generateProducerItemTriggerAndConditionText,
   globalDataKeywords,
 } from "./text-generation";
-import { getCardContentData } from "./models";
+import { getCardContentData, getProducerItemContentData } from "./models";
 
 describe("globalDataKeywords", () => {
   describe("`cards`のキーがデータ定義のidに存在する", () => {
@@ -343,6 +343,12 @@ describe("generateEffectText", () => {
       args: [{ kind: "perform", score: { focusMultiplier: 1.5, value: 1 } }],
       expected: "パラメータ+1（{{集中}}効果を1.5倍適用）",
       name: "perform - score - focusMultiplier",
+    },
+    {
+      args: [{ kind: "perform", score: { boostPerCardUsed: 2, value: 1 } }],
+      expected:
+        "パラメータ+1（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+2）",
+      name: "perform - score - boostPerCardUsed",
     },
     {
       args: [{ kind: "perform", score: { times: 2, value: 1 } }],
@@ -860,6 +866,56 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "kingyosukuideshobu",
+      expected: [
+        "{{体力消費}}2",
+        "{{好印象}}+3",
+        "{{スキルカード使用数追加}}+1",
+        "スキルカードを引く",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "hajimetenobasho",
+      expected: ["{{好印象}}+6", "{{レッスン中1回}}{{重複不可}}"].join("\n"),
+    },
+    {
+      cardId: "hajimetenogohobi",
+      expected: [
+        "{{好調}}3ターン",
+        "{{絶好調}}2ターン",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "hajimetenoramune",
+      expected: [
+        "{{好調}}状態の場合、使用可",
+        "パラメータ+9",
+        "{{好調}}の200%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "ochakaiheyokoso",
+      expected: [
+        "{{元気}}+3",
+        "{{絶好調}}2ターン",
+        "{{スキルカード使用数追加}}+1",
+        "スキルカードを引く",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "nyudogumotokimi",
+      expected: [
+        "次に使用する{{アクティブスキルカード}}の効果をもう1回発動（1回・1ターン）",
+        "{{好調}}3ターン",
+        "{{消費体力減少}}2ターン",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1091,7 +1147,8 @@ describe("generateProducerItemTriggerAndConditionText", () => {
   });
 });
 describe("generateProducerItemDescription", () => {
-  const testCases: Array<{
+  const testParameters: Array<{
+    enhanced?: boolean;
     expected: ReturnType<typeof generateProducerItemDescription>;
     producerItemId: ProducerItemDataId;
   }> = [
@@ -1151,18 +1208,83 @@ describe("generateProducerItemDescription", () => {
         "（レッスン内3回）",
       ].join("\n"),
     },
+    {
+      producerItemId: "yabureshirazunopoi",
+      expected: [
+        "ターン開始時{{好印象}}が6以上の場合、体力回復4",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashitemari",
+      expected: [
+        "ターン終了時{{好印象}}が6以上の場合、{{好印象}}の100%分パラメータ上昇",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashikotone",
+      expected: [
+        "{{初めてのご褒美}}使用時、{{好調}}2ターン",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashikotone",
+      enhanced: true,
+      expected: [
+        "{{初めてのご褒美}}使用時、{{好調}}2ターン",
+        "{{固定元気}}+5",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "binnonakanokirameki",
+      expected: [
+        "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
+        "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "tokimekinoippai",
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+3（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+3）",
+        "{{体力消費}}2",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "tokimekinoippai",
+      enhanced: true,
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+5（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+3）",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "kimitowakeaunatsu",
+      expected: [
+        "ターン開始時{{消費体力減少}}状態の場合、{{絶好調}}1ターン",
+        "スキルカードを引く",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
   ];
-  test.each(testCases)(
+  test.each(testParameters)(
     '$producerItemId => "$expected"',
-    ({ expected, producerItemId }) => {
-      const producerItem = getProducerItemDataByConstId(producerItemId);
+    ({ enhanced, expected, producerItemId }) => {
+      const producerItemData = getProducerItemDataByConstId(producerItemId);
+      const producerItemContent = getProducerItemContentData(
+        producerItemData,
+        enhanced ?? false,
+      );
       expect(
         generateProducerItemDescription({
-          cost: producerItem.base.cost,
-          condition: producerItem.base.condition,
-          effects: producerItem.base.effects,
-          times: producerItem.base.times,
-          trigger: producerItem.base.trigger,
+          cost: producerItemContent.cost,
+          condition: producerItemContent.condition,
+          effects: producerItemContent.effects,
+          times: producerItemContent.times,
+          trigger: producerItemContent.trigger,
         }),
       ).toBe(expected);
     },

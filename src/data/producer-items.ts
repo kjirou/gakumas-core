@@ -171,6 +171,40 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "hatsukoenoakashikotone",
+    name: "初声の証・ことね",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 1,
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardDataId: "hajimetenogohobi",
+      },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+        { kind: "perform", vitality: { fixedValue: true, value: 5 } },
+      ],
+      times: 1,
+      trigger: {
+        kind: "beforeCardEffectActivation",
+        cardDataId: "hajimetenogohobi",
+      },
+    },
+  },
+  {
     id: "chibidomotezukurimedaru",
     name: "ちびども手作りメダル",
     producerItemPossessionKind: "logic",
@@ -316,6 +350,46 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: { kind: "afterCardEffectActivation" },
+    },
+  },
+  {
+    id: "hatsukoenoakashitemari",
+    name: "初声の証・手毬",
+    keywords: ["hatsugoenoakashitemari"],
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "positiveImpression",
+          percentage: 100,
+        },
+      ],
+      times: 2,
+      trigger: { kind: "turnEnd" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "positiveImpression",
+          percentage: 100,
+        },
+      ],
+      times: 3,
+      trigger: { kind: "turnEnd" },
     },
   },
   {
@@ -903,6 +977,118 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "kimitowakeaunatsu",
+    name: "きみと分け合う夏",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "halfLifeConsumption",
+        range: { min: 1 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "excellentCondition", duration: 1 },
+        },
+        { kind: "drawCards", amount: 1 },
+      ],
+      times: 2,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "halfLifeConsumption",
+        range: { min: 1 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "excellentCondition", duration: 1 },
+        },
+        { kind: "drawCards", amount: 1 },
+      ],
+      times: 3,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
+    id: "binnonakanokirameki",
+    name: "瓶の中のきらめき",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 3,
+      trigger: { kind: "turnEnd" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 3 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 4,
+      trigger: { kind: "turnEnd" },
+    },
+  },
+  {
+    id: "tokimekinoippai",
+    name: "ときめきのいっぱい",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countReminingTurns",
+        max: 1,
+      },
+      cost: { kind: "life", value: 2 },
+      effects: [
+        {
+          kind: "perform",
+          score: { boostPerCardUsed: 3, value: 3 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countReminingTurns",
+        max: 1,
+      },
+      effects: [
+        {
+          kind: "perform",
+          score: { boostPerCardUsed: 3, value: 5 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "biggudorimuchokimbako",
     name: "ビッグドリーム貯金箱",
     keywords: ["biggudorimuchokinbako"],
@@ -1176,6 +1362,47 @@ export const producerItemsAsConst = [
       trigger: {
         kind: "afterCardEffectActivation",
         cardSummaryKind: "active",
+      },
+    },
+  },
+  {
+    id: "yabureshirazunopoi",
+    name: "敗れ知らずのポイ",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "recoverLife",
+          value: 4,
+        },
+      ],
+      times: 2,
+      trigger: {
+        kind: "turnStart",
+      },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "recoverLife",
+          value: 5,
+        },
+      ],
+      times: 2,
+      trigger: {
+        kind: "turnStart",
       },
     },
   },

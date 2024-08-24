@@ -520,17 +520,6 @@ describe("generateEffectText", () => {
         {
           kind: "perform",
           score: { value: 10 },
-          condition: { kind: "hasGoodCondition" },
-        },
-      ],
-      expected: "{{好調}}状態の場合、パラメータ+10",
-      name: "condition - hasGoodCondition",
-    },
-    {
-      args: [
-        {
-          kind: "perform",
-          score: { value: 10 },
           condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
         },
       ],
@@ -867,6 +856,14 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "ritorupurinsu",
+      expected: [
+        "パラメータ+8",
+        "{{好調}}状態の場合、パラメータ+3",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "kingyosukuideshobu",
       expected: [
         "{{体力消費}}2",
@@ -1041,7 +1038,11 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     {
       args: [
         {
-          condition: { kind: "hasGoodCondition" },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "goodCondition",
+            range: { min: 1 },
+          },
           trigger: { kind: "turnStartEveryTwoTurns" },
         },
       ],
@@ -1069,7 +1070,11 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     {
       args: [
         {
-          condition: { kind: "hasGoodCondition" },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "goodCondition",
+            range: { min: 1 },
+          },
           trigger: { kind: "modifierIncrease", modifierKind: "focus" },
         },
       ],
@@ -1088,7 +1093,11 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     {
       args: [
         {
-          condition: { kind: "hasGoodCondition" },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "goodCondition",
+            range: { min: 1 },
+          },
           trigger: { kind: "turnEnd" },
         },
       ],
@@ -1107,7 +1116,11 @@ describe("generateProducerItemTriggerAndConditionText", () => {
     {
       args: [
         {
-          condition: { kind: "hasGoodCondition" },
+          condition: {
+            kind: "countModifier",
+            modifierKind: "goodCondition",
+            range: { min: 1 },
+          },
           trigger: { kind: "turnStart" },
         },
       ],

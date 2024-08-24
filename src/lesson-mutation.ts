@@ -358,12 +358,6 @@ export const canActivateEffect = (
     case "countVitality": {
       return validateNumberInRange(lesson.idol.vitality, condition.range);
     }
-    case "hasGoodCondition": {
-      return (
-        lesson.idol.modifiers.find((e) => e.kind === "goodCondition") !==
-        undefined
-      );
-    }
     case "measureIfLifeIsEqualGreaterThanHalf": {
       const percentage = Math.floor(
         (lesson.idol.life * 100) / lesson.idol.maxLife,

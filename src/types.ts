@@ -291,6 +291,24 @@ export type Modifier = Readonly<
 >;
 
 /**
+ * 現在値が基準値に対して指定比率の範囲内かの条件内容
+ *
+ * - 原文は、「{valueKind}が{percentage}%{criterionKind}の場合、使用可」
+ *   - 「ご指導ご鞭撻」は、「体力の50%以上の場合、使用可」
+ *   - 「お姉ちゃんだもの！」は、「レッスンCLEARの100%以下の場合、使用可」
+ *   - 「ファーストステップ」は、「体力が50%以上の場合、消費体力削減1」
+ *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
+ *   - 「まだ見ぬ世界へ」は、「ターン開始時体力が50%以下の場合、集中+5」
+ * - 本家の端数処理は未調査、現状は「以上」は切り上げ、「以下」は切り捨てで判定している。
+ * - 少々複雑な処理であり、スキルカード使用条件と効果条件の両方で必要になるので、共通化している
+ */
+export type MeasureValueConditionContent = {
+  valueKind: "life" | "score";
+  criterionKind: "greaterEqual" | "lessEqual";
+  percentage: number;
+};
+
+/**
  * 効果発動条件
  *
  * - スキルカードの効果に対して設定する場合は、効果それぞれの発動条件を意味する
@@ -350,16 +368,10 @@ export type EffectCondition = Readonly<
       kind: "countVitality";
       range: RangedNumber;
     }
-  | {
-      /**
-       * 体力が最大体力に対して50%以上か
-       *
-       * - 原文の構文は、「体力が50%以上の場合、」
-       *   - 「ファーストステップ」は、「体力が50%以上の場合、消費体力削減1」
-       *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
-       */
-      kind: "measureIfLifeIsEqualGreaterThanHalf";
-    }
+  | ({
+      /** 現在値が基準値に対して指定比率の範囲内か */
+      kind: "measureValue";
+    } & MeasureValueConditionContent)
 >;
 
 /**
@@ -630,20 +642,10 @@ export type CardUsageCondition = Readonly<
        */
       kind: "hasGoodCondition";
     }
-  | {
-      /**
-       * 現在値が基準値に対して指定比率の範囲内か
-       *
-       * - 原文は、「{valueKind}が{percentage}%{criterionKind}の場合、使用可」
-       *   - 「ご指導ご鞭撻」は、「体力の50%以上の場合、使用可」
-       *   - 「お姉ちゃんだもの！」は、「レッスンCLEARの100%以下の場合、使用可」
-       * - 本家の端数処理は未調査、現状は「以上」は切り上げ、「以下」は切り捨てで判定している。
-       */
+  | ({
+      /** 現在値が基準値に対して指定比率の範囲内か */
       kind: "measureValue";
-      valueKind: "life" | "score";
-      criterionKind: "greaterEqual" | "lessEqual";
-      percentage: number;
-    }
+    } & MeasureValueConditionContent)
 >;
 
 /**

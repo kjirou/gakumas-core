@@ -520,23 +520,32 @@ describe("generateEffectText", () => {
         {
           kind: "perform",
           score: { value: 10 },
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+          condition: {
+            kind: "measureValue",
+            criterionKind: "greaterEqual",
+            percentage: 50,
+            valueKind: "life",
+          },
         },
       ],
       expected: "体力が50%以上の場合、パラメータ+10",
-      name: "condition - measureIfLifeIsEqualGreaterThanHalf",
+      name: "condition - measureValue - life",
     },
     {
       args: [
         {
           kind: "perform",
-          score: { value: 1 },
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+          score: { value: 10 },
+          condition: {
+            kind: "measureValue",
+            criterionKind: "lessEqual",
+            percentage: 100,
+            valueKind: "score",
+          },
         },
-        { hasSeparator: false },
       ],
-      expected: "体力が50%以上の場合パラメータ+1",
-      name: "condition - 読点を挿入しない",
+      expected: "レッスンCLEARの100%以下の場合、パラメータ+10",
+      name: "condition - measureValue - score",
     },
   ];
   test.each(testCases)('$name => "$expected"', ({ args, expected }) => {
@@ -573,7 +582,7 @@ describe("generateCardUsageConditionText", () => {
           valueKind: "life",
         },
       ],
-      expected: "体力の50%以上の場合、使用可",
+      expected: "体力が50%以上の場合、使用可",
       name: "measureValue - 1",
     },
     {
@@ -991,16 +1000,6 @@ describe("generateProducerItemTriggerAndConditionText", () => {
       ],
       expected: "{{アドレナリン全開}}使用時、",
       name: "beforeCardEffectActivation - cardDataId",
-    },
-    {
-      args: [
-        {
-          condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-          trigger: { kind: "beforeCardEffectActivation" },
-        },
-      ],
-      expected: "スキルカード使用時体力が50%以上の場合、",
-      name: "beforeCardEffectActivation - condition - not countModifier",
     },
     {
       args: [

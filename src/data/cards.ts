@@ -1036,7 +1036,12 @@ export const cardsAsConst = [
           { kind: "perform", vitality: { value: 3 } },
           {
             kind: "getModifier",
-            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            condition: {
+              kind: "measureValue",
+              criterionKind: "greaterEqual",
+              valueKind: "life",
+              percentage: 50,
+            },
             modifier: { kind: "lifeConsumptionReduction", value: 1 },
           },
         ],
@@ -1047,7 +1052,12 @@ export const cardsAsConst = [
           { kind: "perform", vitality: { value: 6 } },
           {
             kind: "getModifier",
-            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            condition: {
+              kind: "measureValue",
+              criterionKind: "greaterEqual",
+              valueKind: "life",
+              percentage: 50,
+            },
             modifier: { kind: "lifeConsumptionReduction", value: 1 },
           },
         ],
@@ -1057,7 +1067,12 @@ export const cardsAsConst = [
           { kind: "perform", vitality: { value: 8 } },
           {
             kind: "getModifier",
-            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            condition: {
+              kind: "measureValue",
+              criterionKind: "greaterEqual",
+              valueKind: "life",
+              percentage: 50,
+            },
             modifier: { kind: "lifeConsumptionReduction", value: 1 },
           },
         ],
@@ -1067,7 +1082,12 @@ export const cardsAsConst = [
           { kind: "perform", vitality: { value: 9 } },
           {
             kind: "getModifier",
-            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            condition: {
+              kind: "measureValue",
+              criterionKind: "greaterEqual",
+              valueKind: "life",
+              percentage: 50,
+            },
             modifier: { kind: "lifeConsumptionReduction", value: 1 },
           },
         ],
@@ -4853,7 +4873,12 @@ export const cardsAsConst = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            condition: {
+              kind: "measureValue",
+              criterionKind: "greaterEqual",
+              valueKind: "life",
+              percentage: 50,
+            },
             modifier: {
               kind: "delayedEffect",
               delay: 1,
@@ -4875,7 +4900,12 @@ export const cardsAsConst = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+            condition: {
+              kind: "measureValue",
+              criterionKind: "greaterEqual",
+              valueKind: "life",
+              percentage: 50,
+            },
             modifier: {
               kind: "delayedEffect",
               delay: 1,

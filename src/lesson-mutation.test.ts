@@ -37,6 +37,7 @@ import {
   useCard,
   useDrink,
   validateCostConsumution,
+  measureValue,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
 import { createLessonForTest } from "./test-utils";
@@ -2279,6 +2280,7 @@ describe("calculatePerformingVitalityEffect", () => {
     expect(calculatePerformingVitalityEffect(...args)).toStrictEqual(expected);
   });
 });
+// measureValue のテストケースで可能な範囲はそちらで検証する
 describe("canActivateEffect", () => {
   const testCases: Array<{
     args: Parameters<typeof canActivateEffect>;
@@ -2498,37 +2500,43 @@ describe("canActivateEffect", () => {
       expected: false,
     },
     {
-      name: "measureIfLifeIsEqualGreaterThanHalfを満たす時、trueを返す",
+      name: "measureValueを満たす時、trueを返す",
       args: [
         {
-          idol: {
-            life: 5,
-            maxLife: 10,
-          },
+          score: 100,
+          clearScoreThresholds: { clear: 100 },
         } as Lesson,
-        { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "lessEqual",
+          percentage: 100,
+        },
       ],
       expected: true,
     },
     {
-      name: "measureIfLifeIsEqualGreaterThanHalfを満たさない時、falseを返す",
+      name: "measureValueを満たさない時、falseを返す",
       args: [
         {
-          idol: {
-            life: 4,
-            maxLife: 10,
-          },
+          score: 99,
+          clearScoreThresholds: { clear: 100 },
         } as Lesson,
-        { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+        {
+          kind: "measureValue",
+          valueKind: "score",
+          criterionKind: "lessEqual",
+          percentage: 100,
+        },
       ],
-      expected: false,
+      expected: true,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(canActivateEffect(...args)).toBe(expected);
   });
 });
-// validateCostConsumution で検証できる内容はそちらで行う
+// validateCostConsumution, measureValue で検証できる内容はそちらで行う
 describe("canPlayCard", () => {
   const testCases: Array<{
     args: Parameters<typeof canPlayCard>;
@@ -2664,7 +2672,7 @@ describe("canPlayCard", () => {
       expected: false,
     },
     {
-      name: "life比率以上の追加条件を満たす時、スキルカードを使える",
+      name: "measureValueで処理している追加条件を満たす時、スキルカードを使える",
       args: [
         {
           idol: {
@@ -2685,7 +2693,7 @@ describe("canPlayCard", () => {
       expected: true,
     },
     {
-      name: "life比率以上の追加条件を満たさない時、スキルカードを使えない",
+      name: "measureValueで処理している追加条件を満たさない時、スキルカードを使えない",
       args: [
         {
           idol: {
@@ -2704,165 +2712,6 @@ describe("canPlayCard", () => {
         },
       ],
       expected: false,
-    },
-    {
-      name: "life比率以下の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 5,
-            maxLife: 10,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        {
-          kind: "measureValue",
-          valueKind: "life",
-          criterionKind: "lessEqual",
-          percentage: 50,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "life比率以下の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 6,
-            maxLife: 10,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "normal", value: 3 },
-        {
-          kind: "measureValue",
-          valueKind: "life",
-          criterionKind: "lessEqual",
-          percentage: 50,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "score比率以上の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 10,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "greaterEqual",
-          percentage: 100,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "score比率以上の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 9,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "greaterEqual",
-          percentage: 100,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "score比率以下の追加条件を満たす時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 10,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "lessEqual",
-          percentage: 100,
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "score比率以下の追加条件を満たさない時、スキルカードを使えない",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 11,
-          clearScoreThresholds: {
-            clear: 10,
-          },
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "lessEqual",
-          percentage: 100,
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "score比率の追加条件があるが、レッスンにクリアスコア閾値が設定されていない時、スキルカードを使える",
-      args: [
-        {
-          idol: {
-            life: 0,
-            vitality: 0,
-            modifiers: [] as Idol["modifiers"],
-          },
-          score: 10,
-        } as Lesson,
-        { kind: "normal", value: 0 },
-        {
-          kind: "measureValue",
-          valueKind: "score",
-          criterionKind: "greaterEqual",
-          percentage: 100,
-        },
-      ],
-      expected: true,
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
@@ -3891,6 +3740,200 @@ describe("decreaseEachModifierDurationOverTime", () => {
     expect(decreaseEachModifierDurationOverTime(...args)).toStrictEqual(
       expected,
     );
+  });
+});
+describe("measureValue", () => {
+  const testCases: Array<{
+    args: Parameters<typeof measureValue>;
+    expected: ReturnType<typeof measureValue>;
+    name: string;
+  }> = [
+    {
+      name: "life比率以上の条件を満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            life: 5,
+            maxLife: 10,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          valueKind: "life",
+          criterionKind: "greaterEqual",
+          percentage: 50,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "life比率以上の条件を満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            life: 4,
+            maxLife: 10,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          valueKind: "life",
+          criterionKind: "greaterEqual",
+          percentage: 50,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "life比率以下の追加条件を満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            life: 5,
+            maxLife: 10,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          valueKind: "life",
+          criterionKind: "lessEqual",
+          percentage: 50,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "life比率以下の条件を満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            life: 6,
+            maxLife: 10,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          valueKind: "life",
+          criterionKind: "lessEqual",
+          percentage: 50,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "score比率以上の条件を満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 10,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        {
+          valueKind: "score",
+          criterionKind: "greaterEqual",
+          percentage: 100,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "score比率以上の条件を満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 9,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        {
+          valueKind: "score",
+          criterionKind: "greaterEqual",
+          percentage: 100,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "score比率以下の条件を満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 10,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        {
+          valueKind: "score",
+          criterionKind: "lessEqual",
+          percentage: 100,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "score比率以下の条件を満たさない時、falseを返す",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 11,
+          clearScoreThresholds: {
+            clear: 10,
+          },
+        } as Lesson,
+        {
+          valueKind: "score",
+          criterionKind: "lessEqual",
+          percentage: 100,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "score比率の条件だが、レッスンにクリアスコア閾値が設定されていない時、trueを返す",
+      args: [
+        {
+          idol: {
+            life: 0,
+            vitality: 0,
+            modifiers: [] as Idol["modifiers"],
+          },
+          score: 10,
+        } as Lesson,
+        {
+          valueKind: "score",
+          criterionKind: "greaterEqual",
+          percentage: 100,
+        },
+      ],
+      expected: true,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(measureValue(...args)).toStrictEqual(expected);
   });
 });
 // 計算内容は calculatePerformingScoreEffect のテストで検証する

@@ -143,7 +143,12 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "r",
     base: {
-      condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      condition: {
+        kind: "measureValue",
+        criterionKind: "greaterEqual",
+        valueKind: "life",
+        percentage: 50,
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 2 } },
       ],
@@ -154,7 +159,12 @@ export const producerItemsAsConst = [
       },
     },
     enhanced: {
-      condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      condition: {
+        kind: "measureValue",
+        criterionKind: "greaterEqual",
+        valueKind: "life",
+        percentage: 50,
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
       ],
@@ -522,7 +532,12 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "sr",
     base: {
-      condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      condition: {
+        kind: "measureValue",
+        criterionKind: "greaterEqual",
+        valueKind: "life",
+        percentage: 50,
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 2 } },
       ],
@@ -602,7 +617,12 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "sr",
     base: {
-      condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      condition: {
+        kind: "measureValue",
+        criterionKind: "greaterEqual",
+        valueKind: "life",
+        percentage: 50,
+      },
       effects: [
         {
           kind: "getModifier",
@@ -613,7 +633,12 @@ export const producerItemsAsConst = [
       trigger: { kind: "turnEnd" },
     },
     enhanced: {
-      condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
+      condition: {
+        kind: "measureValue",
+        criterionKind: "greaterEqual",
+        valueKind: "life",
+        percentage: 50,
+      },
       effects: [
         {
           kind: "getModifier",

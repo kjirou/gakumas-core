@@ -5616,6 +5616,7 @@ describe("useDrink", () => {
           drinkIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          noConsumption: false,
         },
       ],
       expected: {
@@ -5648,6 +5649,7 @@ describe("useDrink", () => {
           drinkIndex: 0,
           getRandom: () => 0,
           idGenerator: createIdGenerator(),
+          noConsumption: false,
         },
       ],
       expected: {
@@ -5687,6 +5689,35 @@ describe("useDrink", () => {
           },
         ] as LessonUpdateQuery[],
         nextHistoryResultIndex: 4,
+      },
+    },
+    {
+      name: "noConsumption - Pドリンクを消費しないこともできる",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.drinks = [
+            { data: getDrinkDataByConstId("hatsuboshimizu"), id: "a" },
+          ];
+          return lesson;
+        })(),
+        1,
+        {
+          drinkIndex: 0,
+          getRandom: () => 0,
+          idGenerator: createIdGenerator(),
+          noConsumption: true,
+        },
+      ],
+      expected: {
+        updates: [
+          {
+            kind: "score",
+            actual: 10,
+            max: 10,
+          },
+        ] as LessonUpdateQuery[],
+        nextHistoryResultIndex: 2,
       },
     },
   ];

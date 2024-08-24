@@ -2294,6 +2294,26 @@ export const useCard = (
   nextHistoryResultIndex++;
 
   //
+  // 使用したスキルカード数を加算
+  //
+  const totalCardUsageCountUpdates: LessonUpdateQuery[] = [
+    createLessonUpdateQueryFromDiff(
+      {
+        kind: "totalCardUsageCount",
+        value: newLesson.idol.totalCardUsageCount + 1,
+      },
+      {
+        kind: "cardUsage.totalCardUsageCount",
+        cardId: card.id,
+        historyTurnNumber: newLesson.turnNumber,
+        historyResultIndex: nextHistoryResultIndex,
+      },
+    ),
+  ];
+  newLesson = patchDiffs(newLesson, totalCardUsageCountUpdates);
+  nextHistoryResultIndex++;
+
+  //
   // 効果発動
   //
   let effectActivationUpdates: LessonUpdateQuery[] = [];
@@ -2533,6 +2553,7 @@ export const useCard = (
       ...consumeRemainingCardUsageCountUpdates,
       ...usedCardPlacementUpdates,
       ...costConsumptionUpdates,
+      ...totalCardUsageCountUpdates,
       ...effectActivationUpdates,
       ...recoveringActionPointsUpdates,
     ],

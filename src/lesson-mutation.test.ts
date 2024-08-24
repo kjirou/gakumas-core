@@ -4069,6 +4069,72 @@ describe("useCard preview:false", () => {
       });
     });
   });
+  describe("使用したスキルカード数の加算", () => {
+    test("累積して加算される", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            data: getCardDataByConstId("apirunokihon"),
+            enhancements: [],
+          },
+          {
+            id: "b",
+            data: getCardDataByConstId("apirunokihon"),
+            enhancements: [],
+          },
+        ],
+      });
+      lesson.hand = ["a", "b"];
+      const idGenerator = createIdGenerator();
+
+      expect(lesson.idol.totalCardUsageCount).toBe(0);
+      const { updates: updates1 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      lesson = patchDiffs(lesson, updates1);
+      expect(lesson.idol.totalCardUsageCount).toBe(1);
+
+      const { updates: updates2 } = useCard(lesson, 2, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator,
+        preview: false,
+      });
+      lesson = patchDiffs(lesson, updates2);
+      expect(lesson.idol.totalCardUsageCount).toBe(2);
+    });
+    test("この値を参照する時、これから使うスキルカードも1枚分として加算して効果へ反映する", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            data: getCardDataByConstId("mikannotaiki"),
+            enhancements: [],
+          },
+        ],
+      });
+      lesson.hand = ["a"];
+      const { updates } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([
+        {
+          kind: "vitality",
+          // +2 + +3/1枚
+          actual: 5,
+          max: 5,
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
   // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
   describe("Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動", () => {
     test("「アドレナリン全開」の使用により「最高にハッピーの源」が発動する", () => {

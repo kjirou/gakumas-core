@@ -145,6 +145,30 @@ describe("generateCardInHandDisplay", () => {
       } as CardInHandDisplay,
     },
     {
+      name: "使用したスキルカード数を参照して元気を増加する効果は、まだ使っていないスキルカードを1枚分として加算した上で、表示値へ反映する",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                data: getCardDataByConstId("mikannotaiki"),
+                enhancements: [],
+              },
+            ],
+          });
+          lesson.idol.totalCardUsageCount = 2;
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        vitality: 11,
+      } as CardInHandDisplay,
+    },
+    {
       name: "無条件の状態修正と条件付きの状態修正を持つスキルカードで、後者の条件を満たさない時、effectsには条件を満たした旨と満たさない旨の2レコードが入る",
       args: [
         createLessonForTest({
@@ -637,6 +661,11 @@ describe("generateCardPlayPreviewDisplay", () => {
             kind: "life",
             actual: -3,
             max: -3,
+            reason: expect.any(Object),
+          },
+          {
+            kind: "totalCardUsageCount",
+            value: 1,
             reason: expect.any(Object),
           },
           {

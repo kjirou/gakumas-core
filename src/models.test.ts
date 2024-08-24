@@ -1190,6 +1190,19 @@ describe("patchDiffs", () => {
       expect(lessonMock.score).toBe(3);
     });
   });
+  describe("totalCardUsageCount", () => {
+    test("it works", () => {
+      let lessonMock = {
+        idol: {
+          totalCardUsageCount: 0,
+        },
+      } as Lesson;
+      lessonMock = patchDiffs(lessonMock, [
+        { kind: "totalCardUsageCount", value: 2 },
+      ]);
+      expect(lessonMock.idol.totalCardUsageCount).toBe(2);
+    });
+  });
   describe("turnEnded", () => {
     test("it works", () => {
       let lessonMock = {

@@ -95,13 +95,21 @@ export const generateCardInHandDisplay = (
   getRandom: GetRandom,
   idGenerator: IdGenerator,
 ): CardInHandDisplay => {
-  const card = lesson.cards.find((card) => card.id === cardId);
+  let newLesson = lesson;
+  // 使用したスキルカード数は、1加算された状態で表示される
+  newLesson = patchDiffs(lesson, [
+    {
+      kind: "totalCardUsageCount",
+      value: newLesson.idol.totalCardUsageCount + 1,
+    },
+  ]);
+  const card = newLesson.cards.find((card) => card.id === cardId);
   if (!card) {
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
   const cardContent = getCardContentData(card.data, card.enhancements.length);
   const effectActivations = activateEffectsOnCardPlay(
-    lesson,
+    newLesson,
     cardContent.effects,
     getRandom,
     idGenerator,
@@ -144,12 +152,12 @@ export const generateCardInHandDisplay = (
   return {
     cost: calculateModifierEffectedActionCost(
       cardContent.cost,
-      lesson.idol.modifiers,
+      newLesson.idol.modifiers,
     ),
     effects: effectDisplays,
     enhancements: card.enhancements,
     name: generateCardName(card.data.name, card.enhancements.length),
-    playable: canPlayCard(lesson, cardContent.cost, cardContent.condition),
+    playable: canPlayCard(newLesson, cardContent.cost, cardContent.condition),
     rarity: card.data.rarity,
     scores,
     vitality,

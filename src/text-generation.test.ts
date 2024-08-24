@@ -931,6 +931,15 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "basuniyurarete",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "パラメータ+8（{{集中}}効果を2.6倍適用）",
+        "体力が50%以下の場合、{{元気}}+12",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1288,6 +1297,25 @@ describe("generateProducerItemDescription", () => {
         "ターン開始時{{消費体力減少}}状態の場合、{{絶好調}}1ターン",
         "スキルカードを引く",
         "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "madaminusekaihe",
+      expected: [
+        "ターン開始時体力が50%以下の場合、{{集中}}+5",
+        "{{消費体力削減}}2",
+        "手札をすべて{{レッスン中強化}}",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "madaminusekaihe",
+      enhanced: true,
+      expected: [
+        "ターン開始時体力が50%以下の場合、{{集中}}+7",
+        "{{消費体力削減}}3",
+        "手札をすべて{{レッスン中強化}}",
+        "（レッスン内1回）",
       ].join("\n"),
     },
   ];

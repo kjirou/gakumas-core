@@ -1077,6 +1077,49 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "madaminusekaihe",
+    name: "まだ見ぬ世界へ",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "measureValue",
+        valueKind: "life",
+        criterionKind: "lessEqual",
+        percentage: 50,
+      },
+      effects: [
+        { kind: "getModifier", modifier: { kind: "focus", amount: 5 } },
+        {
+          kind: "getModifier",
+          modifier: { kind: "lifeConsumptionReduction", value: 2 },
+        },
+        { kind: "enhanceHand" },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: {
+        kind: "measureValue",
+        valueKind: "life",
+        criterionKind: "lessEqual",
+        percentage: 50,
+      },
+      effects: [
+        { kind: "getModifier", modifier: { kind: "focus", amount: 7 } },
+        {
+          kind: "getModifier",
+          modifier: { kind: "lifeConsumptionReduction", value: 3 },
+        },
+        { kind: "enhanceHand" },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "binnonakanokirameki",
     name: "瓶の中のきらめき",
     producerItemPossessionKind: "sense",

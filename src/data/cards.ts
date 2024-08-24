@@ -6703,35 +6703,54 @@ export const cardsAsConst = [
       {},
     ],
   },
-  // {
-  //   id: "basuniyurarete",
-  //   name: "バスに揺られて",
-  //   cardPossessionKind: "sense",
-  //   cardSummaryKind: "active",
-  //   cardProviderKind: "idol",
-  //   nonDuplicative: true,
-  //   rarity: "ssr",
-  //   contents: [
-  //     {
-  //       cost: { kind: "normal", value: 2 },
-  //       effects: [
-  //         // TODO: パラメータ追加と元気が1効果内なのか2効果なのかが不明、効果説明欄の改行の具合から判別できない
-  //         { kind: "perform", score: { focusMultiplier: 2.3, value: 5 } },
-  //         {
-  //           kind: "perform",
-  //           condition: { kind: "measureIfLifeIsEqualGreaterThanHalf" },
-  //           vitality: { value: 6 },
-  //         },
-  //       ],
-  //       usableOncePerLesson: true,
-  //     },
-  //     {},
-  //     // TODO: ++
-  //     {},
-  //     // TODO: +++
-  //     {},
-  //   ],
-  // },
+  {
+    id: "basuniyurarete",
+    name: "バスに揺られて",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          // TODO: パラメータ追加と元気が1効果内なのか2効果なのかが不明、効果説明欄の改行の具合から判別できない
+          { kind: "perform", score: { focusMultiplier: 2.3, value: 5 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "measureValue",
+              valueKind: "life",
+              criterionKind: "lessEqual",
+              percentage: 50,
+            },
+            vitality: { value: 6 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", score: { focusMultiplier: 2.6, value: 8 } },
+          {
+            kind: "perform",
+            condition: {
+              kind: "measureValue",
+              valueKind: "life",
+              criterionKind: "lessEqual",
+              percentage: 50,
+            },
+            vitality: { value: 12 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
   {
     id: "hajimetenoramune",
     name: "はじめてのラムネ",

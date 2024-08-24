@@ -388,6 +388,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "shinosawahiro-ssr-2",
+    characterId: "shinosawahiro",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "motivation",
+    },
+    rarity: "ssr",
+    specificCardId: "basuniyurarete",
+    specificProducerItemId: "madaminusekaihe",
+    title: "コントラスト",
+  },
+  {
     id: "shinosawahiro-ssr-1",
     characterId: "shinosawahiro",
     producePlan: {

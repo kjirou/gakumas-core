@@ -54,13 +54,21 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "r",
     base: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [{ kind: "perform", score: { value: 6 } }],
       times: 1,
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [{ kind: "perform", score: { value: 11 } }],
       times: 1,
       trigger: { kind: "turnStart" },
@@ -104,7 +112,11 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "r",
     base: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
       ],
@@ -112,7 +124,11 @@ export const producerItemsAsConst = [
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 2 } },
       ],
@@ -399,13 +415,21 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "sr",
     base: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [{ kind: "perform", vitality: { value: 9 } }],
       times: 1,
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [{ kind: "perform", vitality: { value: 12 } }],
       times: 1,
       trigger: { kind: "turnStart" },
@@ -680,7 +704,11 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "others",
     rarity: "ssr",
     base: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [
         {
           kind: "getModifier",
@@ -856,7 +884,11 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "ssr",
     base: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 2 } },
         { kind: "perform", vitality: { value: 1 } },
@@ -865,7 +897,11 @@ export const producerItemsAsConst = [
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "hasGoodCondition" },
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 1 },
+      },
       effects: [
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
         { kind: "perform", vitality: { value: 1 } },

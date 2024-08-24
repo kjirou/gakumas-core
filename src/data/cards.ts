@@ -675,7 +675,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 6 } },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 3 },
           },
         ],
@@ -685,7 +689,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 9 } },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 4 },
           },
         ],
@@ -696,7 +704,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 10 } },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 3 },
           },
         ],
@@ -706,7 +718,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 12 } },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 3 },
           },
         ],
@@ -1122,7 +1138,11 @@ export const cardsAsConst = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 1 },
           },
         ],
@@ -1136,7 +1156,11 @@ export const cardsAsConst = [
           },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 1 },
           },
         ],
@@ -1647,7 +1671,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 8 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 3 },
           },
         ],
@@ -1658,7 +1686,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 13 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 5 },
           },
         ],
@@ -1668,7 +1700,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 15 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 6 },
           },
         ],
@@ -1678,7 +1714,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 19 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 6 },
           },
         ],
@@ -4155,7 +4195,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 4 } },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 3 },
           },
         ],
@@ -4166,7 +4210,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 6 } },
           {
             kind: "getModifier",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             modifier: { kind: "focus", amount: 4 },
           },
         ],
@@ -6345,7 +6393,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 12 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 14 },
           },
         ],
@@ -6356,7 +6408,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 18 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 20 },
           },
         ],
@@ -6366,7 +6422,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 22 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 23 },
           },
         ],
@@ -6376,7 +6436,11 @@ export const cardsAsConst = [
           { kind: "perform", score: { value: 25 } },
           {
             kind: "perform",
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
             score: { value: 26 },
           },
         ],

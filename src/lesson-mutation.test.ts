@@ -913,7 +913,11 @@ describe("activateEffectsOnCardPlay", () => {
           {
             kind: "getModifier",
             modifier: { kind: "focus", amount: 1 },
-            condition: { kind: "hasGoodCondition" },
+            condition: {
+              kind: "countModifier",
+              modifierKind: "goodCondition",
+              range: { min: 1 },
+            },
           },
         ],
         () => 0,
@@ -2490,32 +2494,6 @@ describe("canActivateEffect", () => {
           },
         } as Lesson,
         { kind: "countVitality", range: { min: 2, max: 2 } },
-      ],
-      expected: false,
-    },
-    {
-      name: "hasGoodConditionを満たす時、trueを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [
-              { kind: "goodCondition", duration: 1 },
-            ] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "hasGoodCondition" },
-      ],
-      expected: true,
-    },
-    {
-      name: "hasGoodConditionを満たさない時、falseを返す",
-      args: [
-        {
-          idol: {
-            modifiers: [{ kind: "focus", amount: 1 }] as Idol["modifiers"],
-          },
-        } as Lesson,
-        { kind: "hasGoodCondition" },
       ],
       expected: false,
     },

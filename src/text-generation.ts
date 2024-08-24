@@ -328,8 +328,6 @@ const generateEffectConditionText = (condition: EffectCondition): string => {
         : `残り${condition.max}ターン以内の場合`;
     case "countVitality":
       return `${kwd("vitality")}が${generateRangedNumberText(condition.range)}の場合`;
-    case "hasGoodCondition":
-      return `${kwd("goodCondition")}状態の場合`;
     case "measureIfLifeIsEqualGreaterThanHalf":
       return "体力が50%以上の場合";
     default:

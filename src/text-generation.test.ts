@@ -814,6 +814,15 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "shinseitokaibakutan",
+      expected: [
+        "レッスン開始時手札に入る",
+        "{{消費体力減少}}2ターン",
+        "{{スキルカード使用数追加}}+1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "wammoasuteppu",
       expected: [
         "パラメータ+7（2回）",

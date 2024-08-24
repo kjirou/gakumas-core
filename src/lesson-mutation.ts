@@ -595,16 +595,19 @@ export const calculatePerformingScoreEffect = (
   const mightyPerformance = idol.modifiers.find(
     (e) => e.kind === "mightyPerformance",
   );
+  // NOTE: 0.1 * 1.4 = 0.13999999999999999 になるなど、絶好調時の好調1を0.1として計算すると値がずれるので、整数で計算する
+  const goodConditionMultiplier =
+    (goodConditionDuration > 0 ? 15 : 10) +
+    (goodConditionDuration > 0 && hasExcellentCondition
+      ? goodConditionDuration
+      : 0);
   const focusMultiplier =
     query.focusMultiplier !== undefined ? query.focusMultiplier : 1;
   const baseScore = Math.ceil(
     (query.value +
       focusAmount * focusMultiplier +
       (query.boostPerCardUsed ?? 0) * idol.totalCardUsageCount) *
-      ((goodConditionDuration > 0 ? 1.5 : 1.0) +
-        (goodConditionDuration > 0 && hasExcellentCondition
-          ? goodConditionDuration * 0.1
-          : 0.0)) *
+      (goodConditionMultiplier / 10) *
       (mightyPerformance ? (100 + mightyPerformance.percentage) / 100 : 1.0),
   );
   const score =

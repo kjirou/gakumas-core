@@ -7505,6 +7505,7 @@ export const cardsAsConst = [
             },
           },
         ],
+        innate: true,
         usableOncePerLesson: true,
       },
       {

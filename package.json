@@ -1,6 +1,6 @@
 {
   "name": "gakumas-core",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Core engine of Gakuen iDOLM@STER!(学園アイドルマスター)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

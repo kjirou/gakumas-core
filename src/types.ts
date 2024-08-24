@@ -1165,7 +1165,13 @@ export type Idol = {
    *   - 検証: https://github.com/kjirou/gakumas-core/issues/81
    */
   scoreBonus: Record<IdolParameterKind, number> | undefined;
-  /** 本レッスン中にスキルカードを使用した回数、関連する原文は「レッスン中に使用したスキルカード{n}枚ごとに、」 */
+  /**
+   * 使用したスキルカード数
+   *
+   * - 関連する原文は、「レッスン中に使用したスキルカード{n}枚ごとに、」
+   * - スキルカードの効果がこの値を参照する場合、そのスキルカードを使用した分も1回分として加算する
+   *   - 仕様確認: https://github.com/kjirou/gakumas-core/issues/203
+   */
   totalCardUsageCount: number;
   /**
    * 元気
@@ -1539,6 +1545,11 @@ export type LessonUpdateQueryReason = Readonly<
     | {
         /** スキルカード使用.残りスキルカード使用数消費 */
         kind: "cardUsage.remainingCardUsageCountConsumption";
+      }
+    | {
+        /** スキルカード使用.使用したスキルカード数 */
+        kind: "cardUsage.totalCardUsageCount";
+        cardId: Card["id"];
       }
     | {
         /** Pドリンク使用.消費 */

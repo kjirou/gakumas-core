@@ -640,6 +640,16 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
         };
         break;
       }
+      case "totalCardUsageCount": {
+        newLesson = {
+          ...newLesson,
+          idol: {
+            ...newLesson.idol,
+            totalCardUsageCount: update.value,
+          },
+        };
+        break;
+      }
       case "turnEnded": {
         newLesson = {
           ...newLesson,

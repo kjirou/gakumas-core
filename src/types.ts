@@ -1425,6 +1425,10 @@ export type LessonUpdateDiff = Readonly<
       max: number;
     }
   | {
+      kind: "totalCardUsageCount";
+      value: number;
+    }
+  | {
       kind: "turnEnded";
       value: boolean;
     }

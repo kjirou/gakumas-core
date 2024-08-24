@@ -25,6 +25,7 @@ import type {
   DrinkData,
   EffectWithoutCondition,
   ProducerItemData,
+  MeasureValueConditionContent,
 } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -296,6 +297,15 @@ export const generateActionCostText = (
   }
 };
 
+const generateMeasureValueText = (condition: MeasureValueConditionContent) => {
+  return [
+    condition.valueKind === "life" ? "体力が" : "レッスンCLEARの",
+    `${condition.percentage}%`,
+    condition.criterionKind === "greaterEqual" ? "以上" : "以下",
+    "の場合",
+  ].join("");
+};
+
 const generateEffectConditionText = (condition: EffectCondition): string => {
   switch (condition.kind) {
     case "countModifier": {
@@ -328,8 +338,8 @@ const generateEffectConditionText = (condition: EffectCondition): string => {
         : `残り${condition.max}ターン以内の場合`;
     case "countVitality":
       return `${kwd("vitality")}が${generateRangedNumberText(condition.range)}の場合`;
-    case "measureIfLifeIsEqualGreaterThanHalf":
-      return "体力が50%以上の場合";
+    case "measureValue":
+      return generateMeasureValueText(condition);
     default:
       const unreachable: never = condition;
       throw new Error(`Unreachable statement`);
@@ -426,12 +436,7 @@ export const generateCardUsageConditionText = (
     case "hasGoodCondition":
       return `${kwd("goodCondition")}状態の場合、使用可`;
     case "measureValue":
-      return [
-        condition.valueKind === "life" ? "体力" : "レッスンCLEAR",
-        `の${condition.percentage}%`,
-        condition.criterionKind === "greaterEqual" ? "以上" : "以下",
-        "の場合、使用可",
-      ].join("");
+      return generateMeasureValueText(condition) + "、使用可";
     default:
       const unreachable: never = condition;
       throw new Error(`Unreachable statement`);

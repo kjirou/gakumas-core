@@ -20,6 +20,7 @@ import type {
   ProducerItem,
   ProducerItemTrigger,
   VitalityUpdateQuery,
+  MeasureValueConditionContent,
 } from "./types";
 import { filterGeneratableCardsData, getCardDataByConstId } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -223,6 +224,55 @@ export const validateCostConsumution = (
   }
 };
 
+/**
+ * 様々な値の現在値が基準値に対して指定比率の範囲内かを判定する
+ */
+export const measureValue = (
+  lesson: Lesson,
+  condition: MeasureValueConditionContent,
+): boolean => {
+  let targetPercentage: number | undefined = undefined;
+  const valueKind = condition.valueKind;
+  switch (valueKind) {
+    case "life": {
+      targetPercentage = Math.floor(
+        (lesson.idol.life * 100) / lesson.idol.maxLife,
+      );
+      break;
+    }
+    case "score": {
+      if (lesson.clearScoreThresholds) {
+        const result = calculateClearScoreProgress(
+          lesson.score,
+          lesson.clearScoreThresholds,
+        );
+        targetPercentage = result.clearScoreProgressPercentage;
+      }
+      break;
+    }
+    default: {
+      const unreachable: never = valueKind;
+      throw new Error(`Unreachable statement`);
+    }
+  }
+  if (targetPercentage === undefined) {
+    return true;
+  }
+  const criterionKind = condition.criterionKind;
+  switch (criterionKind) {
+    case "greaterEqual": {
+      return targetPercentage >= condition.percentage;
+    }
+    case "lessEqual": {
+      return targetPercentage <= condition.percentage;
+    }
+    default: {
+      const unreachable: never = criterionKind;
+      throw new Error(`Unreachable statement`);
+    }
+  }
+};
+
 /** スキルカードが使用できるかを判定する */
 export const canPlayCard = (
   lesson: Lesson,
@@ -251,46 +301,7 @@ export const canPlayCard = (
       );
     }
     case "measureValue": {
-      let targetPercentage: number | undefined = undefined;
-      const valueKind = condition.valueKind;
-      switch (valueKind) {
-        case "life": {
-          targetPercentage = Math.floor(
-            (lesson.idol.life * 100) / lesson.idol.maxLife,
-          );
-          break;
-        }
-        case "score": {
-          if (lesson.clearScoreThresholds) {
-            const result = calculateClearScoreProgress(
-              lesson.score,
-              lesson.clearScoreThresholds,
-            );
-            targetPercentage = result.clearScoreProgressPercentage;
-          }
-          break;
-        }
-        default: {
-          const unreachable: never = valueKind;
-          throw new Error(`Unreachable statement`);
-        }
-      }
-      if (targetPercentage === undefined) {
-        return true;
-      }
-      const criterionKind = condition.criterionKind;
-      switch (criterionKind) {
-        case "greaterEqual": {
-          return targetPercentage >= condition.percentage;
-        }
-        case "lessEqual": {
-          return targetPercentage <= condition.percentage;
-        }
-        default: {
-          const unreachable: never = criterionKind;
-          throw new Error(`Unreachable statement`);
-        }
-      }
+      return measureValue(lesson, condition);
     }
     default: {
       const unreachable: never = conditionKind;
@@ -358,11 +369,8 @@ export const canActivateEffect = (
     case "countVitality": {
       return validateNumberInRange(lesson.idol.vitality, condition.range);
     }
-    case "measureIfLifeIsEqualGreaterThanHalf": {
-      const percentage = Math.floor(
-        (lesson.idol.life * 100) / lesson.idol.maxLife,
-      );
-      return percentage >= 50;
+    case "measureValue": {
+      return measureValue(lesson, condition);
     }
     default: {
       const unreachable: never = conditionKind;

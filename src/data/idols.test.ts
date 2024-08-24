@@ -1,6 +1,6 @@
-import { cards } from "./cards";
+import { cards, getCardDataById } from "./cards";
 import { characters } from "./characters";
-import { producerItems } from "./producer-items";
+import { producerItems, getProducerItemDataById } from "./producer-items";
 import { idols } from "./idols";
 
 test("idが重複していない", () => {
@@ -31,6 +31,16 @@ for (const idol of idols) {
           (producerItem) => producerItem.id === idol.specificProducerItemId,
         ),
       ).toBe(true);
+    });
+    test("アイドルのプランと固有それぞれのプランが一致している", () => {
+      const specificCardData = getCardDataById(idol.specificCardId);
+      expect(specificCardData.cardPossessionKind).toBe(idol.producePlan.kind);
+      const specificProducerItemData = getProducerItemDataById(
+        idol.specificProducerItemId,
+      );
+      expect(specificProducerItemData.producerItemPossessionKind).toBe(
+        idol.producePlan.kind,
+      );
     });
   });
 }

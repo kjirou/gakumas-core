@@ -48,6 +48,7 @@ export const createGamePlayForTest = (
 /**
  * スキルカードへレッスンサポートの付与をする
  *
+ * - こっちは非推奨
  * - 本体は未実装
  */
 export const addLessonSupport = (
@@ -58,6 +59,36 @@ export const addLessonSupport = (
   const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
   if (lesson.cards.find((card) => card.id === cardId) === undefined) {
     throw new Error(`Card not found: ${cardId}`);
+  }
+  const update: LessonUpdateQuery = {
+    kind: "cards.enhancement.lessonSupport",
+    targets: [{ cardId, supportCardIds: new Array<{}>(count).fill({}) }],
+    reason: {
+      kind: "unknown",
+      historyTurnNumber: lesson.turnNumber,
+      historyResultIndex: getNextHistoryResultIndex(gamePlay.updates),
+    },
+  };
+  return {
+    ...gamePlay,
+    updates: [...gamePlay.updates, update],
+  };
+};
+
+/**
+ * スキルカードへレッスンサポートの付与をする
+ *
+ * - 本体は未実装
+ */
+export const addLessonSupport2 = (
+  gamePlay: GamePlay,
+  index: number,
+  count: number,
+): GamePlay => {
+  const lesson = patchDiffs(gamePlay.initialLesson, gamePlay.updates);
+  const cardId = lesson.hand[index];
+  if (cardId === undefined) {
+    throw new Error(`Card not found: ${index}`);
   }
   const update: LessonUpdateQuery = {
     kind: "cards.enhancement.lessonSupport",

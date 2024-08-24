@@ -3322,6 +3322,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.turnNumber = 1;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
       {
@@ -3347,6 +3348,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.turnNumber = 2;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     const update = updates.find((e) => e.kind === "cardPlacement") as any;
     expect(update.hand).toHaveLength(3);
@@ -3371,6 +3373,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.turnNumber = 2;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(3);
@@ -3396,6 +3399,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.discardPile = [];
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(0);
@@ -3416,6 +3420,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.handWhenEmptyDeck = ["a", "b", "c"];
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
+      noInnateActivation: false,
     });
     const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(3);
@@ -3436,6 +3441,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.handWhenEmptyDeck = ["a", "b"];
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
+      noInnateActivation: false,
     });
     const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(3);
@@ -3456,6 +3462,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.handWhenEmptyDeck = ["a", "b", "c"];
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: () => 0,
+      noInnateActivation: false,
     });
     const newLesson = patchDiffs(lesson, updates);
     expect(newLesson.hand).toHaveLength(3);
@@ -3479,6 +3486,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.turnNumber = 1;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     expect(updates.filter((e) => e.kind === "cardPlacement")).toStrictEqual([
       {
@@ -3518,6 +3526,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.turnNumber = 1;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     expect(
       updates.filter((e) => e.kind === "cardPlacement").slice(-1),
@@ -3559,6 +3568,7 @@ describe("drawCardsOnTurnStart", () => {
     lesson.turnNumber = 1;
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     expect(
       updates.filter((e) => e.kind === "cardPlacement").slice(-1),
@@ -3591,6 +3601,7 @@ describe("drawCardsOnTurnStart", () => {
     }
     const { updates } = drawCardsOnTurnStart(lesson, 1, {
       getRandom: Math.random,
+      noInnateActivation: false,
     });
     expect(
       updates.filter((e) => e.kind === "cards.removingLessonSupports"),

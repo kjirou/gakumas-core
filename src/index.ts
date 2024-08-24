@@ -304,8 +304,15 @@ export const getNextPhase = (gamePlay: GamePlay): NextLifecyclePhase => {
  * レッスンのターンを開始する
  *
  * - レッスン開始時に関わる処理も含む
+ *
+ * @param options.noInnateActivation テスト用、「レッスン開始時手札に入る」によるスキルカードの移動を行わないなら true
  */
-export const startTurn = (gamePlay: GamePlay): GamePlay => {
+export const startTurn = (
+  gamePlay: GamePlay,
+  options: {
+    noInnateActivation?: boolean;
+  } = {},
+): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = getLesson(gamePlay);
@@ -487,6 +494,7 @@ export const startTurn = (gamePlay: GamePlay): GamePlay => {
       historyResultIndex,
       {
         getRandom: gamePlay.getRandom,
+        noInnateActivation: options.noInnateActivation ?? false,
       },
     );
     updates = [...updates, ...drawCardsOnTurnStartResult.updates];

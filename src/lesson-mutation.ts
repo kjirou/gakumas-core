@@ -1721,6 +1721,7 @@ export const drawCardsOnTurnStart = (
   historyResultIndex: LessonUpdateQuery["reason"]["historyResultIndex"],
   params: {
     getRandom: GetRandom;
+    noInnateActivation: boolean;
   },
 ): LessonMutationResult => {
   let newLesson = lesson;
@@ -1735,7 +1736,7 @@ export const drawCardsOnTurnStart = (
   //
   let innateCardCount = 0;
   let moveInnateCardsUpdates: LessonUpdateQuery[] = [];
-  if (newLesson.turnNumber === 1) {
+  if (!params.noInnateActivation && newLesson.turnNumber === 1) {
     let innateCardIds: Array<Card["id"]> = [];
     let restCardids: Array<Card["id"]> = [];
     for (const deckCardId of newLesson.deck) {

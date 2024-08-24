@@ -650,8 +650,15 @@ export const playCard = (
  * - プレビューはない
  *
  * @param drinkIndex 選択するPドリンクのインデックス、使用条件を満たすPドリンクのみ選択可能
+ * @param options.noConsumption 任意、Pドリンクを消費しない場合は true を設定
  */
-export const useDrink = (gamePlay: GamePlay, drinkIndex: number): GamePlay => {
+export const useDrink = (
+  gamePlay: GamePlay,
+  drinkIndex: number,
+  options: {
+    noConsumption?: boolean;
+  } = {},
+): GamePlay => {
   let { updates } = gamePlay;
   let historyResultIndex = getNextHistoryResultIndex(updates);
   let lesson = getLesson(gamePlay);
@@ -668,6 +675,7 @@ export const useDrink = (gamePlay: GamePlay, drinkIndex: number): GamePlay => {
     getRandom: gamePlay.getRandom,
     idGenerator: gamePlay.idGenerator,
     drinkIndex,
+    noConsumption: options.noConsumption ?? false,
   });
   updates = [...updates, ...useDrinkResult.updates];
   historyResultIndex = useDrinkResult.nextHistoryResultIndex;

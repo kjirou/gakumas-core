@@ -2066,6 +2066,7 @@ export const useDrink = (
     drinkIndex: number;
     getRandom: GetRandom;
     idGenerator: IdGenerator;
+    noConsumption: boolean;
   },
 ): LessonMutationResult => {
   let newLesson = lesson;
@@ -2079,23 +2080,26 @@ export const useDrink = (
   //
   // Pドリンクの消費
   //
-  const drinkConsumptionUpdates: LessonUpdateQuery[] = [
-    createLessonUpdateQueryFromDiff(
-      {
-        kind: "drinks.removal",
-        id: drink.id,
-      },
-      {
-        kind: "drinkUsage.consumption",
-        drinkDataId: drink.data.id,
-        drinkIndex: params.drinkIndex,
-        historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
-      },
-    ),
-  ];
-  newLesson = patchDiffs(newLesson, drinkConsumptionUpdates);
-  nextHistoryResultIndex++;
+  let drinkConsumptionUpdates: LessonUpdateQuery[] = [];
+  if (!params.noConsumption) {
+    drinkConsumptionUpdates = [
+      createLessonUpdateQueryFromDiff(
+        {
+          kind: "drinks.removal",
+          id: drink.id,
+        },
+        {
+          kind: "drinkUsage.consumption",
+          drinkDataId: drink.data.id,
+          drinkIndex: params.drinkIndex,
+          historyTurnNumber: newLesson.turnNumber,
+          historyResultIndex: nextHistoryResultIndex,
+        },
+      ),
+    ];
+    newLesson = patchDiffs(newLesson, drinkConsumptionUpdates);
+    nextHistoryResultIndex++;
+  }
 
   //
   // コストの消費

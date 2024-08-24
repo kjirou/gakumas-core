@@ -856,6 +856,14 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "ritorupurinsu",
+      expected: [
+        "パラメータ+8",
+        "{{好調}}状態の場合、パラメータ+3",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "kingyosukuideshobu",
       expected: [
         "{{体力消費}}2",

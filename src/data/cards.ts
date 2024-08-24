@@ -6551,6 +6551,64 @@ export const cardsAsConst = [
       {},
     ],
   },
+  {
+    id: "nyudogumotokimi",
+    name: "入道雲と、きみ",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "doubleEffect",
+              cardSummaryKind: "active",
+              duration: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "doubleEffect",
+              cardSummaryKind: "active",
+              duration: 1,
+            },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "goodCondition", duration: 5 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 2 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
   // {
   //   id: "basuniyurarete",
   //   name: "バスに揺られて",

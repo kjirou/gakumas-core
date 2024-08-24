@@ -324,6 +324,13 @@ export const canActivateEffect = (
           targetValue = goodCondition ? goodCondition.duration : 0;
           break;
         }
+        case "halfLifeConsumption": {
+          const halfLifeConsumption = lesson.idol.modifiers.find(
+            (e) => e.kind === "halfLifeConsumption",
+          );
+          targetValue = halfLifeConsumption ? halfLifeConsumption.duration : 0;
+          break;
+        }
         case "motivation": {
           const motivation = lesson.idol.modifiers.find(
             (e) => e.kind === "motivation",

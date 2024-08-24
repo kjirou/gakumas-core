@@ -318,6 +318,7 @@ export type EffectCondition = Readonly<
       modifierKind:
         | "focus"
         | "goodCondition"
+        | "halfLifeConsumption"
         | "motivation"
         | "positiveImpression";
       /** 本家には、「a以上」または「a以下」のどちらかのみで、「a以上b以下」の指定はない */

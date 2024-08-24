@@ -977,6 +977,45 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "kimitowakeaunatsu",
+    name: "きみと分け合う夏",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "halfLifeConsumption",
+        range: { min: 1 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "excellentCondition", duration: 1 },
+        },
+        { kind: "drawCards", amount: 1 },
+      ],
+      times: 2,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "halfLifeConsumption",
+        range: { min: 1 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "excellentCondition", duration: 1 },
+        },
+        { kind: "drawCards", amount: 1 },
+      ],
+      times: 3,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "binnonakanokirameki",
     name: "瓶の中のきらめき",
     producerItemPossessionKind: "sense",

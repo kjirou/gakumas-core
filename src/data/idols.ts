@@ -460,6 +460,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "himesakirinami-ssr-2",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "ssr",
+    specificCardId: "nyudogumotokimi",
+    specificProducerItemId: "kimitowakeaunatsu",
+    title: "キミとセミブルー",
+  },
+  {
     id: "himesakirinami-ssr-1",
     characterId: "himesakirinami",
     producePlan: {

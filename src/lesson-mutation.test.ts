@@ -2342,6 +2342,42 @@ describe("canActivateEffect", () => {
       expected: false,
     },
     {
+      name: "countModifierのhalfLifeConsumptionを満たす時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "halfLifeConsumption", duration: 3 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "halfLifeConsumption",
+          range: { min: 3 },
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "countModifierのhalfLifeConsumptionを満たさない時、trueを返す",
+      args: [
+        {
+          idol: {
+            modifiers: [
+              { kind: "halfLifeConsumption", duration: 2 },
+            ] as Idol["modifiers"],
+          },
+        } as Lesson,
+        {
+          kind: "countModifier",
+          modifierKind: "halfLifeConsumption",
+          range: { min: 3 },
+        },
+      ],
+      expected: false,
+    },
+    {
       name: "countModifierのmotivationを満たす時、trueを返す",
       args: [
         {

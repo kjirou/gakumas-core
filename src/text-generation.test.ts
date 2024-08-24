@@ -907,6 +907,15 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "nyudogumotokimi",
+      expected: [
+        "次に使用する{{アクティブスキルカード}}の効果をもう1回発動（1回・1ターン）",
+        "{{好調}}3ターン",
+        "{{消費体力減少}}2ターン",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1250,6 +1259,14 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "ターン開始時最終ターンの場合、パラメータ+5（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+3）",
         "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "kimitowakeaunatsu",
+      expected: [
+        "ターン開始時{{消費体力減少}}状態の場合、{{絶好調}}1ターン",
+        "スキルカードを引く",
+        "（レッスン内2回）",
       ].join("\n"),
     },
   ];

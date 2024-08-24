@@ -110,7 +110,7 @@ test("中間試験まで3週のSPレッスンを再現する", () => {
 
   // 残りターン数6
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "hombanzenya", 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 5,
@@ -140,7 +140,7 @@ test("中間試験まで3週のSPレッスンを再現する", () => {
 
   // 残りターン数4
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "hyogennokihon2", 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 1,
@@ -155,7 +155,7 @@ test("中間試験まで3週のSPレッスンを再現する", () => {
 
   // 残りターン数3
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport(gamePlay, "risutato", 1);
+  gamePlay = addLessonSupport(gamePlay, 1, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 24,
     vitality: 9,

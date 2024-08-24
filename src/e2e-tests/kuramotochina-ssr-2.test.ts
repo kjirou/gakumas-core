@@ -21,7 +21,7 @@ import {
   startTurn,
   useDrink,
 } from "../index";
-import { addLessonSupport2 } from "../test-utils";
+import { addLessonSupport } from "../test-utils";
 
 // 再現するプレイ動画: https://www.youtube.com/watch?v=ZxVPhMuy6ko
 test("最終試験前の追い込みレッスンを再現する", () => {
@@ -160,7 +160,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数12
   gamePlay = startTurn(gamePlay, { noInnateActivation: true });
-  gamePlay = addLessonSupport2(gamePlay, 1, 1);
+  gamePlay = addLessonSupport(gamePlay, 1, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 31,
     vitality: 0,
@@ -186,7 +186,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数10
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 2, 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 12,
@@ -202,7 +202,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数9
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 0, 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 12,
@@ -217,7 +217,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数8
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 2, 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 16,
@@ -247,7 +247,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数6
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 0, 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 10,
@@ -258,14 +258,14 @@ test("最終試験前の追い込みレッスンを再現する", () => {
     score: 105,
   } as LessonDisplay);
   gamePlay = playCard(gamePlay, 0);
-  gamePlay = addLessonSupport2(gamePlay, 2, 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   gamePlay = playCard(gamePlay, 2);
   gamePlay = endTurn(gamePlay);
 
   // 残りターン数5
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 0, 1);
-  gamePlay = addLessonSupport2(gamePlay, 1, 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
+  gamePlay = addLessonSupport(gamePlay, 1, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 11,
@@ -281,8 +281,8 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数4
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 0, 1);
-  gamePlay = addLessonSupport2(gamePlay, 1, 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
+  gamePlay = addLessonSupport(gamePlay, 1, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 8,
@@ -298,7 +298,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数3
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 2, 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 1,
@@ -316,7 +316,7 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数2
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 2, 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 29,
     vitality: 1,
@@ -332,8 +332,8 @@ test("最終試験前の追い込みレッスンを再現する", () => {
 
   // 残りターン数1
   gamePlay = startTurn(gamePlay);
-  gamePlay = addLessonSupport2(gamePlay, 0, 1);
-  gamePlay = addLessonSupport2(gamePlay, 2, 1);
+  gamePlay = addLessonSupport(gamePlay, 0, 1);
+  gamePlay = addLessonSupport(gamePlay, 2, 1);
   expect(generateLessonDisplay(gamePlay)).toMatchObject({
     life: 24,
     vitality: 0,

@@ -29,6 +29,7 @@ import { compareDeckOrder } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 import {
   activateEffectsOnCardPlay,
+  calculateCostConsumption,
   canPlayCard,
   useCard,
 } from "./lesson-mutation";
@@ -97,7 +98,7 @@ export const generateCardInHandDisplay = (
 ): CardInHandDisplay => {
   let newLesson = lesson;
   // 使用したスキルカード数は、1加算された状態で表示される
-  newLesson = patchDiffs(lesson, [
+  newLesson = patchDiffs(newLesson, [
     {
       kind: "totalCardUsageCount",
       value: newLesson.idol.totalCardUsageCount + 1,
@@ -108,6 +109,15 @@ export const generateCardInHandDisplay = (
     throw new Error(`Card not found in cards: cardId=${cardId}`);
   }
   const cardContent = getCardContentData(card.data, card.enhancements.length);
+  const actualCost = calculateModifierEffectedActionCost(
+    cardContent.cost,
+    newLesson.idol.modifiers,
+  );
+  // コスト消費後の状態で効果発動の結果は計算される
+  newLesson = patchDiffs(
+    newLesson,
+    calculateCostConsumption(newLesson.idol, actualCost),
+  );
   const effectActivations = activateEffectsOnCardPlay(
     newLesson,
     cardContent.effects,
@@ -150,10 +160,7 @@ export const generateCardInHandDisplay = (
     }
   }
   return {
-    cost: calculateModifierEffectedActionCost(
-      cardContent.cost,
-      newLesson.idol.modifiers,
-    ),
+    cost: actualCost,
     effects: effectDisplays,
     enhancements: card.enhancements,
     name: generateCardName(card.data.name, card.enhancements.length),

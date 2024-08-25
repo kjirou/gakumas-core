@@ -90,6 +90,34 @@ describe("generateCardInHandDisplay", () => {
       },
     },
     {
+      name: "コスト消費後の状態を元に効果が計算される",
+      args: [
+        (() => {
+          const lesson = createLessonForTest({
+            cards: [
+              {
+                id: "a",
+                data: getCardDataByConstId("shupurehikoru"),
+                enhancements: [],
+              },
+            ],
+          });
+          lesson.idol.modifiers = [
+            { kind: "goodCondition", duration: 1, id: "m1" },
+            { kind: "focus", amount: 3, id: "m2" },
+          ];
+          return lesson;
+        })(),
+        "a",
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: {
+        // 集中の効果がなくなって、好調の効果のみになっている
+        scores: [{ value: 9 }],
+      } as CardInHandDisplay,
+    },
+    {
       name: "コストにリソースが足りない時も、消費する分のコストの値を返す",
       args: [
         (() => {

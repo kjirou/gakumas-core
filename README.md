@@ -7,6 +7,7 @@ Core engine of Gakuen iDOLM@STER!(学園アイドルマスター)
 - [学園アイドルマスター](https://gakuen.idolmaster-official.jp/)（通称:学マス）のカードゲーム部分の内部処理を再現したものです。
   - 育成ゲーム部分は含んでいません。
 - TypeScript対応です。
+- UIへ組み込んだデモ: [学マスレッスンシミュレーター](https://gakumas-lesson-simulator.netlify.app)
 
 ## :rocket: インストール方法
 

@@ -5657,12 +5657,13 @@ export const cardsAsConst = [
     cardPossessionKind: "free",
     cardProviderKind: "others",
     cardSummaryKind: "mental",
+    keywords: ["aidorutamashii"],
     necessaryProducerLevel: 35,
     nonDuplicative: true,
     rarity: "ssr",
     contents: [
       {
-        cost: { kind: "life", value: 2 },
+        cost: { kind: "normal", value: 2 },
         effects: [
           { kind: "perform", vitality: { value: 6 } },
           {
@@ -5670,6 +5671,7 @@ export const cardsAsConst = [
             modifier: { kind: "debuffProtection", times: 1 },
           },
         ],
+        innate: true,
         usableOncePerLesson: true,
       },
       {
@@ -5690,7 +5692,7 @@ export const cardsAsConst = [
         ],
       },
       {
-        cost: { kind: "life", value: 1 },
+        cost: { kind: "normal", value: 1 },
       },
       // TODO: +++
       {},

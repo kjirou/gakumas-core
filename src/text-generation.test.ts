@@ -710,6 +710,26 @@ describe("generateCardDescription", () => {
       expected: ["{{好印象}}+4", "{{好印象}}の60%分パラメータ上昇"].join("\n"),
     },
     {
+      cardId: "aidorudamashii",
+      expected: [
+        "レッスン開始時手札に入る",
+        "{{元気}}+6",
+        "{{低下状態無効}}（1回）",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "aidorudamashii",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "レッスン開始時手札に入る",
+        "{{元気}}+6",
+        "{{低下状態無効}}（1回）",
+        "次のターン、手札をすべて{{レッスン中強化}}",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "hoyoryoku",
       expected: [
         "パラメータ+2{{元気}}+1",

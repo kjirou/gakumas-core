@@ -1019,6 +1019,18 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "natsunoyoinosenkohanabi",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}4",
+        "レッスン開始時手札に入る",
+        "{{好印象}}+4",
+        "{{やる気}}+3",
+        "以降、{{元気}}効果のスキルカード使用後、{{好印象}}+1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',

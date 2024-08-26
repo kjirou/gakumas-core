@@ -7359,6 +7359,78 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "natsunoyoinosenkohanabi",
+    name: "夏の宵の線香花火",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 3 },
+          },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 2 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "after",
+                  effectKind: "vitality",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
+              },
+              representativeName: "夏の宵の線香花火",
+            },
+          },
+        ],
+        innate: true,
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "positiveImpression", amount: 4 },
+          },
+          { kind: "getModifier", modifier: { kind: "motivation", amount: 3 } },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "after",
+                  effectKind: "vitality",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
+              },
+              representativeName: "夏の宵の線香花火",
+            },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "hanamoyukisetsu",
     name: "花萌ゆ季節",
     cardPossessionKind: "free",

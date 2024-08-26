@@ -84,28 +84,41 @@ export type VitalityUpdateQuery = Readonly<{
  *   - Pアイテムは、あれはあれでまだ不整合が出てないので、様子見を兼ねてそのままにしている
  *   - 最終的には、本家仕様が許すなら、これへ統合したい
  */
-export type ReactiveEffectTrigger = Readonly<{
-  /**
-   * スキルカードの主効果発動に伴う効果発動
-   *
-   * - 原文から推測した構文は、「[元気効果の](アクティブスキルカード|メンタルスキルカード|スキルカード|{指定スキルカード})使用(時|後)」
-   *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
-   *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
-   *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
-   *   - 「夏の宵の線香花火」は、「以降、元気効果のスキルカード使用後、好印象+1」
-   *     - 効果発動時点の参考動画: https://youtu.be/3bzWi4m19oo?si=lYYdgowS72ZLICL1&t=13
-   */
-  kind: "accordingToCardEffectActivation";
-  /**
-   * 前後の時点どちらか
-   *
-   * - 原文の「使用時」は効果発動前を意味し、「使用後」が効果発動後を意味する
-   */
-  adjacentKind: "after" | "before";
-  cardDataId?: CardData["id"];
-  cardSummaryKind?: CardSummaryKind;
-  effectKind?: "vitality";
-}>;
+export type ReactiveEffectTrigger = Readonly<
+  | {
+      /**
+       * スキルカードの主効果発動に伴う効果発動
+       *
+       * - 原文から推測した構文は、「[元気効果の](アクティブスキルカード|メンタルスキルカード|スキルカード|{指定スキルカード})使用(時|後)」
+       *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
+       *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
+       *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
+       *   - 「夏の宵の線香花火」は、「以降、元気効果のスキルカード使用後、好印象+1」
+       *     - 効果発動時点の参考動画: https://youtu.be/3bzWi4m19oo?si=lYYdgowS72ZLICL1&t=13
+       */
+      kind: "accordingToCardEffectActivation";
+      /**
+       * 前後の時点どちらか
+       *
+       * - 原文の「使用時」は効果発動前を意味し、「使用後」が効果発動後を意味する
+       */
+      adjacentKind: "after" | "before";
+      cardDataId?: CardData["id"];
+      cardSummaryKind?: CardSummaryKind;
+      effectKind?: "vitality";
+    }
+  | {
+      /**
+       * ターン終了時に効果発動
+       *
+       * - 原文の構文は、「ターン終了時」
+       *   - 「内気系少女」は、「以降、ターン終了時、好印象+1」
+       *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
+       *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
+       */
+      kind: "turnEnd";
+    }
+>;
 
 /**
  * 反応型効果のクエリ
@@ -123,6 +136,9 @@ export type ReactiveEffectQuery = Readonly<
   | {
       kind: "beforeCardEffectActivation";
       cardDataId: CardData["id"];
+    }
+  | {
+      kind: "turnEnd";
     }
 >;
 
@@ -216,18 +232,6 @@ export type ModifierData = Readonly<
       /** 「消費体力増加{duration}ターン」 */
       kind: "doubleLifeConsumption";
       duration: number;
-    }
-  | {
-      /**
-       * ターン終了時に効果発動
-       *
-       * - 原文の構文は、「以降、ターン終了時、[{effect}]」
-       *   - 「内気系少女」は、「以降、ターン終了時、好印象+1」
-       *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
-       *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
-       */
-      kind: "effectActivationOnTurnEnd";
-      effect: Effect;
     }
   | {
       /** 「絶好調{duration}ターン」 */

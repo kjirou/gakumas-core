@@ -39,13 +39,6 @@ export const metaModifierDictioanry = {
     displayedRepresentativeValuePropertyName: "duration",
     label: "絶好調",
   },
-  effectActivationOnTurnEnd: {
-    kind: "effectActivationOnTurnEnd",
-    debuff: false,
-    displayedRepresentativeValuePropertyName: undefined,
-    // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
-    label: "ターン終了時持続効果",
-  },
   focus: {
     kind: "focus",
     debuff: false,

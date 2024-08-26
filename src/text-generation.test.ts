@@ -101,6 +101,15 @@ describe("generateReactiveEffectTriggerText", () => {
       ],
       expected: "{{アドレナリン全開}}使用時",
     },
+    {
+      name: "turnEnd",
+      args: [
+        {
+          kind: "turnEnd",
+        },
+      ],
+      expected: "ターン終了時",
+    },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(generateReactiveEffectTriggerText(...args)).toBe(expected);
@@ -244,16 +253,20 @@ describe("generateEffectText", () => {
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationOnTurnEnd",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
+            kind: "reactiveEffect",
+            reactiveEffect: {
+              trigger: { kind: "turnEnd" },
+              effect: {
+                kind: "getModifier",
+                modifier: { kind: "positiveImpression", amount: 1 },
+              },
             },
+            representativeName: "",
           },
         },
       ],
       expected: "以降、ターン終了時、{{好印象}}+1",
-      name: "getModifier - effectActivationOnTurnEnd",
+      name: "getModifier - reactiveEffect",
     },
     {
       args: [

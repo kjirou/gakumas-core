@@ -541,7 +541,7 @@ describe("getDisplayedRepresentativeModifierValue", () => {
       expected: 2,
     },
     {
-      args: [{ kind: "effectActivationOnTurnEnd" } as Modifier],
+      args: [{ kind: "reactiveEffect" } as Modifier],
       expected: undefined,
     },
   ];

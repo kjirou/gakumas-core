@@ -105,8 +105,6 @@ const globalKeywords = {
   delayedEffect: metaModifierDictioanry.delayedEffect.label,
   doubleEffect: metaModifierDictioanry.doubleEffect.label,
   doubleLifeConsumption: metaModifierDictioanry.doubleLifeConsumption.label,
-  effectActivationOnTurnEnd:
-    metaModifierDictioanry.effectActivationOnTurnEnd.label,
   enhanceHand: "レッスン中強化",
   excellentCondition: metaModifierDictioanry.excellentCondition.label,
   fixedValueVitality: "固定元気",
@@ -178,8 +176,11 @@ export const generateReactiveEffectTriggerText = (
         `使用${trigger.adjacentKind === "before" ? "時" : "後"}`,
       ].join("");
     }
+    case "turnEnd": {
+      return "ターン終了時";
+    }
     default: {
-      const unreachable: never = trigger.kind;
+      const unreachable: never = trigger;
       throw new Error(`Unreachable statement`);
     }
   }
@@ -243,15 +244,6 @@ const generateModifierText = (modifier: ModifierData): string => {
       return `次に使用する${cardText}の効果をもう1回発動（1回${durationText}）`;
     case "doubleLifeConsumption":
       return `${kwd("doubleLifeConsumption")}${modifier.duration}ターン`;
-    case "effectActivationOnTurnEnd":
-      return [
-        "以降、ターン終了時",
-        // 条件がない場合のみ「、」を挿入する
-        // 「内気系少女」は、「以降、ターン終了時、好印象+1」
-        // 「天真爛漫」は、「以降、ターン終了時集中が3以上の場合、集中+2」
-        modifier.effect.condition ? "" : "、",
-        generateEffectText(modifier.effect),
-      ].join("");
     case "excellentCondition":
       return `${kwd("excellentCondition")}${modifier.duration}ターン`;
     case "focus":
@@ -274,7 +266,10 @@ const generateModifierText = (modifier: ModifierData): string => {
       return [
         "以降、",
         generateReactiveEffectTriggerText(modifier.reactiveEffect.trigger),
-        "、",
+        // 条件がない場合のみ「、」を挿入する
+        // 「内気系少女」は、「以降、ターン終了時、好印象+1」
+        // 「天真爛漫」は、「以降、ターン終了時集中が3以上の場合、集中+2」
+        modifier.reactiveEffect.effect.condition ? "" : "、",
         generateEffectText(modifier.reactiveEffect.effect),
       ].join("");
     default:

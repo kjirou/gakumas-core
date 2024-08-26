@@ -240,37 +240,45 @@ export const validateQueryOfReactiveEffectTrigger = (
 ) => {
   switch (trigger.kind) {
     case "accordingToCardEffectActivation": {
-      const cardData = getCardDataById(query.cardDataId);
-      const cardDataIdCondition =
-        trigger.cardDataId === undefined ||
-        trigger.cardDataId === query.cardDataId;
-      const cardSummaryKindCondition =
-        trigger.cardSummaryKind === undefined ||
-        trigger.cardSummaryKind === cardData.cardSummaryKind;
-      if (query.kind === "beforeCardEffectActivation") {
-        return (
-          trigger.adjacentKind === "before" &&
-          cardSummaryKindCondition &&
-          cardDataIdCondition
-        );
-      } else if (query.kind === "afterCardEffectActivation") {
-        const effectKindCondition =
-          trigger.effectKind === undefined ||
-          (trigger.effectKind === "vitality" &&
-            query.diffs.some(
-              (diff) => diff.kind === "vitality" && diff.max > 0,
-            ));
-        return (
-          trigger.adjacentKind === "after" &&
-          cardSummaryKindCondition &&
-          cardDataIdCondition &&
-          effectKindCondition
-        );
+      if (
+        query.kind === "beforeCardEffectActivation" ||
+        query.kind === "afterCardEffectActivation"
+      ) {
+        const cardData = getCardDataById(query.cardDataId);
+        const cardDataIdCondition =
+          trigger.cardDataId === undefined ||
+          trigger.cardDataId === query.cardDataId;
+        const cardSummaryKindCondition =
+          trigger.cardSummaryKind === undefined ||
+          trigger.cardSummaryKind === cardData.cardSummaryKind;
+        if (query.kind === "beforeCardEffectActivation") {
+          return (
+            trigger.adjacentKind === "before" &&
+            cardSummaryKindCondition &&
+            cardDataIdCondition
+          );
+        } else if (query.kind === "afterCardEffectActivation") {
+          const effectKindCondition =
+            trigger.effectKind === undefined ||
+            (trigger.effectKind === "vitality" &&
+              query.diffs.some(
+                (diff) => diff.kind === "vitality" && diff.max > 0,
+              ));
+          return (
+            trigger.adjacentKind === "after" &&
+            cardSummaryKindCondition &&
+            cardDataIdCondition &&
+            effectKindCondition
+          );
+        }
       }
       return false;
     }
+    case "turnEnd": {
+      return query.kind === "turnEnd";
+    }
     default: {
-      const unreachable: never = trigger.kind;
+      const unreachable: never = trigger;
       throw new Error(`Unreachable statement`);
     }
   }
@@ -1048,7 +1056,6 @@ export const activateEffect = <
         // 常に新規追加になる状態修正群
         case "delayedEffect":
         case "doubleEffect":
-        case "effectActivationOnTurnEnd":
         case "reactiveEffect": {
           diff = createNewModifierDiff(effect.modifier, idGenerator());
           break;
@@ -2681,10 +2688,15 @@ export const activateEffectsOnTurnEnd = (
   if (!isScoreSatisfyingPerfect(newLesson)) {
     for (const modifier of newLesson.idol.modifiers) {
       let innerUpdates: LessonUpdateQuery[] = [];
-      if (modifier.kind === "effectActivationOnTurnEnd") {
+      if (
+        modifier.kind === "reactiveEffect" &&
+        validateQueryOfReactiveEffectTrigger(modifier.reactiveEffect.trigger, {
+          kind: "turnEnd",
+        })
+      ) {
         const diffs = activateEffectIf(
           newLesson,
-          modifier.effect,
+          modifier.reactiveEffect.effect,
           params.getRandom,
           params.idGenerator,
         );

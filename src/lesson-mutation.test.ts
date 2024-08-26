@@ -1036,15 +1036,19 @@ describe("activateEffectsOnTurnEnd", () => {
     });
   });
   describe("状態修正による効果発動", () => {
-    test("effectActivationOnTurnEnd", () => {
+    test("reactiveEffect", () => {
       const lesson = createLessonForTest();
       lesson.idol.modifiers = [
         {
-          kind: "effectActivationOnTurnEnd",
-          effect: {
-            kind: "getModifier",
-            modifier: { kind: "motivation", amount: 1 },
+          kind: "reactiveEffect",
+          reactiveEffect: {
+            trigger: { kind: "turnEnd" },
+            effect: {
+              kind: "getModifier",
+              modifier: { kind: "motivation", amount: 1 },
+            },
           },
+          representativeName: "Foo",
           id: "x",
         },
       ];

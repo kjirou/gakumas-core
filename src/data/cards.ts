@@ -1955,11 +1955,15 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
               },
+              representativeName: "内気系少女",
             },
           },
         ],
@@ -1975,11 +1979,15 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
               },
+              representativeName: "内気系少女",
             },
           },
         ],
@@ -6067,16 +6075,20 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                condition: {
-                  kind: "countModifier",
-                  modifierKind: "focus",
-                  range: { min: 3 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  condition: {
+                    kind: "countModifier",
+                    modifierKind: "focus",
+                    range: { min: 3 },
+                  },
+                  modifier: { kind: "focus", amount: 2 },
                 },
-                modifier: { kind: "focus", amount: 2 },
               },
+              representativeName: "天真爛漫",
             },
           },
         ],
@@ -6388,16 +6400,20 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                condition: {
-                  kind: "countModifier",
-                  modifierKind: "positiveImpression",
-                  range: { min: 3 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  condition: {
+                    kind: "countModifier",
+                    modifierKind: "positiveImpression",
+                    range: { min: 3 },
+                  },
+                  modifier: { kind: "positiveImpression", amount: 3 },
                 },
-                modifier: { kind: "positiveImpression", amount: 3 },
               },
+              representativeName: "虹色ドリーマー",
             },
           },
         ],
@@ -6412,16 +6428,20 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                condition: {
-                  kind: "countModifier",
-                  modifierKind: "positiveImpression",
-                  range: { min: 3 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  condition: {
+                    kind: "countModifier",
+                    modifierKind: "positiveImpression",
+                    range: { min: 3 },
+                  },
+                  modifier: { kind: "positiveImpression", amount: 3 },
                 },
-                modifier: { kind: "positiveImpression", amount: 3 },
               },
+              representativeName: "虹色ドリーマー",
             },
           },
         ],
@@ -6436,16 +6456,20 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                condition: {
-                  kind: "countModifier",
-                  modifierKind: "positiveImpression",
-                  range: { min: 3 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  condition: {
+                    kind: "countModifier",
+                    modifierKind: "positiveImpression",
+                    range: { min: 3 },
+                  },
+                  modifier: { kind: "positiveImpression", amount: 3 },
                 },
-                modifier: { kind: "positiveImpression", amount: 3 },
               },
+              representativeName: "虹色ドリーマー",
             },
           },
         ],
@@ -7075,11 +7099,15 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
               },
+              representativeName: "もう怖くないから",
             },
           },
         ],
@@ -7095,11 +7123,15 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationOnTurnEnd",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: { kind: "turnEnd" },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
               },
+              representativeName: "もう怖くないから",
             },
           },
         ],

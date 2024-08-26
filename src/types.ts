@@ -78,6 +78,63 @@ export type VitalityUpdateQuery = Readonly<{
 }>;
 
 /**
+ * 反応型効果のトリガー
+ *
+ * - 現状は、状態修正のもののみこちらを使っている
+ *   - Pアイテムは、あれはあれでまだ不整合が出てないので、様子見を兼ねてそのままにしている
+ *   - 最終的には、本家仕様が許すなら、これへ統合したい
+ */
+export type ReactiveEffectTrigger = Readonly<{
+  /**
+   * スキルカードの主効果発動に伴う効果発動
+   *
+   * - 原文から推測した構文は、「[元気効果の](アクティブスキルカード|メンタルスキルカード|スキルカード|{指定スキルカード})使用(時|後)」
+   *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
+   *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
+   *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
+   *   - 「夏の宵の線香花火」は、「以降、元気効果のスキルカード使用後、好印象+1」
+   *     - 効果発動時点の参考動画: https://youtu.be/3bzWi4m19oo?si=lYYdgowS72ZLICL1&t=13
+   */
+  kind: "accordingToCardEffectActivation";
+  /**
+   * 前後の時点どちらか
+   *
+   * - 原文の「使用時」は効果発動前を意味し、「使用後」が効果発動後を意味する
+   */
+  adjacentKind: "after" | "before";
+  cardDataId?: CardData["id"];
+  cardSummaryKind?: CardSummaryKind;
+  effectKind?: "vitality";
+}>;
+
+/**
+ * 反応型効果のクエリ
+ *
+ * - 反応型効果判定時に必要な情報をまとめたもの
+ * - 呼び出し元で生成して渡す
+ */
+export type ReactiveEffectQuery = Readonly<
+  | {
+      kind: "afterCardEffectActivation";
+      cardDataId: CardData["id"];
+      /** スキルカード使用による更新差分リスト */
+      diffs: LessonUpdateDiff[];
+    }
+  | {
+      kind: "beforeCardEffectActivation";
+      cardDataId: CardData["id"];
+    }
+>;
+
+/**
+ * 反応型効果
+ */
+export type ReactiveEffect = Readonly<{
+  effect: Effect;
+  trigger: ReactiveEffectTrigger;
+}>;
+
+/**
  * 状態修正データ定義
  *
  * - データとして状態修正を表現するときの形式
@@ -174,7 +231,7 @@ export type ModifierData = Readonly<
     }
   | {
       /**
-       * スキルカード使用時の主効果発動前に効果発動
+       * スキルカード使用による主効果発動前に効果発動
        *
        * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{effect}」
        *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」

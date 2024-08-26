@@ -26,6 +26,7 @@ import type {
   EffectWithoutCondition,
   ProducerItemData,
   MeasureValueConditionContent,
+  ReactiveEffectTrigger,
 } from "./types";
 import { getCardDataByConstId } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -161,6 +162,30 @@ export const generateCardName = (
   name: CardData["name"],
   enhancementCount: number,
 ): string => name + "+".repeat(enhancementCount);
+
+export const generateReactiveEffectTriggerText = (
+  trigger: ReactiveEffectTrigger,
+): string => {
+  switch (trigger.kind) {
+    case "accordingToCardEffectActivation": {
+      return [
+        trigger.effectKind === "vitality" ? `${kwd("vitality")}効果の` : "",
+        trigger.cardDataId !== undefined
+          ? cardKwd(trigger.cardDataId)
+          : trigger.cardSummaryKind === "active"
+            ? kwd("activeSkillCard")
+            : trigger.cardSummaryKind === "mental"
+              ? kwd("mentalSkillCard")
+              : "スキルカード",
+        `使用${trigger.adjacentKind === "before" ? "時" : "後"}`,
+      ].join("");
+    }
+    default: {
+      const unreachable: never = trigger.kind;
+      throw new Error(`Unreachable statement`);
+    }
+  }
+};
 
 /**
  * 状態修正種別のみからキーワードを生成する

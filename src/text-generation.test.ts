@@ -18,6 +18,7 @@ import {
   generateEffectText,
   generateProducerItemDescription,
   generateProducerItemTriggerAndConditionText,
+  generateReactiveEffectTriggerText,
   globalDataKeywords,
 } from "./text-generation";
 import { getCardContentData, getProducerItemContentData } from "./models";
@@ -48,6 +49,61 @@ describe("generateCardName", () => {
   ];
   test.each(testCases)('$args => "$expected"', ({ args, expected }) => {
     expect(generateCardName(...args)).toBe(expected);
+  });
+});
+describe("generateReactiveEffectTriggerText", () => {
+  const testCases: Array<{
+    args: Parameters<typeof generateReactiveEffectTriggerText>;
+    expected: ReturnType<typeof generateReactiveEffectTriggerText>;
+    name: string;
+  }> = [
+    {
+      name: "accordingToCardEffectActivation - before, cardSummaryKind 無し, effectKind 無し",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+        },
+      ],
+      expected: "スキルカード使用時",
+    },
+    {
+      name: "accordingToCardEffectActivation - after, active, vitality",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "after",
+          cardSummaryKind: "active",
+          effectKind: "vitality",
+        },
+      ],
+      expected: "{{元気}}効果の{{アクティブスキルカード}}使用後",
+    },
+    {
+      name: "accordingToCardEffectActivation - mental",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+          cardSummaryKind: "mental",
+        },
+      ],
+      expected: "{{メンタルスキルカード}}使用時",
+    },
+    {
+      name: "accordingToCardEffectActivation - cardDataId",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+          cardDataId: "adorenarinzenkai",
+        },
+      ],
+      expected: "{{アドレナリン全開}}使用時",
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(generateReactiveEffectTriggerText(...args)).toBe(expected);
   });
 });
 describe("generateEffectText", () => {

@@ -37,6 +37,7 @@ import {
   useCard,
   useDrink,
   validateCostConsumution,
+  validateQueryOfReactiveEffectTrigger,
   measureValue,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
@@ -5982,5 +5983,182 @@ describe("validateCostConsumution", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(validateCostConsumution(...args)).toStrictEqual(expected);
+  });
+});
+describe("validateQueryOfReactiveEffectTrigger", () => {
+  const testCases: Array<{
+    args: Parameters<typeof validateQueryOfReactiveEffectTrigger>;
+    expected: ReturnType<typeof validateQueryOfReactiveEffectTrigger>;
+    name: string;
+  }> = [
+    {
+      name: "accordingToCardEffectActivation - before - 満たす",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "accordingToCardEffectActivation - before - 満たさない",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "accordingToCardEffectActivation - after - 満たす",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "after",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "accordingToCardEffectActivation - after - 満たさない",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "after",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "accordingToCardEffectActivation - cardDataId - 満たす",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "accordingToCardEffectActivation - cardDataId - 満たさない",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "pozunokihon",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "accordingToCardEffectActivation - cardSummaryKind - 満たす",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "accordingToCardEffectActivation - cardSummaryKind - 満たさない",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "before",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "hyogennokihon",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "accordingToCardEffectActivation - effectKind - 満たす",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "after",
+          effectKind: "vitality",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "hyogennokihon",
+          diffs: [{ kind: "vitality", actual: 1, max: 1 }],
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "accordingToCardEffectActivation - effectKind - 満たさない",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "after",
+          effectKind: "vitality",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [{ kind: "score", actual: 1, max: 1 }],
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "accordingToCardEffectActivation - effectKind - vitality - 元気の差分はあるが上がらなかった時は満たさない",
+      args: [
+        {
+          kind: "accordingToCardEffectActivation",
+          adjacentKind: "after",
+          effectKind: "vitality",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [{ kind: "vitality", actual: 0, max: 0 }],
+        },
+      ],
+      expected: false,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(validateQueryOfReactiveEffectTrigger(...args)).toBe(expected);
   });
 });

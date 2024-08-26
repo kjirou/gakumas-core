@@ -21,8 +21,15 @@ import type {
   ProducerItemTrigger,
   VitalityUpdateQuery,
   MeasureValueConditionContent,
+  ReactiveEffect,
+  ReactiveEffectTrigger,
+  ReactiveEffectQuery,
 } from "./types";
-import { filterGeneratableCardsData, getCardDataByConstId } from "./data/cards";
+import {
+  filterGeneratableCardsData,
+  getCardDataByConstId,
+  getCardDataById,
+} from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateModifierEffectedActionCost,
@@ -219,6 +226,51 @@ export const validateCostConsumution = (
     }
     default: {
       const unreachable: never = actualCostKind;
+      throw new Error(`Unreachable statement`);
+    }
+  }
+};
+
+/**
+ * 反応型効果のトリガーの要求を満たすかを検証する
+ */
+export const validateQueryOfReactiveEffectTrigger = (
+  trigger: ReactiveEffectTrigger,
+  query: ReactiveEffectQuery,
+) => {
+  switch (trigger.kind) {
+    case "accordingToCardEffectActivation": {
+      const cardData = getCardDataById(query.cardDataId);
+      const cardDataIdCondition =
+        trigger.cardDataId === undefined ||
+        trigger.cardDataId === query.cardDataId;
+      const cardSummaryKindCondition =
+        trigger.cardSummaryKind === undefined ||
+        trigger.cardSummaryKind === cardData.cardSummaryKind;
+      if (query.kind === "beforeCardEffectActivation") {
+        return (
+          trigger.adjacentKind === "before" &&
+          cardSummaryKindCondition &&
+          cardDataIdCondition
+        );
+      } else if (query.kind === "afterCardEffectActivation") {
+        const effectKindCondition =
+          trigger.effectKind === undefined ||
+          (trigger.effectKind === "vitality" &&
+            query.diffs.some(
+              (diff) => diff.kind === "vitality" && diff.max > 0,
+            ));
+        return (
+          trigger.adjacentKind === "after" &&
+          cardSummaryKindCondition &&
+          cardDataIdCondition &&
+          effectKindCondition
+        );
+      }
+      return false;
+    }
+    default: {
+      const unreachable: never = trigger.kind;
       throw new Error(`Unreachable statement`);
     }
   }

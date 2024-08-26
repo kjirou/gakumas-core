@@ -260,34 +260,24 @@ describe("generateEffectText", () => {
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
-            effect: {
-              kind: "perform",
-              vitality: { fixedValue: true, value: 1 },
+            kind: "reactiveEffect",
+            reactiveEffect: {
+              trigger: {
+                kind: "accordingToCardEffectActivation",
+                adjacentKind: "before",
+                cardSummaryKind: "active",
+              },
+              effect: {
+                kind: "perform",
+                vitality: { fixedValue: true, value: 1 },
+              },
             },
+            representativeName: "",
           },
         },
       ],
       expected: "以降、{{アクティブスキルカード}}使用時、{{固定元気}}+1",
-      name: "getModifier - effectActivationBeforeCardEffectActivation - active",
-    },
-    {
-      args: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "mental",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
-            },
-          },
-        },
-      ],
-      expected: "以降、{{メンタルスキルカード}}使用時、{{好印象}}+1",
-      name: "getModifier - effectActivationBeforeCardEffectActivation - mental",
+      name: "getModifier - reactiveEffect - accordingToCardEffectActivation",
     },
     {
       args: [

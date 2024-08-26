@@ -3068,12 +3068,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "perform",
-                vitality: { fixedValue: true, value: 2 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "perform",
+                  vitality: { fixedValue: true, value: 2 },
+                },
               },
+              representativeName: "演出計画",
             },
           },
         ],
@@ -3089,12 +3096,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "perform",
-                vitality: { fixedValue: true, value: 2 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "perform",
+                  vitality: { fixedValue: true, value: 2 },
+                },
               },
+              representativeName: "演出計画",
             },
           },
         ],
@@ -3108,12 +3122,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "perform",
-                vitality: { fixedValue: true, value: 2 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "perform",
+                  vitality: { fixedValue: true, value: 2 },
+                },
               },
+              representativeName: "演出計画",
             },
           },
         ],
@@ -3127,12 +3148,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "perform",
-                vitality: { fixedValue: true, value: 2 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "perform",
+                  vitality: { fixedValue: true, value: 2 },
+                },
               },
+              representativeName: "演出計画",
             },
           },
         ],
@@ -3159,12 +3187,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "focus", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "focus", amount: 1 },
+                },
               },
+              representativeName: "願いの力",
             },
           },
         ],
@@ -3180,12 +3215,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "focus", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "focus", amount: 1 },
+                },
               },
+              representativeName: "願いの力",
             },
           },
         ],
@@ -3199,12 +3241,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "focus", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "focus", amount: 1 },
+                },
               },
+              representativeName: "願いの力",
             },
           },
         ],
@@ -3632,12 +3681,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "mental",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "mental",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
               },
+              representativeName: "ファンシーチャーム",
             },
           },
         ],
@@ -3652,12 +3708,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "mental",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "mental",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "positiveImpression", amount: 1 },
+                },
               },
+              representativeName: "ファンシーチャーム",
             },
           },
         ],
@@ -3689,12 +3752,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "mental",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "motivation", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "mental",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "motivation", amount: 1 },
+                },
               },
+              representativeName: "ワクワクが止まらない",
             },
           },
         ],
@@ -3709,12 +3779,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "mental",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "motivation", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "mental",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "motivation", amount: 1 },
+                },
               },
+              representativeName: "ワクワクが止まらない",
             },
           },
         ],
@@ -3729,12 +3806,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "mental",
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "motivation", amount: 1 },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "mental",
+                },
+                effect: {
+                  kind: "getModifier",
+                  modifier: { kind: "motivation", amount: 1 },
+                },
               },
+              representativeName: "ワクワクが止まらない",
             },
           },
         ],
@@ -5234,9 +5318,16 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: { kind: "perform", score: { value: 4 } },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: { kind: "perform", score: { value: 4 } },
+              },
+              representativeName: "至高のエンタメ",
             },
           },
         ],
@@ -5256,9 +5347,16 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: { kind: "perform", score: { value: 5 } },
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                  cardSummaryKind: "active",
+                },
+                effect: { kind: "perform", score: { value: 5 } },
+              },
+              representativeName: "至高のエンタメ",
             },
           },
         ],
@@ -5479,12 +5577,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              effect: {
-                kind: "performLeveragingModifier",
-                modifierKind: "positiveImpression",
-                percentage: 30,
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                },
+                effect: {
+                  kind: "performLeveragingModifier",
+                  modifierKind: "positiveImpression",
+                  percentage: 30,
+                },
               },
+              representativeName: "輝くキミへ",
             },
           },
         ],
@@ -5502,12 +5607,19 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              effect: {
-                kind: "performLeveragingModifier",
-                modifierKind: "positiveImpression",
-                percentage: 50,
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                },
+                effect: {
+                  kind: "performLeveragingModifier",
+                  modifierKind: "positiveImpression",
+                  percentage: 50,
+                },
               },
+              representativeName: "輝くキミへ",
             },
           },
         ],

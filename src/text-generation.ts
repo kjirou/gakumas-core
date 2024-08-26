@@ -105,8 +105,6 @@ const globalKeywords = {
   delayedEffect: metaModifierDictioanry.delayedEffect.label,
   doubleEffect: metaModifierDictioanry.doubleEffect.label,
   doubleLifeConsumption: metaModifierDictioanry.doubleLifeConsumption.label,
-  effectActivationBeforeCardEffectActivation:
-    metaModifierDictioanry.effectActivationBeforeCardEffectActivation.label,
   effectActivationOnTurnEnd:
     metaModifierDictioanry.effectActivationOnTurnEnd.label,
   enhanceHand: "レッスン中強化",
@@ -254,15 +252,6 @@ const generateModifierText = (modifier: ModifierData): string => {
         modifier.effect.condition ? "" : "、",
         generateEffectText(modifier.effect),
       ].join("");
-    case "effectActivationBeforeCardEffectActivation":
-      return (
-        "以降、" +
-        (modifier.cardKind === "active"
-          ? kwd("activeSkillCard")
-          : kwd("mentalSkillCard")) +
-        "使用時、" +
-        generateEffectText(modifier.effect)
-      );
     case "excellentCondition":
       return `${kwd("excellentCondition")}${modifier.duration}ターン`;
     case "focus":
@@ -281,6 +270,13 @@ const generateModifierText = (modifier: ModifierData): string => {
       return `${kwd("noVitalityIncrease")}${modifier.duration}ターン`;
     case "positiveImpression":
       return `${kwd("positiveImpression")}+${modifier.amount}`;
+    case "reactiveEffect":
+      return [
+        "以降、",
+        generateReactiveEffectTriggerText(modifier.reactiveEffect.trigger),
+        "、",
+        generateEffectText(modifier.reactiveEffect.effect),
+      ].join("");
     default:
       const unreachable: never = modifier;
       throw new Error(`Unreachable statement`);

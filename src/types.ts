@@ -230,18 +230,6 @@ export type ModifierData = Readonly<
       effect: Effect;
     }
   | {
-      /**
-       * スキルカード使用による主効果発動前に効果発動
-       *
-       * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{effect}」
-       *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
-       *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
-       */
-      kind: "effectActivationBeforeCardEffectActivation";
-      cardKind?: CardSummaryKind;
-      effect: Effect;
-    }
-  | {
       /** 「絶好調{duration}ターン」 */
       kind: "excellentCondition";
       duration: number;
@@ -301,6 +289,20 @@ export type ModifierData = Readonly<
        */
       kind: "positiveImpression";
       amount: number;
+    }
+  | {
+      /**
+       * 反応型効果
+       */
+      kind: "reactiveEffect";
+      reactiveEffect: ReactiveEffect;
+      /**
+       * 代表する表示名
+       *
+       * - 本家UIの状態修正アイコンの表示時に使う
+       * - スキルカード名・Pアイテム名・Pドリンク名などが入る
+       */
+      representativeName: string;
     }
 >;
 

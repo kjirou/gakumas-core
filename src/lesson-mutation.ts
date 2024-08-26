@@ -1048,8 +1048,8 @@ export const activateEffect = <
         // 常に新規追加になる状態修正群
         case "delayedEffect":
         case "doubleEffect":
-        case "effectActivationBeforeCardEffectActivation":
-        case "effectActivationOnTurnEnd": {
+        case "effectActivationOnTurnEnd":
+        case "reactiveEffect": {
           diff = createNewModifierDiff(effect.modifier, idGenerator());
           break;
         }
@@ -2434,21 +2434,23 @@ export const useCard = (
     }
 
     //
-    // 状態修正に起因する、スキルカード使用時の効果発動
+    // 状態修正に起因する、スキルカードの主効果発動（前）に伴う効果発動
     //
     if (!params.preview) {
-      const effectsUponCardUsage = newLesson.idol.modifiers.filter(
-        (e) =>
-          e.kind === "effectActivationBeforeCardEffectActivation" &&
-          (e.cardKind === undefined ||
-            e.cardKind === card.data.cardSummaryKind),
-      ) as Array<
-        Extract<
-          Modifier,
-          { kind: "effectActivationBeforeCardEffectActivation" }
-        >
-      >;
-      for (const { effect } of effectsUponCardUsage) {
+      const effectsBeforeCardEffectActivation = newLesson.idol.modifiers
+        .filter((modifier) => modifier.kind === "reactiveEffect")
+        .filter((modifier) =>
+          validateQueryOfReactiveEffectTrigger(
+            modifier.reactiveEffect.trigger,
+            {
+              kind: "beforeCardEffectActivation",
+              cardDataId: card.data.id,
+            },
+          ),
+        );
+      for (const {
+        reactiveEffect: { effect },
+      } of effectsBeforeCardEffectActivation) {
         const diffs = activateEffectIf(
           newLesson,
           effect,

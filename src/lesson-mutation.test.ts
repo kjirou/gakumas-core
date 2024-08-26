@@ -4313,23 +4313,18 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifiers.addition" &&
-            e.actual.kind === "effectActivationBeforeCardEffectActivation",
+            e.actual.kind === "reactiveEffect",
         ),
       ).toStrictEqual([
         {
           kind: "modifiers.addition",
           actual: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "mental",
-            effect: expect.any(Object),
+            kind: "reactiveEffect",
+            reactiveEffect: expect.any(Object),
+            representativeName: "ファンシーチャーム",
             id: expect.any(String),
           },
-          max: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "mental",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
+          max: expect.any(Object),
           reason: expect.any(Object),
         },
       ]);
@@ -4397,23 +4392,18 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifiers.addition" &&
-            e.actual.kind === "effectActivationBeforeCardEffectActivation",
+            e.actual.kind === "reactiveEffect",
         ),
       ).toStrictEqual([
         {
           kind: "modifiers.addition",
           actual: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
-            effect: expect.any(Object),
+            kind: "reactiveEffect",
+            reactiveEffect: expect.any(Object),
+            representativeName: "演出計画",
             id: expect.any(String),
           },
-          max: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
+          max: expect.any(Object),
           reason: expect.any(Object),
         },
       ]);
@@ -4474,21 +4464,18 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifiers.addition" &&
-            e.actual.kind === "effectActivationBeforeCardEffectActivation",
+            e.actual.kind === "reactiveEffect",
         ),
       ).toStrictEqual([
         {
           kind: "modifiers.addition",
           actual: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            effect: expect.any(Object),
+            kind: "reactiveEffect",
+            reactiveEffect: expect.any(Object),
+            representativeName: "輝くキミへ",
             id: expect.any(String),
           },
-          max: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
+          max: expect.any(Object),
           reason: expect.any(Object),
         },
       ]);
@@ -4924,8 +4911,15 @@ describe("useCard preview:false", () => {
         lesson.hand = ["a"];
         lesson.idol.modifiers = [
           {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
+            kind: "reactiveEffect",
+            reactiveEffect: {
+              trigger: {
+                kind: "accordingToCardEffectActivation",
+                adjacentKind: "before",
+              },
+              effect: { kind: "perform", score: { value: 1 } },
+            },
+            representativeName: "Foo",
             id: "x",
           } as Modifier,
         ];
@@ -4939,23 +4933,18 @@ describe("useCard preview:false", () => {
           updates.filter(
             (e) =>
               e.kind === "modifiers.addition" &&
-              e.actual.kind === "effectActivationBeforeCardEffectActivation",
+              e.actual.kind === "reactiveEffect",
           ),
         ).toStrictEqual([
           {
             kind: "modifiers.addition",
             actual: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: expect.any(Object),
+              kind: "reactiveEffect",
+              reactiveEffect: expect.any(Object),
+              representativeName: "演出計画",
               id: expect.any(String),
             },
-            max: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: expect.any(Object),
-              id: expect.any(String),
-            },
+            max: expect.any(Object),
             reason: expect.any(Object),
           },
         ]);

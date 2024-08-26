@@ -46,13 +46,6 @@ export const metaModifierDictioanry = {
     // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
     label: "ターン終了時持続効果",
   },
-  effectActivationBeforeCardEffectActivation: {
-    kind: "effectActivationBeforeCardEffectActivation",
-    debuff: false,
-    displayedRepresentativeValuePropertyName: undefined,
-    // TODO: 本家では、状態修正の付与元のスキルカード名が表示される
-    label: "スキルカード発動前持続効果",
-  },
   focus: {
     kind: "focus",
     debuff: false,
@@ -100,5 +93,11 @@ export const metaModifierDictioanry = {
     debuff: false,
     displayedRepresentativeValuePropertyName: "amount",
     label: "好印象",
+  },
+  reactiveEffect: {
+    kind: "reactiveEffect",
+    debuff: false,
+    displayedRepresentativeValuePropertyName: undefined,
+    label: "持続効果",
   },
 } as const satisfies Record<ModifierData["kind"], MetaModifierData>;

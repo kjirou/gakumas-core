@@ -98,6 +98,7 @@ export const metaModifierDictioanry = {
     kind: "reactiveEffect",
     debuff: false,
     displayedRepresentativeValuePropertyName: undefined,
+    // 状態修正リストの表示用情報では、 representativeName が表示されるので、今のところこれは使われていない
     label: "持続効果",
   },
 } as const satisfies Record<ModifierData["kind"], MetaModifierData>;

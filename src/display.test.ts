@@ -1303,6 +1303,29 @@ describe("generateModifierDisplays", () => {
       ] as ModifierDisplay[],
     },
     {
+      name: "reactiveEffect は個別設定の名称を使う",
+      args: [
+        {
+          modifiers: [
+            {
+              kind: "reactiveEffect",
+              reactiveEffect: {
+                trigger: {
+                  kind: "accordingToCardEffectActivation",
+                  adjacentKind: "before",
+                },
+                effect: { kind: "perform", score: { value: 1 } },
+              },
+              representativeName: "Foo",
+              id: "m1",
+            },
+          ],
+          recommendedModifierKind: "focus",
+        },
+      ],
+      expected: [{ name: "Foo" }] as ModifierDisplay[],
+    },
+    {
       name: "おすすめ効果が先頭へ移動する",
       args: [
         {

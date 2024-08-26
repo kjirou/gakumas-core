@@ -556,7 +556,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 51 },
       { name: "やる気", representativeValue: 12 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
       { name: "スキルカード使用数追加", representativeValue: 1 },
     ],
     score: 3974,
@@ -573,7 +573,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 79 },
       { name: "やる気", representativeValue: 18 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 4335,
   } as LessonDisplay);
@@ -588,7 +588,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 85 },
       { name: "やる気", representativeValue: 18 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 5589,
   } as LessonDisplay);
@@ -603,7 +603,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 91 },
       { name: "やる気", representativeValue: 18 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 6070,
   } as LessonDisplay);
@@ -620,7 +620,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 97 },
       { name: "やる気", representativeValue: 16 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 10814,
   } as LessonDisplay);
@@ -635,7 +635,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 97 },
       { name: "やる気", representativeValue: 16 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
       { name: "発動予約", representativeValue: 1 },
     ],
     score: 12542,
@@ -650,7 +650,7 @@ test("最終試験その1を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 97 },
       { name: "やる気", representativeValue: 16 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
       { name: "発動予約", representativeValue: 1 },
     ],
     score: 17674,
@@ -863,7 +863,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 35 },
       { name: "やる気", representativeValue: 20 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
       { name: "スキルカード使用数追加", representativeValue: 1 },
     ],
     score: 1302,
@@ -885,7 +885,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 57 },
       { name: "やる気", representativeValue: 23 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 2032 + scoreMod,
   } as LessonDisplay);
@@ -900,7 +900,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 60 },
       { name: "やる気", representativeValue: 23 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 2351 + scoreMod,
   } as LessonDisplay);
@@ -917,7 +917,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 68 },
       { name: "やる気", representativeValue: 20 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 3568 + scoreMod,
   } as LessonDisplay);
@@ -933,7 +933,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 85 },
       { name: "やる気", representativeValue: 18 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 6337 + scoreMod,
   } as LessonDisplay);
@@ -948,7 +948,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 91 },
       { name: "やる気", representativeValue: 18 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 7679 + scoreMod,
   } as LessonDisplay);
@@ -963,7 +963,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 97 },
       { name: "やる気", representativeValue: 18 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 8191 + scoreMod,
   } as LessonDisplay);
@@ -979,7 +979,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 100 },
       { name: "やる気", representativeValue: 16 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 11370 + scoreMod,
   } as LessonDisplay);
@@ -995,7 +995,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 99 },
       { name: "やる気", representativeValue: 16 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 18405 + scoreMod,
   } as LessonDisplay);
@@ -1009,7 +1009,7 @@ test("最終試験その2を再現する", () => {
     modifiers: [
       { name: "好印象", representativeValue: 106 },
       { name: "やる気", representativeValue: 16 },
-      { name: "持続効果", representativeValue: undefined },
+      { name: "ファンシーチャーム", representativeValue: undefined },
     ],
     score: 20274 + scoreMod,
   } as LessonDisplay);

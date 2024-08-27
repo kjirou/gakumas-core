@@ -1309,13 +1309,11 @@ describe("generateModifierDisplays", () => {
           modifiers: [
             {
               kind: "reactiveEffect",
-              reactiveEffect: {
-                trigger: {
-                  kind: "accordingToCardEffectActivation",
-                  adjacentKind: "before",
-                },
-                effect: { kind: "perform", score: { value: 1 } },
+              trigger: {
+                kind: "accordingToCardEffectActivation",
+                adjacentKind: "before",
               },
+              effect: { kind: "perform", score: { value: 1 } },
               representativeName: "Foo",
               id: "m1",
             },

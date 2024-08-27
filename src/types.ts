@@ -143,14 +143,6 @@ export type ReactiveEffectQuery = Readonly<
 >;
 
 /**
- * 反応型効果
- */
-export type ReactiveEffect = Readonly<{
-  effect: Effect;
-  trigger: ReactiveEffectTrigger;
-}>;
-
-/**
  * 状態修正データ定義
  *
  * - データとして状態修正を表現するときの形式
@@ -299,7 +291,7 @@ export type ModifierData = Readonly<
        * 反応型効果
        */
       kind: "reactiveEffect";
-      reactiveEffect: ReactiveEffect;
+      effect: Effect;
       /**
        * 代表する表示名
        *
@@ -307,6 +299,7 @@ export type ModifierData = Readonly<
        * - スキルカード名・Pアイテム名・Pドリンク名などが入る
        */
       representativeName: string;
+      trigger: ReactiveEffectTrigger;
     }
 >;
 

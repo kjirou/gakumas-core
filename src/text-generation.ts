@@ -265,12 +265,12 @@ const generateModifierText = (modifier: ModifierData): string => {
     case "reactiveEffect":
       return [
         "以降、",
-        generateReactiveEffectTriggerText(modifier.reactiveEffect.trigger),
+        generateReactiveEffectTriggerText(modifier.trigger),
         // 条件がない場合のみ「、」を挿入する
         // 「内気系少女」は、「以降、ターン終了時、好印象+1」
         // 「天真爛漫」は、「以降、ターン終了時集中が3以上の場合、集中+2」
-        modifier.reactiveEffect.effect.condition ? "" : "、",
-        generateEffectText(modifier.reactiveEffect.effect),
+        modifier.effect.condition ? "" : "、",
+        generateEffectText(modifier.effect),
       ].join("");
     default:
       const unreachable: never = modifier;

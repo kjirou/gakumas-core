@@ -1041,12 +1041,10 @@ describe("activateEffectsOnTurnEnd", () => {
       lesson.idol.modifiers = [
         {
           kind: "reactiveEffect",
-          reactiveEffect: {
-            trigger: { kind: "turnEnd" },
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "motivation", amount: 1 },
-            },
+          trigger: { kind: "turnEnd" },
+          effect: {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 1 },
           },
           representativeName: "Foo",
           id: "x",
@@ -4324,7 +4322,8 @@ describe("useCard preview:false", () => {
           kind: "modifiers.addition",
           actual: {
             kind: "reactiveEffect",
-            reactiveEffect: expect.any(Object),
+            trigger: expect.any(Object),
+            effect: expect.any(Object),
             representativeName: "ファンシーチャーム",
             id: expect.any(String),
           },
@@ -4403,7 +4402,8 @@ describe("useCard preview:false", () => {
           kind: "modifiers.addition",
           actual: {
             kind: "reactiveEffect",
-            reactiveEffect: expect.any(Object),
+            trigger: expect.any(Object),
+            effect: expect.any(Object),
             representativeName: "演出計画",
             id: expect.any(String),
           },
@@ -4475,7 +4475,8 @@ describe("useCard preview:false", () => {
           kind: "modifiers.addition",
           actual: {
             kind: "reactiveEffect",
-            reactiveEffect: expect.any(Object),
+            trigger: expect.any(Object),
+            effect: expect.any(Object),
             representativeName: "輝くキミへ",
             id: expect.any(String),
           },
@@ -4916,13 +4917,11 @@ describe("useCard preview:false", () => {
         lesson.idol.modifiers = [
           {
             kind: "reactiveEffect",
-            reactiveEffect: {
-              trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
-              },
-              effect: { kind: "perform", score: { value: 1 } },
+            trigger: {
+              kind: "accordingToCardEffectActivation",
+              adjacentKind: "before",
             },
+            effect: { kind: "perform", score: { value: 1 } },
             representativeName: "Foo",
             id: "x",
           } as Modifier,
@@ -4944,7 +4943,8 @@ describe("useCard preview:false", () => {
             kind: "modifiers.addition",
             actual: {
               kind: "reactiveEffect",
-              reactiveEffect: expect.any(Object),
+              trigger: expect.any(Object),
+              effect: expect.any(Object),
               representativeName: "演出計画",
               id: expect.any(String),
             },

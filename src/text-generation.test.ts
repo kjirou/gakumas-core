@@ -254,12 +254,10 @@ describe("generateEffectText", () => {
           kind: "getModifier",
           modifier: {
             kind: "reactiveEffect",
-            reactiveEffect: {
-              trigger: { kind: "turnEnd" },
-              effect: {
-                kind: "getModifier",
-                modifier: { kind: "positiveImpression", amount: 1 },
-              },
+            trigger: { kind: "turnEnd" },
+            effect: {
+              kind: "getModifier",
+              modifier: { kind: "positiveImpression", amount: 1 },
             },
             representativeName: "",
           },
@@ -274,16 +272,14 @@ describe("generateEffectText", () => {
           kind: "getModifier",
           modifier: {
             kind: "reactiveEffect",
-            reactiveEffect: {
-              trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
-                cardSummaryKind: "active",
-              },
-              effect: {
-                kind: "perform",
-                vitality: { fixedValue: true, value: 1 },
-              },
+            trigger: {
+              kind: "accordingToCardEffectActivation",
+              adjacentKind: "before",
+              cardSummaryKind: "active",
+            },
+            effect: {
+              kind: "perform",
+              vitality: { fixedValue: true, value: 1 },
             },
             representativeName: "",
           },

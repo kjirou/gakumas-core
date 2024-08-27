@@ -21,7 +21,6 @@ import type {
   ProducerItemTrigger,
   VitalityUpdateQuery,
   MeasureValueConditionContent,
-  ReactiveEffect,
   ReactiveEffectTrigger,
   ReactiveEffectQuery,
 } from "./types";
@@ -2447,17 +2446,12 @@ export const useCard = (
       const effectsBeforeCardEffectActivation = newLesson.idol.modifiers
         .filter((modifier) => modifier.kind === "reactiveEffect")
         .filter((modifier) =>
-          validateQueryOfReactiveEffectTrigger(
-            modifier.reactiveEffect.trigger,
-            {
-              kind: "beforeCardEffectActivation",
-              cardDataId: card.data.id,
-            },
-          ),
+          validateQueryOfReactiveEffectTrigger(modifier.trigger, {
+            kind: "beforeCardEffectActivation",
+            cardDataId: card.data.id,
+          }),
         );
-      for (const {
-        reactiveEffect: { effect },
-      } of effectsBeforeCardEffectActivation) {
+      for (const { effect } of effectsBeforeCardEffectActivation) {
         const diffs = activateEffectIf(
           newLesson,
           effect,
@@ -2690,13 +2684,13 @@ export const activateEffectsOnTurnEnd = (
       let innerUpdates: LessonUpdateQuery[] = [];
       if (
         modifier.kind === "reactiveEffect" &&
-        validateQueryOfReactiveEffectTrigger(modifier.reactiveEffect.trigger, {
+        validateQueryOfReactiveEffectTrigger(modifier.trigger, {
           kind: "turnEnd",
         })
       ) {
         const diffs = activateEffectIf(
           newLesson,
-          modifier.reactiveEffect.effect,
+          modifier.effect,
           params.getRandom,
           params.idGenerator,
         );

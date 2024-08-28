@@ -274,6 +274,26 @@ export const getIdolParameterKindOnTurn = (
   return lesson.turnNumber === 0 ? turns[0] : turns[lesson.turnNumber - 1];
 };
 
+/**
+ * レッスンクリア以降はパラメータ属性条件が無視される設定を考慮して、現在のターンのアイドルパラメータ種別を返す
+ *
+ * @returns undefined の場合は、条件が無視されている
+ */
+export const getIdolParameterKindOnTurnConsideringIgnoring = (
+  lesson: Lesson,
+): IdolParameterKind | undefined => {
+  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+  let isLessonClear = false;
+  if (lesson.clearScoreThresholds) {
+    isLessonClear =
+      calculateClearScoreProgress(lesson.score, lesson.clearScoreThresholds)
+        .remainingClearScore === 0;
+  }
+  return lesson.ignoreIdolParameterKindConditionAfterClearing && isLessonClear
+    ? undefined
+    : idolParameterKind;
+};
+
 export const createCurrentTurnDetails = (
   lesson: Lesson,
 ): CurrentTurnDetails => {

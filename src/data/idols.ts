@@ -168,7 +168,7 @@ export const idolsAsConst = [
     },
     rarity: "ssr",
     specificCardId: "yosomihadame",
-    specificProducerItemId: "biggudorimuchokimbako",
+    specificProducerItemId: "piggudorimuchokimbako",
     title: "世界一可愛い私",
   },
   {

@@ -608,7 +608,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
       producerItems: [
         {
           id: "a",
-          data: getProducerItemDataByConstId("biggudorimuchokimbako"),
+          data: getProducerItemDataByConstId("piggudorimuchokimbako"),
           enhanced: false,
           activationCount: 0,
         },

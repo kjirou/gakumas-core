@@ -4645,10 +4645,7 @@ describe("useCard preview:false", () => {
         lesson.idol.modifiers = [
           {
             kind: "reactiveEffect",
-            trigger: {
-              kind: "accordingToCardEffectActivation",
-              adjacentKind: "before",
-            },
+            trigger: { kind: "beforeCardEffectActivation" },
             effect: { kind: "perform", score: { value: 1 } },
             representativeName: "Foo",
             id: "x",
@@ -5727,42 +5724,11 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
       expected: true,
     },
     {
-      name: "accordingToCardEffectActivation - before - 満たす",
+      name: "afterCardEffectActivation - cardDataId - 満たす",
       args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
-        },
-        {
-          kind: "beforeCardEffectActivation",
-          cardDataId: "apirunokihon",
-          idolParameterKind: "vocal",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "accordingToCardEffectActivation - before - 満たさない",
-      args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
-        },
         {
           kind: "afterCardEffectActivation",
           cardDataId: "apirunokihon",
-          diffs: [],
-          idolParameterKind: "vocal",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "accordingToCardEffectActivation - after - 満たす",
-      args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
         },
         {
           kind: "afterCardEffectActivation",
@@ -5774,90 +5740,58 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
       expected: true,
     },
     {
-      name: "accordingToCardEffectActivation - after - 満たさない",
+      name: "afterCardEffectActivation - cardDataId - 満たさない",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
-        },
-        {
-          kind: "beforeCardEffectActivation",
-          cardDataId: "apirunokihon",
-          idolParameterKind: "vocal",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "accordingToCardEffectActivation - cardDataId - 満たす",
-      args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
+          kind: "afterCardEffectActivation",
           cardDataId: "apirunokihon",
         },
         {
-          kind: "beforeCardEffectActivation",
-          cardDataId: "apirunokihon",
-          idolParameterKind: "vocal",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "accordingToCardEffectActivation - cardDataId - 満たさない",
-      args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
-          cardDataId: "apirunokihon",
-        },
-        {
-          kind: "beforeCardEffectActivation",
+          kind: "afterCardEffectActivation",
           cardDataId: "pozunokihon",
+          diffs: [],
           idolParameterKind: "vocal",
         },
       ],
       expected: false,
     },
     {
-      name: "accordingToCardEffectActivation - cardSummaryKind - 満たす",
+      name: "afterCardEffectActivation - cardSummaryKind - 満たす",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
+          kind: "afterCardEffectActivation",
           cardSummaryKind: "active",
         },
         {
-          kind: "beforeCardEffectActivation",
+          kind: "afterCardEffectActivation",
           cardDataId: "apirunokihon",
+          diffs: [],
           idolParameterKind: "vocal",
         },
       ],
       expected: true,
     },
     {
-      name: "accordingToCardEffectActivation - cardSummaryKind - 満たさない",
+      name: "afterCardEffectActivation - cardSummaryKind - 満たさない",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
+          kind: "afterCardEffectActivation",
           cardSummaryKind: "active",
         },
         {
-          kind: "beforeCardEffectActivation",
+          kind: "afterCardEffectActivation",
           cardDataId: "hyogennokihon",
+          diffs: [],
           idolParameterKind: "vocal",
         },
       ],
       expected: false,
     },
     {
-      name: "accordingToCardEffectActivation - effectKind - 満たす",
+      name: "afterCardEffectActivation - effectKind - 満たす",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
+          kind: "afterCardEffectActivation",
           effectKind: "vitality",
         },
         {
@@ -5870,11 +5804,10 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
       expected: true,
     },
     {
-      name: "accordingToCardEffectActivation - effectKind - 満たさない",
+      name: "afterCardEffectActivation - effectKind - 満たさない",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
+          kind: "afterCardEffectActivation",
           effectKind: "vitality",
         },
         {
@@ -5887,11 +5820,10 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
       expected: false,
     },
     {
-      name: "accordingToCardEffectActivation - effectKind - vitality - 元気の差分はあるが上がらなかった時は満たさない",
+      name: "afterCardEffectActivation - effectKind - vitality - 元気の差分はあるが上がらなかった時は満たさない",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
+          kind: "afterCardEffectActivation",
           effectKind: "vitality",
         },
         {
@@ -5904,66 +5836,91 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
       expected: false,
     },
     {
-      name: "accordingToCardEffectActivation - idolParameterKind - before - 満たす",
+      name: "afterCardEffectActivation - idolParameterKind - after - 満たさない",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
+          kind: "afterCardEffectActivation",
           idolParameterKind: "vocal",
         },
         {
-          kind: "beforeCardEffectActivation",
+          kind: "afterCardEffectActivation",
           cardDataId: "apirunokihon",
-          idolParameterKind: "vocal",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "accordingToCardEffectActivation - idolParameterKind - before - 満たさない",
-      args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
-          idolParameterKind: "vocal",
-        },
-        {
-          kind: "beforeCardEffectActivation",
-          cardDataId: "apirunokihon",
+          diffs: [],
           idolParameterKind: "dance",
         },
       ],
       expected: false,
     },
     {
-      name: "accordingToCardEffectActivation - idolParameterKind - after - 満たす",
+      name: "beforeCardEffectActivation - cardDataId - 満たす",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
-          idolParameterKind: "vocal",
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
         },
         {
-          kind: "afterCardEffectActivation",
+          kind: "beforeCardEffectActivation",
           cardDataId: "apirunokihon",
-          diffs: [],
           idolParameterKind: "vocal",
         },
       ],
       expected: true,
     },
     {
-      name: "accordingToCardEffectActivation - idolParameterKind - after - 満たさない",
+      name: "beforeCardEffectActivation - cardDataId - 満たさない",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "pozunokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation - cardSummaryKind - 満たす",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivation - cardSummaryKind - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "hyogennokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
           idolParameterKind: "vocal",
         },
         {
-          kind: "afterCardEffectActivation",
+          kind: "beforeCardEffectActivation",
           cardDataId: "apirunokihon",
-          diffs: [],
           idolParameterKind: "dance",
         },
       ],

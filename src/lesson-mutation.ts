@@ -240,7 +240,8 @@ export const validateQueryOfReactiveEffectTrigger = (
     query.idolParameterKind === undefined ||
     trigger.idolParameterKind === query.idolParameterKind;
   switch (trigger.kind) {
-    case "accordingToCardEffectActivation": {
+    case "afterCardEffectActivation":
+    case "beforeCardEffectActivation": {
       if (
         query.kind === "beforeCardEffectActivation" ||
         query.kind === "afterCardEffectActivation"
@@ -252,14 +253,19 @@ export const validateQueryOfReactiveEffectTrigger = (
         const cardSummaryKindCondition =
           trigger.cardSummaryKind === undefined ||
           trigger.cardSummaryKind === cardData.cardSummaryKind;
-        if (query.kind === "beforeCardEffectActivation") {
+        if (
+          trigger.kind === "beforeCardEffectActivation" &&
+          query.kind === "beforeCardEffectActivation"
+        ) {
           return (
-            trigger.adjacentKind === "before" &&
             cardSummaryKindCondition &&
             cardDataIdCondition &&
             idolParameterKindCondition
           );
-        } else if (query.kind === "afterCardEffectActivation") {
+        } else if (
+          trigger.kind === "afterCardEffectActivation" &&
+          query.kind === "afterCardEffectActivation"
+        ) {
           const effectKindCondition =
             trigger.effectKind === undefined ||
             (trigger.effectKind === "vitality" &&
@@ -267,7 +273,6 @@ export const validateQueryOfReactiveEffectTrigger = (
                 (diff) => diff.kind === "vitality" && diff.max > 0,
               ));
           return (
-            trigger.adjacentKind === "after" &&
             cardSummaryKindCondition &&
             cardDataIdCondition &&
             effectKindCondition &&

@@ -174,10 +174,14 @@ export const generateReactiveEffectTriggerText = (
       break;
   }
   switch (trigger.kind) {
-    case "accordingToCardEffectActivation": {
+    case "afterCardEffectActivation":
+    case "beforeCardEffectActivation": {
       return [
         idolParameterKindText,
-        trigger.effectKind === "vitality" ? `${kwd("vitality")}効果の` : "",
+        trigger.kind === "afterCardEffectActivation" &&
+        trigger.effectKind === "vitality"
+          ? `${kwd("vitality")}効果の`
+          : "",
         trigger.cardDataId !== undefined
           ? cardKwd(trigger.cardDataId)
           : trigger.cardSummaryKind === "active"
@@ -185,7 +189,7 @@ export const generateReactiveEffectTriggerText = (
             : trigger.cardSummaryKind === "mental"
               ? kwd("mentalSkillCard")
               : "スキルカード",
-        `使用${trigger.adjacentKind === "before" ? "時" : "後"}`,
+        `使用${trigger.kind === "beforeCardEffectActivation" ? "時" : "後"}`,
       ].join("");
     }
     case "modifierIncrease": {

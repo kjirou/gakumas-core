@@ -3079,8 +3079,7 @@ export const cardsAsConst = [
               },
               representativeName: "演出計画",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3105,8 +3104,7 @@ export const cardsAsConst = [
               },
               representativeName: "演出計画",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3129,8 +3127,7 @@ export const cardsAsConst = [
               },
               representativeName: "演出計画",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3153,8 +3150,7 @@ export const cardsAsConst = [
               },
               representativeName: "演出計画",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3190,8 +3186,7 @@ export const cardsAsConst = [
               },
               representativeName: "願いの力",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3216,8 +3211,7 @@ export const cardsAsConst = [
               },
               representativeName: "願いの力",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3240,8 +3234,7 @@ export const cardsAsConst = [
               },
               representativeName: "願いの力",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -3678,8 +3671,7 @@ export const cardsAsConst = [
               },
               representativeName: "ファンシーチャーム",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "mental",
               },
             },
@@ -3703,8 +3695,7 @@ export const cardsAsConst = [
               },
               representativeName: "ファンシーチャーム",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "mental",
               },
             },
@@ -3745,8 +3736,7 @@ export const cardsAsConst = [
               },
               representativeName: "ワクワクが止まらない",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "mental",
               },
             },
@@ -3770,8 +3760,7 @@ export const cardsAsConst = [
               },
               representativeName: "ワクワクが止まらない",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "mental",
               },
             },
@@ -3795,8 +3784,7 @@ export const cardsAsConst = [
               },
               representativeName: "ワクワクが止まらない",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "mental",
               },
             },
@@ -5302,8 +5290,7 @@ export const cardsAsConst = [
               effect: { kind: "perform", score: { value: 4 } },
               representativeName: "至高のエンタメ",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -5329,8 +5316,7 @@ export const cardsAsConst = [
               effect: { kind: "perform", score: { value: 5 } },
               representativeName: "至高のエンタメ",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
+                kind: "beforeCardEffectActivation",
                 cardSummaryKind: "active",
               },
             },
@@ -5560,10 +5546,7 @@ export const cardsAsConst = [
                 percentage: 30,
               },
               representativeName: "輝くキミへ",
-              trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
-              },
+              trigger: { kind: "beforeCardEffectActivation" },
             },
           },
         ],
@@ -5588,10 +5571,7 @@ export const cardsAsConst = [
                 percentage: 50,
               },
               representativeName: "輝くキミへ",
-              trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "before",
-              },
+              trigger: { kind: "beforeCardEffectActivation" },
             },
           },
         ],
@@ -7337,8 +7317,7 @@ export const cardsAsConst = [
               },
               representativeName: "夏の宵の線香花火",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "after",
+                kind: "afterCardEffectActivation",
                 effectKind: "vitality",
               },
             },
@@ -7364,8 +7343,7 @@ export const cardsAsConst = [
               },
               representativeName: "夏の宵の線香花火",
               trigger: {
-                kind: "accordingToCardEffectActivation",
-                adjacentKind: "after",
+                kind: "afterCardEffectActivation",
                 effectKind: "vitality",
               },
             },

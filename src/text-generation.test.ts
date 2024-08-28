@@ -57,21 +57,15 @@ describe("generateReactiveEffectTriggerText", () => {
     name: string;
   }> = [
     {
-      name: "accordingToCardEffectActivation - before, cardSummaryKind 無し, effectKind 無し",
-      args: [
-        {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
-        },
-      ],
+      name: "beforeCardEffectActivation, cardSummaryKind 無し, effectKind 無し",
+      args: [{ kind: "beforeCardEffectActivation" }],
       expected: "スキルカード使用時",
     },
     {
-      name: "accordingToCardEffectActivation - after, active, vitality",
+      name: "afterCardEffectActivation, active, vitality",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "after",
+          kind: "afterCardEffectActivation",
           cardSummaryKind: "active",
           effectKind: "vitality",
         },
@@ -79,22 +73,20 @@ describe("generateReactiveEffectTriggerText", () => {
       expected: "{{元気}}効果の{{アクティブスキルカード}}使用後",
     },
     {
-      name: "accordingToCardEffectActivation - mental",
+      name: "mental 指定",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
+          kind: "beforeCardEffectActivation",
           cardSummaryKind: "mental",
         },
       ],
       expected: "{{メンタルスキルカード}}使用時",
     },
     {
-      name: "accordingToCardEffectActivation - cardDataId",
+      name: "cardDataId 有り",
       args: [
         {
-          kind: "accordingToCardEffectActivation",
-          adjacentKind: "before",
+          kind: "beforeCardEffectActivation",
           cardDataId: "adorenarinzenkai",
         },
       ],
@@ -293,8 +285,7 @@ describe("generateEffectText", () => {
           modifier: {
             kind: "reactiveEffect",
             trigger: {
-              kind: "accordingToCardEffectActivation",
-              adjacentKind: "before",
+              kind: "beforeCardEffectActivation",
               cardSummaryKind: "active",
             },
             effect: {
@@ -306,7 +297,7 @@ describe("generateEffectText", () => {
         },
       ],
       expected: "以降、{{アクティブスキルカード}}使用時、{{固定元気}}+1",
-      name: "getModifier - reactiveEffect - accordingToCardEffectActivation",
+      name: "getModifier - reactiveEffect - beforeCardEffectActivation",
     },
     {
       args: [

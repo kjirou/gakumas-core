@@ -1,8 +1,6 @@
 import type {
   ActionCost,
   Card,
-  CardData,
-  CardSummaryKind,
   CardUsageCondition,
   Effect,
   EffectCondition,
@@ -18,11 +16,17 @@ import type {
   Modifier,
   ModifierData,
   ProducerItem,
-  ProducerItemTrigger,
   VitalityUpdateQuery,
   MeasureValueConditionContent,
+  ReactiveEffectTrigger,
+  ReactiveEffectQuery,
+  ReactiveEffectQueryWithoutIdolParameterKind,
 } from "./types";
-import { filterGeneratableCardsData, getCardDataByConstId } from "./data/cards";
+import {
+  filterGeneratableCardsData,
+  getCardDataByConstId,
+  getCardDataById,
+} from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
 import {
   calculateModifierEffectedActionCost,
@@ -225,6 +229,97 @@ export const validateCostConsumution = (
 };
 
 /**
+ * 反応型効果のトリガーの要求を満たすかを検証する
+ */
+export const validateQueryOfReactiveEffectTrigger = (
+  trigger: ReactiveEffectTrigger,
+  query: ReactiveEffectQuery,
+): boolean => {
+  const idolParameterKindCondition =
+    trigger.idolParameterKind === undefined ||
+    query.idolParameterKind === undefined ||
+    trigger.idolParameterKind === query.idolParameterKind;
+  switch (trigger.kind) {
+    case "afterCardEffectActivation":
+    case "beforeCardEffectActivation": {
+      if (
+        query.kind === "beforeCardEffectActivation" ||
+        query.kind === "afterCardEffectActivation"
+      ) {
+        const cardData = getCardDataById(query.cardDataId);
+        const cardDataIdCondition =
+          trigger.cardDataId === undefined ||
+          trigger.cardDataId === query.cardDataId;
+        const cardSummaryKindCondition =
+          trigger.cardSummaryKind === undefined ||
+          trigger.cardSummaryKind === cardData.cardSummaryKind;
+        if (
+          trigger.kind === "beforeCardEffectActivation" &&
+          query.kind === "beforeCardEffectActivation"
+        ) {
+          return (
+            cardSummaryKindCondition &&
+            cardDataIdCondition &&
+            idolParameterKindCondition
+          );
+        } else if (
+          trigger.kind === "afterCardEffectActivation" &&
+          query.kind === "afterCardEffectActivation"
+        ) {
+          const effectKindCondition =
+            trigger.effectKind === undefined ||
+            (trigger.effectKind === "vitality" &&
+              query.diffs.some(
+                (diff) => diff.kind === "vitality" && diff.max > 0,
+              ));
+          return (
+            cardSummaryKindCondition &&
+            cardDataIdCondition &&
+            effectKindCondition &&
+            idolParameterKindCondition
+          );
+        }
+      }
+      return false;
+    }
+    case "lessonStart": {
+      return query.kind === "lessonStart" && idolParameterKindCondition;
+    }
+    case "modifierIncrease": {
+      if (query.kind === "modifierIncrease") {
+        const increasedModifierKinds = scanIncreasedModifierKinds(
+          query.modifiers,
+          query.diffs,
+        );
+        const modifierKindCondition = increasedModifierKinds.includes(
+          trigger.modifierKind,
+        );
+        return modifierKindCondition && idolParameterKindCondition;
+      }
+      return false;
+    }
+    case "turnEnd": {
+      return query.kind === "turnEnd" && idolParameterKindCondition;
+    }
+    case "turnStart": {
+      return query.kind === "turnStart" && idolParameterKindCondition;
+    }
+    case "turnStartEveryNTurns": {
+      return (
+        query.kind === "turnStartEveryNTurns" &&
+        query.turnNumber > 0 &&
+        query.turnNumber % trigger.interval === 0 &&
+        idolParameterKindCondition
+      );
+    }
+    default: {
+      const unreachable: never = trigger;
+      throw new Error(`Unreachable statement`);
+    }
+  }
+};
+
+/**
  * 様々な値の現在値が基準値に対して指定比率の範囲内かを判定する
  */
 export const measureValue = (
@@ -385,20 +480,11 @@ export const canActivateEffect = (
  * - 体力消費のコストがあるPアイテムは、体力が足りない時も発動できる
  *   - 仕様確認Issue: https://github.com/kjirou/gakumas-core/issues/46
  *   - 体力減少という類似効果もあるが、こちらは不明。一旦は体力消費と同じように、足りなくても発動している。
- *
- * @param options.cardDataId 一部のトリガーでのみ有効、直前で使用したスキルカード定義IDを指定する
- * @param options.cardSummaryKind 一部のトリガーでのみ有効、直前で使用したスキルカード概要種別を指定する
- * @param options.increasedModifierKinds 一部のトリガーでのみ有効、直前で使用したスキルカードにより上昇した状態修正の種別リストを指定する
  */
 export const canActivateProducerItem = (
   lesson: Lesson,
   producerItem: ProducerItem,
-  callFrom: ProducerItemTrigger["kind"],
-  options: {
-    cardDataId?: CardData["id"];
-    cardSummaryKind?: CardSummaryKind;
-    increasedModifierKinds?: Modifier["kind"][];
-  } = {},
+  queryLike: ReactiveEffectQueryWithoutIdolParameterKind,
 ): boolean => {
   const producerItemContent = getProducerItemContentData(
     producerItem.data,
@@ -411,36 +497,15 @@ export const canActivateProducerItem = (
       calculateClearScoreProgress(lesson.score, lesson.clearScoreThresholds)
         .remainingClearScore === 0;
   }
-  const everyTwoTurnsCondition =
-    !(producerItemContent.trigger.kind === "turnStartEveryTwoTurns") ||
-    (lesson.turnNumber >= 2 && lesson.turnNumber % 2 === 0);
-  const cardDataIdCondition =
-    !(producerItemContent.trigger.kind === "beforeCardEffectActivation") ||
-    producerItemContent.trigger.cardDataId === undefined ||
-    producerItemContent.trigger.cardDataId === options.cardDataId;
-  const cardSummaryKindCondition =
-    !(
-      producerItemContent.trigger.kind === "beforeCardEffectActivation" ||
-      producerItemContent.trigger.kind === "afterCardEffectActivation"
-    ) ||
-    producerItemContent.trigger.cardSummaryKind === undefined ||
-    producerItemContent.trigger.cardSummaryKind === options.cardSummaryKind;
-  const modifierIncreaseCondition =
-    !(producerItemContent.trigger.kind === "modifierIncrease") ||
-    (options.increasedModifierKinds || []).includes(
-      producerItemContent.trigger.modifierKind,
-    );
-  const idolParameterKindCondition =
-    (lesson.ignoreIdolParameterKindConditionAfterClearing && isLessonClear) ||
-    producerItemContent.trigger.idolParameterKind === undefined ||
-    producerItemContent.trigger.idolParameterKind === idolParameterKind;
+  const query = {
+    ...queryLike,
+    idolParameterKind:
+      lesson.ignoreIdolParameterKindConditionAfterClearing && isLessonClear
+        ? undefined
+        : idolParameterKind,
+  } as ReactiveEffectQuery;
   return (
-    producerItemContent.trigger.kind === callFrom &&
-    everyTwoTurnsCondition &&
-    cardDataIdCondition &&
-    cardSummaryKindCondition &&
-    modifierIncreaseCondition &&
-    idolParameterKindCondition &&
+    validateQueryOfReactiveEffectTrigger(producerItemContent.trigger, query) &&
     (producerItemContent.condition === undefined ||
       canActivateEffect(lesson, producerItemContent.condition)) &&
     isRemainingProducerItemTimes(producerItem)
@@ -996,8 +1061,7 @@ export const activateEffect = <
         // 常に新規追加になる状態修正群
         case "delayedEffect":
         case "doubleEffect":
-        case "effectActivationBeforeCardEffectActivation":
-        case "effectActivationOnTurnEnd": {
+        case "reactiveEffect": {
           diff = createNewModifierDiff(effect.modifier, idGenerator());
           break;
         }
@@ -1055,7 +1119,7 @@ export const activateEffect = <
       break;
     }
     case "performLeveragingModifier": {
-      let score = 0;
+      let baseValue = 0;
       const modifierKind = effect.modifierKind;
       switch (modifierKind) {
         case "goodCondition": {
@@ -1066,7 +1130,9 @@ export const activateEffect = <
             goodCondition && "duration" in goodCondition
               ? goodCondition.duration
               : 0;
-          score = Math.ceil((goodConditionDuration * effect.percentage) / 100);
+          baseValue = Math.ceil(
+            (goodConditionDuration * effect.percentage) / 100,
+          );
           break;
         }
         case "motivation": {
@@ -1075,7 +1141,7 @@ export const activateEffect = <
           );
           const motivationAmount =
             motivation && "amount" in motivation ? motivation.amount : 0;
-          score = Math.ceil((motivationAmount * effect.percentage) / 100);
+          baseValue = Math.ceil((motivationAmount * effect.percentage) / 100);
           break;
         }
         case "positiveImpression": {
@@ -1086,7 +1152,7 @@ export const activateEffect = <
             positiveImpression && "amount" in positiveImpression
               ? positiveImpression.amount
               : 0;
-          score = Math.ceil(
+          baseValue = Math.ceil(
             (positiveImpressionAmount * effect.percentage) / 100,
           );
           break;
@@ -1096,15 +1162,31 @@ export const activateEffect = <
           throw new Error(`Unreachable statement`);
         }
       }
-      diffs = [
-        ...diffs,
-        ...calculatePerformingScoreEffect(
-          lesson.idol,
-          scoreBonus,
-          remainingIncrementableScore,
-          { value: score },
-        ),
-      ];
+      let newDiffs: LessonUpdateDiff[] = [];
+      switch (effect.valueKind) {
+        case "score": {
+          newDiffs = calculatePerformingScoreEffect(
+            lesson.idol,
+            scoreBonus,
+            remainingIncrementableScore,
+            { value: baseValue },
+          );
+          break;
+        }
+        case "vitality": {
+          newDiffs = [
+            calculatePerformingVitalityEffect(lesson.idol, {
+              value: baseValue,
+            }),
+          ];
+          break;
+        }
+        default: {
+          const unreachable: never = effect.valueKind;
+          throw new Error(`Unreachable statement`);
+        }
+      }
+      diffs = [...diffs, ...newDiffs];
       break;
     }
     case "performLeveragingVitality": {
@@ -1337,18 +1419,10 @@ export const activateEffectsOfProducerItem = (
  */
 export const activateEffectsEachProducerItemsAccordingToCardUsage = (
   lesson: Lesson,
-  producerItemTriggerKind:
-    | "afterCardEffectActivation"
-    | "beforeCardEffectActivation"
-    | "modifierIncrease",
+  queryLike: ReactiveEffectQueryWithoutIdolParameterKind,
   getRandom: GetRandom,
   idGenerator: IdGenerator,
   reason: LessonUpdateQueryReason,
-  options: {
-    cardDataId?: CardData["id"];
-    cardSummaryKind?: CardSummaryKind;
-    increasedModifierKinds?: Modifier["kind"][];
-  } = {},
 ): {
   lesson: Lesson;
   updates: LessonUpdateQuery[];
@@ -1357,12 +1431,7 @@ export const activateEffectsEachProducerItemsAccordingToCardUsage = (
   let newLesson = lesson;
   const targetProducerItems = newLesson.idol.producerItems.filter(
     (producerItem) =>
-      canActivateProducerItem(
-        newLesson,
-        producerItem,
-        producerItemTriggerKind,
-        options,
-      ),
+      canActivateProducerItem(newLesson, producerItem, queryLike),
   );
   for (const producerItem of targetProducerItems) {
     const diffs = activateEffectsOfProducerItem(
@@ -1414,7 +1483,9 @@ export const activateEffectsOnLessonStart = (
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (canActivateProducerItem(newLesson, producerItem, "lessonStart")) {
+    if (
+      canActivateProducerItem(newLesson, producerItem, { kind: "lessonStart" })
+    ) {
       const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
@@ -1515,7 +1586,11 @@ export const activateProducerItemEffectsOnTurnStart = (
   //
   let turnStartUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (canActivateProducerItem(newLesson, producerItem, "turnStart")) {
+    if (
+      canActivateProducerItem(newLesson, producerItem, {
+        kind: "turnStart",
+      })
+    ) {
       const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
@@ -1541,12 +1616,15 @@ export const activateProducerItemEffectsOnTurnStart = (
   }
 
   //
-  // 2ターンごとの効果発動
+  // 数ターンごとの効果発動
   //
-  let turnStartEveryTwoTurnsUpdates: LessonUpdateQuery[] = [];
+  let turnStartEveryNTurnsUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
     if (
-      canActivateProducerItem(newLesson, producerItem, "turnStartEveryTwoTurns")
+      canActivateProducerItem(newLesson, producerItem, {
+        kind: "turnStartEveryNTurns",
+        turnNumber: newLesson.turnNumber,
+      })
     ) {
       const diffs = activateEffectsOfProducerItem(
         newLesson,
@@ -1563,8 +1641,8 @@ export const activateProducerItemEffectsOnTurnStart = (
       );
       if (innerUpdates.length > 0) {
         newLesson = patchDiffs(newLesson, innerUpdates);
-        turnStartEveryTwoTurnsUpdates = [
-          ...turnStartEveryTwoTurnsUpdates,
+        turnStartEveryNTurnsUpdates = [
+          ...turnStartEveryNTurnsUpdates,
           ...innerUpdates,
         ];
         nextHistoryResultIndex++;
@@ -1576,7 +1654,7 @@ export const activateProducerItemEffectsOnTurnStart = (
   }
 
   return {
-    updates: [...turnStartUpdates, ...turnStartEveryTwoTurnsUpdates],
+    updates: [...turnStartUpdates, ...turnStartEveryNTurnsUpdates],
     nextHistoryResultIndex,
   };
 };
@@ -2193,6 +2271,7 @@ export const useCard = (
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 
+  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
   const beforeHand = newLesson.hand;
   const doubleEffect = findPrioritizedDoubleEffectModifier(
     card.data.cardSummaryKind,
@@ -2363,7 +2442,7 @@ export const useCard = (
       const { lesson: updatedLesson, updates } =
         activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
-          "beforeCardEffectActivation",
+          { kind: "beforeCardEffectActivation", cardDataId: card.data.id },
           params.getRandom,
           params.idGenerator,
           {
@@ -2372,31 +2451,25 @@ export const useCard = (
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
           },
-          {
-            cardDataId: card.data.id,
-            cardSummaryKind: card.data.cardSummaryKind,
-          },
         );
       newLesson = updatedLesson;
       effectActivationUpdates = [...effectActivationUpdates, ...updates];
     }
 
     //
-    // 状態修正に起因する、スキルカード使用時の効果発動
+    // 状態修正に起因する、スキルカードの主効果発動（前）に伴う効果発動
     //
     if (!params.preview) {
-      const effectsUponCardUsage = newLesson.idol.modifiers.filter(
-        (e) =>
-          e.kind === "effectActivationBeforeCardEffectActivation" &&
-          (e.cardKind === undefined ||
-            e.cardKind === card.data.cardSummaryKind),
-      ) as Array<
-        Extract<
-          Modifier,
-          { kind: "effectActivationBeforeCardEffectActivation" }
-        >
-      >;
-      for (const { effect } of effectsUponCardUsage) {
+      const effectsBeforeCardEffectActivation = newLesson.idol.modifiers
+        .filter((modifier) => modifier.kind === "reactiveEffect")
+        .filter((modifier) =>
+          validateQueryOfReactiveEffectTrigger(modifier.trigger, {
+            kind: "beforeCardEffectActivation",
+            cardDataId: card.data.id,
+            idolParameterKind,
+          }),
+        );
+      for (const { effect } of effectsBeforeCardEffectActivation) {
         const diffs = activateEffectIf(
           newLesson,
           effect,
@@ -2464,6 +2537,10 @@ export const useCard = (
       }
     }
 
+    const mainEffectDiffs = mainEffectActivations
+      .filter((e) => e !== undefined)
+      .reduce((acc, e) => [...acc, ...e], []);
+
     //
     // Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動
     //
@@ -2471,7 +2548,11 @@ export const useCard = (
       const { lesson: updatedLesson, updates } =
         activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
-          "afterCardEffectActivation",
+          {
+            kind: "afterCardEffectActivation",
+            cardDataId: card.data.id,
+            diffs: mainEffectDiffs,
+          },
           params.getRandom,
           params.idGenerator,
           {
@@ -2479,10 +2560,6 @@ export const useCard = (
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
-          },
-          {
-            cardDataId: card.data.id,
-            cardSummaryKind: card.data.cardSummaryKind,
           },
         );
       newLesson = updatedLesson;
@@ -2496,7 +2573,11 @@ export const useCard = (
       const { lesson: updatedLesson, updates } =
         activateEffectsEachProducerItemsAccordingToCardUsage(
           newLesson,
-          "modifierIncrease",
+          {
+            kind: "modifierIncrease",
+            diffs: mainEffectDiffs,
+            modifiers: newLesson.idol.modifiers,
+          },
           params.getRandom,
           params.idGenerator,
           {
@@ -2504,14 +2585,6 @@ export const useCard = (
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,
-          },
-          {
-            increasedModifierKinds: scanIncreasedModifierKinds(
-              newLesson.idol.modifiers,
-              mainEffectActivations
-                .filter((e) => e !== undefined)
-                .reduce((acc, e) => [...acc, ...e], []),
-            ),
           },
         );
       newLesson = updatedLesson;
@@ -2590,12 +2663,14 @@ export const activateEffectsOnTurnEnd = (
   let newLesson = lesson;
   let nextHistoryResultIndex = historyResultIndex;
 
+  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
+
   //
   // Pアイテム起因の、ターン終了時の効果発動
   //
   let producerItemUpdates: LessonUpdateQuery[] = [];
   for (const producerItem of newLesson.idol.producerItems) {
-    if (canActivateProducerItem(newLesson, producerItem, "turnEnd")) {
+    if (canActivateProducerItem(newLesson, producerItem, { kind: "turnEnd" })) {
       const diffs = activateEffectsOfProducerItem(
         newLesson,
         producerItem,
@@ -2627,7 +2702,13 @@ export const activateEffectsOnTurnEnd = (
   if (!isScoreSatisfyingPerfect(newLesson)) {
     for (const modifier of newLesson.idol.modifiers) {
       let innerUpdates: LessonUpdateQuery[] = [];
-      if (modifier.kind === "effectActivationOnTurnEnd") {
+      if (
+        modifier.kind === "reactiveEffect" &&
+        validateQueryOfReactiveEffectTrigger(modifier.trigger, {
+          kind: "turnEnd",
+          idolParameterKind,
+        })
+      ) {
         const diffs = activateEffectIf(
           newLesson,
           modifier.effect,

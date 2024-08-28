@@ -395,6 +395,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
       ],
@@ -411,6 +412,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
       ],
@@ -687,12 +689,12 @@ export const producerItemsAsConst = [
     base: {
       effects: [{ kind: "perform", vitality: { value: 5 } }],
       times: 2,
-      trigger: { kind: "turnStartEveryTwoTurns" },
+      trigger: { kind: "turnStartEveryNTurns", interval: 2 },
     },
     enhanced: {
       effects: [{ kind: "perform", vitality: { value: 5 } }],
       times: 3,
-      trigger: { kind: "turnStartEveryTwoTurns" },
+      trigger: { kind: "turnStartEveryNTurns", interval: 2 },
     },
   },
   {
@@ -1284,6 +1286,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 30,
         },
       ],
@@ -1301,6 +1304,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
       ],
@@ -1345,6 +1349,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
         { kind: "perform", vitality: { value: 3 } },
@@ -1362,6 +1367,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
         { kind: "perform", vitality: { value: 3 } },
@@ -1439,6 +1445,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "motivation",
+          valueKind: "score",
           percentage: 270,
         },
       ],
@@ -1459,6 +1466,7 @@ export const producerItemsAsConst = [
         {
           kind: "performLeveragingModifier",
           modifierKind: "motivation",
+          valueKind: "score",
           percentage: 340,
         },
       ],
@@ -1507,6 +1515,62 @@ export const producerItemsAsConst = [
       times: 2,
       trigger: {
         kind: "turnStart",
+      },
+    },
+  },
+  {
+    id: "pachipachisenkohanabi",
+    name: "ぱちぱち線香花火",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "positiveImpression",
+          valueKind: "vitality",
+          percentage: 100,
+        },
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 2 },
+        },
+      ],
+      times: 4,
+      trigger: {
+        kind: "turnStartEveryNTurns",
+        interval: 3,
+      },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "positiveImpression",
+        range: { min: 6 },
+      },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "positiveImpression",
+          valueKind: "vitality",
+          percentage: 100,
+        },
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 3 },
+        },
+      ],
+      trigger: {
+        kind: "turnStartEveryNTurns",
+        interval: 3,
       },
     },
   },

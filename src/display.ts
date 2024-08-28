@@ -264,10 +264,14 @@ const generateModifierDisplay = (
       representativeValueDelta: representativeValue,
     };
   }
+  const name =
+    modifier.kind === "reactiveEffect"
+      ? modifier.representativeName
+      : metaModifierDictioanry[modifier.kind].label;
   return {
     ...modifier,
     change,
-    name: metaModifierDictioanry[modifier.kind].label,
+    name,
     // TODO: 状態修正の詳細の説明文を生成する
     description: "",
     representativeValue,

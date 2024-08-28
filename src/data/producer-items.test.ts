@@ -62,9 +62,10 @@ for (const producerItem of producerItems) {
         );
       }
     });
-    test("`trigger`が`cardDataId`設定の`beforeCardEffectActivation`の時、対象のidがスキルカード定義に存在する", () => {
+    test("`trigger`に`cardDataId`が設定されている時、対象のidがスキルカード定義に存在する", () => {
       if (
-        producerItem.base.trigger.kind === "beforeCardEffectActivation" &&
+        (producerItem.base.trigger.kind === "beforeCardEffectActivation" ||
+          producerItem.base.trigger.kind === "afterCardEffectActivation") &&
         producerItem.base.trigger.cardDataId !== undefined
       ) {
         expect(
@@ -73,7 +74,8 @@ for (const producerItem of producerItems) {
       }
       if (
         producerItem.enhanced &&
-        producerItem.enhanced.trigger.kind === "beforeCardEffectActivation" &&
+        (producerItem.enhanced.trigger.kind === "beforeCardEffectActivation" ||
+          producerItem.enhanced.trigger.kind === "afterCardEffectActivation") &&
         producerItem.enhanced.trigger.cardDataId !== undefined
       ) {
         expect(

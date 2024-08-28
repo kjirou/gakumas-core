@@ -78,6 +78,189 @@ export type VitalityUpdateQuery = Readonly<{
 }>;
 
 /**
+ * 反応型効果のトリガー
+ */
+export type ReactiveEffectTrigger = Readonly<
+  (
+    | {
+        /**
+         * スキルカードの主効果発動後の効果発動
+         *
+         * - 原文から推測した構文は、「[元気効果の](アクティブスキルカード|メンタルスキルカード|スキルカード|{指定スキルカード})使用後」
+         *   - 状態修正の例
+         *     - 「夏の宵の線香花火」は、「以降、元気効果のスキルカード使用後、好印象+1」
+         *       - 効果発動時点の参考動画: https://youtu.be/3bzWi4m19oo?si=lYYdgowS72ZLICL1&t=13
+         *   - Pアイテムの例
+         *     - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
+         *     - 「ビッグドリーム貯金箱」は、「スキルカード使用後好印象が6以上の場合、好印象+3」
+         *     - 「転がり続ける元気の源」は、「メンタルスキルカード使用後やる気が5以上の場合、やる気+3」
+         */
+        kind: "afterCardEffectActivation";
+        cardDataId?: CardData["id"];
+        cardSummaryKind?: CardSummaryKind;
+        effectKind?: "vitality";
+      }
+    | {
+        /**
+         * スキルカードの主効果発動前の効果発動
+         *
+         * - 原文から推測した構文は、「(アクティブスキルカード|メンタルスキルカード|スキルカード|{指定スキルカード})使用時」
+         *   - 状態修正の例
+         *     - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
+         *     - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
+         *     - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
+         *   - Pアイテムの例
+         *     - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
+         *     - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
+         *     - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
+         */
+        kind: "beforeCardEffectActivation";
+        cardDataId?: CardData["id"];
+        cardSummaryKind?: CardSummaryKind;
+      }
+    | {
+        /**
+         * レッスン開始時
+         *
+         * - 原文の構文は、「レッスン開始時」
+         *   - 「ゲーセンの戦利品」は、「レッスン開始時、集中+3」
+         */
+        kind: "lessonStart";
+      }
+    | {
+        /**
+         * スキルカードの主効果発動に伴う状態修正増加時
+         *
+         * - 原文の構文は、「{modifierKind}が増加後」
+         *   - 「緑のお揃いブレス」は、「好印象が増加後、好印象+3」
+         *   - 「願いを叶えるお守り」は、「やる気が増加後、やる気+2」
+         *   - 「Dearリトルプリンス」は、「好調の効果ターンが増加後、好調3ターン」
+         *   - 「放課後のらくがき」は、「集中が増加後体力が50%以上の場合、集中+2」
+         *   - 「ひみつ特訓カーデ」は、「やる気が増加後、やる気+3」
+         * - おそらくは、スキルカードの主効果による状態修正の増加のみを対象としている
+         *   - 状態修正の継続効果による増加では発動しない
+         *     - 例えば、「ひみつ特訓カーデ」は、「ワクワクが止まらない」の効果によるやる気増加では発動しない
+         *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=5v6jyo5BoXUkwCC5&t=5916
+         *       - 「厳選初星ブレンド」の継続効果も同じだった
+         *   - Pドリンクの効果による増加では発動しない
+         *     - 例えば、「ひみつ特訓カーデ」は、「ホットコーヒー」の効果によるやる気増加では発動しない
+         *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=ioUWJCIpHTBUYk7W&t=6052
+         */
+        kind: "modifierIncrease";
+        modifierKind:
+          | "focus"
+          | "goodCondition"
+          | "motivation"
+          | "positiveImpression";
+      }
+    | {
+        /**
+         * ターン終了時
+         *
+         * - 原文の構文は、「ターン終了時」
+         *   - 「内気系少女」は、「以降、ターン終了時、好印象+1」
+         *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
+         *   - 「ちびども手作りメダル」は、「ターン終了時好印象が6以上の場合、好印象+2」
+         *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
+         */
+        kind: "turnEnd";
+      }
+    | {
+        /**
+         * ターン開始時
+         *
+         * - 原文の構文は、「ターン開始時」
+         *   - 「ばくおんライオン」は、「ターン開始時好調状態の場合、パラメータ+6」
+         */
+        kind: "turnStart";
+      }
+    | {
+        /**
+         * nターンごとのターン開始時
+         *
+         * - 原文の構文は、「{interval}ターンごとに」
+         *   - 「柴犬ポシェット」は、「2ターンごとに、元気+5」
+         *   - 「ぱちぱち線香花火」は、「3ターンごとに好印象が6以上の場合、好印象の100%分元気増加」
+         * - turnStart と別種別にしているのは、それよりも後の発動するため
+         *   - index.ts の endTurn の効果発動順により詳細に書いてある
+         */
+        kind: "turnStartEveryNTurns";
+        interval: number;
+      }
+  ) & {
+    /**
+     * 一部のアイドルパラメータ種別のみで有効か
+     *
+     * - 原文の構文は、「【(ボイス|ダンス|ビジュアル)レッスン・(ボイス|ダンス|ビジュアル)ターンのみ】」
+     *   - 「得体のしれないモノ」は、「【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
+     *   - 「悔しさの象徴」は、「【ダンスレッスン・ダンスターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
+     *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
+     * - 追い込みレッスンのクリア以降のパーフェクト狙い中（ボーナス中ともいう）は、この条件を常に満たすようになる
+     *   - Ref: https://x.com/ondeath_id/status/1792068212634669195
+     *   - Ref: https://gameo.jp/gkmas/1116
+     */
+    idolParameterKind?: IdolParameterKind;
+  }
+>;
+
+/**
+ * 反応型効果のクエリからアイドルパラメータ種別を除いたもの
+ *
+ * - canActivateProducerItem の引数の型の都合で切り分けたもの
+ *   - Omit<ReactiveEffectQuery, 'idolParameterKind'> だと同じ結果にならなかった
+ */
+export type ReactiveEffectQueryWithoutIdolParameterKind = Readonly<
+  | {
+      kind: "afterCardEffectActivation";
+      cardDataId: CardData["id"];
+      /** スキルカード使用による更新差分リスト */
+      diffs: LessonUpdateDiff[];
+    }
+  | {
+      kind: "beforeCardEffectActivation";
+      cardDataId: CardData["id"];
+    }
+  | {
+      kind: "lessonStart";
+    }
+  | {
+      kind: "modifierIncrease";
+      /** 判定時の状態修正リスト */
+      modifiers: Modifier[];
+      /** スキルカード使用による更新差分リスト */
+      diffs: LessonUpdateDiff[];
+    }
+  | {
+      kind: "turnEnd";
+    }
+  | {
+      kind: "turnStart";
+    }
+  | {
+      kind: "turnStartEveryNTurns";
+      turnNumber: Lesson["turnNumber"];
+    }
+>;
+
+/**
+ * 反応型効果のクエリ
+ *
+ * - 反応型効果判定時に必要な情報をまとめたもの
+ * - 呼び出し元で生成して渡す
+ */
+export type ReactiveEffectQuery = Readonly<
+  ReactiveEffectQueryWithoutIdolParameterKind & {
+    /**
+     * 現在のターンのアイドルパラメータ種別
+     *
+     * - この条件を無視できる時は undefined を指定する
+     *   - 現状は、追い込みレッスンのクリア後にこの状態になる
+     */
+    idolParameterKind: IdolParameterKind | undefined;
+  }
+>;
+
+/**
  * 状態修正データ定義
  *
  * - データとして状態修正を表現するときの形式
@@ -161,30 +344,6 @@ export type ModifierData = Readonly<
       duration: number;
     }
   | {
-      /**
-       * ターン終了時に効果発動
-       *
-       * - 原文の構文は、「以降、ターン終了時、[{effect}]」
-       *   - 「内気系少女」は、「以降、ターン終了時、好印象+1」
-       *   - 「天真爛漫」は、「以降、ターン終了時、集中3以上の場合、集中+2」
-       *   - 「厳選初星ブレンド」は、「以降、ターン終了時、やる気+1」
-       */
-      kind: "effectActivationOnTurnEnd";
-      effect: Effect;
-    }
-  | {
-      /**
-       * スキルカード使用時の主効果発動前に効果発動
-       *
-       * - 原文の構文は、「以降、(アクティブスキルカード|メンタルスキルカード)使用時、{effect}」
-       *   - 「ファンシーチャーム」は、「以降、メンタルスキルカード使用時、好印象+1」
-       *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
-       */
-      kind: "effectActivationBeforeCardEffectActivation";
-      cardKind?: CardSummaryKind;
-      effect: Effect;
-    }
-  | {
       /** 「絶好調{duration}ターン」 */
       kind: "excellentCondition";
       duration: number;
@@ -244,6 +403,21 @@ export type ModifierData = Readonly<
        */
       kind: "positiveImpression";
       amount: number;
+    }
+  | {
+      /**
+       * 反応型効果
+       */
+      kind: "reactiveEffect";
+      effect: Effect;
+      /**
+       * 代表する表示名
+       *
+       * - 本家UIの状態修正アイコンの表示時に使う
+       * - スキルカード名・Pアイテム名・Pドリンク名などが入る
+       */
+      representativeName: string;
+      trigger: ReactiveEffectTrigger;
     }
 >;
 
@@ -517,15 +691,17 @@ export type EffectWithoutCondition = Readonly<
     }
   | {
       /**
-       * 状態修正値を基底としてパラメータを増加する
+       * 状態修正値を基底として perfrom を行う
        *
        * - 原文の構文は、「{modifierKind}の{percentage}%分パラメータ上昇」
        *   - 「200%スマイル」は、「好印象の100%分パラメータ上昇」
        *   - 「開花」は、「やる気の200%分パラメータ上昇」
+       *   - 「ぱちぱち線香花火」は、「好印象の100%分元気増加
        * - 割合計算上生じるスコアの端数は切り上げ
        */
       kind: "performLeveragingModifier";
       modifierKind: "goodCondition" | "motivation" | "positiveImpression";
+      valueKind: "score" | "vitality";
       /** 状態修正値に対するパーセント表記の乗数 */
       percentage: number;
     }
@@ -831,112 +1007,6 @@ export type CardSetData = Readonly<{
   id: string;
 }>;
 
-export type ProducerItemTrigger = Readonly<
-  (
-    | {
-        /**
-         * スキルカード使用時の主効果発動後
-         *
-         * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用後」
-         *   - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
-         *   - 「ビッグドリーム貯金箱」は、「スキルカード使用後好印象が6以上の場合、好印象+3」
-         *   - 「転がり続ける元気の源」は、「メンタルスキルカード使用後やる気が5以上の場合、やる気+3」
-         * - 現状の本家では、状態修正値の条件を必ず伴っているが、本実装では任意にしている
-         */
-        kind: "afterCardEffectActivation";
-        cardSummaryKind?: CardSummaryKind;
-      }
-    | {
-        /**
-         * スキルカード使用時の主効果発動前
-         *
-         * - 原文の構文は、「(アクティブ|メンタル)スキルカード使用時」
-         *   - 「いつものメイクポーチ」は、「アクティブスキルカード使用時体力が50%以上の場合、集中+2」
-         *   - 「最高にハッピーの源」は、「アドレナリン全開使用時、好調3ターン」
-         *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
-         */
-        kind: "beforeCardEffectActivation";
-        cardDataId?: CardData["id"];
-        cardSummaryKind?: CardSummaryKind;
-      }
-    | {
-        /**
-         * レッスンを開始した時
-         *
-         * - 原文の構文は、「レッスン開始時」
-         *   - 「ゲーセンの戦利品」は、「レッスン開始時、集中+3」
-         */
-        kind: "lessonStart";
-      }
-    | {
-        /**
-         * スキルカードの主効果により状態修正が増加した時
-         *
-         * - 原文の構文は、「{modifierKind}が増加後」
-         *   - 「緑のお揃いブレス」は、「好印象が増加後、好印象+3」
-         *   - 「願いを叶えるお守り」は、「やる気が増加後、やる気+2」
-         *   - 「Dearリトルプリンス」は、「好調の効果ターンが増加後、好調3ターン」
-         *   - 「放課後のらくがき」は、「集中が増加後体力が50%以上の場合、集中+2」
-         *   - 「ひみつ特訓カーデ」は、「やる気が増加後、やる気+3」
-         * - おそらくは、スキルカードの主効果による状態修正の増加のみを対象としている
-         *   - 状態修正の継続効果による増加では発動しない
-         *     - 例えば、「ひみつ特訓カーデ」は、「ワクワクが止まらない」の効果によるやる気増加では発動しない
-         *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=5v6jyo5BoXUkwCC5&t=5916
-         *       - 「厳選初星ブレンド」の継続効果も同じだった
-         *   - Pドリンクの効果による増加では発動しない
-         *     - 例えば、「ひみつ特訓カーデ」は、「ホットコーヒー」の効果によるやる気増加では発動しない
-         *       - 参考動画: https://www.youtube.com/live/zUdOzAkUVRY?si=ioUWJCIpHTBUYk7W&t=6052
-         */
-        kind: "modifierIncrease";
-        modifierKind:
-          | "focus"
-          | "goodCondition"
-          | "motivation"
-          | "positiveImpression";
-      }
-    | {
-        /**
-         * ターンが終了した時
-         *
-         * - 原文の構文は、「ターン終了時」
-         *   - 「ちびども手作りメダル」は、「ターン終了時好印象が6以上の場合、好印象+2」
-         */
-        kind: "turnEnd";
-      }
-    | {
-        /**
-         * ターンが開始した時
-         *
-         * - 原文の構文は、「ターン開始時」
-         *   - 「ばくおんライオン」は、「ターン開始時好調状態の場合、パラメータ+6」
-         */
-        kind: "turnStart";
-      }
-    | {
-        /**
-         * 2ターン毎のターン開始時
-         *
-         * - 原文の構文は、「2ターンごと」
-         *   - 「柴犬ポシェット」は、「2ターンごと、元気+5」
-         */
-        kind: "turnStartEveryTwoTurns";
-      }
-  ) & {
-    /**
-     * 一部のアイドルパラメータ種別のみで有効か
-     *
-     * - 原文の構文は、「【(ボイス|ダンス|ビジュアル)レッスン・(ボイス|ダンス|ビジュアル)ターンのみ】」
-     *   - 「得体のしれないモノ」は、「【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
-     *   - 「悔しさの象徴」は、「【ダンスレッスン・ダンスターンのみ】ターン開始時、パラメータ上昇量増加50%（1ターン）」
-     *   - 「曇りをぬぐったタオル」は、「【ボーカルレッスン・ボーカルターンのみ】アクティブスキルカード使用時、体力回復2」
-     * - 追い込みレッスンのクリア以降のパーフェクト狙い中（ボーナス中ともいう）は、この条件を常に満たすようになる
-     *   - Ref: https://x.com/ondeath_id/status/1792068212634669195
-     *   - Ref: https://gameo.jp/gkmas/1116
-     */
-    idolParameterKind?: IdolParameterKind;
-  }
->;
-
 export type ProducerItemContentData = Readonly<{
   /**
    * 効果発動条件
@@ -961,7 +1031,7 @@ export type ProducerItemContentData = Readonly<{
    *     - TODO: 最終ターンが1でこれを発動して、そのターンにターン追加+1をしたら、再び発動するの？
    */
   times?: number;
-  trigger: ProducerItemTrigger;
+  trigger: ReactiveEffectTrigger;
 }>;
 
 /**

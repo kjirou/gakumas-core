@@ -147,6 +147,7 @@ export const drinksAsConst = [
       {
         kind: "performLeveragingModifier",
         modifierKind: "positiveImpression",
+        valueKind: "score",
         percentage: 100,
       },
       { kind: "perform", vitality: { value: 3 } },
@@ -182,11 +183,13 @@ export const drinksAsConst = [
       {
         kind: "getModifier",
         modifier: {
-          kind: "effectActivationOnTurnEnd",
+          kind: "reactiveEffect",
           effect: {
             kind: "getModifier",
             modifier: { kind: "focus", amount: 1 },
           },
+          representativeName: "厳選初星マキアート",
+          trigger: { kind: "turnEnd" },
         },
       },
     ],
@@ -215,11 +218,13 @@ export const drinksAsConst = [
       {
         kind: "getModifier",
         modifier: {
-          kind: "effectActivationOnTurnEnd",
+          kind: "reactiveEffect",
           effect: {
             kind: "getModifier",
             modifier: { kind: "positiveImpression", amount: 1 },
           },
+          representativeName: "厳選初星ティー",
+          trigger: { kind: "turnEnd" },
         },
       },
     ],
@@ -234,11 +239,13 @@ export const drinksAsConst = [
       {
         kind: "getModifier",
         modifier: {
-          kind: "effectActivationOnTurnEnd",
+          kind: "reactiveEffect",
           effect: {
             kind: "getModifier",
             modifier: { kind: "motivation", amount: 1 },
           },
+          representativeName: "厳選初星ブレンド",
+          trigger: { kind: "turnEnd" },
         },
       },
     ],

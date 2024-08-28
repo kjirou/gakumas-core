@@ -17,7 +17,7 @@ import {
   generateDrinkDescription,
   generateEffectText,
   generateProducerItemDescription,
-  generateProducerItemTriggerAndConditionText,
+  generateReactiveEffectTriggerText,
   globalDataKeywords,
 } from "./text-generation";
 import { getCardContentData, getProducerItemContentData } from "./models";
@@ -48,6 +48,83 @@ describe("generateCardName", () => {
   ];
   test.each(testCases)('$args => "$expected"', ({ args, expected }) => {
     expect(generateCardName(...args)).toBe(expected);
+  });
+});
+describe("generateReactiveEffectTriggerText", () => {
+  const testCases: Array<{
+    args: Parameters<typeof generateReactiveEffectTriggerText>;
+    expected: ReturnType<typeof generateReactiveEffectTriggerText>;
+    name: string;
+  }> = [
+    {
+      name: "beforeCardEffectActivation, cardSummaryKind 無し, effectKind 無し",
+      args: [{ kind: "beforeCardEffectActivation" }],
+      expected: "スキルカード使用時",
+    },
+    {
+      name: "afterCardEffectActivation, active, vitality",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          cardSummaryKind: "active",
+          effectKind: "vitality",
+        },
+      ],
+      expected: "{{元気}}効果の{{アクティブスキルカード}}使用後",
+    },
+    {
+      name: "mental 指定",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardSummaryKind: "mental",
+        },
+      ],
+      expected: "{{メンタルスキルカード}}使用時",
+    },
+    {
+      name: "cardDataId 有り",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "adorenarinzenkai",
+        },
+      ],
+      expected: "{{アドレナリン全開}}使用時",
+    },
+    {
+      name: "modifierIncrease - goodCondition 以外の時",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "focus",
+        },
+      ],
+      expected: "{{集中}}が増加後",
+    },
+    {
+      name: "modifierIncrease - goodCondition の時",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "goodCondition",
+        },
+      ],
+      expected: "{{好調}}の効果ターンが増加後",
+    },
+    {
+      name: "turnStartEveryNTurns",
+      args: [
+        {
+          kind: "turnStartEveryNTurns",
+          interval: 2,
+        },
+      ],
+      expected: "2ターンごとに",
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(generateReactiveEffectTriggerText(...args)).toBe(expected);
   });
 });
 describe("generateEffectText", () => {
@@ -188,50 +265,39 @@ describe("generateEffectText", () => {
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationOnTurnEnd",
+            kind: "reactiveEffect",
+            trigger: { kind: "turnEnd" },
             effect: {
               kind: "getModifier",
               modifier: { kind: "positiveImpression", amount: 1 },
             },
+            representativeName: "",
           },
         },
       ],
       expected: "以降、ターン終了時、{{好印象}}+1",
-      name: "getModifier - effectActivationOnTurnEnd",
+      name: "getModifier - reactiveEffect",
     },
     {
       args: [
         {
           kind: "getModifier",
           modifier: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
+            kind: "reactiveEffect",
+            trigger: {
+              kind: "beforeCardEffectActivation",
+              cardSummaryKind: "active",
+            },
             effect: {
               kind: "perform",
               vitality: { fixedValue: true, value: 1 },
             },
+            representativeName: "",
           },
         },
       ],
       expected: "以降、{{アクティブスキルカード}}使用時、{{固定元気}}+1",
-      name: "getModifier - effectActivationBeforeCardEffectActivation - active",
-    },
-    {
-      args: [
-        {
-          kind: "getModifier",
-          modifier: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "mental",
-            effect: {
-              kind: "getModifier",
-              modifier: { kind: "positiveImpression", amount: 1 },
-            },
-          },
-        },
-      ],
-      expected: "以降、{{メンタルスキルカード}}使用時、{{好印象}}+1",
-      name: "getModifier - effectActivationBeforeCardEffectActivation - mental",
+      name: "getModifier - reactiveEffect - beforeCardEffectActivation",
     },
     {
       args: [
@@ -393,6 +459,7 @@ describe("generateEffectText", () => {
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
       ],
@@ -960,6 +1027,18 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "natsunoyoinosenkohanabi",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}4",
+        "レッスン開始時手札に入る",
+        "{{好印象}}+4",
+        "{{やる気}}+3",
+        "以降、{{元気}}効果のスキルカード使用後、{{好印象}}+1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -978,223 +1057,6 @@ describe("generateCardDescription", () => {
       ).toBe(expected);
     },
   );
-});
-describe("generateProducerItemTriggerAndConditionText", () => {
-  const testCases: Array<{
-    args: Parameters<typeof generateProducerItemTriggerAndConditionText>;
-    expected: ReturnType<typeof generateProducerItemTriggerAndConditionText>;
-    name: string;
-  }> = [
-    {
-      args: [
-        {
-          trigger: { kind: "beforeCardEffectActivation" },
-        },
-      ],
-      expected: "スキルカード使用時、",
-      name: "beforeCardEffectActivation - no options",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "beforeCardEffectActivation",
-            cardSummaryKind: "active",
-          },
-        },
-      ],
-      expected: "{{アクティブスキルカード}}使用時、",
-      name: "beforeCardEffectActivation - cardSummaryKind: active",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "beforeCardEffectActivation",
-            cardSummaryKind: "mental",
-          },
-        },
-      ],
-      expected: "{{メンタルスキルカード}}使用時、",
-      name: "beforeCardEffectActivation - cardSummaryKind: mental",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "beforeCardEffectActivation",
-            cardDataId: "adorenarinzenkai",
-          },
-        },
-      ],
-      expected: "{{アドレナリン全開}}使用時、",
-      name: "beforeCardEffectActivation - cardDataId",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "afterCardEffectActivation" },
-        },
-      ],
-      expected: "スキルカード使用後、",
-      name: "afterCardEffectActivation - no options",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "afterCardEffectActivation",
-            cardSummaryKind: "active",
-          },
-        },
-      ],
-      expected: "{{アクティブスキルカード}}使用後、",
-      name: "afterCardEffectActivation - cardSummaryKind: active",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "afterCardEffectActivation",
-            cardSummaryKind: "mental",
-          },
-        },
-      ],
-      expected: "{{メンタルスキルカード}}使用後、",
-      name: "afterCardEffectActivation - cardSummaryKind: mental",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStartEveryTwoTurns" },
-        },
-      ],
-      expected: "2ターンごとに、",
-      name: "turnStartEveryTwoTurns",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "turnStartEveryTwoTurns" },
-        },
-      ],
-      expected: "2ターンごとに{{好調}}状態の場合、",
-      name: "turnStartEveryTwoTurns - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "modifierIncrease", modifierKind: "focus" },
-        },
-      ],
-      expected: "{{集中}}が増加後、",
-      name: "modifierIncrease - not goodCondition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "modifierIncrease", modifierKind: "goodCondition" },
-        },
-      ],
-      expected: "{{好調}}の効果ターンが増加後、",
-      name: "modifierIncrease - goodCondition",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "modifierIncrease", modifierKind: "focus" },
-        },
-      ],
-      expected: "{{集中}}が増加後{{好調}}状態の場合、",
-      name: "modifierIncrease - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnEnd" },
-        },
-      ],
-      expected: "ターン終了時、",
-      name: "turnEnd",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "turnEnd" },
-        },
-      ],
-      expected: "ターン終了時{{好調}}状態の場合、",
-      name: "turnEnd - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart" },
-        },
-      ],
-      expected: "ターン開始時、",
-      name: "turnStart",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "turnStart" },
-        },
-      ],
-      expected: "ターン開始時{{好調}}状態の場合、",
-      name: "turnStart - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart", idolParameterKind: "vocal" },
-        },
-      ],
-      expected: "【ボイスレッスン・ボイスターンのみ】ターン開始時、",
-      name: "idolParameterKind - vocal",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart", idolParameterKind: "dance" },
-        },
-      ],
-      expected: "【ダンスレッスン・ダンスターンのみ】ターン開始時、",
-      name: "idolParameterKind - dance",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart", idolParameterKind: "visual" },
-        },
-      ],
-      expected: "【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、",
-      name: "idolParameterKind - visual",
-    },
-  ];
-  test.each(testCases)('$name => "$expected"', ({ args, expected }) => {
-    expect(generateProducerItemTriggerAndConditionText(...args)).toBe(expected);
-  });
 });
 describe("generateProducerItemDescription", () => {
   const testParameters: Array<{
@@ -1336,6 +1198,24 @@ describe("generateProducerItemDescription", () => {
         "{{消費体力削減}}3",
         "手札をすべて{{レッスン中強化}}",
         "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "pachipachisenkohanabi",
+      expected: [
+        "3ターンごとに{{好印象}}が6以上の場合、{{好印象}}の100%分{{元気}}増加",
+        "{{やる気}}+2",
+        "{{体力消費}}1",
+        "（レッスン内4回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "pachipachisenkohanabi",
+      enhanced: true,
+      expected: [
+        "3ターンごとに{{好印象}}が6以上の場合、{{好印象}}の100%分{{元気}}増加",
+        "{{やる気}}+3",
+        "{{体力消費}}1",
       ].join("\n"),
     },
   ];

@@ -685,6 +685,8 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
 
 /**
  * 更新差分を走査して、上昇した状態修正種別リストを返す
+ *
+ * @param beforeModifiers 更新前の状態修正リスト
  */
 export const scanIncreasedModifierKinds = (
   beforeModifiers: Modifier[],

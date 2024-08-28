@@ -37,6 +37,7 @@ import {
   useCard,
   useDrink,
   validateCostConsumution,
+  validateQueryOfReactiveEffectTrigger,
   measureValue,
 } from "./lesson-mutation";
 import { patchDiffs } from "./models";
@@ -351,7 +352,7 @@ describe("activateEffectIf", () => {
       ],
     },
     {
-      name: "performLeveragingModifier - goodCondition",
+      name: "performLeveragingModifier - score - goodCondition",
       args: [
         (() => {
           const lesson = createLessonForTest();
@@ -363,6 +364,7 @@ describe("activateEffectIf", () => {
         {
           kind: "performLeveragingModifier",
           modifierKind: "goodCondition",
+          valueKind: "score",
           percentage: 100,
         },
         () => 0,
@@ -374,6 +376,33 @@ describe("activateEffectIf", () => {
           // 通常の好調の効果も反映される
           actual: 15,
           max: 15,
+        },
+      ],
+    },
+    {
+      name: "performLeveragingModifier - vitality - motivation",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "motivation", amount: 10, id: "m1" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "goodCondition",
+          valueKind: "vitality",
+          percentage: 100,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "vitality",
+          actual: 10,
+          max: 10,
         },
       ],
     },
@@ -408,13 +437,14 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     } as const;
     const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
       lesson,
-      "afterCardEffectActivation",
+      {
+        kind: "afterCardEffectActivation",
+        cardDataId: "apirunokihon",
+        diffs: [],
+      },
       () => 0,
       createIdGenerator(),
       dummyReason,
-      {
-        cardSummaryKind: "active",
-      },
     );
     expect(
       updates.filter(
@@ -479,13 +509,10 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates1 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "beforeCardEffectActivation",
+        { kind: "beforeCardEffectActivation", cardDataId: "apirunokihon" },
         () => 0,
         createIdGenerator(),
         dummyReason,
-        {
-          cardSummaryKind: "active",
-        },
       );
     expect(
       updates1.filter((e) => e.kind === "modifiers.addition"),
@@ -508,13 +535,10 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates2 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "beforeCardEffectActivation",
+        { kind: "beforeCardEffectActivation", cardDataId: "hyogennokihon" },
         () => 0,
         createIdGenerator(),
         dummyReason,
-        {
-          cardSummaryKind: "mental",
-        },
       );
     expect(updates2).toStrictEqual([]);
   });
@@ -538,13 +562,10 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates1 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "beforeCardEffectActivation",
+        { kind: "beforeCardEffectActivation", cardDataId: "adorenarinzenkai" },
         () => 0,
         createIdGenerator(),
         dummyReason,
-        {
-          cardDataId: "adorenarinzenkai",
-        },
       );
     expect(
       updates1.filter(
@@ -575,85 +596,12 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates2 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "beforeCardEffectActivation",
+        { kind: "beforeCardEffectActivation", cardDataId: "apirunokihon" },
         () => 0,
         createIdGenerator(),
         dummyReason,
-        {
-          cardDataId: "apirunokihon",
-        },
       );
     expect(updates2).toStrictEqual([]);
-  });
-  test("「最高にハッピーの源」と「曇りをぬぐったタオル」は、1枚のアクティブスキルカード使用時に同時に効果発動し得る", () => {
-    let lesson = createLessonForTest({
-      producerItems: [
-        {
-          id: "a",
-          data: getProducerItemDataByConstId("saikonihappinominamoto"),
-          enhanced: false,
-          activationCount: 0,
-        },
-        {
-          id: "b",
-          data: getProducerItemDataByConstId("kumoriwonuguttataoru"),
-          enhanced: false,
-          activationCount: 0,
-        },
-      ],
-    });
-    const dummyReason = {
-      kind: "cardUsage",
-      cardId: "x",
-      historyTurnNumber: 1,
-      historyResultIndex: 1,
-    } as const;
-    const { updates } = activateEffectsEachProducerItemsAccordingToCardUsage(
-      lesson,
-      "beforeCardEffectActivation",
-      () => 0,
-      createIdGenerator(),
-      dummyReason,
-      {
-        cardDataId: "adorenarinzenkai",
-        cardSummaryKind: "active",
-      },
-    );
-    expect(
-      updates.filter(
-        (e) =>
-          e.kind === "modifiers.addition" ||
-          e.kind === "vitality" ||
-          e.kind === "life",
-      ),
-    ).toStrictEqual([
-      {
-        kind: "modifiers.addition",
-        actual: {
-          kind: "goodCondition",
-          duration: 3,
-          id: expect.any(String),
-        },
-        max: {
-          kind: "goodCondition",
-          duration: 3,
-          id: expect.any(String),
-        },
-        reason: expect.any(Object),
-      },
-      {
-        kind: "vitality",
-        actual: 5,
-        max: 5,
-        reason: expect.any(Object),
-      },
-      {
-        kind: "life",
-        actual: 0,
-        max: 2,
-        reason: expect.any(Object),
-      },
-    ]);
   });
   test("スキルカード使用後トリガーである、「ビッグドリーム貯金箱」を、好印象が6以上の時、発動する。好印象が6未満の時、発動しない", () => {
     let lesson = createLessonForTest({
@@ -666,6 +614,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
         },
       ],
     });
+    // 効果条件は lesson の中の状態を参照するので、 modifiers はちゃんと lesson にセットする必要がある
     lesson.idol.modifiers = [
       { kind: "positiveImpression", amount: 6, id: "m1" },
     ];
@@ -678,7 +627,11 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates1 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "afterCardEffectActivation",
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+        },
         () => 0,
         createIdGenerator(),
         dummyReason,
@@ -719,7 +672,11 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates2 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "afterCardEffectActivation",
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+        },
         () => 0,
         createIdGenerator(),
         dummyReason,
@@ -746,13 +703,25 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates1 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "modifierIncrease",
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              id: "m1",
+              actual: 1,
+              max: 1,
+            },
+          ],
+          modifiers: [
+            { kind: "motivation", amount: 1, id: "m1" },
+            { kind: "positiveImpression", amount: 1, id: "m2" },
+          ],
+        },
         () => 0,
         createIdGenerator(),
         dummyReason,
-        {
-          increasedModifierKinds: ["motivation"],
-        },
       );
     expect(
       updates1.filter((e) => e.kind === "modifiers.addition"),
@@ -775,13 +744,25 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
     const { updates: updates2 } =
       activateEffectsEachProducerItemsAccordingToCardUsage(
         lesson,
-        "modifierIncrease",
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              id: "m2",
+              actual: 1,
+              max: 1,
+            },
+          ],
+          modifiers: [
+            { kind: "motivation", amount: 1, id: "m1" },
+            { kind: "positiveImpression", amount: 1, id: "m2" },
+          ],
+        },
         () => 0,
         createIdGenerator(),
         dummyReason,
-        {
-          increasedModifierKinds: ["positiveImpression"],
-        },
       );
     expect(updates2).toStrictEqual([]);
   });
@@ -1035,15 +1016,17 @@ describe("activateEffectsOnTurnEnd", () => {
     });
   });
   describe("状態修正による効果発動", () => {
-    test("effectActivationOnTurnEnd", () => {
+    test("reactiveEffect", () => {
       const lesson = createLessonForTest();
       lesson.idol.modifiers = [
         {
-          kind: "effectActivationOnTurnEnd",
+          kind: "reactiveEffect",
+          trigger: { kind: "turnEnd" },
           effect: {
             kind: "getModifier",
             modifier: { kind: "motivation", amount: 1 },
           },
+          representativeName: "Foo",
           id: "x",
         },
       ];
@@ -2736,7 +2719,7 @@ describe("canPlayCard", () => {
     expect(canPlayCard(...args)).toStrictEqual(expected);
   });
 });
-// condition 条件は canActivateEffect で検証する、こちらでやろうとするとモックが複雑になるのでやらない
+// canActivateEffect, validateQueryOfReactiveEffectTrigger で検証できることはそちらで行う
 describe("canActivateProducerItem", () => {
   const testCases: Array<{
     args: Parameters<typeof canActivateProducerItem>;
@@ -2744,26 +2727,26 @@ describe("canActivateProducerItem", () => {
     name: string;
   }> = [
     {
-      name: "トリガー種別以外の条件がなく、トリガー種別が一致する時、trueを返す",
+      name: "トリガー以外の条件がなく、トリガー種別が一致する時、trueを返す",
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
-          data: { base: { trigger: { kind: "turnStart" } } },
+          data: { base: { trigger: { kind: "turnEnd" } } },
         } as ProducerItem,
-        "turnStart",
+        { kind: "turnEnd" },
       ],
       expected: true,
     },
     {
-      name: "トリガー種別以外の条件がなく、トリガー種別が一致しない時、falseを返す",
+      name: "トリガー以外の条件がなく、トリガー種別が一致しない時、falseを返す",
       args: [
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 0,
           data: { base: { trigger: { kind: "turnStart" } } },
         } as ProducerItem,
-        "turnEnd",
+        { kind: "turnEnd" },
       ],
       expected: false,
     },
@@ -2775,46 +2758,14 @@ describe("canActivateProducerItem", () => {
           activationCount: 0,
           data: {
             base: {
-              trigger: { kind: "turnStart" },
+              trigger: { kind: "turnEnd" },
               cost: { kind: "life", value: 1 },
             },
           },
         } as ProducerItem,
-        "turnStart",
+        { kind: "turnEnd" },
       ],
       expected: true,
-    },
-    {
-      name: "アイドルパラメータ種別条件があり、合致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          data: {
-            base: {
-              trigger: { kind: "turnStart", idolParameterKind: "vocal" },
-            },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: true,
-    },
-    {
-      name: "アイドルパラメータ種別条件があり、合致しない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          activationCount: 0,
-          data: {
-            base: {
-              trigger: { kind: "turnStart", idolParameterKind: "dance" },
-            },
-          },
-        } as ProducerItem,
-        "turnStart",
-      ],
-      expected: false,
     },
     {
       name: "アイドルパラメータ種別条件があり、合致しないが、クリア済みなら全属性対象になる時、trueを返す",
@@ -2830,11 +2781,11 @@ describe("canActivateProducerItem", () => {
           activationCount: 0,
           data: {
             base: {
-              trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              trigger: { kind: "turnEnd", idolParameterKind: "dance" },
             },
           },
         } as ProducerItem,
-        "turnStart",
+        { kind: "turnEnd" },
       ],
       expected: true,
     },
@@ -2852,11 +2803,11 @@ describe("canActivateProducerItem", () => {
           activationCount: 0,
           data: {
             base: {
-              trigger: { kind: "turnStart", idolParameterKind: "dance" },
+              trigger: { kind: "turnEnd", idolParameterKind: "dance" },
             },
           },
         } as ProducerItem,
-        "turnStart",
+        { kind: "turnEnd" },
       ],
       expected: false,
     },
@@ -2866,9 +2817,9 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 1,
-          data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+          data: { base: { trigger: { kind: "turnEnd" }, times: 2 } },
         } as ProducerItem,
-        "turnStart",
+        { kind: "turnEnd" },
       ],
       expected: true,
     },
@@ -2878,201 +2829,9 @@ describe("canActivateProducerItem", () => {
         { turns: ["vocal"], turnNumber: 1 } as Lesson,
         {
           activationCount: 2,
-          data: { base: { trigger: { kind: "turnStart" }, times: 2 } },
+          data: { base: { trigger: { kind: "turnEnd" }, times: 2 } },
         } as ProducerItem,
-        "turnStart",
-      ],
-      expected: false,
-    },
-    {
-      name: "turnStartEveryTwoTurns で、2ターン目の時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 2 } as Lesson,
-        {
-          data: {
-            base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-          },
-        } as ProducerItem,
-        "turnStartEveryTwoTurns",
-      ],
-      expected: true,
-    },
-    {
-      name: "turnStartEveryTwoTurns で、1ターン目の時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-          },
-        } as ProducerItem,
-        "turnStartEveryTwoTurns",
-      ],
-      expected: false,
-    },
-    {
-      name: "turnStartEveryTwoTurns で、0ターン目の時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 0 } as Lesson,
-        {
-          data: {
-            base: { trigger: { kind: "turnStartEveryTwoTurns" } },
-          },
-        } as ProducerItem,
-        "turnStartEveryTwoTurns",
-      ],
-      expected: false,
-    },
-    {
-      name: "beforeCardEffectActivation で、スキルカード定義IDとスキルカード概要種別が一致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "beforeCardEffectActivation",
-                cardDataId: "a",
-                cardSummaryKind: "active",
-              },
-            },
-          },
-        } as ProducerItem,
-        "beforeCardEffectActivation",
-        {
-          cardDataId: "a",
-          cardSummaryKind: "active",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "beforeCardEffectActivation で、スキルカード定義IDが一致せず、スキルカード概要種別が一致する時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "beforeCardEffectActivation",
-                cardDataId: "a",
-                cardSummaryKind: "active",
-              },
-            },
-          },
-        } as ProducerItem,
-        "beforeCardEffectActivation",
-        {
-          cardDataId: "b",
-          cardSummaryKind: "active",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "beforeCardEffectActivation で、スキルカード定義IDが一致し、スキルカード概要種別が一致しない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "beforeCardEffectActivation",
-                cardDataId: "a",
-                cardSummaryKind: "active",
-              },
-            },
-          },
-        } as ProducerItem,
-        "beforeCardEffectActivation",
-        {
-          cardDataId: "a",
-          cardSummaryKind: "mental",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "afterCardEffectActivation で、スキルカード概要種別が一致する時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "afterCardEffectActivation",
-                cardSummaryKind: "active",
-              },
-            },
-          },
-        } as ProducerItem,
-        "afterCardEffectActivation",
-        {
-          cardSummaryKind: "active",
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "afterCardEffectActivation で、スキルカード概要種別が一致しない時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "afterCardEffectActivation",
-                cardSummaryKind: "active",
-              },
-            },
-          },
-        } as ProducerItem,
-        "afterCardEffectActivation",
-        {
-          cardSummaryKind: "mental",
-        },
-      ],
-      expected: false,
-    },
-    {
-      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれる時、trueを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "modifierIncrease",
-                modifierKind: "focus",
-              },
-            },
-          },
-        } as ProducerItem,
-        "modifierIncrease",
-        {
-          increasedModifierKinds: ["focus"],
-        },
-      ],
-      expected: true,
-    },
-    {
-      name: "modifierIncrease で、指定した状態修正が渡された状態修正リストに含まれない時、falseを返す",
-      args: [
-        { turns: ["vocal"], turnNumber: 1 } as Lesson,
-        {
-          data: {
-            base: {
-              trigger: {
-                kind: "modifierIncrease",
-                modifierKind: "focus",
-              },
-            },
-          },
-        } as ProducerItem,
-        "modifierIncrease",
-        {
-          increasedModifierKinds: ["goodCondition"],
-        },
+        { kind: "turnEnd" },
       ],
       expected: false,
     },
@@ -4312,23 +4071,19 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifiers.addition" &&
-            e.actual.kind === "effectActivationBeforeCardEffectActivation",
+            e.actual.kind === "reactiveEffect",
         ),
       ).toStrictEqual([
         {
           kind: "modifiers.addition",
           actual: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "mental",
+            kind: "reactiveEffect",
+            trigger: expect.any(Object),
             effect: expect.any(Object),
+            representativeName: "ファンシーチャーム",
             id: expect.any(String),
           },
-          max: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "mental",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
+          max: expect.any(Object),
           reason: expect.any(Object),
         },
       ]);
@@ -4396,23 +4151,19 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifiers.addition" &&
-            e.actual.kind === "effectActivationBeforeCardEffectActivation",
+            e.actual.kind === "reactiveEffect",
         ),
       ).toStrictEqual([
         {
           kind: "modifiers.addition",
           actual: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
+            kind: "reactiveEffect",
+            trigger: expect.any(Object),
             effect: expect.any(Object),
+            representativeName: "演出計画",
             id: expect.any(String),
           },
-          max: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
+          max: expect.any(Object),
           reason: expect.any(Object),
         },
       ]);
@@ -4473,21 +4224,19 @@ describe("useCard preview:false", () => {
         updates1.filter(
           (e) =>
             e.kind === "modifiers.addition" &&
-            e.actual.kind === "effectActivationBeforeCardEffectActivation",
+            e.actual.kind === "reactiveEffect",
         ),
       ).toStrictEqual([
         {
           kind: "modifiers.addition",
           actual: {
-            kind: "effectActivationBeforeCardEffectActivation",
+            kind: "reactiveEffect",
+            trigger: expect.any(Object),
             effect: expect.any(Object),
+            representativeName: "輝くキミへ",
             id: expect.any(String),
           },
-          max: {
-            kind: "effectActivationBeforeCardEffectActivation",
-            effect: expect.any(Object),
-            id: expect.any(String),
-          },
+          max: expect.any(Object),
           reason: expect.any(Object),
         },
       ]);
@@ -4923,8 +4672,10 @@ describe("useCard preview:false", () => {
         lesson.hand = ["a"];
         lesson.idol.modifiers = [
           {
-            kind: "effectActivationBeforeCardEffectActivation",
-            cardKind: "active",
+            kind: "reactiveEffect",
+            trigger: { kind: "beforeCardEffectActivation" },
+            effect: { kind: "perform", score: { value: 1 } },
+            representativeName: "Foo",
             id: "x",
           } as Modifier,
         ];
@@ -4938,23 +4689,19 @@ describe("useCard preview:false", () => {
           updates.filter(
             (e) =>
               e.kind === "modifiers.addition" &&
-              e.actual.kind === "effectActivationBeforeCardEffectActivation",
+              e.actual.kind === "reactiveEffect",
           ),
         ).toStrictEqual([
           {
             kind: "modifiers.addition",
             actual: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
+              kind: "reactiveEffect",
+              trigger: expect.any(Object),
               effect: expect.any(Object),
+              representativeName: "演出計画",
               id: expect.any(String),
             },
-            max: {
-              kind: "effectActivationBeforeCardEffectActivation",
-              cardKind: "active",
-              effect: expect.any(Object),
-              id: expect.any(String),
-            },
+            max: expect.any(Object),
             reason: expect.any(Object),
           },
         ]);
@@ -5982,5 +5729,478 @@ describe("validateCostConsumution", () => {
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
     expect(validateCostConsumution(...args)).toStrictEqual(expected);
+  });
+});
+describe("validateQueryOfReactiveEffectTrigger", () => {
+  const testCases: Array<{
+    args: Parameters<typeof validateQueryOfReactiveEffectTrigger>;
+    expected: ReturnType<typeof validateQueryOfReactiveEffectTrigger>;
+    name: string;
+  }> = [
+    {
+      name: "query の idolParameterKind が undefined の時は、常に条件を満たす",
+      args: [
+        {
+          kind: "turnEnd",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "turnEnd",
+          idolParameterKind: undefined,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "afterCardEffectActivation - cardDataId - 満たす",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "afterCardEffectActivation - cardDataId - 満たさない",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "pozunokihon",
+          diffs: [],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "afterCardEffectActivation - cardSummaryKind - 満たす",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "afterCardEffectActivation - cardSummaryKind - 満たさない",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "hyogennokihon",
+          diffs: [],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "afterCardEffectActivation - effectKind - 満たす",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "vitality",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "hyogennokihon",
+          diffs: [{ kind: "vitality", actual: 1, max: 1 }],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "afterCardEffectActivation - effectKind - 満たさない",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "vitality",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [{ kind: "score", actual: 1, max: 1 }],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "afterCardEffectActivation - effectKind - vitality - 元気の差分はあるが上がらなかった時は満たさない",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "vitality",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [{ kind: "vitality", actual: 0, max: 0 }],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "afterCardEffectActivation - idolParameterKind - after - 満たさない",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "apirunokihon",
+          diffs: [],
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation - cardDataId - 満たす",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivation - cardDataId - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "pozunokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation - cardSummaryKind - 満たす",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivation - cardSummaryKind - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          cardSummaryKind: "active",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "hyogennokihon",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivation - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivation",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "beforeCardEffectActivation",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "lessonStart - kind - 満たさない",
+      args: [
+        {
+          kind: "lessonStart",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "turnEnd",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "lessonStart - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "lessonStart",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "lessonStart",
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "modifierIncrease - modifierKind - 新規追加の時、満たす",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "focus",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.addition",
+              actual: { kind: "focus", amount: 1, id: "a" },
+              max: { kind: "focus", amount: 1, id: "a" },
+            },
+          ],
+          modifiers: [],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "modifierIncrease - modifierKind - 新規追加の時、満たさない",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "goodCondition",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.addition",
+              actual: { kind: "focus", amount: 1, id: "a" },
+              max: { kind: "focus", amount: 1, id: "a" },
+            },
+          ],
+          modifiers: [],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "modifierIncrease - modifierKind - 更新の時、満たす",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "focus",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              actual: 2,
+              max: 2,
+              id: "a",
+            },
+          ],
+          modifiers: [
+            { kind: "focus", amount: 1, id: "a" },
+            { kind: "motivation", amount: 1, id: "b" },
+          ],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "modifierIncrease - modifierKind - 更新の時、満たさない",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "focus",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              actual: 2,
+              max: 2,
+              id: "b",
+            },
+          ],
+          modifiers: [
+            { kind: "focus", amount: 1, id: "a" },
+            { kind: "motivation", amount: 1, id: "b" },
+          ],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "modifierIncrease - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "focus",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "modifierIncrease",
+          diffs: [
+            {
+              kind: "modifiers.addition",
+              actual: { kind: "focus", amount: 1, id: "a" },
+              max: { kind: "focus", amount: 1, id: "a" },
+            },
+          ],
+          modifiers: [],
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "turnEnd - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "turnEnd",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "turnEnd",
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStart - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "turnStart",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "turnStart",
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryNTurns - 2 間隔の時 2 ターン目は満たす",
+      args: [
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          turnNumber: 2,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "turnStartEveryNTurns - 2 間隔の時 1 ターン目は満たさない",
+      args: [
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          turnNumber: 1,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryNTurns - 2 間隔の時 0 ターン目は満たさない",
+      args: [
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          turnNumber: 0,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "turnStartEveryNTurns - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "turnStartEveryNTurns",
+          idolParameterKind: "dance",
+          turnNumber: 2,
+        },
+      ],
+      expected: false,
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(validateQueryOfReactiveEffectTrigger(...args)).toBe(expected);
   });
 });

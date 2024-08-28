@@ -136,6 +136,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "fujitakotone-ssr-3",
+    characterId: "fujitakotone",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "motivation",
+    },
+    rarity: "ssr",
+    specificCardId: "natsunoyoinosenkohanabi",
+    specificProducerItemId: "pachipachisenkohanabi",
+    title: "冠菊",
+  },
+  {
     id: "fujitakotone-ssr-2",
     characterId: "fujitakotone",
     producePlan: {

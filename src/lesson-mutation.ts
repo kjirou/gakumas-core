@@ -46,6 +46,7 @@ import {
   numberOfCardsToDrawAtTurnStart,
   patchDiffs,
   scanIncreasedModifierKinds,
+  getIdolParameterKindOnTurnConsideringIgnoring,
 } from "./models";
 import { getRandomInteger, shuffleArray, validateNumberInRange } from "./utils";
 
@@ -490,19 +491,9 @@ export const canActivateProducerItem = (
     producerItem.data,
     producerItem.enhanced,
   );
-  const idolParameterKind = getIdolParameterKindOnTurn(lesson);
-  let isLessonClear = false;
-  if (lesson.clearScoreThresholds) {
-    isLessonClear =
-      calculateClearScoreProgress(lesson.score, lesson.clearScoreThresholds)
-        .remainingClearScore === 0;
-  }
   const query = {
     ...queryLike,
-    idolParameterKind:
-      lesson.ignoreIdolParameterKindConditionAfterClearing && isLessonClear
-        ? undefined
-        : idolParameterKind,
+    idolParameterKind: getIdolParameterKindOnTurnConsideringIgnoring(lesson),
   } as ReactiveEffectQuery;
   return (
     validateQueryOfReactiveEffectTrigger(producerItemContent.trigger, query) &&
@@ -2457,7 +2448,7 @@ export const useCard = (
     }
 
     //
-    // 状態修正に起因する、スキルカードの主効果発動（前）に伴う効果発動
+    // 状態修正に起因する、スキルカードの主効果発動前の効果発動
     //
     if (!params.preview) {
       const effectsBeforeCardEffectActivation = newLesson.idol.modifiers
@@ -2542,7 +2533,7 @@ export const useCard = (
       .reduce((acc, e) => [...acc, ...e], []);
 
     //
-    // Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動
+    // Pアイテムに起因する、スキルカードの主効果発動後の効果発動
     //
     if (!params.preview) {
       const { lesson: updatedLesson, updates } =
@@ -2564,6 +2555,48 @@ export const useCard = (
         );
       newLesson = updatedLesson;
       effectActivationUpdates = [...effectActivationUpdates, ...updates];
+    }
+
+    //
+    // 状態修正に起因する、スキルカードの主効果発動後の効果発動
+    //
+    if (!params.preview) {
+      const effectsAfterCardEffectActivation = newLesson.idol.modifiers
+        .filter((modifier) => modifier.kind === "reactiveEffect")
+        .filter((modifier) =>
+          validateQueryOfReactiveEffectTrigger(modifier.trigger, {
+            kind: "afterCardEffectActivation",
+            cardDataId: card.data.id,
+            diffs: mainEffectDiffs,
+            idolParameterKind:
+              getIdolParameterKindOnTurnConsideringIgnoring(newLesson),
+          }),
+        );
+      for (const { effect } of effectsAfterCardEffectActivation) {
+        const diffs = activateEffectIf(
+          newLesson,
+          effect,
+          params.getRandom,
+          params.idGenerator,
+        );
+        if (diffs) {
+          const innerUpdates = [
+            ...diffs.map((diff) =>
+              createLessonUpdateQueryFromDiff(diff, {
+                kind: "cardUsage.modifier.afterCardEffectActivation",
+                cardId: card.id,
+                historyTurnNumber: newLesson.turnNumber,
+                historyResultIndex: nextHistoryResultIndex,
+              }),
+            ),
+          ];
+          newLesson = patchDiffs(newLesson, innerUpdates);
+          effectActivationUpdates = [
+            ...effectActivationUpdates,
+            ...innerUpdates,
+          ];
+        }
+      }
     }
 
     //

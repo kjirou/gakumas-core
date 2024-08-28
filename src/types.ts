@@ -1334,7 +1334,7 @@ export type Lesson = {
   handWhenEmptyDeck: Array<Card["id"]>;
   idol: Idol;
   /**
-   * レッスンクリア以降はパラメータ属性が全属性になるか
+   * レッスンクリア以降はパラメータ属性条件が無視されるか
    *
    * - クリア以降は、【ボイスレッスン・ボイスターンのみ】などのパラメータ属性条件を無視し、条件を常に満たすようになる設定
    *   - 本家の「追い込みレッスン」の仕様
@@ -1593,6 +1593,11 @@ export type LessonUpdateQueryReason = Readonly<
         kind: "cardUsage.mainEffectActivation";
         cardId: Card["id"];
         effectIndex: number;
+      }
+    | {
+        /** スキルカード使用.状態修正.主効果発動後の効果発動 */
+        kind: "cardUsage.modifier.afterCardEffectActivation";
+        cardId: Card["id"];
       }
     | {
         /** スキルカード使用.状態修正.主効果発動前の効果発動 */

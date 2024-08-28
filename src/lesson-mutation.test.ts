@@ -3967,7 +3967,7 @@ describe("useCard preview:false", () => {
     });
   });
   // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
-  describe("Pアイテムに起因する、スキルカード使用時の主効果発動前の効果発動", () => {
+  describe("Pアイテムに起因する、スキルカードの主効果発動前の効果発動", () => {
     test("「アドレナリン全開」の使用により「最高にハッピーの源」が発動する", () => {
       let lesson = createLessonForTest({
         cards: [
@@ -4038,7 +4038,7 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
-  describe("状態修正に起因する、スキルカード使用時の効果発動", () => {
+  describe("状態修正に起因する、スキルカードの主効果発動前の効果発動", () => {
     test("「ファンシーチャーム」は、メンタルスキルカード使用時、好印象を付与する。アクティブスキルカード使用時は付与しない", () => {
       let lesson = createLessonForTest({
         cards: [
@@ -5036,7 +5036,7 @@ describe("useCard preview:false", () => {
     });
   });
   // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
-  describe("Pアイテムに起因する、スキルカード使用時の主効果発動後の効果発動", () => {
+  describe("Pアイテムに起因する、スキルカードの主効果発動後の効果発動", () => {
     test("「えいえいおー」の使用により「テクノドッグ」が発動する", () => {
       let lesson = createLessonForTest({
         cards: [
@@ -5088,6 +5088,43 @@ describe("useCard preview:false", () => {
           id: expect.any(String),
           actual: 2,
           max: 2,
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
+  describe("状態修正に起因する、スキルカードの主効果発動後の効果発動", () => {
+    test("少なくとも、発動できる", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            data: getCardDataByConstId("apirunokihon"),
+            enhancements: [],
+          },
+        ],
+      });
+      lesson.hand = ["a"];
+      lesson.idol.modifiers = [
+        {
+          kind: "reactiveEffect",
+          trigger: { kind: "afterCardEffectActivation" },
+          effect: { kind: "perform", vitality: { value: 1 } },
+          representativeName: "Foo",
+          id: "m1",
+        },
+      ];
+      const { updates } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates.filter((e) => e.kind === "vitality")).toStrictEqual([
+        {
+          kind: "vitality",
+          actual: 1,
+          max: 1,
           reason: expect.any(Object),
         },
       ]);

@@ -20,6 +20,7 @@ import {
   getIdolParameterKindOnTurn,
   patchDiffs,
   scanIncreasedModifierKinds,
+  getIdolParameterKindOnTurnConsideringIgnoring,
 } from "./models";
 import { createIdGenerator } from "./utils";
 
@@ -577,6 +578,70 @@ describe("getIdolParameterKindOnTurn", () => {
       expect(getIdolParameterKindOnTurn(...args)).toBe(expected);
     },
   );
+});
+describe("getIdolParameterKindOnTurnConsideringIgnoring", () => {
+  const testCases: Array<{
+    args: Parameters<typeof getIdolParameterKindOnTurnConsideringIgnoring>;
+    expected: ReturnType<typeof getIdolParameterKindOnTurnConsideringIgnoring>;
+    name: string;
+  }> = [
+    {
+      name: "クリア状態で条件無視をしない時、ターンのパラメータ種別を返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          score: 1,
+          clearScoreThresholds: { clear: 1 },
+          ignoreIdolParameterKindConditionAfterClearing: false,
+        } as Lesson,
+      ],
+      expected: "vocal",
+    },
+    {
+      name: "クリア状態で条件無視をする時、undefined を返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          score: 1,
+          clearScoreThresholds: { clear: 1 },
+          ignoreIdolParameterKindConditionAfterClearing: true,
+        } as Lesson,
+      ],
+      expected: undefined,
+    },
+    {
+      name: "未クリア状態で条件無視をする時、ターンのパラメータ種別を返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          score: 1,
+          clearScoreThresholds: { clear: 2 },
+          ignoreIdolParameterKindConditionAfterClearing: true,
+        } as Lesson,
+      ],
+      expected: "vocal",
+    },
+    {
+      name: "クリア基準未設定で条件無視をする時、ターンのパラメータ種別を返す",
+      args: [
+        {
+          turns: ["vocal"],
+          turnNumber: 1,
+          score: 1,
+          ignoreIdolParameterKindConditionAfterClearing: true,
+        } as Lesson,
+      ],
+      expected: "vocal",
+    },
+  ];
+  test.each(testCases)("$name", ({ args, expected }) => {
+    expect(getIdolParameterKindOnTurnConsideringIgnoring(...args)).toBe(
+      expected,
+    );
+  });
 });
 describe("patchDiffs", () => {
   describe("actionPoints", () => {

@@ -17,7 +17,6 @@ import {
   generateDrinkDescription,
   generateEffectText,
   generateProducerItemDescription,
-  generateProducerItemTriggerAndConditionText,
   generateReactiveEffectTriggerText,
   globalDataKeywords,
 } from "./text-generation";
@@ -102,13 +101,34 @@ describe("generateReactiveEffectTriggerText", () => {
       expected: "{{アドレナリン全開}}使用時",
     },
     {
-      name: "turnEnd",
+      name: "modifierIncrease - goodCondition 以外の時",
       args: [
         {
-          kind: "turnEnd",
+          kind: "modifierIncrease",
+          modifierKind: "focus",
         },
       ],
-      expected: "ターン終了時",
+      expected: "{{集中}}が増加後",
+    },
+    {
+      name: "modifierIncrease - goodCondition の時",
+      args: [
+        {
+          kind: "modifierIncrease",
+          modifierKind: "goodCondition",
+        },
+      ],
+      expected: "{{好調}}の効果ターンが増加後",
+    },
+    {
+      name: "turnStartEveryNTurns",
+      args: [
+        {
+          kind: "turnStartEveryNTurns",
+          interval: 2,
+        },
+      ],
+      expected: "2ターンごとに",
     },
   ];
   test.each(testCases)("$name", ({ args, expected }) => {
@@ -1045,223 +1065,6 @@ describe("generateCardDescription", () => {
       ).toBe(expected);
     },
   );
-});
-describe("generateProducerItemTriggerAndConditionText", () => {
-  const testCases: Array<{
-    args: Parameters<typeof generateProducerItemTriggerAndConditionText>;
-    expected: ReturnType<typeof generateProducerItemTriggerAndConditionText>;
-    name: string;
-  }> = [
-    {
-      args: [
-        {
-          trigger: { kind: "beforeCardEffectActivation" },
-        },
-      ],
-      expected: "スキルカード使用時、",
-      name: "beforeCardEffectActivation - no options",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "beforeCardEffectActivation",
-            cardSummaryKind: "active",
-          },
-        },
-      ],
-      expected: "{{アクティブスキルカード}}使用時、",
-      name: "beforeCardEffectActivation - cardSummaryKind: active",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "beforeCardEffectActivation",
-            cardSummaryKind: "mental",
-          },
-        },
-      ],
-      expected: "{{メンタルスキルカード}}使用時、",
-      name: "beforeCardEffectActivation - cardSummaryKind: mental",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "beforeCardEffectActivation",
-            cardDataId: "adorenarinzenkai",
-          },
-        },
-      ],
-      expected: "{{アドレナリン全開}}使用時、",
-      name: "beforeCardEffectActivation - cardDataId",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "afterCardEffectActivation" },
-        },
-      ],
-      expected: "スキルカード使用後、",
-      name: "afterCardEffectActivation - no options",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "afterCardEffectActivation",
-            cardSummaryKind: "active",
-          },
-        },
-      ],
-      expected: "{{アクティブスキルカード}}使用後、",
-      name: "afterCardEffectActivation - cardSummaryKind: active",
-    },
-    {
-      args: [
-        {
-          trigger: {
-            kind: "afterCardEffectActivation",
-            cardSummaryKind: "mental",
-          },
-        },
-      ],
-      expected: "{{メンタルスキルカード}}使用後、",
-      name: "afterCardEffectActivation - cardSummaryKind: mental",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStartEveryTwoTurns" },
-        },
-      ],
-      expected: "2ターンごとに、",
-      name: "turnStartEveryTwoTurns",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "turnStartEveryTwoTurns" },
-        },
-      ],
-      expected: "2ターンごとに{{好調}}状態の場合、",
-      name: "turnStartEveryTwoTurns - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "modifierIncrease", modifierKind: "focus" },
-        },
-      ],
-      expected: "{{集中}}が増加後、",
-      name: "modifierIncrease - not goodCondition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "modifierIncrease", modifierKind: "goodCondition" },
-        },
-      ],
-      expected: "{{好調}}の効果ターンが増加後、",
-      name: "modifierIncrease - goodCondition",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "modifierIncrease", modifierKind: "focus" },
-        },
-      ],
-      expected: "{{集中}}が増加後{{好調}}状態の場合、",
-      name: "modifierIncrease - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnEnd" },
-        },
-      ],
-      expected: "ターン終了時、",
-      name: "turnEnd",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "turnEnd" },
-        },
-      ],
-      expected: "ターン終了時{{好調}}状態の場合、",
-      name: "turnEnd - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart" },
-        },
-      ],
-      expected: "ターン開始時、",
-      name: "turnStart",
-    },
-    {
-      args: [
-        {
-          condition: {
-            kind: "countModifier",
-            modifierKind: "goodCondition",
-            range: { min: 1 },
-          },
-          trigger: { kind: "turnStart" },
-        },
-      ],
-      expected: "ターン開始時{{好調}}状態の場合、",
-      name: "turnStart - condition",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart", idolParameterKind: "vocal" },
-        },
-      ],
-      expected: "【ボイスレッスン・ボイスターンのみ】ターン開始時、",
-      name: "idolParameterKind - vocal",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart", idolParameterKind: "dance" },
-        },
-      ],
-      expected: "【ダンスレッスン・ダンスターンのみ】ターン開始時、",
-      name: "idolParameterKind - dance",
-    },
-    {
-      args: [
-        {
-          trigger: { kind: "turnStart", idolParameterKind: "visual" },
-        },
-      ],
-      expected: "【ビジュアルレッスン・ビジュアルターンのみ】ターン開始時、",
-      name: "idolParameterKind - visual",
-    },
-  ];
-  test.each(testCases)('$name => "$expected"', ({ args, expected }) => {
-    expect(generateProducerItemTriggerAndConditionText(...args)).toBe(expected);
-  });
 });
 describe("generateProducerItemDescription", () => {
   const testParameters: Array<{

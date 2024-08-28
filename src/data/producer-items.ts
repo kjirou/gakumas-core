@@ -154,7 +154,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardSummaryKind: "active",
       },
     },
@@ -170,7 +171,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardSummaryKind: "active",
       },
     },
@@ -211,7 +213,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardDataId: "hajimetenogohobi",
       },
     },
@@ -225,7 +228,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardDataId: "hajimetenogohobi",
       },
     },
@@ -360,7 +364,10 @@ export const producerItemsAsConst = [
         },
       ],
       times: 1,
-      trigger: { kind: "afterCardEffectActivation" },
+      trigger: {
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
+      },
     },
     enhanced: {
       condition: {
@@ -375,7 +382,10 @@ export const producerItemsAsConst = [
         },
       ],
       times: 1,
-      trigger: { kind: "afterCardEffectActivation" },
+      trigger: {
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
+      },
     },
   },
   {
@@ -662,7 +672,8 @@ export const producerItemsAsConst = [
       ],
       times: 2,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "active",
       },
     },
@@ -673,7 +684,8 @@ export const producerItemsAsConst = [
       ],
       times: 2,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "active",
       },
     },
@@ -687,12 +699,12 @@ export const producerItemsAsConst = [
     base: {
       effects: [{ kind: "perform", vitality: { value: 5 } }],
       times: 2,
-      trigger: { kind: "turnStartEveryTwoTurns" },
+      trigger: { kind: "turnStartEveryNTurns", interval: 2 },
     },
     enhanced: {
       effects: [{ kind: "perform", vitality: { value: 5 } }],
       times: 3,
-      trigger: { kind: "turnStartEveryTwoTurns" },
+      trigger: { kind: "turnStartEveryNTurns", interval: 2 },
     },
   },
   {
@@ -831,7 +843,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "active",
       },
     },
@@ -852,7 +865,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "active",
       },
     },
@@ -880,7 +894,10 @@ export const producerItemsAsConst = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 1 } },
       ],
       times: 1,
-      trigger: { kind: "beforeCardEffectActivation" },
+      trigger: {
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
+      },
     },
     enhanced: {
       condition: {
@@ -899,7 +916,10 @@ export const producerItemsAsConst = [
         { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
       ],
       times: 1,
-      trigger: { kind: "beforeCardEffectActivation" },
+      trigger: {
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
+      },
     },
   },
   {
@@ -991,7 +1011,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardDataId: "adorenarinzenkai",
       },
     },
@@ -1005,7 +1026,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardDataId: "adorenarinzenkai",
       },
     },
@@ -1219,7 +1241,10 @@ export const producerItemsAsConst = [
         },
       ],
       times: 1,
-      trigger: { kind: "afterCardEffectActivation" },
+      trigger: {
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
+      },
     },
     enhanced: {
       condition: {
@@ -1241,7 +1266,10 @@ export const producerItemsAsConst = [
         },
       ],
       times: 1,
-      trigger: { kind: "afterCardEffectActivation" },
+      trigger: {
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
+      },
     },
   },
   {
@@ -1394,7 +1422,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "mental",
       },
     },
@@ -1416,7 +1445,8 @@ export const producerItemsAsConst = [
       ],
       times: 1,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "mental",
       },
     },
@@ -1444,7 +1474,8 @@ export const producerItemsAsConst = [
       ],
       times: 4,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "active",
       },
     },
@@ -1464,7 +1495,8 @@ export const producerItemsAsConst = [
       ],
       times: 4,
       trigger: {
-        kind: "afterCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "after",
         cardSummaryKind: "active",
       },
     },
@@ -1566,7 +1598,8 @@ export const producerItemsAsConst = [
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardSummaryKind: "active",
         idolParameterKind: "vocal",
       },
@@ -1597,7 +1630,8 @@ export const producerItemsAsConst = [
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardSummaryKind: "active",
         idolParameterKind: "visual",
       },
@@ -1674,7 +1708,8 @@ export const producerItemsAsConst = [
       effects: [{ kind: "recoverLife", value: 2 }],
       times: 3,
       trigger: {
-        kind: "beforeCardEffectActivation",
+        kind: "accordingToCardEffectActivation",
+        adjacentKind: "before",
         cardSummaryKind: "active",
         idolParameterKind: "dance",
       },

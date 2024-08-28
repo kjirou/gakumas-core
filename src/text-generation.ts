@@ -19,7 +19,6 @@ import type {
   IdolParameterKind,
   ModifierData,
   ProducerItemContentData,
-  ProducerItemTrigger,
   RangedNumber,
   VitalityUpdateQuery,
   DrinkData,
@@ -162,9 +161,22 @@ export const generateCardName = (
 export const generateReactiveEffectTriggerText = (
   trigger: ReactiveEffectTrigger,
 ): string => {
+  let idolParameterKindText = "";
+  switch (trigger.idolParameterKind) {
+    case "vocal":
+      idolParameterKindText = "【ボイスレッスン・ボイスターンのみ】";
+      break;
+    case "dance":
+      idolParameterKindText = "【ダンスレッスン・ダンスターンのみ】";
+      break;
+    case "visual":
+      idolParameterKindText = "【ビジュアルレッスン・ビジュアルターンのみ】";
+      break;
+  }
   switch (trigger.kind) {
     case "accordingToCardEffectActivation": {
       return [
+        idolParameterKindText,
         trigger.effectKind === "vitality" ? `${kwd("vitality")}効果の` : "",
         trigger.cardDataId !== undefined
           ? cardKwd(trigger.cardDataId)
@@ -176,8 +188,25 @@ export const generateReactiveEffectTriggerText = (
         `使用${trigger.adjacentKind === "before" ? "時" : "後"}`,
       ].join("");
     }
+    case "modifierIncrease": {
+      return [
+        idolParameterKindText,
+        generateModifierKindText(trigger.modifierKind),
+        trigger.modifierKind === "goodCondition" ? "の効果ターン" : "",
+        "が増加後",
+      ].join("");
+    }
+    case "lessonStart": {
+      return idolParameterKindText + "レッスン開始時";
+    }
     case "turnEnd": {
-      return "ターン終了時";
+      return idolParameterKindText + "ターン終了時";
+    }
+    case "turnStart": {
+      return idolParameterKindText + "ターン開始時";
+    }
+    case "turnStartEveryNTurns": {
+      return `${idolParameterKindText}${trigger.interval}ターンごとに`;
     }
     default: {
       const unreachable: never = trigger;
@@ -499,105 +528,6 @@ export const generateProducerItemName = (
   enhanced: boolean,
 ): string => name + (enhanced ? "+" : "");
 
-export const generateProducerItemTriggerAndConditionText = (params: {
-  condition?: EffectCondition;
-  trigger: ProducerItemTrigger;
-}): string => {
-  const { condition, trigger } = params;
-  let text = "";
-  switch (trigger.idolParameterKind) {
-    case "vocal":
-      text += "【ボイスレッスン・ボイスターンのみ】";
-      break;
-    case "dance":
-      text += "【ダンスレッスン・ダンスターンのみ】";
-      break;
-    case "visual":
-      text += "【ビジュアルレッスン・ビジュアルターンのみ】";
-      break;
-  }
-  switch (trigger.kind) {
-    case "afterCardEffectActivation":
-      text += [
-        (() => {
-          switch (trigger.cardSummaryKind) {
-            case "active":
-              return kwd("activeSkillCard");
-            case "mental":
-              return kwd("mentalSkillCard");
-            default:
-              return "スキルカード";
-          }
-        })(),
-        "使用後",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    case "beforeCardEffectActivation":
-      text += [
-        (() => {
-          if (trigger.cardDataId !== undefined) {
-            return cardKwd(trigger.cardDataId);
-          }
-          switch (trigger.cardSummaryKind) {
-            case "active":
-              return kwd("activeSkillCard");
-            case "mental":
-              return kwd("mentalSkillCard");
-            default:
-              return "スキルカード";
-          }
-        })(),
-        "使用時",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    case "turnStartEveryTwoTurns":
-      text += [
-        "2ターンごとに",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    case "lessonStart":
-      text += [
-        "レッスン開始時",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    case "modifierIncrease":
-      text += [
-        generateModifierKindText(trigger.modifierKind),
-        trigger.modifierKind === "goodCondition" ? "の効果ターン" : "",
-        "が増加後",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    case "turnEnd":
-      text += [
-        "ターン終了時",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    case "turnStart":
-      text += [
-        "ターン開始時",
-        condition ? generateEffectConditionText(condition) : "",
-        "、",
-      ].join("");
-      break;
-    default:
-      const unreachable: never = trigger;
-      throw new Error(`Unreachable statement`);
-  }
-  return text;
-};
-
 const generateProducerItemTimesText = (
   times: ProducerItemContentData["times"],
 ): string => {
@@ -615,10 +545,13 @@ export const generateProducerItemDescription = (params: {
   trigger: ProducerItemContentData["trigger"];
 }): string => {
   let lines: string[] = [];
-  const triggerAndConditionText = generateProducerItemTriggerAndConditionText({
-    condition: params.condition,
-    trigger: params.trigger,
-  });
+  let triggerAndConditionText = generateReactiveEffectTriggerText(
+    params.trigger,
+  );
+  if (params.condition) {
+    triggerAndConditionText += generateEffectConditionText(params.condition);
+  }
+  triggerAndConditionText += "、";
   const effectTexts = params.effects.map((e) => generateEffectText(e));
   lines = [
     ...lines,

@@ -420,9 +420,9 @@ export const startTurn = (
   //
   // 1. 応援/トラブルの効果発動
   // 2. Pアイテム起因の、「ターン開始時」の効果発動
-  //    ProducerItemTrigger["kind"] === "turnStart"
+  //    ReactiveEffectTrigger["kind"] === "turnStart"
   // 3. Pアイテム起因の、「2ターンごと」の効果発動
-  //    ProducerItemTrigger["kind"] === "turnStartEveryTwoTurns"
+  //    ReactiveEffectTrigger["kind"] === "turnStartEveryTwoTurns"
   // 4. 手札を山札から引く
   // 5. 状態修正起因の、「(次ターン|nターン後)、パラメータ+n」の効果発動
   //    Modifier["kind"] === "delayedEffect" && Effect["kind"] === "perform"
@@ -780,10 +780,10 @@ export const endTurn = (gamePlay: GamePlay): GamePlay => {
   //
   // ターン終了時の効果発動順序のまとめ
   //
+  // ReactiveEffectTrigger["kind"] === "turnEnd"
+  //
   // 1. Pアイテム起因の、「ターン終了時」の効果発動
-  //    ProducerItemTrigger["kind"] === "turnEnd"
   // 2. 状態修正起因の、「ターン終了時」の効果発動
-  //    Modifier["kind"] === "effectActivationOnTurnEnd"
   // 3. 未使用の手札を捨てる
   // 4. 好印象の評価によるスコア増加効果発動
   //

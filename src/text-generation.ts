@@ -431,8 +431,13 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
           : "",
         effect.vitality ? generateVitalityUpdateQueryText(effect.vitality) : "",
       ].join("");
-    case "performLeveragingModifier":
-      return `${generateModifierKindText(effect.modifierKind)}の${effect.percentage}%分パラメータ上昇`;
+    case "performLeveragingModifier": {
+      const valueKindText =
+        effect.valueKind === "score"
+          ? "パラメータ上昇"
+          : kwd("vitality") + "増加";
+      return `${generateModifierKindText(effect.modifierKind)}の${effect.percentage}%分${valueKindText}`;
+    }
     case "performLeveragingVitality":
       return (
         (() => {

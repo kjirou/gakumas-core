@@ -147,6 +147,7 @@ export const drinksAsConst = [
       {
         kind: "performLeveragingModifier",
         modifierKind: "positiveImpression",
+        valueKind: "score",
         percentage: 100,
       },
       { kind: "perform", vitality: { value: 3 } },

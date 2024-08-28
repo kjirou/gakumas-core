@@ -691,15 +691,17 @@ export type EffectWithoutCondition = Readonly<
     }
   | {
       /**
-       * 状態修正値を基底としてパラメータを増加する
+       * 状態修正値を基底として perfrom を行う
        *
        * - 原文の構文は、「{modifierKind}の{percentage}%分パラメータ上昇」
        *   - 「200%スマイル」は、「好印象の100%分パラメータ上昇」
        *   - 「開花」は、「やる気の200%分パラメータ上昇」
+       *   - 「ぱちぱち線香花火」は、「好印象の100%分元気増加
        * - 割合計算上生じるスコアの端数は切り上げ
        */
       kind: "performLeveragingModifier";
       modifierKind: "goodCondition" | "motivation" | "positiveImpression";
+      valueKind: "score" | "vitality";
       /** 状態修正値に対するパーセント表記の乗数 */
       percentage: number;
     }

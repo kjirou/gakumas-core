@@ -352,7 +352,7 @@ describe("activateEffectIf", () => {
       ],
     },
     {
-      name: "performLeveragingModifier - goodCondition",
+      name: "performLeveragingModifier - score - goodCondition",
       args: [
         (() => {
           const lesson = createLessonForTest();
@@ -364,6 +364,7 @@ describe("activateEffectIf", () => {
         {
           kind: "performLeveragingModifier",
           modifierKind: "goodCondition",
+          valueKind: "score",
           percentage: 100,
         },
         () => 0,
@@ -375,6 +376,33 @@ describe("activateEffectIf", () => {
           // 通常の好調の効果も反映される
           actual: 15,
           max: 15,
+        },
+      ],
+    },
+    {
+      name: "performLeveragingModifier - vitality - motivation",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "motivation", amount: 10, id: "m1" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "performLeveragingModifier",
+          modifierKind: "goodCondition",
+          valueKind: "vitality",
+          percentage: 100,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "vitality",
+          actual: 10,
+          max: 10,
         },
       ],
     },

@@ -459,6 +459,7 @@ describe("generateEffectText", () => {
         {
           kind: "performLeveragingModifier",
           modifierKind: "positiveImpression",
+          valueKind: "score",
           percentage: 100,
         },
       ],
@@ -1197,6 +1198,24 @@ describe("generateProducerItemDescription", () => {
         "{{消費体力削減}}3",
         "手札をすべて{{レッスン中強化}}",
         "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "pachipachisenkohanabi",
+      expected: [
+        "3ターンごとに{{好印象}}が6以上の場合、{{好印象}}の100%分{{元気}}増加",
+        "{{やる気}}+2",
+        "{{体力消費}}1",
+        "（レッスン内4回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "pachipachisenkohanabi",
+      enhanced: true,
+      expected: [
+        "3ターンごとに{{好印象}}が6以上の場合、{{好印象}}の100%分{{元気}}増加",
+        "{{やる気}}+3",
+        "{{体力消費}}1",
       ].join("\n"),
     },
   ];

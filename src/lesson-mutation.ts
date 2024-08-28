@@ -1119,7 +1119,7 @@ export const activateEffect = <
       break;
     }
     case "performLeveragingModifier": {
-      let score = 0;
+      let baseValue = 0;
       const modifierKind = effect.modifierKind;
       switch (modifierKind) {
         case "goodCondition": {
@@ -1130,7 +1130,9 @@ export const activateEffect = <
             goodCondition && "duration" in goodCondition
               ? goodCondition.duration
               : 0;
-          score = Math.ceil((goodConditionDuration * effect.percentage) / 100);
+          baseValue = Math.ceil(
+            (goodConditionDuration * effect.percentage) / 100,
+          );
           break;
         }
         case "motivation": {
@@ -1139,7 +1141,7 @@ export const activateEffect = <
           );
           const motivationAmount =
             motivation && "amount" in motivation ? motivation.amount : 0;
-          score = Math.ceil((motivationAmount * effect.percentage) / 100);
+          baseValue = Math.ceil((motivationAmount * effect.percentage) / 100);
           break;
         }
         case "positiveImpression": {
@@ -1150,7 +1152,7 @@ export const activateEffect = <
             positiveImpression && "amount" in positiveImpression
               ? positiveImpression.amount
               : 0;
-          score = Math.ceil(
+          baseValue = Math.ceil(
             (positiveImpressionAmount * effect.percentage) / 100,
           );
           break;
@@ -1160,15 +1162,31 @@ export const activateEffect = <
           throw new Error(`Unreachable statement`);
         }
       }
-      diffs = [
-        ...diffs,
-        ...calculatePerformingScoreEffect(
-          lesson.idol,
-          scoreBonus,
-          remainingIncrementableScore,
-          { value: score },
-        ),
-      ];
+      let newDiffs: LessonUpdateDiff[] = [];
+      switch (effect.valueKind) {
+        case "score": {
+          newDiffs = calculatePerformingScoreEffect(
+            lesson.idol,
+            scoreBonus,
+            remainingIncrementableScore,
+            { value: baseValue },
+          );
+          break;
+        }
+        case "vitality": {
+          newDiffs = [
+            calculatePerformingVitalityEffect(lesson.idol, {
+              value: baseValue,
+            }),
+          ];
+          break;
+        }
+        default: {
+          const unreachable: never = effect.valueKind;
+          throw new Error(`Unreachable statement`);
+        }
+      }
+      diffs = [...diffs, ...newDiffs];
       break;
     }
     case "performLeveragingVitality": {

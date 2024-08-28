@@ -256,6 +256,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 100,
           },
         ],
@@ -273,6 +274,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 120,
           },
         ],
@@ -930,6 +932,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 150,
           },
         ],
@@ -940,6 +943,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 200,
           },
         ],
@@ -2545,6 +2549,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 60,
           },
         ],
@@ -2558,6 +2563,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 80,
           },
         ],
@@ -2572,6 +2578,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 90,
           },
         ],
@@ -2586,6 +2593,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 100,
           },
         ],
@@ -2705,6 +2713,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 200,
           },
           {
@@ -2720,6 +2729,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 250,
           },
           {
@@ -2752,6 +2762,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 90,
           },
           {
@@ -2769,6 +2780,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 120,
           },
           {
@@ -2785,6 +2797,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 140,
           },
           {
@@ -2801,6 +2814,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 160,
           },
           {
@@ -4426,6 +4440,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 250,
           },
         ],
@@ -4437,6 +4452,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 350,
           },
         ],
@@ -4447,6 +4463,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 350,
           },
         ],
@@ -4457,6 +4474,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 350,
           },
         ],
@@ -4483,6 +4501,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 120,
           },
         ],
@@ -4498,6 +4517,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 160,
           },
         ],
@@ -5385,6 +5405,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 100,
           },
         ],
@@ -5399,6 +5420,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "positiveImpression",
+            valueKind: "score",
             percentage: 170,
           },
         ],
@@ -5431,6 +5453,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 200,
           },
         ],
@@ -5445,6 +5468,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 300,
           },
         ],
@@ -5458,6 +5482,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 300,
           },
         ],
@@ -5543,6 +5568,7 @@ export const cardsAsConst = [
               effect: {
                 kind: "performLeveragingModifier",
                 modifierKind: "positiveImpression",
+                valueKind: "score",
                 percentage: 30,
               },
               representativeName: "輝くキミへ",
@@ -5568,6 +5594,7 @@ export const cardsAsConst = [
               effect: {
                 kind: "performLeveragingModifier",
                 modifierKind: "positiveImpression",
+                valueKind: "score",
                 percentage: 50,
               },
               representativeName: "輝くキミへ",
@@ -5600,6 +5627,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 150,
           },
         ],
@@ -5612,6 +5640,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "motivation",
+            valueKind: "score",
             percentage: 200,
           },
         ],
@@ -6842,6 +6871,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "goodCondition",
+            valueKind: "score",
             percentage: 200,
           },
         ],
@@ -6853,6 +6883,7 @@ export const cardsAsConst = [
           {
             kind: "performLeveragingModifier",
             modifierKind: "goodCondition",
+            valueKind: "score",
             percentage: 300,
           },
         ],

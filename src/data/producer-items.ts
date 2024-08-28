@@ -1195,9 +1195,9 @@ export const producerItemsAsConst = [
     },
   },
   {
-    id: "biggudorimuchokimbako",
-    name: "ビッグドリーム貯金箱",
-    keywords: ["biggudorimuchokinbako"],
+    id: "piggudorimuchokimbako",
+    name: "ピッグドリーム貯金箱",
+    keywords: ["piggudorimuchokinbako", "biggudorimuchokinbako"],
     producerItemPossessionKind: "logic",
     producerItemProviderKind: "idol",
     rarity: "ssr",

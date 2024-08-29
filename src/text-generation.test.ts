@@ -411,6 +411,15 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "pow",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}3",
+        "{{好印象}}の260%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',

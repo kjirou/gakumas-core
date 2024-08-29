@@ -7189,6 +7189,45 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "pow",
+    name: "pow",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    keywords: ["pau"],
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "life", value: 5 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            valueKind: "score",
+            percentage: 250,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            valueKind: "score",
+            percentage: 260,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "okkinaonigiri",
     name: "おっきなおにぎり",
     cardPossessionKind: "logic",

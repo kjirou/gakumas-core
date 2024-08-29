@@ -40,6 +40,18 @@ export const idolsAsConst = [
     title: "冠菊",
   },
   {
+    id: "hanamisaki-ssr-2",
+    characterId: "hanamisaki",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "ssr",
+    specificCardId: "pow",
+    specificProducerItemId: "kachihenokodawari",
+    title: "Boom Boom Pow",
+  },
+  {
     id: "hanamisaki-ssr-1",
     characterId: "hanamisaki",
     producePlan: {

@@ -314,6 +314,25 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "tegakinomesseji",
+      expected: [
+        "{{好印象}}消費2",
+        "{{元気}}+9",
+        "{{元気}}+9",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "tegakinomesseji",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{好印象}}消費1",
+        "{{元気}}+10",
+        "{{元気}}+10",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "ritorupurinsu",
       expected: [
         "パラメータ+8",

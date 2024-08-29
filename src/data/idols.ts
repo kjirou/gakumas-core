@@ -76,6 +76,18 @@ export const idolsAsConst = [
     title: "わたしが一番！",
   },
   {
+    id: "hanamisaki-r-2",
+    characterId: "hanamisaki",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenomirai",
+    specificProducerItemId: "hatsukoenoakashisaki",
+    title: "初声",
+  },
+  {
     id: "hanamisaki-r-1",
     characterId: "hanamisaki",
     producePlan: {

@@ -2079,6 +2079,44 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenomirai",
+    name: "初めての未来",
+    cardPossessionKind: "logic",
+    cardProviderKind: "idol",
+    cardSummaryKind: "active",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "life", value: 5 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            valueKind: "score",
+            percentage: 190,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "positiveImpression",
+            valueKind: "score",
+            percentage: 200,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "hajimetenobasho",
     name: "初めての場所",
     cardPossessionKind: "logic",

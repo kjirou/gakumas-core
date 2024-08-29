@@ -351,6 +351,15 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "hajimetenomirai",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}3",
+        "{{好印象}}の200%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "hajimetenobasho",
       expected: ["{{好印象}}+6", "{{レッスン中1回}}{{重複不可}}"].join("\n"),
     },
@@ -1105,6 +1114,21 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "ターン開始時{{好印象}}が6以上の場合、体力回復4",
         "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashisaki",
+      expected: [
+        "レッスン中に体力が減少した時、{{好印象}}+2",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashisaki",
+      enhanced: true,
+      expected: [
+        "レッスン中に体力が減少した時、{{好印象}}+2",
+        "（レッスン内3回）",
       ].join("\n"),
     },
     {

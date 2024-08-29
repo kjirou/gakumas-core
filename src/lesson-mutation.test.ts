@@ -2453,26 +2453,26 @@ describe("canActivateEffect", () => {
       expected: false,
     },
     {
-      name: "countReminingTurnsを満たす時、trueを返す",
+      name: "countRemainingTurnsを満たす時、trueを返す",
       args: [
         {
           turnNumber: 4,
           turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
           remainingTurnsChange: 0,
         } as Lesson,
-        { kind: "countReminingTurns", max: 3 },
+        { kind: "countRemainingTurns", max: 3 },
       ],
       expected: true,
     },
     {
-      name: "countReminingTurnsを満たさない時、falseを返す",
+      name: "countRemainingTurnsを満たさない時、falseを返す",
       args: [
         {
           turnNumber: 4,
           turns: ["vocal", "vocal", "vocal", "vocal", "vocal", "vocal"],
           remainingTurnsChange: 0,
         } as Lesson,
-        { kind: "countReminingTurns", max: 2 },
+        { kind: "countRemainingTurns", max: 2 },
       ],
       expected: false,
     },

@@ -384,7 +384,7 @@ const generateEffectConditionText = (condition: EffectCondition): string => {
       }
       return `${generateModifierKindText(condition.modifierKind)}${rangeText}の場合`;
     }
-    case "countReminingTurns":
+    case "countRemainingTurns":
       return condition.max === 1
         ? "最終ターンの場合"
         : `残り${condition.max}ターン以内の場合`;

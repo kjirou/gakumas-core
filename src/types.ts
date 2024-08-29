@@ -541,7 +541,7 @@ export type EffectCondition = Readonly<
        *   - 「等身大のレディリップ」は、「ターン開始時残り2ターン以内の場合、パラメータ+5」
        * - 「ターン追加」による加算も含めた値に対して判定する
        */
-      kind: "countReminingTurns";
+      kind: "countRemainingTurns";
       /** 1が最終ターンを意味する */
       max: number;
     }

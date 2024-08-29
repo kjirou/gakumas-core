@@ -468,7 +468,7 @@ export const canActivateEffect = (
       }
       return validateNumberInRange(targetValue, condition.range);
     }
-    case "countReminingTurns": {
+    case "countRemainingTurns": {
       return createCurrentTurnDetails(lesson).remainingTurns <= condition.max;
     }
     case "countVitality": {

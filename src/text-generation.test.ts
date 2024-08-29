@@ -971,22 +971,22 @@ describe("generateEffectText", () => {
         {
           kind: "perform",
           score: { value: 10 },
-          condition: { kind: "countReminingTurns", max: 1 },
+          condition: { kind: "countRemainingTurns", max: 1 },
         },
       ],
       expected: "最終ターンの場合、パラメータ+10",
-      name: "condition - countReminingTurns - 1",
+      name: "condition - countRemainingTurns - 1",
     },
     {
       args: [
         {
           kind: "perform",
           score: { value: 10 },
-          condition: { kind: "countReminingTurns", max: 2 },
+          condition: { kind: "countRemainingTurns", max: 2 },
         },
       ],
       expected: "残り2ターン以内の場合、パラメータ+10",
-      name: "condition - countReminingTurns - 2",
+      name: "condition - countRemainingTurns - 2",
     },
     {
       args: [

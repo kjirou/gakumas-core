@@ -275,13 +275,13 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "r",
     base: {
-      condition: { kind: "countReminingTurns", max: 1 },
+      condition: { kind: "countRemainingTurns", max: 1 },
       cost: { kind: "life", value: 1 },
       effects: [{ kind: "performLeveragingVitality", percentage: 50 }],
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "countReminingTurns", max: 1 },
+      condition: { kind: "countRemainingTurns", max: 1 },
       cost: { kind: "life", value: 1 },
       effects: [{ kind: "performLeveragingVitality", percentage: 70 }],
       trigger: { kind: "turnStart" },
@@ -972,13 +972,13 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "ssr",
     base: {
-      condition: { kind: "countReminingTurns", max: 2 },
+      condition: { kind: "countRemainingTurns", max: 2 },
       effects: [{ kind: "perform", score: { value: 5 } }],
       times: 2,
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "countReminingTurns", max: 3 },
+      condition: { kind: "countRemainingTurns", max: 3 },
       effects: [{ kind: "perform", score: { value: 5 } }],
       times: 3,
       trigger: { kind: "turnStart" },
@@ -1194,7 +1194,7 @@ export const producerItemsAsConst = [
     rarity: "ssr",
     base: {
       condition: {
-        kind: "countReminingTurns",
+        kind: "countRemainingTurns",
         max: 1,
       },
       cost: { kind: "life", value: 2 },
@@ -1209,7 +1209,7 @@ export const producerItemsAsConst = [
     },
     enhanced: {
       condition: {
-        kind: "countReminingTurns",
+        kind: "countRemainingTurns",
         max: 1,
       },
       effects: [
@@ -1281,7 +1281,7 @@ export const producerItemsAsConst = [
     producerItemProviderKind: "idol",
     rarity: "ssr",
     base: {
-      condition: { kind: "countReminingTurns", max: 2 },
+      condition: { kind: "countRemainingTurns", max: 2 },
       effects: [
         { kind: "performLeveragingVitality", percentage: 50 },
         { kind: "drainLife", value: 1 },
@@ -1289,7 +1289,7 @@ export const producerItemsAsConst = [
       trigger: { kind: "turnStart" },
     },
     enhanced: {
-      condition: { kind: "countReminingTurns", max: 2 },
+      condition: { kind: "countRemainingTurns", max: 2 },
       effects: [
         { kind: "performLeveragingVitality", percentage: 65 },
         { kind: "drainLife", value: 1 },

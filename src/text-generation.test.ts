@@ -1189,6 +1189,18 @@ describe("generateProducerItemDescription", () => {
         "{{体力消費}}1",
       ].join("\n"),
     },
+    {
+      producerItemId: "kachihenokodawari",
+      expected: [
+        "レッスン中に体力が減少した時、{{好印象}}+2",
+        "（レッスン内4回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "kachihenokodawari",
+      enhanced: true,
+      expected: ["レッスン中に体力が減少した時、{{好印象}}+2"].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$producerItemId => "$expected"',

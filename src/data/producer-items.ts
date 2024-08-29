@@ -1428,6 +1428,32 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "kachihenokodawari",
+    name: "勝ちへのこだわり",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 2 },
+        },
+      ],
+      times: 4,
+      trigger: { kind: "lifeDecrease" },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 2 },
+        },
+      ],
+      trigger: { kind: "lifeDecrease" },
+    },
+  },
+  {
     id: "kaerujirushinosempuki",
     name: "カエル印の扇風機",
     keywords: ["kaerushirushinosenpuki"],

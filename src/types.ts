@@ -129,6 +129,15 @@ export type ReactiveEffectTrigger = Readonly<
       }
     | {
         /**
+         * 体力減少時
+         *
+         * - 原文の構文は、「レッスン中に体力が減少した時」
+         *   - 「勝ちへのこだわり」は、「レッスン中に体力が減少した時、好印象+2」
+         */
+        kind: "lifeDecrease";
+      }
+    | {
+        /**
          * スキルカードの主効果発動に伴う状態修正増加時
          *
          * - 原文の構文は、「{modifierKind}が増加後」
@@ -222,6 +231,11 @@ export type ReactiveEffectQueryWithoutIdolParameterKind = Readonly<
     }
   | {
       kind: "lessonStart";
+    }
+  | {
+      kind: "lifeDecrease";
+      /** スキルカード使用による更新差分リスト */
+      diffs: LessonUpdateDiff[];
     }
   | {
       kind: "modifierIncrease";
@@ -1612,6 +1626,11 @@ export type LessonUpdateQueryReason = Readonly<
     | {
         /** スキルカード使用.Pアイテム.主効果発動前の効果発動 */
         kind: "cardUsage.producerItem.beforeCardEffectActivation";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.Pアイテム.体力減少時の効果発動 */
+        kind: "cardUsage.producerItem.lifeDecreaseEffectActivation";
         cardId: Card["id"];
       }
     | {

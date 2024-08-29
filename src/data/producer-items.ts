@@ -379,6 +379,34 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "hatsukoenoakashisaki",
+    name: "初声の証・咲季",
+    keywords: ["hatsugoenoakashisaki"],
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "lifeDecrease" },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 2 },
+        },
+      ],
+      times: 3,
+      trigger: { kind: "lifeDecrease" },
+    },
+  },
+  {
     id: "hatsukoenoakashitemari",
     name: "初声の証・手毬",
     keywords: ["hatsugoenoakashitemari"],
@@ -1425,6 +1453,32 @@ export const producerItemsAsConst = [
         kind: "afterCardEffectActivation",
         cardSummaryKind: "mental",
       },
+    },
+  },
+  {
+    id: "kachihenokodawari",
+    name: "勝ちへのこだわり",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 2 },
+        },
+      ],
+      times: 4,
+      trigger: { kind: "lifeDecrease" },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 2 },
+        },
+      ],
+      trigger: { kind: "lifeDecrease" },
     },
   },
   {

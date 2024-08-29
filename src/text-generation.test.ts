@@ -351,6 +351,15 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "hajimetenomirai",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}3",
+        "{{好印象}}の200%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "hajimetenobasho",
       expected: ["{{好印象}}+6", "{{レッスン中1回}}{{重複不可}}"].join("\n"),
     },
@@ -408,6 +417,15 @@ describe("generateCardDescription", () => {
         "{{好印象}}+4",
         "{{やる気}}+3",
         "以降、{{元気}}効果のスキルカード使用後、{{好印象}}+1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "pow",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}3",
+        "{{好印象}}の260%分パラメータ上昇",
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
@@ -1099,6 +1117,21 @@ describe("generateProducerItemDescription", () => {
       ].join("\n"),
     },
     {
+      producerItemId: "hatsukoenoakashisaki",
+      expected: [
+        "レッスン中に体力が減少した時、{{好印象}}+2",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "hatsukoenoakashisaki",
+      enhanced: true,
+      expected: [
+        "レッスン中に体力が減少した時、{{好印象}}+2",
+        "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
       producerItemId: "hatsukoenoakashitemari",
       expected: [
         "ターン終了時{{好印象}}が6以上の場合、{{好印象}}の100%分パラメータ上昇",
@@ -1188,6 +1221,18 @@ describe("generateProducerItemDescription", () => {
         "{{やる気}}+3",
         "{{体力消費}}1",
       ].join("\n"),
+    },
+    {
+      producerItemId: "kachihenokodawari",
+      expected: [
+        "レッスン中に体力が減少した時、{{好印象}}+2",
+        "（レッスン内4回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "kachihenokodawari",
+      enhanced: true,
+      expected: ["レッスン中に体力が減少した時、{{好印象}}+2"].join("\n"),
     },
   ];
   test.each(testParameters)(

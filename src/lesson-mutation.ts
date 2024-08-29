@@ -286,6 +286,15 @@ export const validateQueryOfReactiveEffectTrigger = (
     case "lessonStart": {
       return query.kind === "lessonStart" && idolParameterKindCondition;
     }
+    case "lifeDecrease": {
+      if (query.kind === "lifeDecrease") {
+        return (
+          query.diffs.some((diff) => diff.kind === "life" && diff.actual < 0) &&
+          idolParameterKindCondition
+        );
+      }
+      return false;
+    }
     case "modifierIncrease": {
       if (query.kind === "modifierIncrease") {
         const increasedModifierKinds = scanIncreasedModifierKinds(
@@ -2615,6 +2624,30 @@ export const useCard = (
           params.idGenerator,
           {
             kind: "cardUsage.producerItem.modifierIncreaseEffectActivation",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+        );
+      newLesson = updatedLesson;
+      effectActivationUpdates = [...effectActivationUpdates, ...updates];
+    }
+
+    //
+    // Pアイテムに起因する、体力減少時の効果発動
+    //
+    if (!params.preview) {
+      const { lesson: updatedLesson, updates } =
+        activateEffectsEachProducerItemsAccordingToCardUsage(
+          newLesson,
+          {
+            kind: "lifeDecrease",
+            diffs: costConsumptionUpdates,
+          },
+          params.getRandom,
+          params.idGenerator,
+          {
+            kind: "cardUsage.producerItem.lifeDecreaseEffectActivation",
             cardId: card.id,
             historyTurnNumber: newLesson.turnNumber,
             historyResultIndex: nextHistoryResultIndex,

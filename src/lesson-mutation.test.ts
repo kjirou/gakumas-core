@@ -5188,6 +5188,48 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
+  describe("Pアイテムに起因する、体力減少時の効果発動", () => {
+    test("スキルカード使用により体力が減少した時、「勝ちへのこだわり」が発動する", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "a",
+            data: getCardDataByConstId("apirunokihon"),
+            enhancements: [],
+          },
+        ],
+        producerItems: [
+          {
+            id: "p1",
+            data: getProducerItemDataByConstId("kachihenokodawari"),
+            enhanced: false,
+            activationCount: 0,
+          },
+        ],
+      });
+      lesson.hand = ["a"];
+      const { updates } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(
+        updates.filter((e) => e.kind === "modifiers.addition"),
+      ).toStrictEqual([
+        {
+          kind: "modifiers.addition",
+          actual: {
+            kind: "positiveImpression",
+            amount: 2,
+            id: expect.any(String),
+          },
+          max: expect.any(Object),
+          reason: expect.any(Object),
+        },
+      ]);
+    });
+  });
   describe("スキルカード使用数追加によるアクションポイントの回復", () => {
     test("it works", () => {
       const lesson = createLessonForTest({
@@ -5992,6 +6034,20 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
       expected: false,
     },
     {
+      name: "lessonStart - 満たす",
+      args: [
+        {
+          kind: "lessonStart",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "lessonStart",
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
       name: "lessonStart - kind - 満たさない",
       args: [
         {
@@ -6014,6 +6070,51 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
         },
         {
           kind: "lessonStart",
+          idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "lifeDecrease - 満たす",
+      args: [
+        {
+          kind: "lifeDecrease",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "lifeDecrease",
+          diffs: [{ kind: "life", actual: -1, max: -1 }],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "lifeDecrease - 満たさない",
+      args: [
+        {
+          kind: "lifeDecrease",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "lifeDecrease",
+          diffs: [{ kind: "life", actual: 0, max: -1 }],
+          idolParameterKind: "vocal",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "lifeDecrease - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "lifeDecrease",
+          idolParameterKind: "vocal",
+        },
+        {
+          kind: "lifeDecrease",
+          diffs: [{ kind: "life", actual: -1, max: -1 }],
           idolParameterKind: "dance",
         },
       ],

@@ -203,6 +203,9 @@ export const generateReactiveEffectTriggerText = (
     case "lessonStart": {
       return idolParameterKindText + "レッスン開始時";
     }
+    case "lifeDecrease": {
+      return idolParameterKindText + "レッスン中に体力が減少した時";
+    }
     case "turnEnd": {
       return idolParameterKindText + "ターン終了時";
     }

@@ -6282,7 +6282,7 @@ export const cardsAsConst = [
     rarity: "ssr",
     contents: [
       {
-        cost: { kind: "goodCondition", value: 2 },
+        cost: { kind: "positiveImpression", value: 2 },
         effects: [
           { kind: "perform", vitality: { value: 9 } },
           { kind: "perform", vitality: { value: 9 } },
@@ -6290,7 +6290,7 @@ export const cardsAsConst = [
         usableOncePerLesson: true,
       },
       {
-        cost: { kind: "goodCondition", value: 1 },
+        cost: { kind: "positiveImpression", value: 1 },
         effects: [
           { kind: "perform", vitality: { value: 10 } },
           { kind: "perform", vitality: { value: 10 } },

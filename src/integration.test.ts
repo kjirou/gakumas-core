@@ -45,7 +45,7 @@ describe("手札の配布と山札の再構築", () => {
     expect(display3.inventory.deck).toHaveLength(4);
     expect(display3.inventory.discardPile).toHaveLength(0);
   });
-  test("山札6枚で、スキップを続けた時、山札:3,捨札:0と山札:0,捨札:3を繰り返す / 山札0枚時の特殊仕様は発動しない", () => {
+  test("山札6枚で、スキップを続けた時、山札:3,捨札:0と山札:0,捨札:3を繰り返す", () => {
     let gamePlay = initializeGamePlay({
       idolDataId: "kuramotochina-r-1",
       cards: new Array(5).fill({ id: "apirunokihon" }),
@@ -72,49 +72,7 @@ describe("手札の配布と山札の再構築", () => {
     expect(display3.inventory.deck).toHaveLength(3);
     expect(display3.inventory.discardPile).toHaveLength(0);
   });
-  test("山札6枚で、2ターン目の山札0枚状態でスキルカードを使用した時、山札0枚時の特殊仕様が発動する", () => {
-    let gamePlay = initializeGamePlay({
-      idolDataId: "kuramotochina-r-1",
-      noIdolSpecificCard: true,
-      cards: [
-        { id: "apirunokihon", testId: "a" },
-        { id: "apirunokihon", testId: "b" },
-        { id: "apirunokihon", testId: "c" },
-        { id: "apirunokihon", testId: "d" },
-        { id: "apirunokihon", testId: "e" },
-        { id: "apirunokihon", testId: "f" },
-      ],
-      producerItems: [],
-      turns: ["vocal", "vocal", "vocal"],
-    });
-    gamePlay.initialLesson.deck = ["a", "b", "c", "d", "e", "f"];
-    // 1
-    gamePlay = startTurn(gamePlay);
-    expect(getLesson(gamePlay)).toMatchObject({
-      hand: ["a", "b", "c"],
-      deck: ["d", "e", "f"],
-      discardPile: [],
-    });
-    gamePlay = skipTurn(gamePlay);
-    gamePlay = endTurn(gamePlay);
-    // 2
-    gamePlay = startTurn(gamePlay);
-    expect(getLesson(gamePlay)).toMatchObject({
-      hand: ["d", "e", "f"],
-      deck: [],
-      discardPile: ["a", "b", "c"],
-    });
-    gamePlay = playCard(gamePlay, 0);
-    gamePlay = endTurn(gamePlay);
-    // 3
-    gamePlay = startTurn(gamePlay);
-    expect(getLesson(gamePlay)).toMatchObject({
-      hand: expect.arrayContaining(["a", "b", "c"]),
-      deck: [],
-      discardPile: expect.arrayContaining(["d", "e", "f"]),
-    });
-  });
-  test("山札3枚で、毎ターンスキルカードを使用した時、おそらくは山札0枚時の特殊仕様を発動しつつも、手札は毎ターン3枚引ける", () => {
+  test("山札3枚で、毎ターンスキルカードを使用した時、手札は毎ターン3枚引ける", () => {
     let gamePlay = initializeGamePlay({
       idolDataId: "kuramotochina-r-1",
       noIdolSpecificCard: true,

@@ -241,7 +241,6 @@ export const createLesson = (params: {
     memoryEffects,
     turns: params.turns,
     removedCardPile: [],
-    handWhenEmptyDeck: [],
     score: 0,
     turnNumber: 0,
     turnEnded: false,
@@ -499,13 +498,6 @@ export const patchDiffs = <LessonUpdateDiffLike extends LessonUpdateDiff>(
               (drink) => drink.id !== update.id,
             ),
           },
-        };
-        break;
-      }
-      case "handWhenEmptyDeck": {
-        newLesson = {
-          ...newLesson,
-          handWhenEmptyDeck: update.cardIds,
         };
         break;
       }

@@ -1330,22 +1330,6 @@ export type Lesson = {
    * - 最大5枚
    */
   hand: Array<Card["id"]>;
-  /**
-   * 山札0枚時にスキルカードを使った時の手札
-   *
-   * - 本家仕様には、不具合だと思われる、妙な仕様がある
-   *   - それは「山札が0枚の時に、スキルカードを使うと、その時の手札が、次の山札の再構築対象にならない」というもの
-   *    - 仕様確認動画: https://www.youtube.com/watch?v=X8cjsP3B2hw
-   * - これを再現するために、この条件に合致するその時の手札を保持する
-   *   - 次のターン開始処理の手札を引く時に参照して、山札の再構築の候補から外して、直接捨札へ配置する
-   * - 本実装では、便宜上「山札0枚時の特殊仕様」と命名している
-   * - 補足:
-   *   - ターン最後のスキルカードを、スキルカード使用数追加がある状態で使用し、その後にスキップした場合もこの仕様の影響を受ける
-   *   - 山札0枚時に「仕切り直し」を使った時は、この現象は発生しない
-   *     - 仕様確認動画: https://www.youtube.com/watch?v=OfLUwt2eIDs
-   *   - 除外に入る札は、結果的にこの仕様の影響を受けないので、ここには含めない
-   */
-  handWhenEmptyDeck: Array<Card["id"]>;
   idol: Idol;
   /**
    * レッスンクリア以降はパラメータ属性条件が無視されるか
@@ -1455,10 +1439,6 @@ export type LessonUpdateDiff = Readonly<
       /** Pドリンクの削除 */
       kind: "drinks.removal";
       id: Drink["id"];
-    }
-  | {
-      kind: "handWhenEmptyDeck";
-      cardIds: Lesson["handWhenEmptyDeck"];
     }
   | {
       kind: "life";

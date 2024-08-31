@@ -821,7 +821,7 @@ export const activateEffect = <
       break;
     }
     case "drawCards": {
-      const { deck, deckRebuilt, discardPile, drawnCards } = drawCardsFromDeck(
+      const { deck, discardPile, drawnCards } = drawCardsFromDeck(
         lesson.deck,
         effect.amount,
         lesson.discardPile,
@@ -832,12 +832,6 @@ export const activateEffect = <
         lesson.hand,
         discardPile,
       );
-      if (deckRebuilt) {
-        diffs.push({
-          kind: "handWhenEmptyDeck",
-          cardIds: [],
-        });
-      }
       diffs.push(
         createCardPlacementDiff(
           {
@@ -877,7 +871,6 @@ export const activateEffect = <
       const discardPile1 = [...lesson.discardPile, ...lesson.hand];
       const {
         deck,
-        deckRebuilt,
         discardPile: discardPile2,
         drawnCards,
       } = drawCardsFromDeck(
@@ -891,12 +884,6 @@ export const activateEffect = <
         [],
         discardPile2,
       );
-      if (deckRebuilt) {
-        diffs.push({
-          kind: "handWhenEmptyDeck",
-          cardIds: [],
-        });
-      }
       diffs.push(
         createCardPlacementDiff(
           {
@@ -1850,38 +1837,6 @@ export const drawCardsOnTurnStart = (
   }
 
   //
-  // 捨札から、山札0枚時の特殊仕様の対象になったスキルカードリストを取り出して、一時的に退避しておく
-  //
-  // - 山札の再構築時の候補から外すため
-  // - 山札0枚時の特殊仕様によるもの、詳細は Lesson["handWhenEmptyDeck"] を参照
-  //
-  const beforeHandWhenEmptyDeck = newLesson.handWhenEmptyDeck;
-  let handWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (newLesson.handWhenEmptyDeck.length > 0) {
-    // 必ず、山札は0枚のはず
-    if (newLesson.deck.length > 0) {
-      throw new Error(
-        `Unexpected state: deck is not empty: ${newLesson.deck.length}`,
-      );
-    }
-    handWhenEmptyDeckUpdates = [
-      {
-        kind: "cardPlacement",
-        discardPile: newLesson.discardPile.filter(
-          (e) => !newLesson.handWhenEmptyDeck.includes(e),
-        ),
-        reason: {
-          kind: "turnStart",
-          historyTurnNumber: newLesson.turnNumber,
-          historyResultIndex: nextHistoryResultIndex,
-        },
-      },
-    ];
-    newLesson = patchDiffs(newLesson, handWhenEmptyDeckUpdates);
-    nextHistoryResultIndex++;
-  }
-
-  //
   // 全てのスキルカードのレッスンサポートを削除する
   //
   // - TODO: おそらくは、この時点ではなく、手札から手札以外に外れる時に削除するのではないかと思う。まずは仕様不明: https://github.com/kjirou/gakumas-core/issues/58
@@ -1941,79 +1896,11 @@ export const drawCardsOnTurnStart = (
   newLesson = patchDiffs(newLesson, drawCardsEffectUpdates);
   nextHistoryResultIndex++;
 
-  //
-  // 先に捨札から取り出した、山札0枚時に捨札になったスキルカードを捨札へ戻す
-  //
-  let restoringHandWhenEmptyDeckUpdates: LessonUpdateQuery[] = [];
-  if (beforeHandWhenEmptyDeck.length > 0) {
-    // 必ず、山札は再構築されているはずなので、捨札は空のはず
-    if (newLesson.discardPile.length > 0) {
-      throw new Error(
-        `Unexpected state: discardPile is not empty: ${newLesson.discardPile.length}`,
-      );
-    }
-    // 必ず、"drawCards"の中で山札が再構築されているはずなので、その中でこの値は初期化されているはず
-    if (newLesson.handWhenEmptyDeck.length > 0) {
-      throw new Error(
-        `Unexpected state: handWhenEmptyDeck is not empty: ${newLesson.discardPile.length}`,
-      );
-    }
-    restoringHandWhenEmptyDeckUpdates = [
-      {
-        kind: "cardPlacement",
-        discardPile: beforeHandWhenEmptyDeck,
-        reason: {
-          kind: "turnStart",
-          historyTurnNumber: newLesson.turnNumber,
-          historyResultIndex: nextHistoryResultIndex,
-        },
-      },
-    ];
-    newLesson = patchDiffs(newLesson, restoringHandWhenEmptyDeckUpdates);
-    nextHistoryResultIndex++;
-  }
-
-  //
-  // 手札が3枚未満なら、足りない数を引くように再度試みる
-  //
-  // - 主に、手札:3,山札:0,捨札:3未満 の状態で、山札0枚時の特殊仕様が発動した時に、 手札:3未満,山札:0,捨札:3 になる状況を想定している
-  // - 上記の状況で、本家がどのように動作するかは不明。現状は確認する方法はおそらく存在しない。
-  // - シミュレーター側で、少数手札で回す時に不便なので、この仕様を入れた
-  //   - Ref. Discord の FB: https://discord.com/channels/1207572227118075934/1239791087254634506/1275121923424256022
-  //
-  let retryingDrawCardsUpdates: LessonUpdateQuery[] = [];
-  if (newLesson.hand.length < numberOfCardsToDrawAtTurnStart) {
-    const diffs = activateEffect(
-      newLesson,
-      {
-        kind: "drawCards",
-        amount: numberOfCardsToDrawAtTurnStart - newLesson.hand.length,
-      },
-      params.getRandom,
-      // "drawCards" に限れば idGenerator は使われない
-      () => {
-        throw new Error("Unexpected call");
-      },
-    );
-    retryingDrawCardsUpdates = diffs.map((diff) =>
-      createLessonUpdateQueryFromDiff(diff, {
-        kind: "turnStart.drawingHand",
-        historyTurnNumber: newLesson.turnNumber,
-        historyResultIndex: nextHistoryResultIndex,
-      }),
-    );
-    newLesson = patchDiffs(newLesson, retryingDrawCardsUpdates);
-    nextHistoryResultIndex++;
-  }
-
   return {
     updates: [
       ...moveInnateCardsUpdates,
-      ...handWhenEmptyDeckUpdates,
       ...removeLessonSupportUpdates,
       ...drawCardsEffectUpdates,
-      ...restoringHandWhenEmptyDeckUpdates,
-      ...retryingDrawCardsUpdates,
     ],
     nextHistoryResultIndex,
   };
@@ -2272,7 +2159,6 @@ export const useCard = (
   let nextHistoryResultIndex = historyResultIndex;
 
   const idolParameterKind = getIdolParameterKindOnTurn(lesson);
-  const beforeHand = newLesson.hand;
   const doubleEffect = findPrioritizedDoubleEffectModifier(
     card.data.cardSummaryKind,
     newLesson.idol.modifiers,
@@ -2309,7 +2195,6 @@ export const useCard = (
   // 手札の消費
   //
   // - 「レッスン中1回」がないものは捨札、あるものは除外へ移動する
-  // - 加えて、山札0枚時の特殊仕様のための手札情報を保存する、詳細は Lesson["handWhenEmptyDeck"] を参照
   //
   let usedCardPlacementUpdates: LessonUpdateQuery[] = [];
   if (!params.preview) {
@@ -2338,32 +2223,6 @@ export const useCard = (
         },
       ),
     ];
-    // 山札0枚時の特殊仕様の対象スキルカードの保持
-    // a) 山札が0枚の時である
-    // b) 除外になるスキルカードではない
-    // c) 既にこのターンに保持していない
-    //    - 2枚目のスキルカード使用時は手札が減ってしまうので、減る前の状態を保存するのが正しい
-    if (
-      newLesson.deck.length === 0 &&
-      !cardContent.usableOncePerLesson &&
-      newLesson.handWhenEmptyDeck.length === 0
-    ) {
-      usedCardPlacementUpdates = [
-        ...usedCardPlacementUpdates,
-        createLessonUpdateQueryFromDiff(
-          {
-            kind: "handWhenEmptyDeck",
-            cardIds: beforeHand,
-          },
-          {
-            kind: "cardUsage",
-            cardId,
-            historyTurnNumber: newLesson.turnNumber,
-            historyResultIndex: nextHistoryResultIndex,
-          },
-        ),
-      ];
-    }
     newLesson = patchDiffs(newLesson, usedCardPlacementUpdates);
     nextHistoryResultIndex++;
   }

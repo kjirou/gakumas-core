@@ -379,7 +379,6 @@ describe("createLesson", () => {
       deck: ["c1"],
       discardPile: [],
       removedCardPile: [],
-      handWhenEmptyDeck: [],
       score: 0,
       turnNumber: 0,
       turnEnded: false,
@@ -1181,20 +1180,6 @@ describe("patchDiffs", () => {
         },
       ]);
       expect(lessonMock.idol.life).toBe(3);
-    });
-  });
-  describe("handWhenEmptyDeck", () => {
-    test("it works", () => {
-      let lessonMock = {
-        handWhenEmptyDeck: ["1"],
-      } as Lesson;
-      lessonMock = patchDiffs(lessonMock, [
-        {
-          kind: "handWhenEmptyDeck",
-          cardIds: ["2"],
-        },
-      ]);
-      expect(lessonMock.handWhenEmptyDeck).toStrictEqual(["2"]);
     });
   });
   describe("producerItem.activationCount", () => {

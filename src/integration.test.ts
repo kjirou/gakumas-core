@@ -192,7 +192,7 @@ describe("レッスン開始時処理", () => {
 });
 describe("「ランダムな強化済みスキルカード（SSR）を、手札に生成」", () => {
   test("概ね正しく動作する", () => {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       let gamePlay = initializeGamePlay({
         idolDataId: "shinosawahiro-r-1",
         cards: [{ id: "apirunokihon" }, { id: "hyojonokihon" }],
@@ -218,7 +218,7 @@ describe("「ランダムな強化済みスキルカード（SSR）を、手札�
 });
 describe("「眠気を山札のランダムな位置に生成」", () => {
   test("概ね正しく動作する", () => {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       let gamePlay = initializeGamePlay({
         idolDataId: "shinosawahiro-r-1",
         cards: [

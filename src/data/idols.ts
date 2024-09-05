@@ -376,6 +376,18 @@ export const idolsAsConst = [
     title: "胸を張って一歩ずつ",
   },
   {
+    id: "kuramotochina-r-2",
+    characterId: "kuramotochina",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenoiro",
+    specificProducerItemId: "shoshinnoakashichina",
+    title: "初心",
+  },
+  {
     id: "kuramotochina-r-1",
     characterId: "kuramotochina",
     producePlan: {

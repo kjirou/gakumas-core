@@ -269,6 +269,37 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "shoshinnoakashichina",
+    name: "初心の証・千奈",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      condition: { kind: "countRemainingTurns", max: 1 },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "perform",
+          score: { value: 2, boostPerCardUsed: 1 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: { kind: "countRemainingTurns", max: 1 },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "perform",
+          score: { value: 6, boostPerCardUsed: 1 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "chibidomotezukurimedaru",
     name: "ちびども手作りメダル",
     producerItemPossessionKind: "logic",

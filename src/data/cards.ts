@@ -1891,6 +1891,41 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenoiro",
+    name: "初めての色",
+    cardPossessionKind: "sense",
+    cardProviderKind: "idol",
+    cardSummaryKind: "mental",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "arubaita",
     name: "アルバイター",
     cardPossessionKind: "logic",

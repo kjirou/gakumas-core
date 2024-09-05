@@ -182,6 +182,15 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "hajimetenoiro",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{元気}}+5",
+        "{{絶好調}}3ターン",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "shupurehikoru",
       expected: [
         "{{集中}}消費3",
@@ -1204,6 +1213,23 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
         "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashichina",
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+2（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+1）",
+        "{{体力消費}}1",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashichina",
+      enhanced: true,
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+6（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+1）",
+        "{{体力消費}}1",
+        "（レッスン内1回）",
       ].join("\n"),
     },
     {

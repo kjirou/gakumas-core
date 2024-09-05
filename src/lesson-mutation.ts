@@ -740,12 +740,13 @@ export const calculatePerformingVitalityEffect = (
     motivation && "amount" in motivation ? motivation.amount : 0;
   const motivationMultiplier =
     query.motivationMultiplier !== undefined ? query.motivationMultiplier : 1;
-  const value =
+  const value = Math.ceil(
     query.value +
-    motivationAmount * motivationMultiplier +
-    (query.boostPerCardUsed !== undefined
-      ? idol.totalCardUsageCount * query.boostPerCardUsed
-      : 0);
+      motivationAmount * motivationMultiplier +
+      (query.boostPerCardUsed !== undefined
+        ? idol.totalCardUsageCount * query.boostPerCardUsed
+        : 0),
+  );
   return {
     kind: "vitality",
     actual: value,

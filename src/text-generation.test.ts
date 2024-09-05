@@ -174,6 +174,34 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "hajimetenochihei",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{好調}}の250%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "hajimetenoiro",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{元気}}+5",
+        "{{絶好調}}3ターン",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "hajimetenooaite",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}3",
+        "{{元気}}+2（{{やる気}}効果を1.5倍適用）",
+        "{{元気}}の50%分パラメータ上昇",
+        "{{消費体力削減}}1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "shupurehikoru",
       expected: [
         "{{集中}}消費3",
@@ -1160,6 +1188,21 @@ describe("generateProducerItemDescription", () => {
       ].join("\n"),
     },
     {
+      producerItemId: "shoshinnoakashirinami",
+      expected: [
+        "スキルカードを3回使用するごとに、{{やる気}}+2",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashirinami",
+      enhanced: true,
+      expected: [
+        "スキルカードを3回使用するごとに、{{やる気}}+3",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
       producerItemId: "hatsukoenoakashikotone",
       expected: [
         "{{初めてのご褒美}}使用時、{{好調}}2ターン",
@@ -1180,6 +1223,39 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
         "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashiririya",
+      expected: [
+        "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
+        "{{体力消費}}1",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashiririya",
+      enhanced: true,
+      expected: [
+        "ターン終了時{{好調}}が6ターン以上の場合、{{好調}}2ターン",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashichina",
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+2（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+1）",
+        "{{体力消費}}1",
+        "（レッスン内1回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashichina",
+      enhanced: true,
+      expected: [
+        "ターン開始時最終ターンの場合、パラメータ+6（レッスン中に使用したスキルカード1枚ごとに、パラメータ上昇量+1）",
+        "{{体力消費}}1",
+        "（レッスン内1回）",
       ].join("\n"),
     },
     {

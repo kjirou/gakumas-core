@@ -231,6 +231,75 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "shoshinnoakashiririya",
+    name: "初心の証・リーリヤ",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 6 },
+      },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "turnEnd" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "turnEnd" },
+    },
+  },
+  {
+    id: "shoshinnoakashichina",
+    name: "初心の証・千奈",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      condition: { kind: "countRemainingTurns", max: 1 },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "perform",
+          score: { value: 2, boostPerCardUsed: 1 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+    enhanced: {
+      condition: { kind: "countRemainingTurns", max: 1 },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "perform",
+          score: { value: 6, boostPerCardUsed: 1 },
+        },
+      ],
+      times: 1,
+      trigger: { kind: "turnStart" },
+    },
+  },
+  {
     id: "chibidomotezukurimedaru",
     name: "ちびども手作りメダル",
     producerItemPossessionKind: "logic",
@@ -446,6 +515,33 @@ export const producerItemsAsConst = [
       ],
       times: 3,
       trigger: { kind: "turnEnd" },
+    },
+  },
+  {
+    id: "shoshinnoakashirinami",
+    name: "初心の証・莉波",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "beforeCardEffectActivationEveryNTimes", interval: 3 },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 3 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "beforeCardEffectActivationEveryNTimes", interval: 3 },
     },
   },
   {

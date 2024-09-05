@@ -316,6 +316,18 @@ export const idolsAsConst = [
     title: "一つ踏み出した先に",
   },
   {
+    id: "katsuragiririya-r-2",
+    characterId: "katsuragiririya",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenochihei",
+    specificProducerItemId: "shoshinnoakashiririya",
+    title: "初心",
+  },
+  {
     id: "katsuragiririya-r-1",
     characterId: "katsuragiririya",
     producePlan: {
@@ -362,6 +374,18 @@ export const idolsAsConst = [
     specificCardId: "isshokemmei",
     specificProducerItemId: "shogenaihankachi",
     title: "胸を張って一歩ずつ",
+  },
+  {
+    id: "kuramotochina-r-2",
+    characterId: "kuramotochina",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenoiro",
+    specificProducerItemId: "shoshinnoakashichina",
+    title: "初心",
   },
   {
     id: "kuramotochina-r-1",
@@ -554,6 +578,18 @@ export const idolsAsConst = [
     specificCardId: "yorisokimochi",
     specificProducerItemId: "kimihenosashiire",
     title: "「私らしさ」のはじまり",
+  },
+  {
+    id: "himesakirinami-r-2",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "motivation",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenooaite",
+    specificProducerItemId: "shoshinnoakashirinami",
+    title: "初心",
   },
   {
     id: "himesakirinami-r-1",

@@ -1854,6 +1854,78 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenochihei",
+    name: "初めての地平",
+    cardPossessionKind: "sense",
+    cardProviderKind: "idol",
+    cardSummaryKind: "active",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            valueKind: "score",
+            percentage: 200,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            valueKind: "score",
+            percentage: 250,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "hajimetenoiro",
+    name: "初めての色",
+    cardPossessionKind: "sense",
+    cardProviderKind: "idol",
+    cardSummaryKind: "mental",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 2 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "perform", vitality: { value: 5 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "excellentCondition", duration: 3 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "arubaita",
     name: "アルバイター",
     cardPossessionKind: "logic",
@@ -2140,6 +2212,56 @@ export const cardsAsConst = [
           {
             kind: "getModifier",
             modifier: { kind: "positiveImpression", amount: 8 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
+    id: "hajimetenooaite",
+    name: "初めてのお相手",
+    cardPossessionKind: "logic",
+    cardProviderKind: "idol",
+    cardSummaryKind: "active",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          {
+            kind: "perform",
+            vitality: { value: 2, motivationMultiplier: 1.5 },
+          },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 40,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          {
+            kind: "perform",
+            vitality: { value: 2, motivationMultiplier: 1.5 },
+          },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 50,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
           },
         ],
       },

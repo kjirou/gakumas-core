@@ -64,16 +64,24 @@ export type CardSummaryKind = "active" | "mental" | "trouble";
  *
  * - 元気の値の更新要求を宣言的に定義できるようにしたもの
  *   - なお、状態修正については、現状は表記通りの数値の加減算しかないので、この構造は作っていない
- * - 原文の構文は、「[固定]元気+{value}[（レッスン中に使用したスキルカード1枚ごとに、元気増加量+{boostPerSkillCardUsed}）]」
+ * - 原文の構文は、「[固定]元気+{value}[（レッスン中に使用したスキルカード1枚ごとに、元気増加量+{boostPerSkillCardUsed}）][やる気効果を{motivationMultiplier}倍適用]」
  *   - 「未完の大器」は、「元気+2（レッスン中に使用したスキルカード1枚ごとに、元気増加量+3）」
  *   - 「おっきなおにぎり」は、「元気+2（レッスン中に使用したスキルカード1枚ごとに、元気増加量+5）」
  *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
+ *   - 「さっぱりひといき+」は、「元気+2（やる気効果を2.3倍適用）」
  */
 export type VitalityUpdateQuery = Readonly<{
   /** 使用したスキルカード1枚毎の効果量増加 */
   boostPerCardUsed?: number;
   /** 効果に記載した値をそのまま適用するか、原文は「固定元気」 */
   fixedValue?: boolean;
+  /**
+   * やる気適用倍率
+   *
+   * - 端数計算は切り上げ
+   *   - focusMultiplier の計算を参考にした
+   */
+  motivationMultiplier?: number;
   value: number;
 }>;
 
@@ -117,6 +125,17 @@ export type ReactiveEffectTrigger = Readonly<
         kind: "beforeCardEffectActivation";
         cardDataId?: CardData["id"];
         cardSummaryKind?: CardSummaryKind;
+      }
+    | {
+        /**
+         * n回ごとのスキルカードの主効果発動前の効果発動
+         *
+         * - 原文から推測した構文は、「(アクティブスキルカード|メンタルスキルカード|スキルカード)を{interval}回使用するごとに」
+         *   - 「ぱたぱたうちわ」は、「スキルカードを3回使用するごとに、元気+1」
+         */
+        kind: "beforeCardEffectActivationEveryNTimes";
+        cardSummaryKind?: CardSummaryKind;
+        interval: number;
       }
     | {
         /**
@@ -228,6 +247,11 @@ export type ReactiveEffectQueryWithoutIdolParameterKind = Readonly<
   | {
       kind: "beforeCardEffectActivation";
       cardDataId: CardData["id"];
+    }
+  | {
+      kind: "beforeCardEffectActivationEveryNTimes";
+      cardDataId: CardData["id"];
+      totalCardUsageCount: Idol["totalCardUsageCount"];
     }
   | {
       kind: "lessonStart";
@@ -691,7 +715,7 @@ export type EffectWithoutCondition = Readonly<
         /**
          * 集中適用倍率
          *
-         * - 端数計算は切り上げ、現状は0.5倍単位でしか値が存在しないので四捨五入かもしれない
+         * - 端数計算は切り上げ
          *   - 計算例
          *     - 「ハイタッチ」（パラメータ+17、集中適用倍率1.5倍）を、集中+11、好調中に使った時に、スコアが51だった
          *       - `集中11 * 1.5 = 16.5 => 17 ; (パラメータ17 + 集中分17) * 好調1.5 = 51`
@@ -1604,6 +1628,11 @@ export type LessonUpdateQueryReason = Readonly<
         cardId: Card["id"];
       }
     | {
+        /** スキルカード使用.Pアイテム.n回ごとの主効果発動前の効果発動 */
+        kind: "cardUsage.producerItem.beforeCardEffectActivationEveryNTimes";
+        cardId: Card["id"];
+      }
+    | {
         /** スキルカード使用.Pアイテム.主効果発動前の効果発動 */
         kind: "cardUsage.producerItem.beforeCardEffectActivation";
         cardId: Card["id"];
@@ -1905,6 +1934,15 @@ export type CardInInventoryDisplay = Card & {
 export type ProducerItemDisplay = ProducerItem & {
   description: string;
   name: string;
+  /**
+   * Pアイテム毎に異なる補足情報
+   *
+   * - 現在は、 「ぱたぱたうちわ」の「スキルカードn回使用するとごとに」のために使用している
+   *   - 本家UIでは、発動までの残り回数が "3回" -> "2回" -> "1回" ... のように表示されている、それを雑に実現するためのもの
+   * - テキストが独立して意味が通じ、UI上の表示位置は同じという前提にしたい
+   *   - そのため、"3回" と単位なども含んだ文字列を返す
+   */
+  optionalTexts: string[];
   /** 残り発動回数 */
   remainingTimes: number | undefined;
 };

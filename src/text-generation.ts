@@ -192,6 +192,17 @@ export const generateReactiveEffectTriggerText = (
         `使用${trigger.kind === "beforeCardEffectActivation" ? "時" : "後"}`,
       ].join("");
     }
+    case "beforeCardEffectActivationEveryNTimes": {
+      return [
+        idolParameterKindText,
+        trigger.cardSummaryKind === "active"
+          ? kwd("activeSkillCard")
+          : trigger.cardSummaryKind === "mental"
+            ? kwd("mentalSkillCard")
+            : "スキルカード",
+        `を${trigger.interval}回使用するごとに`,
+      ].join("");
+    }
     case "modifierIncrease": {
       return [
         idolParameterKindText,
@@ -322,6 +333,9 @@ const generateVitalityUpdateQueryText = (
     `+${query.value}` +
     (query.boostPerCardUsed !== undefined
       ? `（レッスン中に使用したスキルカード1枚ごとに、${kwd("vitality")}増加量+${query.boostPerCardUsed}）`
+      : "") +
+    (query.motivationMultiplier !== undefined
+      ? `（${kwd("motivation")}効果を${query.motivationMultiplier}倍適用）`
       : "")
   );
 };

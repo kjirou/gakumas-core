@@ -508,6 +508,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "himesakirinami-ssr-3",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "motivation",
+    },
+    rarity: "ssr",
+    specificCardId: "sapparihitoiki",
+    specificProducerItemId: "patapatauchiwa",
+    title: "ようこそ初星温泉",
+  },
+  {
     id: "himesakirinami-ssr-2",
     characterId: "himesakirinami",
     producePlan: {

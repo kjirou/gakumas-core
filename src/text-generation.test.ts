@@ -429,6 +429,27 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "sapparihitoiki",
+      expected: [
+        "{{体力消費}}5",
+        "{{元気}}+2（{{やる気}}効果を2.3倍適用）",
+        "{{元気}}の50%分パラメータ上昇",
+        "{{消費体力削減}}1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
+      cardId: "sapparihitoiki",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}4",
+        "{{元気}}+2（{{やる気}}効果を2.3倍適用）",
+        "{{元気}}の90%分パラメータ上昇",
+        "{{消費体力削減}}1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1234,6 +1255,23 @@ describe("generateProducerItemDescription", () => {
       enhanced: true,
       expected: ["レッスン中に体力が減少した時、{{好印象}}+2"].join("\n"),
     },
+    {
+      producerItemId: "patapatauchiwa",
+      expected: [
+        "スキルカードを3回使用するごとに、{{元気}}+1",
+        "{{やる気}}+3",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "patapatauchiwa",
+      enhanced: true,
+      expected: [
+        "スキルカードを3回使用するごとに、{{元気}}+2",
+        "{{やる気}}+4",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$producerItemId => "$expected"',
@@ -1296,6 +1334,17 @@ describe("generateReactiveEffectTriggerText", () => {
         },
       ],
       expected: "{{アドレナリン全開}}使用時",
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardSummaryKind: "mental",
+          interval: 2,
+        },
+      ],
+      expected: "{{メンタルスキルカード}}を2回使用するごとに",
     },
     {
       name: "modifierIncrease - goodCondition 以外の時",

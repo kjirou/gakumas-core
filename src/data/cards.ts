@@ -7465,6 +7465,56 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "sapparihitoiki",
+    name: "さっぱりひといき",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "life", value: 5 },
+        effects: [
+          {
+            kind: "perform",
+            vitality: { motivationMultiplier: 2.3, value: 2 },
+          },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 50,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          {
+            kind: "perform",
+            vitality: { motivationMultiplier: 2.3, value: 2 },
+          },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 90,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "hanamoyukisetsu",
     name: "花萌ゆ季節",
     cardPossessionKind: "free",

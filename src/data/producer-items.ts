@@ -1629,6 +1629,47 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "patapatauchiwa",
+    name: "ぱたぱたうちわ",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      effects: [
+        {
+          kind: "perform",
+          vitality: { value: 1 },
+        },
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 3 },
+        },
+      ],
+      times: 2,
+      trigger: {
+        kind: "beforeCardEffectActivationEveryNTimes",
+        interval: 3,
+      },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "perform",
+          vitality: { value: 2 },
+        },
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 4 },
+        },
+      ],
+      times: 2,
+      trigger: {
+        kind: "beforeCardEffectActivationEveryNTimes",
+        interval: 3,
+      },
+    },
+  },
+  {
     id: "etainoshirenaimono",
     name: "得体の知れないモノ",
     producerItemPossessionKind: "free",

@@ -64,16 +64,24 @@ export type CardSummaryKind = "active" | "mental" | "trouble";
  *
  * - 元気の値の更新要求を宣言的に定義できるようにしたもの
  *   - なお、状態修正については、現状は表記通りの数値の加減算しかないので、この構造は作っていない
- * - 原文の構文は、「[固定]元気+{value}[（レッスン中に使用したスキルカード1枚ごとに、元気増加量+{boostPerSkillCardUsed}）]」
+ * - 原文の構文は、「[固定]元気+{value}[（レッスン中に使用したスキルカード1枚ごとに、元気増加量+{boostPerSkillCardUsed}）][やる気効果を{motivationMultiplier}倍適用]」
  *   - 「未完の大器」は、「元気+2（レッスン中に使用したスキルカード1枚ごとに、元気増加量+3）」
  *   - 「おっきなおにぎり」は、「元気+2（レッスン中に使用したスキルカード1枚ごとに、元気増加量+5）」
  *   - 「演出計画」は、「以降、アクティブスキルカード使用時、固定元気+2」
+ *   - 「さっぱりひといき+」は、「元気+2（やる気効果を2.3倍適用）」
  */
 export type VitalityUpdateQuery = Readonly<{
   /** 使用したスキルカード1枚毎の効果量増加 */
   boostPerCardUsed?: number;
   /** 効果に記載した値をそのまま適用するか、原文は「固定元気」 */
   fixedValue?: boolean;
+  /**
+   * やる気適用倍率
+   *
+   * - 端数計算は切り上げ
+   *   - focusMultiplier の計算を参考にした
+   */
+  motivationMultiplier?: number;
   value: number;
 }>;
 
@@ -117,6 +125,17 @@ export type ReactiveEffectTrigger = Readonly<
         kind: "beforeCardEffectActivation";
         cardDataId?: CardData["id"];
         cardSummaryKind?: CardSummaryKind;
+      }
+    | {
+        /**
+         * n回ごとのスキルカードの主効果発動前の効果発動
+         *
+         * - 原文から推測した構文は、「(アクティブスキルカード|メンタルスキルカード|スキルカード)を{interval}回使用するごとに」
+         *   - 「ぱたぱたうちわ」は、「スキルカードを3回使用するごとに、元気+1」
+         */
+        kind: "beforeCardEffectActivationEveryNTimes";
+        cardSummaryKind?: CardSummaryKind;
+        interval: number;
       }
     | {
         /**
@@ -228,6 +247,11 @@ export type ReactiveEffectQueryWithoutIdolParameterKind = Readonly<
   | {
       kind: "beforeCardEffectActivation";
       cardDataId: CardData["id"];
+    }
+  | {
+      kind: "beforeCardEffectActivationEveryNTimes";
+      cardDataId: CardData["id"];
+      totalCardUsageCount: Idol["totalCardUsageCount"];
     }
   | {
       kind: "lessonStart";
@@ -691,7 +715,7 @@ export type EffectWithoutCondition = Readonly<
         /**
          * 集中適用倍率
          *
-         * - 端数計算は切り上げ、現状は0.5倍単位でしか値が存在しないので四捨五入かもしれない
+         * - 端数計算は切り上げ
          *   - 計算例
          *     - 「ハイタッチ」（パラメータ+17、集中適用倍率1.5倍）を、集中+11、好調中に使った時に、スコアが51だった
          *       - `集中11 * 1.5 = 16.5 => 17 ; (パラメータ17 + 集中分17) * 好調1.5 = 51`
@@ -1601,6 +1625,11 @@ export type LessonUpdateQueryReason = Readonly<
     | {
         /** スキルカード使用.Pアイテム.主効果発動後の効果発動 */
         kind: "cardUsage.producerItem.afterCardEffectActivation";
+        cardId: Card["id"];
+      }
+    | {
+        /** スキルカード使用.Pアイテム.n回ごとの主効果発動前の効果発動 */
+        kind: "cardUsage.producerItem.beforeCardEffectActivationEveryNTimes";
         cardId: Card["id"];
       }
     | {

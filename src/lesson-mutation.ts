@@ -283,6 +283,23 @@ export const validateQueryOfReactiveEffectTrigger = (
       }
       return false;
     }
+    case "beforeCardEffectActivationEveryNTimes": {
+      if (query.kind === "beforeCardEffectActivationEveryNTimes") {
+        const cardData = getCardDataById(query.cardDataId);
+        const cardSummaryKindCondition =
+          trigger.cardSummaryKind === undefined ||
+          trigger.cardSummaryKind === cardData.cardSummaryKind;
+        const totalCardUsageCountCondition =
+          query.totalCardUsageCount > 0 &&
+          query.totalCardUsageCount % trigger.interval === 0;
+        return (
+          cardSummaryKindCondition &&
+          idolParameterKindCondition &&
+          totalCardUsageCountCondition
+        );
+      }
+      return false;
+    }
     case "lessonStart": {
       return query.kind === "lessonStart" && idolParameterKindCondition;
     }
@@ -721,9 +738,11 @@ export const calculatePerformingVitalityEffect = (
   const motivation = idol.modifiers.find((e) => e.kind === "motivation");
   const motivationAmount =
     motivation && "amount" in motivation ? motivation.amount : 0;
+  const motivationMultiplier =
+    query.motivationMultiplier !== undefined ? query.motivationMultiplier : 1;
   const value =
     query.value +
-    motivationAmount +
+    motivationAmount * motivationMultiplier +
     (query.boostPerCardUsed !== undefined
       ? idol.totalCardUsageCount * query.boostPerCardUsed
       : 0);
@@ -2353,6 +2372,31 @@ export const useCard = (
           ];
         }
       }
+    }
+
+    //
+    // Pアイテムに起因する、n回ごとのスキルカードの主効果発動前の効果発動
+    //
+    if (!params.preview) {
+      const { lesson: updatedLesson, updates } =
+        activateEffectsEachProducerItemsAccordingToCardUsage(
+          newLesson,
+          {
+            kind: "beforeCardEffectActivationEveryNTimes",
+            cardDataId: card.data.id,
+            totalCardUsageCount: newLesson.idol.totalCardUsageCount,
+          },
+          params.getRandom,
+          params.idGenerator,
+          {
+            kind: "cardUsage.producerItem.beforeCardEffectActivationEveryNTimes",
+            cardId: card.id,
+            historyTurnNumber: newLesson.turnNumber,
+            historyResultIndex: nextHistoryResultIndex,
+          },
+        );
+      newLesson = updatedLesson;
+      effectActivationUpdates = [...effectActivationUpdates, ...updates];
     }
 
     //

@@ -2244,6 +2244,24 @@ describe("calculatePerformingVitalityEffect", () => {
       },
     },
     {
+      name: "motivationMultiplier が設定されている時",
+      args: [
+        {
+          vitality: 0,
+          modifiers: [
+            { kind: "motivation", amount: 10, id: "m1" },
+          ] as Idol["modifiers"],
+          totalCardUsageCount: 3,
+        } as Idol,
+        { value: 1, motivationMultiplier: 2 },
+      ],
+      expected: {
+        kind: "vitality",
+        actual: 21,
+        max: 21,
+      },
+    },
+    {
       name: "固定元気の時、他のいかなる修正も無視する",
       args: [
         {
@@ -4162,6 +4180,53 @@ describe("useCard preview:false", () => {
       ]);
     });
   });
+  // 基本的には activateEffectsEachProducerItemsAccordingToCardUsage のテストで検証する
+  describe("Pアイテムに起因する、n回ごとのスキルカードの主効果発動前の効果発動", () => {
+    test("「ぱたぱたうちわ」は、スキルカードの3回目の使用で発動する、2回目では発動しない", () => {
+      let lesson = createLessonForTest({
+        cards: [
+          {
+            id: "c1",
+            data: getCardDataByConstId("apirunokihon"),
+            enhancements: [],
+          },
+        ],
+        producerItems: [
+          {
+            id: "p1",
+            data: getProducerItemDataByConstId("patapatauchiwa"),
+            enhanced: false,
+            activationCount: 0,
+          },
+        ],
+      });
+      lesson.hand = ["c1"];
+      lesson.idol.totalCardUsageCount = 2;
+      const { updates: updates1 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates1.filter((e) => e.kind === "vitality")).toStrictEqual([
+        {
+          kind: "vitality",
+          actual: 1,
+          max: 1,
+          reason: expect.any(Object),
+        },
+      ]);
+
+      lesson.idol.totalCardUsageCount = 1;
+      const { updates: updates2 } = useCard(lesson, 1, {
+        selectedCardInHandIndex: 0,
+        getRandom: () => 0,
+        idGenerator: createIdGenerator(),
+        preview: false,
+      });
+      expect(updates2.filter((e) => e.kind === "vitality")).toStrictEqual([]);
+    });
+  });
   // 個別の効果発動に関するテストは、 activeEffect のテストで検証する
   describe("主効果発動", () => {
     describe("効果適用条件を満たさない効果は適用されない", () => {
@@ -5764,6 +5829,110 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           kind: "beforeCardEffectActivation",
           cardDataId: "apirunokihon",
           idolParameterKind: "dance",
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes - interval - 満たす",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+          totalCardUsageCount: 2,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes - interval - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+          totalCardUsageCount: 3,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes - interval - 0 回目は、満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+          totalCardUsageCount: 0,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes - cardSummaryKind - 満たす",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardSummaryKind: "active",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "vocal",
+          totalCardUsageCount: 2,
+        },
+      ],
+      expected: true,
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes - cardSummaryKind - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardSummaryKind: "active",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardDataId: "hyogennokihon",
+          idolParameterKind: "vocal",
+          totalCardUsageCount: 2,
+        },
+      ],
+      expected: false,
+    },
+    {
+      name: "beforeCardEffectActivationEveryNTimes - idolParameterKind - 満たさない",
+      args: [
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          idolParameterKind: "vocal",
+          interval: 2,
+        },
+        {
+          kind: "beforeCardEffectActivationEveryNTimes",
+          cardDataId: "apirunokihon",
+          idolParameterKind: "dance",
+          totalCardUsageCount: 2,
         },
       ],
       expected: false,

@@ -518,6 +518,33 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "shoshinnoakashirinami",
+    name: "初心の証・莉波",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "beforeCardEffectActivationEveryNTimes", interval: 3 },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "motivation", amount: 3 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "beforeCardEffectActivationEveryNTimes", interval: 3 },
+    },
+  },
+  {
     id: "sakinokanzenshokureshipi",
     name: "咲季の完全食レシピ",
     producerItemPossessionKind: "sense",

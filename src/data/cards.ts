@@ -2222,6 +2222,56 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenooaite",
+    name: "初めてのお相手",
+    cardPossessionKind: "logic",
+    cardProviderKind: "idol",
+    cardSummaryKind: "active",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "life", value: 4 },
+        effects: [
+          {
+            kind: "perform",
+            vitality: { value: 2, motivationMultiplier: 1.5 },
+          },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 40,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        cost: { kind: "life", value: 3 },
+        effects: [
+          {
+            kind: "perform",
+            vitality: { value: 2, motivationMultiplier: 1.5 },
+          },
+          {
+            kind: "performLeveragingVitality",
+            percentage: 50,
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "lifeConsumptionReduction", value: 1 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "zentoyoyo",
     name: "前途洋々",
     cardPossessionKind: "free",

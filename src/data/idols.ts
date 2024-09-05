@@ -580,6 +580,18 @@ export const idolsAsConst = [
     title: "「私らしさ」のはじまり",
   },
   {
+    id: "himesakirinami-r-2",
+    characterId: "himesakirinami",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "motivation",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenooaite",
+    specificProducerItemId: "shoshinnoakashirinami",
+    title: "初心",
+  },
+  {
     id: "himesakirinami-r-1",
     characterId: "himesakirinami",
     producePlan: {

@@ -191,6 +191,17 @@ describe("generateCardDescription", () => {
       ].join("\n"),
     },
     {
+      cardId: "hajimetenooaite",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{体力消費}}3",
+        "{{元気}}+2（{{やる気}}効果を1.5倍適用）",
+        "{{元気}}の50%分パラメータ上昇",
+        "{{消費体力削減}}1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
+    {
       cardId: "shupurehikoru",
       expected: [
         "{{集中}}消費3",
@@ -1173,6 +1184,21 @@ describe("generateProducerItemDescription", () => {
       producerItemId: "hatsukoenoakashitemari",
       expected: [
         "ターン終了時{{好印象}}が6以上の場合、{{好印象}}の100%分パラメータ上昇",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashirinami",
+      expected: [
+        "スキルカードを3回使用するごとに、{{やる気}}+2",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "shoshinnoakashirinami",
+      enhanced: true,
+      expected: [
+        "スキルカードを3回使用するごとに、{{やる気}}+3",
         "（レッスン内2回）",
       ].join("\n"),
     },

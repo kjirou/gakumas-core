@@ -1854,6 +1854,43 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "hajimetenochihei",
+    name: "初めての地平",
+    cardPossessionKind: "sense",
+    cardProviderKind: "idol",
+    cardSummaryKind: "active",
+    nonDuplicative: true,
+    rarity: "r",
+    contents: [
+      {
+        cost: { kind: "normal", value: 2 },
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            valueKind: "score",
+            percentage: 200,
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "performLeveragingModifier",
+            modifierKind: "goodCondition",
+            valueKind: "score",
+            percentage: 250,
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "arubaita",
     name: "アルバイター",
     cardPossessionKind: "logic",

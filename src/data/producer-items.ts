@@ -231,6 +231,44 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "shoshinnoakashiririya",
+    name: "初心の証・リーリヤ",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "r",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 6 },
+      },
+      cost: { kind: "life", value: 1 },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "turnEnd" },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "goodCondition",
+        range: { min: 6 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "goodCondition", duration: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "turnEnd" },
+    },
+  },
+  {
     id: "chibidomotezukurimedaru",
     name: "ちびども手作りメダル",
     producerItemPossessionKind: "logic",

@@ -316,6 +316,18 @@ export const idolsAsConst = [
     title: "一つ踏み出した先に",
   },
   {
+    id: "katsuragiririya-r-2",
+    characterId: "katsuragiririya",
+    producePlan: {
+      kind: "sense",
+      recommendedModifierKind: "goodCondition",
+    },
+    rarity: "r",
+    specificCardId: "hajimetenochihei",
+    specificProducerItemId: "shoshinnoakashiririya",
+    title: "初心",
+  },
+  {
     id: "katsuragiririya-r-1",
     characterId: "katsuragiririya",
     producePlan: {

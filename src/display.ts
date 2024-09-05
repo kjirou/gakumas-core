@@ -24,6 +24,7 @@ import type {
   Modifier,
   ProducePlan,
   ProducerItem,
+  Idol,
 } from "./types";
 import { compareDeckOrder } from "./data/cards";
 import { metaModifierDictioanry } from "./data/modifiers";
@@ -208,6 +209,7 @@ export const generateCardInInventoryDisplays = (
 
 export const generateProducerItemDisplays = (
   producerItems: ProducerItem[],
+  totalCardUsageCount: Idol["totalCardUsageCount"],
 ): ProducerItemDisplay[] => {
   return producerItems.map((producerItem) => {
     const producerItemContent = getProducerItemContentData(
@@ -218,6 +220,21 @@ export const generateProducerItemDisplays = (
       producerItem.data.name,
       producerItem.enhanced,
     );
+    const remainingTimes = getRemainingProducerItemTimes(producerItem);
+    let optionalTexts: ProducerItemDisplay["optionalTexts"] = [];
+    if (
+      producerItemContent.trigger.kind ===
+        "beforeCardEffectActivationEveryNTimes" &&
+      remainingTimes !== undefined &&
+      remainingTimes > 0
+    ) {
+      optionalTexts = [
+        String(
+          producerItemContent.trigger.interval -
+            (totalCardUsageCount % producerItemContent.trigger.interval),
+        ) + "回",
+      ];
+    }
     return {
       ...producerItem,
       name,
@@ -228,7 +245,8 @@ export const generateProducerItemDisplays = (
         times: producerItemContent.times,
         trigger: producerItemContent.trigger,
       }),
-      remainingTimes: getRemainingProducerItemTimes(producerItem),
+      optionalTexts,
+      remainingTimes,
     };
   });
 };
@@ -405,7 +423,10 @@ export const generateLessonDisplay = (gamePlay: GamePlay): LessonDisplay => {
     ),
     maxLife: lesson.idol.maxLife,
     modifiers,
-    producerItems: generateProducerItemDisplays(lesson.idol.producerItems),
+    producerItems: generateProducerItemDisplays(
+      lesson.idol.producerItems,
+      lesson.idol.totalCardUsageCount,
+    ),
     score: lesson.score,
     scoreBonus,
     turns,

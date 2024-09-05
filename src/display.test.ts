@@ -1470,6 +1470,7 @@ describe("generateProducerItemDisplays", () => {
             activationCount: 0,
           },
         ],
+        0,
       ],
       expected: [
         {
@@ -1477,6 +1478,63 @@ describe("generateProducerItemDisplays", () => {
         },
         {
           name: "天川ラーメン巡り",
+        },
+      ] as ProducerItemDisplay[],
+    },
+    {
+      name: "optionalTexts - 残り回数がある時、次回発動までの回数を返す",
+      args: [
+        [
+          {
+            id: "p1",
+            data: getProducerItemDataByConstId("patapatauchiwa"),
+            enhanced: false,
+            activationCount: 0,
+          },
+        ],
+        0,
+      ],
+      expected: [
+        {
+          optionalTexts: ["3回"],
+        },
+      ] as ProducerItemDisplay[],
+    },
+    {
+      name: "optionalTexts - 残り回数があり、スキルカードが何回か使用されている時、次回発動までの回数を返す",
+      args: [
+        [
+          {
+            id: "p1",
+            data: getProducerItemDataByConstId("patapatauchiwa"),
+            enhanced: false,
+            activationCount: 0,
+          },
+        ],
+        2,
+      ],
+      expected: [
+        {
+          optionalTexts: ["1回"],
+        },
+      ] as ProducerItemDisplay[],
+    },
+    {
+      name: "optionalTexts - 残り回数がない時、空配列を返す",
+      args: [
+        [
+          {
+            id: "p1",
+            data: getProducerItemDataByConstId("patapatauchiwa"),
+            enhanced: false,
+            activationCount: 3,
+          },
+        ],
+        2,
+      ],
+      expected: [
+        {
+          optionalTexts: [] as any,
         },
       ] as ProducerItemDisplay[],
     },

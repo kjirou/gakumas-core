@@ -1934,6 +1934,15 @@ export type CardInInventoryDisplay = Card & {
 export type ProducerItemDisplay = ProducerItem & {
   description: string;
   name: string;
+  /**
+   * Pアイテム毎に異なる補足情報
+   *
+   * - 現在は、 「ぱたぱたうちわ」の「スキルカードn回使用するとごとに」のために使用している
+   *   - 本家UIでは、発動までの残り回数が "3回" -> "2回" -> "1回" ... のように表示されている、それを雑に実現するためのもの
+   * - テキストが独立して意味が通じ、UI上の表示位置は同じという前提にしたい
+   *   - そのため、"3回" と単位なども含んだ文字列を返す
+   */
+  optionalTexts: string[];
   /** 残り発動回数 */
   remainingTimes: number | undefined;
 };

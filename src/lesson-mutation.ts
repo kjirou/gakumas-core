@@ -1091,17 +1091,39 @@ export const activateEffect = <
       const modifier = lesson.idol.modifiers.find(
         (e) => e.kind === effect.modifierKind,
       );
-      // 現在は、好印象に対してしか存在しない効果なので、そのこと前提で実装している
-      if (modifier?.kind === "positiveImpression") {
-        const amount =
-          Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
-        diffs.push({
-          kind: "modifiers.update",
-          propertyNameKind: "amount",
-          id: modifier.id,
-          actual: amount,
-          max: amount,
-        });
+      switch (effect.modifierKind) {
+        case "focus": {
+          if (modifier && "amount" in modifier) {
+            const amount =
+              Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
+            diffs.push({
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              id: modifier.id,
+              actual: amount,
+              max: amount,
+            });
+          }
+          break;
+        }
+        case "positiveImpression": {
+          if (modifier && "amount" in modifier) {
+            const amount =
+              Math.ceil(modifier.amount * effect.multiplier) - modifier.amount;
+            diffs.push({
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              id: modifier.id,
+              actual: amount,
+              max: amount,
+            });
+          }
+          break;
+        }
+        default: {
+          const unreachable: never = effect;
+          throw new Error(`Unreachable statement`);
+        }
       }
       break;
     }

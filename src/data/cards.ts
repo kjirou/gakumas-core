@@ -7102,6 +7102,46 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "kokuritohitokuchi",
+    name: "こくりとひとくち",
+    cardPossessionKind: "sense",
+    cardSummaryKind: "mental",
+    cardProviderKind: "idol",
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 5 },
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 3 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+        ],
+        innate: true,
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          { kind: "getModifier", modifier: { kind: "focus", amount: 4 } },
+          {
+            kind: "getModifier",
+            modifier: { kind: "halfLifeConsumption", duration: 1 },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "yosomihadame",
     name: "よそ見はダメ♪",
     cardPossessionKind: "logic",

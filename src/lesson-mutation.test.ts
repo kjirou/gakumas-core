@@ -323,7 +323,36 @@ describe("activateEffectIf", () => {
       ],
     },
     {
-      name: "multiplyModifier",
+      name: "multiplyModifier - focus",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [
+            { kind: "focus", amount: 10, id: "m1" },
+            { kind: "positiveImpression", amount: 100, id: "m2" },
+          ];
+          return lesson;
+        })(),
+        {
+          kind: "multiplyModifier",
+          modifierKind: "focus",
+          multiplier: 1.5,
+        },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m1",
+          actual: 5,
+          max: 5,
+        },
+      ],
+    },
+    {
+      name: "multiplyModifier - positiveImpression",
       args: [
         (() => {
           const lesson = createLessonForTest();

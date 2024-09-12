@@ -690,7 +690,7 @@ export type EffectWithoutCondition = Readonly<
        *   - 現状は「夢へのライフログ」の1.5倍しかないので、本実装では切り上げる
        */
       kind: "multiplyModifier";
-      modifierKind: "positiveImpression";
+      modifierKind: "focus" | "positiveImpression";
       multiplier: number;
     }
   | {

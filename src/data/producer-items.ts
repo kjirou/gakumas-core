@@ -1319,6 +1319,43 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "onsennoatonootanoshimi",
+    name: "温泉の後のお楽しみ",
+    producerItemPossessionKind: "sense",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      effects: [
+        {
+          kind: "multiplyModifier",
+          modifierKind: "focus",
+          multiplier: 1.3,
+        },
+        {
+          kind: "perform",
+          vitality: { fixedValue: true, value: 2 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "beforeCardEffectActivationEveryNTimes", interval: 4 },
+    },
+    enhanced: {
+      effects: [
+        {
+          kind: "multiplyModifier",
+          modifierKind: "focus",
+          multiplier: 1.3,
+        },
+        {
+          kind: "perform",
+          vitality: { fixedValue: true, value: 7 },
+        },
+      ],
+      times: 2,
+      trigger: { kind: "beforeCardEffectActivationEveryNTimes", interval: 4 },
+    },
+  },
+  {
     id: "piggudorimuchokimbako",
     name: "ピッグドリーム貯金箱",
     keywords: ["piggudorimuchokinbako", "biggudorimuchokinbako"],

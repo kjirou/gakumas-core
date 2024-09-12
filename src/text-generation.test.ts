@@ -478,6 +478,17 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "kokuritohitokuchi",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "レッスン開始時手札に入る",
+        "{{集中}}+4",
+        "{{消費体力減少}}1ターン",
+        "{{スキルカード使用数追加}}+1",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1345,6 +1356,23 @@ describe("generateProducerItemDescription", () => {
       expected: [
         "スキルカードを3回使用するごとに、{{元気}}+2",
         "{{やる気}}+4",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "onsennoatonootanoshimi",
+      expected: [
+        "スキルカードを4回使用するごとに、{{集中}}1.3倍",
+        "{{固定元気}}+2",
+        "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "onsennoatonootanoshimi",
+      enhanced: true,
+      expected: [
+        "スキルカードを4回使用するごとに、{{集中}}1.3倍",
+        "{{固定元気}}+7",
         "（レッスン内2回）",
       ].join("\n"),
     },

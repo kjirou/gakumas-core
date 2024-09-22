@@ -232,6 +232,18 @@ export const idolsAsConst = [
     title: "学園生活",
   },
   {
+    id: "arimuramao-ssr-3",
+    characterId: "arimuramao",
+    producePlan: {
+      kind: "logic",
+      recommendedModifierKind: "positiveImpression",
+    },
+    rarity: "ssr",
+    specificCardId: "tsukiyonoranuei",
+    specificProducerItemId: "sutairisshumodo",
+    title: "Feel Jewel Dream",
+  },
+  {
     id: "arimuramao-ssr-2",
     characterId: "arimuramao",
     producePlan: {

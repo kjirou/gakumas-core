@@ -5976,6 +5976,10 @@ export const cardsAsConst = [
               amount: 1,
             },
           },
+          {
+            kind: "drawCards",
+            amount: 2,
+          },
         ],
         usableOncePerLesson: true,
       },

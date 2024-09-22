@@ -77,6 +77,41 @@ describe("activateEffectIf", () => {
       ],
     },
     {
+      name: "drainModifier - motivation - 現在値より減少値が高い時、0になるまで減らす",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 2, id: "m1" }];
+          return lesson;
+        })(),
+        { kind: "drainModifier", modifierKind: "motivation", value: 5 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m1",
+          actual: -2,
+          max: -5,
+        },
+      ],
+    },
+    {
+      name: "drainModifier - motivation - 現在値が0の時、何もしない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "drainModifier", modifierKind: "motivation", value: 1 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [],
+    },
+    {
       name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
       args: [
         (() => {

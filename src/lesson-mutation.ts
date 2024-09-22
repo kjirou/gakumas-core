@@ -844,6 +844,30 @@ export const activateEffect = <
       ];
       break;
     }
+    case "drainModifier": {
+      switch (effect.modifierKind) {
+        case "motivation": {
+          const motivation = lesson.idol.modifiers.find(
+            (e) => e.kind === "motivation",
+          );
+          if (motivation) {
+            diffs.push({
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              id: motivation.id,
+              actual: Math.max(-effect.value, -motivation.amount) + 0,
+              max: -effect.value + 0,
+            });
+          }
+          break;
+        }
+        default: {
+          const unreachable: never = effect;
+          throw new Error(`Unreachable statement`);
+        }
+      }
+      break;
+    }
     case "drawCards": {
       const { deck, discardPile, drawnCards } = drawCardsFromDeck(
         lesson.deck,

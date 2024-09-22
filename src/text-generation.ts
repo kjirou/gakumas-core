@@ -104,6 +104,7 @@ const globalKeywords = {
   delayedEffect: metaModifierDictioanry.delayedEffect.label,
   doubleEffect: metaModifierDictioanry.doubleEffect.label,
   doubleLifeConsumption: metaModifierDictioanry.doubleLifeConsumption.label,
+  drainMotivationModifier: "やる気減少",
   enhanceHand: "レッスン中強化",
   excellentCondition: metaModifierDictioanry.excellentCondition.label,
   fixedValueVitality: "固定元気",
@@ -434,6 +435,9 @@ const generateEffectWithoutConditionText = (effect: Effect): string => {
   switch (effect.kind) {
     case "drainLife":
       return `体力減少${effect.value}`;
+    case "drainModifier":
+      // TODO: 現状はやる気だけなので決め打ち
+      return `${kwd("drainMotivationModifier")}${effect.value}`;
     case "drawCards":
       return effect.amount === 1
         ? "スキルカードを引く"

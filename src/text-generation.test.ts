@@ -650,6 +650,11 @@ describe("generateEffectText", () => {
       name: "drainLife",
     },
     {
+      args: [{ kind: "drainModifier", modifierKind: "motivation", value: 1 }],
+      expected: "{{やる気減少}}1",
+      name: "drainModifier - motivation",
+    },
+    {
       args: [{ kind: "drawCards", amount: 1 }],
       expected: "スキルカードを引く",
       name: "drawCards - 1枚の時",
@@ -1397,6 +1402,23 @@ describe("generateProducerItemDescription", () => {
         "スキルカードを4回使用するごとに、{{集中}}1.3倍",
         "{{固定元気}}+7",
         "（レッスン内2回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "sutairisshumodo",
+      expected: [
+        "ターン開始時{{やる気}}が3以上の場合、{{好印象}}+3",
+        "{{やる気減少}}1",
+        "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "sutairisshumodo",
+      enhanced: true,
+      expected: [
+        "ターン開始時{{やる気}}が3以上の場合、{{好印象}}+3",
+        "{{やる気減少}}1",
+        "（レッスン内4回）",
       ].join("\n"),
     },
   ];

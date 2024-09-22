@@ -611,6 +611,20 @@ export type EffectWithoutCondition = Readonly<
     }
   | {
       /**
+       * 状態修正を減少する
+       *
+       * - 原文の構文は、「{modifierKind}減少{value}」
+       *   - 「スタイリッシュモード」は、「やる気減少1」
+       * - 現状はスキルカードには存在しない効果
+       * - 減少する値が不足している場合は、0になるまで減少する
+       *   - 本家仕様は未調査
+       */
+      kind: "drainModifier";
+      modifierKind: "motivation";
+      value: number;
+    }
+  | {
+      /**
        * スキルカードを引く
        *
        * - 原文の構文は、「スキルカードを[{amount}枚]引く」

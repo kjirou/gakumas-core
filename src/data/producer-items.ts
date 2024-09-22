@@ -1803,6 +1803,57 @@ export const producerItemsAsConst = [
     },
   },
   {
+    id: "sutairisshumodo",
+    name: "スタイリッシュモード",
+    producerItemPossessionKind: "logic",
+    producerItemProviderKind: "idol",
+    rarity: "ssr",
+    base: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 3 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 3 },
+        },
+        {
+          kind: "drainModifier",
+          modifierKind: "motivation",
+          value: 1,
+        },
+      ],
+      times: 3,
+      trigger: {
+        kind: "turnStart",
+      },
+    },
+    enhanced: {
+      condition: {
+        kind: "countModifier",
+        modifierKind: "motivation",
+        range: { min: 3 },
+      },
+      effects: [
+        {
+          kind: "getModifier",
+          modifier: { kind: "positiveImpression", amount: 3 },
+        },
+        {
+          kind: "drainModifier",
+          modifierKind: "motivation",
+          value: 1,
+        },
+      ],
+      times: 4,
+      trigger: {
+        kind: "turnStart",
+      },
+    },
+  },
+  {
     id: "etainoshirenaimono",
     name: "得体の知れないモノ",
     producerItemPossessionKind: "free",

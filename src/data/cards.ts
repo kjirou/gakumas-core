@@ -7689,6 +7689,74 @@ export const cardsAsConst = [
     ],
   },
   {
+    id: "tsukiyonoranuei",
+    name: "月夜のランウェイ",
+    cardPossessionKind: "logic",
+    cardSummaryKind: "active",
+    cardProviderKind: "idol",
+    keywords: ["tsukiyonoranwei"],
+    nonDuplicative: true,
+    rarity: "ssr",
+    contents: [
+      {
+        cost: { kind: "normal", value: 6 },
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "reactiveEffect",
+              effect: {
+                kind: "performLeveragingModifier",
+                modifierKind: "positiveImpression",
+                valueKind: "score",
+                percentage: 30,
+              },
+              representativeName: "月夜のランウェイ",
+              trigger: {
+                kind: "afterCardEffectActivation",
+                effectKind: "positiveImpression",
+              },
+            },
+          },
+        ],
+        usableOncePerLesson: true,
+      },
+      {
+        effects: [
+          {
+            kind: "getModifier",
+            modifier: { kind: "motivation", amount: 3 },
+          },
+          {
+            kind: "getModifier",
+            modifier: {
+              kind: "reactiveEffect",
+              effect: {
+                kind: "performLeveragingModifier",
+                modifierKind: "positiveImpression",
+                valueKind: "score",
+                percentage: 50,
+              },
+              representativeName: "月夜のランウェイ",
+              trigger: {
+                kind: "afterCardEffectActivation",
+                effectKind: "positiveImpression",
+              },
+            },
+          },
+        ],
+      },
+      // TODO: ++
+      {},
+      // TODO: +++
+      {},
+    ],
+  },
+  {
     id: "hanamoyukisetsu",
     name: "花萌ゆ季節",
     cardPossessionKind: "free",

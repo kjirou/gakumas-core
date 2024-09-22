@@ -503,6 +503,15 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "tsukiyonoranuei",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{やる気}}+3",
+        "以降、{{好印象}}効果のスキルカード使用後、{{好印象}}の50%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -639,6 +648,11 @@ describe("generateEffectText", () => {
       args: [{ kind: "drainLife", value: 1 }],
       expected: "体力減少1",
       name: "drainLife",
+    },
+    {
+      args: [{ kind: "drainModifier", modifierKind: "motivation", value: 1 }],
+      expected: "{{やる気減少}}1",
+      name: "drainModifier - motivation",
     },
     {
       args: [{ kind: "drawCards", amount: 1 }],
@@ -1390,6 +1404,23 @@ describe("generateProducerItemDescription", () => {
         "（レッスン内2回）",
       ].join("\n"),
     },
+    {
+      producerItemId: "sutairisshumodo",
+      expected: [
+        "ターン開始時{{やる気}}が3以上の場合、{{好印象}}+3",
+        "{{やる気減少}}1",
+        "（レッスン内3回）",
+      ].join("\n"),
+    },
+    {
+      producerItemId: "sutairisshumodo",
+      enhanced: true,
+      expected: [
+        "ターン開始時{{やる気}}が3以上の場合、{{好印象}}+3",
+        "{{やる気減少}}1",
+        "（レッスン内4回）",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$producerItemId => "$expected"',
@@ -1432,6 +1463,16 @@ describe("generateReactiveEffectTriggerText", () => {
         },
       ],
       expected: "{{元気}}効果の{{アクティブスキルカード}}使用後",
+    },
+    {
+      name: "afterCardEffectActivation - positiveImpression",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "positiveImpression",
+        },
+      ],
+      expected: "{{好印象}}効果のスキルカード使用後",
     },
     {
       name: "mental 指定",

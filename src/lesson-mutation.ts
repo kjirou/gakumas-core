@@ -272,6 +272,10 @@ export const validateQueryOfReactiveEffectTrigger = (
             (trigger.effectKind === "vitality" &&
               query.diffs.some(
                 (diff) => diff.kind === "vitality" && diff.max > 0,
+              )) ||
+            (trigger.effectKind === "positiveImpression" &&
+              scanIncreasedModifierKinds(query.modifiers, query.diffs).includes(
+                "positiveImpression",
               ));
           return (
             cardSummaryKindCondition &&
@@ -838,6 +842,30 @@ export const activateEffect = <
           value: effect.value,
         }),
       ];
+      break;
+    }
+    case "drainModifier": {
+      switch (effect.modifierKind) {
+        case "motivation": {
+          const motivation = lesson.idol.modifiers.find(
+            (e) => e.kind === "motivation",
+          );
+          if (motivation) {
+            diffs.push({
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              id: motivation.id,
+              actual: Math.max(-effect.value, -motivation.amount) + 0,
+              max: -effect.value + 0,
+            });
+          }
+          break;
+        }
+        default: {
+          const unreachable: never = effect;
+          throw new Error(`Unreachable statement`);
+        }
+      }
       break;
     }
     case "drawCards": {
@@ -2478,6 +2506,7 @@ export const useCard = (
             kind: "afterCardEffectActivation",
             cardDataId: card.data.id,
             diffs: mainEffectDiffs,
+            modifiers: newLesson.idol.modifiers,
           },
           params.getRandom,
           params.idGenerator,
@@ -2505,6 +2534,7 @@ export const useCard = (
             diffs: mainEffectDiffs,
             idolParameterKind:
               getIdolParameterKindOnTurnConsideringIgnoring(newLesson),
+            modifiers: newLesson.idol.modifiers,
           }),
         );
       for (const { effect } of effectsAfterCardEffectActivation) {

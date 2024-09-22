@@ -98,6 +98,7 @@ export type ReactiveEffectTrigger = Readonly<
          *   - 状態修正の例
          *     - 「夏の宵の線香花火」は、「以降、元気効果のスキルカード使用後、好印象+1」
          *       - 効果発動時点の参考動画: https://youtu.be/3bzWi4m19oo?si=lYYdgowS72ZLICL1&t=13
+         *     - 「月夜のランウェイ」は、「以降、好印象効果のスキルカード使用後、好印象の30%分パラメータ上昇」
          *   - Pアイテムの例
          *     - 「テクノドッグ」は、「スキルカード使用後やる気が3以上の場合、やる気+2」
          *     - 「ビッグドリーム貯金箱」は、「スキルカード使用後好印象が6以上の場合、好印象+3」
@@ -106,7 +107,7 @@ export type ReactiveEffectTrigger = Readonly<
         kind: "afterCardEffectActivation";
         cardDataId?: CardData["id"];
         cardSummaryKind?: CardSummaryKind;
-        effectKind?: "vitality";
+        effectKind?: "positiveImpression" | "vitality";
       }
     | {
         /**
@@ -243,6 +244,8 @@ export type ReactiveEffectQueryWithoutIdolParameterKind = Readonly<
       cardDataId: CardData["id"];
       /** スキルカード使用による更新差分リスト */
       diffs: LessonUpdateDiff[];
+      /** 判定時の状態修正リスト */
+      modifiers: Modifier[];
     }
   | {
       kind: "beforeCardEffectActivation";
@@ -604,6 +607,20 @@ export type EffectWithoutCondition = Readonly<
        * - TODO: 体力を直接減少するのではなくて、normalコスト相当かもしれない
        */
       kind: "drainLife";
+      value: number;
+    }
+  | {
+      /**
+       * 状態修正を減少する
+       *
+       * - 原文の構文は、「{modifierKind}減少{value}」
+       *   - 「スタイリッシュモード」は、「やる気減少1」
+       * - 現状はスキルカードには存在しない効果
+       * - 減少する値が不足している場合は、0になるまで減少する
+       *   - 本家仕様は未調査
+       */
+      kind: "drainModifier";
+      modifierKind: "motivation";
       value: number;
     }
   | {

@@ -77,6 +77,41 @@ describe("activateEffectIf", () => {
       ],
     },
     {
+      name: "drainModifier - motivation - 現在値より減少値が高い時、0になるまで減らす",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          lesson.idol.modifiers = [{ kind: "motivation", amount: 2, id: "m1" }];
+          return lesson;
+        })(),
+        { kind: "drainModifier", modifierKind: "motivation", value: 5 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [
+        {
+          kind: "modifiers.update",
+          propertyNameKind: "amount",
+          id: "m1",
+          actual: -2,
+          max: -5,
+        },
+      ],
+    },
+    {
+      name: "drainModifier - motivation - 現在値が0の時、何もしない",
+      args: [
+        (() => {
+          const lesson = createLessonForTest();
+          return lesson;
+        })(),
+        { kind: "drainModifier", modifierKind: "motivation", value: 1 },
+        () => 0,
+        createIdGenerator(),
+      ],
+      expected: [],
+    },
+    {
       name: "generateCard - 手札0枚で実行した時、強化されたSSRのスキルカードを追加して、手札はその1枚になる",
       args: [
         (() => {
@@ -470,6 +505,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
         kind: "afterCardEffectActivation",
         cardDataId: "apirunokihon",
         diffs: [],
+        modifiers: [],
       },
       () => 0,
       createIdGenerator(),
@@ -660,6 +696,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           kind: "afterCardEffectActivation",
           cardDataId: "apirunokihon",
           diffs: [],
+          modifiers: [],
         },
         () => 0,
         createIdGenerator(),
@@ -705,6 +742,7 @@ describe("activateEffectsEachProducerItemsAccordingToCardUsage", () => {
           kind: "afterCardEffectActivation",
           cardDataId: "apirunokihon",
           diffs: [],
+          modifiers: [],
         },
         () => 0,
         createIdGenerator(),
@@ -5671,6 +5709,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "apirunokihon",
           diffs: [],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: true,
@@ -5687,6 +5726,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "pozunokihon",
           diffs: [],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: false,
@@ -5703,6 +5743,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "apirunokihon",
           diffs: [],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: true,
@@ -5719,6 +5760,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "hyogennokihon",
           diffs: [],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: false,
@@ -5735,6 +5777,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "hyogennokihon",
           diffs: [{ kind: "vitality", actual: 1, max: 1 }],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: true,
@@ -5751,6 +5794,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "apirunokihon",
           diffs: [{ kind: "score", actual: 1, max: 1 }],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: false,
@@ -5767,9 +5811,60 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "apirunokihon",
           diffs: [{ kind: "vitality", actual: 0, max: 0 }],
           idolParameterKind: "vocal",
+          modifiers: [],
         },
       ],
       expected: false,
+    },
+    // 基本的には scanIncreasedModifierKinds のテストで検証するので、パターンを増やしすぎない
+    {
+      name: "afterCardEffectActivation - effectKind - positiveImpression - 好印象を新規追加する時、満たす",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "positiveImpression",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "mesennokihon",
+          diffs: [
+            {
+              kind: "modifiers.addition",
+              actual: { kind: "positiveImpression", amount: 1, id: "m1" },
+              max: { kind: "positiveImpression", amount: 1, id: "m1" },
+            },
+          ],
+          idolParameterKind: "vocal",
+          modifiers: [],
+        },
+      ],
+      expected: true,
+    },
+    // 基本的には scanIncreasedModifierKinds のテストで検証するので、パターンを増やしすぎない
+    {
+      name: "afterCardEffectActivation - effectKind - positiveImpression - 好印象の値を増加する時、満たす",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "positiveImpression",
+        },
+        {
+          kind: "afterCardEffectActivation",
+          cardDataId: "mesennokihon",
+          diffs: [
+            {
+              kind: "modifiers.update",
+              propertyNameKind: "amount",
+              actual: 1,
+              max: 1,
+              id: "m1",
+            },
+          ],
+          idolParameterKind: "vocal",
+          modifiers: [{ kind: "positiveImpression", amount: 1, id: "m1" }],
+        },
+      ],
+      expected: true,
     },
     {
       name: "afterCardEffectActivation - idolParameterKind - after - 満たさない",
@@ -5783,6 +5878,7 @@ describe("validateQueryOfReactiveEffectTrigger", () => {
           cardDataId: "apirunokihon",
           diffs: [],
           idolParameterKind: "dance",
+          modifiers: [],
         },
       ],
       expected: false,

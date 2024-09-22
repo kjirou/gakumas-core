@@ -5923,6 +5923,10 @@ export const cardsAsConst = [
             kind: "getModifier",
             modifier: { kind: "debuffProtection", times: 1 },
           },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
+          },
         ],
         innate: true,
         usableOncePerLesson: true,
@@ -5941,6 +5945,10 @@ export const cardsAsConst = [
               delay: 1,
               effect: { kind: "enhanceHand" },
             },
+          },
+          {
+            kind: "getModifier",
+            modifier: { kind: "additionalCardUsageCount", amount: 1 },
           },
         ],
       },
@@ -5975,6 +5983,10 @@ export const cardsAsConst = [
               kind: "additionalCardUsageCount",
               amount: 1,
             },
+          },
+          {
+            kind: "drawCards",
+            amount: 2,
           },
         ],
         usableOncePerLesson: true,

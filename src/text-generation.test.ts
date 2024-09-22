@@ -503,6 +503,15 @@ describe("generateCardDescription", () => {
         "{{レッスン中1回}}{{重複不可}}",
       ].join("\n"),
     },
+    {
+      cardId: "tsukiyonoranuei",
+      enhancements: [{ kind: "original" }],
+      expected: [
+        "{{やる気}}+3",
+        "以降、{{好印象}}効果のスキルカード使用後、{{好印象}}の50%分パラメータ上昇",
+        "{{レッスン中1回}}{{重複不可}}",
+      ].join("\n"),
+    },
   ];
   test.each(testParameters)(
     '$cardId => "$expected"',
@@ -1432,6 +1441,16 @@ describe("generateReactiveEffectTriggerText", () => {
         },
       ],
       expected: "{{元気}}効果の{{アクティブスキルカード}}使用後",
+    },
+    {
+      name: "afterCardEffectActivation - positiveImpression",
+      args: [
+        {
+          kind: "afterCardEffectActivation",
+          effectKind: "positiveImpression",
+        },
+      ],
+      expected: "{{好印象}}効果のスキルカード使用後",
     },
     {
       name: "mental 指定",

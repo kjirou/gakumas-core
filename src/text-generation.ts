@@ -176,12 +176,30 @@ export const generateReactiveEffectTriggerText = (
   switch (trigger.kind) {
     case "afterCardEffectActivation":
     case "beforeCardEffectActivation": {
+      let effectKindText = "";
+      if (
+        trigger.kind === "afterCardEffectActivation" &&
+        trigger.effectKind !== undefined
+      ) {
+        switch (trigger.effectKind) {
+          case "vitality": {
+            effectKindText = kwd("vitality");
+            break;
+          }
+          case "positiveImpression": {
+            effectKindText = kwd("positiveImpression");
+            break;
+          }
+          default: {
+            const unreachable: never = trigger.effectKind;
+            throw new Error(`Unreachable statement`);
+          }
+        }
+        effectKindText += "効果の";
+      }
       return [
         idolParameterKindText,
-        trigger.kind === "afterCardEffectActivation" &&
-        trigger.effectKind === "vitality"
-          ? `${kwd("vitality")}効果の`
-          : "",
+        effectKindText,
         trigger.cardDataId !== undefined
           ? cardKwd(trigger.cardDataId)
           : trigger.cardSummaryKind === "active"

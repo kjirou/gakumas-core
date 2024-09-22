@@ -272,6 +272,10 @@ export const validateQueryOfReactiveEffectTrigger = (
             (trigger.effectKind === "vitality" &&
               query.diffs.some(
                 (diff) => diff.kind === "vitality" && diff.max > 0,
+              )) ||
+            (trigger.effectKind === "positiveImpression" &&
+              scanIncreasedModifierKinds(query.modifiers, query.diffs).includes(
+                "positiveImpression",
               ));
           return (
             cardSummaryKindCondition &&
@@ -2478,6 +2482,7 @@ export const useCard = (
             kind: "afterCardEffectActivation",
             cardDataId: card.data.id,
             diffs: mainEffectDiffs,
+            modifiers: newLesson.idol.modifiers,
           },
           params.getRandom,
           params.idGenerator,
@@ -2505,6 +2510,7 @@ export const useCard = (
             diffs: mainEffectDiffs,
             idolParameterKind:
               getIdolParameterKindOnTurnConsideringIgnoring(newLesson),
+            modifiers: newLesson.idol.modifiers,
           }),
         );
       for (const { effect } of effectsAfterCardEffectActivation) {

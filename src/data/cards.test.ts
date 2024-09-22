@@ -110,7 +110,8 @@ for (const card of cards) {
       if (
         card.id !== "shikonoentame" &&
         card.id !== "kagayakukimihe" &&
-        card.id !== "nanikiteruno"
+        card.id !== "nanikiteruno" &&
+        card.id !== "tsukiyonoranuei"
       ) {
         for (const content of getCardContentDataList(card)) {
           const hasScorePerformance = content.effects.some(
